@@ -2,6 +2,7 @@
 #define LOGISTIC_ACTIVATION_FUNCTION
 
 #include "ActivationFunctionInterface.hpp"
+#include <string>
 
 class LogisticActivationFunction: public ActivationFunctionInterface
 {
@@ -9,11 +10,13 @@ protected:
 
 public:
 
-   double f(const double &in);
+    std::string getIdCode();
 
-   double f1d(const double &in);
+    double f(const double &in);
 
-   double f2d(const double &in);
+    double f1d(const double &in);
+
+    double f2d(const double &in);
 };
 
 

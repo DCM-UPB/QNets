@@ -3,6 +3,12 @@
 #include <math.h>
 
 
+std::string LogisticActivationFunction::getIdCode()
+{
+    return "lgs";
+}
+
+
 // Activation Function Interface implementation
 
 double LogisticActivationFunction::f(const double &in)
