@@ -20,7 +20,7 @@ protected:
    double * _v2d;
    double * _fdf; // internal variable, used to store the values of the _feeder->getFirstDerivativeFeed(i)
 
-   // variational derivtives
+   // variational derivatives
    int _nvp;
    double * _v1vd; // variational first derivatives
 
@@ -39,15 +39,15 @@ public:
    void setFeeder(NNUnitFeederInterface * feeder){_feeder = feeder;}
 
    // Coordinate derivatives
-   void setFirstDerivativeSubstrate(const int &nx0); 
+   void setFirstDerivativeSubstrate(const int &nx0);
    void setFirstDerivativeValue(const int &i1d, const double &v1d){_v1d[i1d]=v1d;}
    double getFirstDerivativeValue(const int &i1d){return _v1d[i1d];}  // return first derivative value
-   void setSecondDerivativeSubstrate(const int &nx0); 
+   void setSecondDerivativeSubstrate(const int &nx0);
    void setSecondDerivativeValue(const int &i2d, const double &v2d){_v2d[i2d]=v2d;}
    double getSecondDerivativeValue(const int &i2d){return _v2d[i2d];}  // return second derivative value
 
    // Variational derivatives
-   void setVariationalFirstDerivativeSubstrate(const int &nvp); 
+   void setVariationalFirstDerivativeSubstrate(const int &nvp);
    void setVariationalFirstDerivativeValue(const int &i1vd, const double &v1vd){_v1vd[i1vd]=v1vd;}
    double getVariationalFirstDerivativeValue(const int &i1vd){return _v1vd[i1vd];}  // return first derivative value
 

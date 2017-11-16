@@ -18,7 +18,7 @@
 
 \newcommand{\MRTWO}{$ \text{M}(\text{RT})^2 \;$}
 \newcommand{\actf}{\text{a}_f}
-\newcommand{\logaf}{\sigma_{\text{log}}}
+\newcommand{\logaf}{\sigma_{\text{lgs}}}
 \newcommand{\gssaf}{\sigma_{\text{gss}}}
 \newcommand{\idaf}{\sigma_{\text{id}}}
 
@@ -46,54 +46,54 @@ class FeedForwardNeuralNetwork
 {
    // Constructor and destructor
    FeedForwardNeuralNetwork(const int &insize,
-         const int &hidlaysize, 
+         const int &hidlaysize,
          const int &outsize);
    FeedForwardNeuralNetwork(const char * filename);
    ~FeedForwardNeuralNetwork();
-   
+
    // Getters for the basic information
    int getNHiddenLayers();
    int getNLayers();
    int getLayerSize(const int &li);
-   ActivationFunctionInterface * 
+   ActivationFunctionInterface *
          getLayerActivationFunction(const int &li);
-   
+
    // Getters for the variational parameters
    int getNBeta();
    double getBeta(const int &ib);
    void setBeta(const int &ib, const double &beta);
-   
+
    // Set the structure of the FFNN
    void pushHiddenLayer(const int &size);
    void popHiddenLayer();
    void setLayerSize(const int &li, const int &size);
    void setGlobalActivationFunctions(
          ActivationFunctionInterface * actf);
-   void setLayerActivationFunction(const int &li, 
+   void setLayerActivationFunction(const int &li,
          ActivationFunctionInterface * actf);
-   
+
    // Set the computations required
    void addFirstDerivativeSubstrate();
    void addSecondDerivativeSubstrate();
    void addVariationalFirstDerivativeSubstrate();
-   
-   // Connect the FFNN, 
+
+   // Connect the FFNN,
    void connectFFNN();
    void disconnectFFNN();
-   
+
    // Set the input
    void setInput(const int &n, const double * in);
-   
+
    // Feed Forward propagate the input signal
    void FFPropagate();
-   
+
    // Get the ouput after the FFNN Propagation
    double getOutput(const int &i);
    double getFirstDerivative(const int &i, const int &i1d);
    double getSecondDerivative(const int &i, const int &i2d);
-   double getVariationalFirstDerivative(const int &i, 
+   double getVariationalFirstDerivative(const int &i,
          const int &iv1d);
-   
+
    // Store the FFNN structure on a file
    void storeOnFile(const char * filename);
 };
@@ -104,10 +104,10 @@ A \verb+NoisyFunction+ implements a function $f:\mathbb{R}^{n} \rightarrow \math
 Fig. \ref{fig:FFNN} illustrates the structure of a Feed Forward Neural Network (FFNN).
 A FFNN has always at least one \emph{hidden layer}, an \emph{input layer}, and an \emph{output layer}.
 Each layer is made of at least one \emph{unit} (in the figure, the empty circles containing a label) plus an \emph{offset unit} (in the figure, the filled circles).
-The numer of units in a layer (including the offset unit) is called \emph{layer size}.
+The number of units in a layer (including the offset unit) is called \emph{layer size}.
 Each unit contains a value, labeled with the symbol $u^l_i$, where $l$ is the layer index and $i$ the unit index.
 The units with index $i=0$ are not reported in the figure, but represent the offset units.
-The units are connected through a net of connections, parametrised by a value $\beta^{l,p}_n$, where $l$ is the index of the layer where the connections are ending, $p$ refers to the index of the origin-unit, and the index $n$ to the index of the destination-unit. 
+The units are connected through a net of connections, parametrised by a value $\beta^{l,p}_n$, where $l$ is the index of the layer where the connections are ending, $p$ refers to the index of the origin-unit, and the index $n$ to the index of the destination-unit.
 
 \begin{figure}[htpb]
   \centering
@@ -118,13 +118,13 @@ The units are connected through a net of connections, parametrised by a value $\
 
 Despite the complex tasks that a FFNN can be used for, the math of a FFNN is extremely simple.
 A FFNN can be interpreted as a function $f_H: \mathbb{R}^N \rightarrow \mathbb{R}^M$, where $N$ is the size of the input layer (i.e. its number of units, without counting the offset unit), and $M$ the size of the output layer.
-The label $H$ represent the number of hidden layers of the FFNN.
+The label $H$ represents the number of hidden layers of the FFNN.
 Then, once that all the parameters $\beta$ are set, the FFNN output can be computed with the recursive formula:
 \begin{equation}
    u^l_i = \actf( u^{l-1}_{k} \beta^{l,k}_{i}  )
-\end{equation} 
+\end{equation}
 where $\actf: \mathbb{R} \rightarrow \mathbb{R}$ is a so-called \emph{activation function} and we have made use of the Einstein notation, for which repeated symbols on different levels imply a summation, e.g. $x_i^j y^i = \sum_i x_i^j y^i$.
-The activation function is required to be non-linear in order to account for non-linear effects.
+The activation function is required to account for non-linear effects.
 The FFNN library provides three activation functions by default, but the user has the possibility to define and use its own, even though its storage on a file it is not supported (explained later).
 These three activation functions are:
 \begin{enumerate}
@@ -146,7 +146,7 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
 \begin{itemize}
    \item \verb+FeedForwardNeuralNetwork+: There are two possible constructors. The first one takes $3$ \verb+int+, which represents the size of the input, hidden (only one), and output layers. The user can change its shape later on. The values of $\beta$ will be set to some random values. The second constructor takes the path to a file where a FFNN has been stored;
    \item \verb+getNHiddenLayers+: Return the number of hidden layers $H$;
-   \item \verb+getNLayers+: Return the total number of layers, i.e. $H+1$;
+   \item \verb+getNLayers+: Return the total number of layers, i.e. $H+2$;
    \item \verb+getLayerSize+: Return the size of the layer \verb+li+. Remember that $\verb+li+=0$ is reserved for the input layer and $\verb+li+=H+1$ for the output layer;
    \item \verb+getLayerActivationFunction+: Return a pointer to the activation function used to obtain the layer \verb+li+. In the next section we will present the class \verb+ActivationFunctionInterface+;
    \item \verb+getNBeta+: Return the total number of $\beta$;
@@ -167,7 +167,7 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
    \item \verb+connectFFNN+: Connect all the units in the FFNN. After this call it is possible to use the FFNN for computing quantities;
    \item \verb+disconnectFFNN+: Disconnect all the units;
    \item \verb+setInput+: Set the values of the units in the input layer. \verb+n+ is the size of the array \verb+in+, and if it does not suite the size of the input layer an error message will be thrown;
-   \item \verb+FFPropagate+: Comput the output values, including the derivatives if the substrates have been set accordingly;
+   \item \verb+FFPropagate+: Compute the output values, including the derivatives if the substrates have been set accordingly;
    \item \verb+getOutput+: Get the value of the unit \verb+i+ in the output layer;
    \item \verb+getFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$;
    \item \verb+getSecondDerivative+: Get the second derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i2d+}$;
@@ -186,13 +186,13 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
 calss ActivationFunctionInterface
 {
    public:
-   
+
       // compute the activation function value
       virtual double f(const double &) = 0;
-   
+
       // first derivative of the activation function
       virtual double f1d(const double &) = 0;
-   
+
       // second derivative of the activation function
       virtual double f2d(const double &) = 0;
 };
@@ -206,18 +206,18 @@ As example we report the class for the logistic function:
 class LogisticActivationFunction: public ActivationFunctionInterface
 {
    public:
-   
+
       double f(const double &in)
       {
          return (1./(1.+exp(-in)));
       }
-   
+
       double f1d(const double &in)
       {
          double f=this->f(in);
          return (f*(1.-f));
       }
-   
+
       double f2d(const double &in)
       {
          double f=this->f(in);

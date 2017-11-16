@@ -4,7 +4,6 @@
 # for generating again the library with the optimization flags
 
 source ../config.sh
-DEBUGFLAGS="-g -O0"
 OS_NAME=$(uname)
 
 \rm -f exe
@@ -47,5 +46,3 @@ echo ""
 
 # Run the debugging executable
 valgrind --leak-check=full --track-origins=yes ./exe
-
-

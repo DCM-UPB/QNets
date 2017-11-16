@@ -5,7 +5,9 @@
 #include "FeedForwardNeuralNetwork.hpp"
 
 
-void printFFANNStructure(FeedForwardNeuralNetwork * ffann);
+void printFFNNStructure(FeedForwardNeuralNetwork * ffnn);
+
+void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn);
 
 
 #endif
