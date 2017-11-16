@@ -9,5 +9,7 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn);
 
 void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn);
 
+void printFFNNValues(FeedForwardNeuralNetwork * ffnn);
+
 
 #endif

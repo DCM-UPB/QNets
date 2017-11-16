@@ -44,10 +44,10 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 
     cout.precision(2);
     cout << fixed;
-    std::string emptySpaceForBeta = "     ";
-    std::string emptySapceForActivationFunctionId = "   ";
-    std::string emptySpaceAfterBeta = "  ";
-    std::string emptySpaceAfterActivationFunction = "     ";
+    string emptySpaceForBeta = "     ";
+    string emptySapceForActivationFunctionId = "   ";
+    string emptySpaceAfterBeta = "  ";
+    string emptySpaceAfterActivationFunction = "     ";
 
     // max number of units over all layers
     int maxNUnits = 0;
@@ -96,7 +96,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
                     feeder = ffnn->getLayer(l)->getUnit(u)->getFeeder();
                     if (u < ffnn->getLayer(l)->getNUnits() && feeder){
                         if (b < feeder->getNVariationalParameters()){
-                            if (feeder->getBeta(b)>0) cout << "+";
+                            if (feeder->getBeta(b) >= 0.) cout << "+";
                             cout << feeder->getBeta(b);
                         } else {
                             cout << emptySpaceForBeta;
@@ -122,6 +122,41 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
                 }
             }
             cout << endl;
+        }
+        cout << endl;
+    }
+}
+
+
+
+void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
+{
+    using namespace std;
+
+    cout.precision(2);
+    cout << fixed;
+
+    string emptySpaceForValue = "     ";
+    string emptySpaceBetweenProtovalueAndValue = "    ";
+    string emptySpaceAfterValue = "    ";
+
+    int maxNUnits = 0;
+    for (int l=0; l<ffnn->getNLayers(); ++l){
+        if (ffnn->getLayer(l)->getNUnits() > maxNUnits){
+            maxNUnits = ffnn->getLayer(l)->getNUnits();
+        }
+    }
+
+    for (int u=0; u<maxNUnits; ++u){
+        for (int l=0; l<ffnn->getNLayers(); ++l){
+            if (u < ffnn->getLayerSize(l)){
+                if (ffnn->getLayer(l)->getUnit(u)->getProtoValue() >= 0.) cout << "+";
+                cout << ffnn->getLayer(l)->getUnit(u)->getProtoValue() << " -> ";
+                if (ffnn->getLayer(l)->getUnit(u)->getValue() >= 0.) cout << "+";
+                cout << ffnn->getLayer(l)->getUnit(u)->getValue() << "    ";
+            } else {
+                cout << emptySpaceForValue << emptySpaceBetweenProtovalueAndValue << emptySpaceForValue << emptySpaceAfterValue;
+            }
         }
         cout << endl;
     }
