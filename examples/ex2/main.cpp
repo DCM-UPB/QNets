@@ -112,7 +112,7 @@ int main() {
         cout << ffnn->getBeta(i) << "    ";
     }
 
-    
+
 
     cout << endl << endl;
 

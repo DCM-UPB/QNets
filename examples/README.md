@@ -11,3 +11,9 @@
 ##Example 2
 
 `ex2/`: access and modify the beta of a FFANN (i.e. the variational parameters)
+
+
+
+##Example 3
+
+`ex3/`: manage the activation functions
