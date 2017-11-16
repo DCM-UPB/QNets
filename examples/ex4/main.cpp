@@ -16,11 +16,11 @@ int main() {
     cout << "========================================================================" << endl;
     cin.ignore();
 
-    cout << "We generate a FFANN with 4 layers and 3, 4, 5, 2 units respectively" << endl;
+    cout << "We generate a FFANN with 4 layers and 3, 4, 5, 4 units respectively" << endl;
     cin.ignore();
 
     // NON I/O CODE
-    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 4, 2);
+    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 4, 4);
     ffnn->pushHiddenLayer(5);
     //
 
@@ -43,8 +43,7 @@ int main() {
     ffnn->connectFFNN();
     //
 
-    cin.ignore();
-    cout << endl << endl;
+    cout << endl << endl << endl;
 
 
 
@@ -111,8 +110,8 @@ int main() {
     cout << endl;
     cin.ignore();
 
-    cout << "The output is 1-dimensional, as the first unit of the output layer is an offset." << endl << "Its value is ";
-    cout << ffnn->getOutput(1);
+    cout << "The output is 3-dimensional, as the first unit of the output layer is an offset." << endl << "The output values are ";
+    cout << ffnn->getOutput(1) << "    " << ffnn->getOutput(2) << "    " << ffnn->getOutput(3);
     cout << endl;
 
 
