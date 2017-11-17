@@ -69,6 +69,8 @@ debug/exe
 
 examples/*/a.out
 examples/*/*.o
+examples/*/exe*
+examples/*/*.txt
 
 doc/*.aux
 doc/*.dvi
