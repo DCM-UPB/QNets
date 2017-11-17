@@ -6,7 +6,7 @@ It includes first and second derivatives in respect to the input values, and fir
 
 In `doc/` there is a user manual in pdf.
 
-In `examples/` there are several examples (STILL TO BE DONE).
+In `examples/` there are several examples.
 
 
 
