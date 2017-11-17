@@ -29,3 +29,9 @@
 ## Example 5
 
 `ex5/`: compute first and second derivative of the NN output in respect to input
+
+
+
+## Example 6
+
+`ex6/`: compute first derivative of the NN in respect to the variational parameters (betas)
