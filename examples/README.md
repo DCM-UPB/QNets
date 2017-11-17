@@ -35,3 +35,9 @@
 ## Example 6
 
 `ex6/`: compute first derivative of the NN in respect to the variational parameters (betas)
+
+
+
+## Example 7
+
+`ex7/`: write files for plotting the values and its first and second derivatives of a NN:R->R (1-dimensional function)

@@ -112,20 +112,20 @@ int main() {
     
     cout << "The first derivatives in respect to the 1st, 2nd, and 3rd input value are:";
     cin.ignore();
-    cout << "1st output (unit 2 of the output layer): " << ffnn->getFirstDerivative(1, 1) << "    " << ffnn->getFirstDerivative(1, 2) << "    " << ffnn->getFirstDerivative(1, 3);
+    cout << "1st output (unit 2 of the output layer): " << ffnn->getFirstDerivative(1, 0) << "    " << ffnn->getFirstDerivative(1, 1) << "    " << ffnn->getFirstDerivative(1, 2);
     cin.ignore();
-    cout << "2nd output (unit 3 of the output layer): " << ffnn->getFirstDerivative(2, 1) << "    " << ffnn->getFirstDerivative(2, 2) << "    " << ffnn->getFirstDerivative(2, 3);
+    cout << "2nd output (unit 3 of the output layer): " << ffnn->getFirstDerivative(2, 0) << "    " << ffnn->getFirstDerivative(2, 1) << "    " << ffnn->getFirstDerivative(2, 2);
     cin.ignore();
-    cout << "3rd output (unit 4 of the output layer): " << ffnn->getFirstDerivative(3, 1) << "    " << ffnn->getFirstDerivative(3, 2) << "    " << ffnn->getFirstDerivative(3, 3) << endl;
+    cout << "3rd output (unit 4 of the output layer): " << ffnn->getFirstDerivative(3, 0) << "    " << ffnn->getFirstDerivative(3, 1) << "    " << ffnn->getFirstDerivative(3, 2) << endl;
     cin.ignore();
     
     cout << "The second derivatives in respect to the 1st, 2nd, and 3rd input value are:";
     cin.ignore();
-    cout << "1st output (unit 2 of the output layer): " << ffnn->getSecondDerivative(1, 1) << "    " << ffnn->getSecondDerivative(1, 2) << "    " << ffnn->getSecondDerivative(1, 3);
+    cout << "1st output (unit 2 of the output layer): " << ffnn->getSecondDerivative(1, 0) << "    " << ffnn->getSecondDerivative(1, 1) << "    " << ffnn->getSecondDerivative(1, 2);
     cin.ignore();
-    cout << "2nd output (unit 3 of the output layer): " << ffnn->getSecondDerivative(2, 1) << "    " << ffnn->getSecondDerivative(2, 2) << "    " << ffnn->getSecondDerivative(2, 3);
+    cout << "2nd output (unit 3 of the output layer): " << ffnn->getSecondDerivative(2, 0) << "    " << ffnn->getSecondDerivative(2, 1) << "    " << ffnn->getSecondDerivative(2, 2);
     cin.ignore();
-    cout << "3rd output (unit 4 of the output layer): " << ffnn->getSecondDerivative(3, 1) << "    " << ffnn->getSecondDerivative(3, 2) << "    " << ffnn->getSecondDerivative(3, 3);
+    cout << "3rd output (unit 4 of the output layer): " << ffnn->getSecondDerivative(3, 0) << "    " << ffnn->getSecondDerivative(3, 1) << "    " << ffnn->getSecondDerivative(3, 2);
 
 
     cout << endl << endl;
