@@ -15,9 +15,9 @@ protected:
    ActivationFunctionInterface * _actf; // activation function
 
    // coordinate derivatives
-   int _nx0; // number of first derivatives
+   int _nx0; // number of first derivatives (i.e. the number of inputs of the NN)
    double * _v1d; // first derivatives
-   double * _v2d;
+   double * _v2d; // second derivative
    double * _fdf; // internal variable, used to store the values of the _feeder->getFirstDerivativeFeed(i)
 
    // variational derivatives

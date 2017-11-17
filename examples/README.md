@@ -23,3 +23,9 @@
 ## Example 4
 
 `ex4/`: compute the output of a FFNN
+
+
+
+## Example 5
+
+`ex5/`: compute first and second derivative of the NN output in respect to input

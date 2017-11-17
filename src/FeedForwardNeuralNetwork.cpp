@@ -372,7 +372,7 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
          this->setBeta(i,0.);
       }
       // set the identity activation function for some units of the new hidden layer
-      for (int i=1; i<_L[_L.size()-1]->getNUnits(); ++i) 
+      for (int i=1; i<_L[_L.size()-1]->getNUnits(); ++i)
       {
          _L[_L.size()-2]->getUnit(i)->setActivationFunction(&_id_actf);
       }
@@ -405,7 +405,7 @@ void FeedForwardNeuralNetwork::popHiddenLayer()
 void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
 {
    using namespace std;
-   
+
    // open file
    ofstream file;
    file.open(filename);

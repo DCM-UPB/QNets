@@ -161,3 +161,5 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
         cout << endl;
     }
 }
+
+
