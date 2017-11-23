@@ -34,7 +34,7 @@ int main() {
 
     cout << "Graphically it looks like this" << endl;
     cin.ignore();
-    printFFANNStructure(ffnn);
+    printFFNNStructure(ffnn);
 
     cout << endl << "where it must be read from left to right, and:" << endl;
     cout << "idf: identity activation function" << endl;
@@ -60,7 +60,7 @@ int main() {
 
     cout << "Graphically it looks like this:" << endl << endl;
     cin.ignore();
-    printFFANNStructure(ffnn);
+    printFFNNStructure(ffnn);
     cin.ignore();
 
     cout << "As you may have noticed, this new layer is inserted right before the output layer." << endl << endl << endl;
@@ -76,7 +76,7 @@ int main() {
 
     cout << "Graphically it looks like this:" << endl;
     cin.ignore();
-    printFFANNStructure(ffnn);
+    printFFNNStructure(ffnn);
     cin.ignore();
 
     cout << endl << "As you might have noticed, the layer that is removed is the hidden layer right before the output layer." << endl << endl << endl << endl;
