@@ -20,8 +20,8 @@ case ${OS_NAME} in
       install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
       ;;
    "Linux")
-      echo "$CC $FLAGS $OPTFLAGS -I$(pwd)/../../src -L$(pwd)/.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
-      $CC $FLAGS $OPTFLAGS -I$(pwd)/../../src/ -L$(pwd)/../ -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
+      echo "$CC $FLAGS $OPTFLAGS -L$(pwd)/../.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
+      $CC $FLAGS $OPTFLAGS -L$(pwd)/../.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
       ;;
 esac
 

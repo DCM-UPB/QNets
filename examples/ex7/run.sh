@@ -9,19 +9,19 @@ OS_NAME=$(uname)
 RPATH="$(pwd)/../.."
 
 # Build the main executable
-echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../../src/ -c *.cpp"
-$CC $FLAGS $DEBUGFLAGS -Wall -I$(pwd)/../../src/ -c *.cpp
+echo "$CC $FLAGS $OPTFLAGS -I$(pwd)/../../src/ -c *.cpp"
+$CC $FLAGS $OPTFLAGS -Wall -I$(pwd)/../../src/ -c *.cpp
 
 case ${OS_NAME} in
    "Darwin")
-      echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../../src -L$(pwd)/../.. -Wl,-rpath,${RPATH} -o exe *.o -l${LIBNAME}"
-      $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../../src -L$(pwd)/../.. -Wl,-rpath,${RPATH} -o exe *.o -l${LIBNAME}
+      echo "$CC $FLAGS $OPTFLAGS -I$(pwd)/../../src -L$(pwd)/../.. -Wl,-rpath,${RPATH} -o exe *.o -l${LIBNAME}"
+      $CC $FLAGS $OPTFLAGS -I$(pwd)/../../src -L$(pwd)/../.. -Wl,-rpath,${RPATH} -o exe *.o -l${LIBNAME}
       echo "install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe"
       install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
       ;;
    "Linux")
-      echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../../src -L$(pwd)/.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
-      $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../../src/ -L$(pwd)/../ -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
+      echo "$CC $FLAGS $OPTFLAGS -L$(pwd)/../.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
+      $CC $FLAGS $OPTFLAGS -L$(pwd)/../.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
       ;;
 esac
 
