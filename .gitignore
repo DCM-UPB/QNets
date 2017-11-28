@@ -67,6 +67,7 @@ src/*.o
 
 debug/*.o
 debug/exe
+debug/*.txt
 
 examples/*/a.out
 examples/*/*.o
@@ -80,3 +81,4 @@ doc/*.log
 doc/*.out
 doc/*.ps
 doc/*.gz
+
