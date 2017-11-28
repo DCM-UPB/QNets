@@ -4,12 +4,6 @@
 
 
 
-std::string GaussianActivationFunction::getIdCode()
-{
-    return "gss";
-}
-
-
 // Activation Function Interface implementation
 
 double GaussianActivationFunction::f(const double &in)

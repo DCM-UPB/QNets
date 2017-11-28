@@ -9,8 +9,7 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-
-    std::string getIdCode();
+    std::string getIdCode(){return "lgs";};
 
     double f(const double &in);
 

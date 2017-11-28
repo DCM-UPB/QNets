@@ -11,7 +11,7 @@ protected:
 
 public:
 
-    std::string getIdCode();
+    std::string getIdCode(){return "gss";};
 
     double f(const double &in);
 

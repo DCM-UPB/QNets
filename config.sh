@@ -4,10 +4,10 @@
 LIBNAME="ffnn"
 
 # C++ compiler
-CC="g++"
+CC="g++-mp-6"
 
 # C++ flags (std=c++11 is necessary)
-FLAGS="-std=c++11 -Wall -Werror"
+FLAGS="-std=c++11 -Wall"
 
 # Optimization flags
 OPTFLAGS="-O3"

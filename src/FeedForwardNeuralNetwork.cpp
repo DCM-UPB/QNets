@@ -1,11 +1,12 @@
 #include "FeedForwardNeuralNetwork.hpp"
 
 #include "NNUnit.hpp"
+#include "ActivationFunctionManager.hpp"
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <stdexcept>
 
 
 
@@ -414,8 +415,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
    // store the activaction function and size of each layer
    for (int i=0; i<this->getNLayers(); ++i)
    {
-      if ( _L[i]->getActivationFunction() == &_id_actf ) file  << "id_actf"  << " ";
-      if ( _L[i]->getActivationFunction() == &_log_actf ) file << "log_actf" << " ";
+      file << _L[i]->getActivationFunction()->getIdCode() << " ";
       file << this->getLayerSize(i) << " ";
    }
    file << endl;
@@ -431,6 +431,55 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
 
 // --- Constructor
 
+FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf){
+   using namespace std;
+      
+   // check input
+   if (actf.size() < 3)
+      throw std::invalid_argument( "There must be at least 3 layers" );
+   for (vector<string> layer_actf : actf){
+      if (layer_actf.size() < 2)
+         throw std::invalid_argument( "Each layer must contain at least 2 units (one is for the offset)" );
+   }
+      
+   // declare the NN with the right geometry
+   this->construct(actf[0].size(), actf[1].size(), actf.back().size());
+   for (unsigned int l=2; l<actf.size()-1; ++l){
+      this->pushHiddenLayer(actf[l].size());
+   }
+      
+   // set the activation functions
+   ActivationFunctionInterface * af;
+   for (unsigned int l=0; l<actf.size(); ++l){
+      for (unsigned int u=0; u<actf[l].size(); ++u){
+         af = ActivationFunctionManager::provideActivationFunction(actf[l][u]);
+         
+         if (af != 0){
+            _L[l]->getUnit(u)->setActivationFunction(af);
+         } else{
+            cout << "ERROR FeedForwardNeuralNetwork(const int &nlayers, const int * layersize, const char ** actf) : given activation function " << actf[l][u] << " not known" << endl;
+            throw std::invalid_argument( "invalid activation function id code" );
+         }
+         
+         //if (actf[l][u].compare(_id_actf.getIdCode()) == 0){
+         //   _L[l]->getUnit(u)->setActivationFunction(&_id_actf);
+         //}
+         //else if (actf[l][u].compare(_log_actf.getIdCode()) == 0){
+         //   _L[l]->getUnit(u)->setActivationFunction(&_log_actf);
+         //}
+         //else if (actf[l][u].compare(_gss_actf.getIdCode()) == 0){
+         //   _L[l]->getUnit(u)->setActivationFunction(&_gss_actf);
+         //}
+         //else {
+         //   cout << "ERROR FeedForwardNeuralNetwork(const int &nlayers, const int * layersize, const char ** actf) : given activation function " << actf[l][u] << " not known" << endl;
+         //   throw std::invalid_argument( "invalid activation function id code" );
+         //}
+      }
+   }
+   
+}
+
+
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 {
    // open file
@@ -439,7 +488,6 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
    ifstream file;
    file.open(filename);
    string line;
-   stringstream sline;
    // read the number of layers
    int nlayers;
    file >> nlayers;
@@ -451,8 +499,9 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
    {
       file >> actf;
       file >> size;
-      if (actf.compare("id_actf") == 0) {nnl = new NNLayer(size, &_id_actf);}
-      else if (actf.compare("log_actf") == 0) {nnl = new NNLayer(size, &_log_actf);}
+      if (actf.compare(_id_actf.getIdCode()) == 0) {nnl = new NNLayer(size, &_id_actf);}
+      else if (actf.compare(_log_actf.getIdCode()) == 0) {nnl = new NNLayer(size, &_log_actf);}
+      else if (actf.compare(_gss_actf.getIdCode()) == 0) {nnl = new NNLayer(size, &_gss_actf);}
       else {cout << "ERROR FeedForwardNeuralNetwork(const char * filename) : activation function " << actf << " not known" << endl;}
       _L.push_back(nnl);
    }
@@ -476,6 +525,11 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize)
 {
+   this->construct(insize, hidlaysize, outsize);
+}
+
+
+void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysize, const int &outsize){
    NNLayer * in = new NNLayer(insize, &_id_actf);
    NNLayer * hidlay = new NNLayer(hidlaysize, &_log_actf);
    NNLayer * out = new NNLayer(outsize, &_log_actf);

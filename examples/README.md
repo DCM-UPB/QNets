@@ -41,3 +41,9 @@
 ## Example 7
 
 `ex7/`: write files for plotting the values and its first and second derivatives of a NN:R->R (1-dimensional function)
+
+
+
+## Example 8
+
+`ex8/`: read FFNN structure from a file
