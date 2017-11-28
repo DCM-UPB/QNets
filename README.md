@@ -12,6 +12,6 @@ In `examples/` there are several examples.
 
 # Build the library
 
-Insert the system parameters in the `config.sh` and then simply execute the command
+Insert the system parameters in a file named `config.sh` (use `config_template.sh` as template) and then simply execute the command
 
    `./build.sh`
