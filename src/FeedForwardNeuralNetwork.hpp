@@ -37,6 +37,8 @@ public:
     // Get information about the NN
     int getNHiddenLayers(){return _L.size()-2;}
     int getNLayers(){return _L.size();}
+    int getNInput(){return _L.front()->getNUnits()-1;}
+    int getNOutput(){return _L.back()->getNUnits()-1;}
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
     ActivationFunctionInterface * getLayerActivationFunction(const int &li){return _L[li]->getActivationFunction();}
     NNLayer * getLayer(const int &li){return _L[li];}
