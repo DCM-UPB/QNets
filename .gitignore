@@ -2,7 +2,6 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-debug/exe.dSYM/
 # Icon must end with two \r
 Icon
 # Thumbnails
@@ -62,16 +61,15 @@ DerivedData
 # -- project specific ignores --
 lib*
 config.sh
+*exe*
 
 src/*.o
 
 debug/*.o
-debug/exe
 debug/*.txt
 
 examples/*/a.out
 examples/*/*.o
-examples/*/exe*
 examples/*/*.txt
 
 doc/*.aux
