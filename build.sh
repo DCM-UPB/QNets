@@ -1,5 +1,8 @@
 #!/bin/bash
 
+OS_NAME=$(uname)
+echo "The Operating System is: "${OS_NAME}  # here we consider only Linux and Darwin (Mac Os X)
+
 source config.sh
 
 \rm -f *.so
