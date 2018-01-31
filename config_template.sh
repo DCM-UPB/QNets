@@ -1,7 +1,5 @@
 #!/bin/bash
 
-OS_NAME=$(uname)
-
 # Library name
 LIBNAME="ffnn"
 
