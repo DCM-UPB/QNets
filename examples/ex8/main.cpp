@@ -13,17 +13,14 @@
 int main() {
     using namespace std;
 
-    vector<vector<string>> actf;
-    readFFNNStructure("input.txt", actf);
-    
-    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(actf);
-    
+
+    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork("ffnn.in");
+
     cout << "The FFNN read from the file looks like this:" << endl << endl;
-    
+
     printFFNNStructure(ffnn);
-    
-    
-    
+
+
     delete ffnn;
 
     cout << endl << endl;
