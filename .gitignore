@@ -69,8 +69,6 @@ debug/*.o
 debug/*.txt
 debug/unittest/*/*.o
 debug/unittest/*/run_single_unittest.sh
-debug/unittest/*/exe
-debug/unittest/*/exe.DSYM
 
 examples/*/a.out
 examples/*/*.o
