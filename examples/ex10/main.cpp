@@ -113,11 +113,12 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
   /* compute reciprocal condition number of J(x) */
   gsl_multifit_nlinear_rcond(&rcond, w);
 
-  fprintf(stderr, "iter %2zu: A = %.4f, lambda = %.4f, b = %.4f, cond(J) = %8.4f, |f(x)| = %.4f\n",
+  fprintf(stderr, "iter %2zu: b1 = %.4f, b2 = %.4f, b3 = %.4f, b4 = %.4f, cond(J) = %8.4f, |f(x)| = %.4f\n",
           iter,
           gsl_vector_get(x, 0),
           gsl_vector_get(x, 1),
           gsl_vector_get(x, 2),
+          gsl_vector_get(x, 3),
           1.0 / rcond,
           gsl_blas_dnrm2(f));
 }
@@ -155,7 +156,7 @@ int main (void) {
   gsl_rng * r;
   double chisq, chisq0;
   int status, info;
-  int i;
+  size_t i;
 
   const double xtol = 1e-8;
   const double gtol = 1e-8;
@@ -185,6 +186,7 @@ int main (void) {
     double dy = gsl_ran_gaussian(r, si);
 
     weights[i] = 1.0 / (si * si);
+
     x[i] = i;
     y[i] = yi + dy;
     printf ("data: %zu %g %g\n", i, y[i], si);
