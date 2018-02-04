@@ -122,7 +122,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
 };
 
 /* number of data points to fit */
-#define N 10000
+#define N 2000
 
 int main (void) {
 
@@ -130,7 +130,7 @@ int main (void) {
   // variables for data struct
   const int n = N;
   double x[n], y[n], weights[n];
-  FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, 7, 2);
+  FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, 14, 2);
   ffnn->connectFFNN();
   ffnn->addVariationalFirstDerivativeSubstrate();
 
@@ -152,7 +152,6 @@ int main (void) {
   double x_init[ffnn->getNBeta()];
   gsl_vector_view gx = gsl_vector_view_array (x_init, p);
   gsl_vector_view wts = gsl_vector_view_array(weights, n);
-  gsl_rng * r;
   double chisq, chisq0;
   int status, info;
   size_t i;
@@ -172,21 +171,21 @@ int main (void) {
   fdf.params = &d;
 
   // this is the data to be fitted
-  for (i = 0; i<ffnn->getNBeta(); ++i) {
-    x_init[i] = ffnn->getBeta(i);
-  }
-
+  double lb = -10;
+  double ub = 10;
+  double dx = (ub-lb) / (n-1);
   for (i = 0; i < n; ++i) {
-    double lb = -10;
-    double ub = 10;
-    double dx = (ub-lb) / (n-1);
-
-    weights[i] = 1.0;
 
     x[i] = lb + i*dx;
     y[i] = gauss->f(x[i]);
+    weights[i] = 1.0;
     //printf ("data: %zu %g %g\n", i, x[i], y[i]);
   };
+
+  // initial parameters
+  for (i = 0; i<ffnn->getNBeta(); ++i) {
+    x_init[i] = ffnn->getBeta(i);
+  }
 
   // allocate workspace with default parameters
   w = gsl_multifit_nlinear_alloc (T, &fdf_params, n, p);
@@ -198,8 +197,8 @@ int main (void) {
   f = gsl_multifit_nlinear_residual(w);
   gsl_blas_ddot(f, f, &chisq0);
 
-  // solve the system with a maximum of 20 iterations
-  status = gsl_multifit_nlinear_driver(20, xtol, gtol, ftol, callback, NULL, &info, w);
+  // solve the system with a maximum of 50 iterations
+  status = gsl_multifit_nlinear_driver(50, xtol, gtol, ftol, callback, NULL, &info, w);
 
   // compute covariance of best fit parameters
   J = gsl_multifit_nlinear_jac(w);
@@ -234,9 +233,14 @@ int main (void) {
 
   fprintf (stderr, "status = %s\n", gsl_strerror (status));
 
+  double * base_input = new double[ffnn->getNInput()];
+  writePlotFile(ffnn, base_input, 0, 1, lb, ub, 200, "getOutput", "v.txt");
+  delete [] base_input;
+
   gsl_multifit_nlinear_free (w);
   gsl_matrix_free (covar);
-  gsl_rng_free (r);
+
+  delete ffnn;
 
   return 0;
 }
