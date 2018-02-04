@@ -57,7 +57,7 @@ public:
 };
 
 struct data {
-  int n;
+  const int n;
   double * x;
   double * y;
   FeedForwardNeuralNetwork * ffnn;
@@ -76,13 +76,13 @@ int ffnn_f(const gsl_vector * betas, void * data, gsl_vector * f) {
 
   //get NN output
   for (int i=0; i<n; ++i) {
-    ffnn->setInput(1, x);
+    ffnn->setInput(1, &x[i]);
     ffnn->FFPropagate();
-    gsl_vector_set (f, i, ffnn->getOutput(1) - y[i]);
+    gsl_vector_set(f, i, ffnn->getOutput(1) - y[i]);
   }
 
   return GSL_SUCCESS;
-}
+};
 
 int ffnn_df(const gsl_vector * betas, void * data, gsl_matrix * J) {
   const int n = ((struct data *)data)->n;
@@ -95,7 +95,7 @@ int ffnn_df(const gsl_vector * betas, void * data, gsl_matrix * J) {
   }
 
   for (int i=0; i<n; ++i) {
-    ffnn->setInput(1, x);
+    ffnn->setInput(1, &x[i]);
     ffnn->FFPropagate();
     for (int j=0; j<ffnn->getNBeta(); ++j){
       gsl_matrix_set(J, i, j, ffnn->getVariationalFirstDerivative(1, j));
@@ -103,40 +103,40 @@ int ffnn_df(const gsl_vector * betas, void * data, gsl_matrix * J) {
   }
 
   return GSL_SUCCESS;
-}
+};
 
 void callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w) {
   gsl_vector *f = gsl_multifit_nlinear_residual(w);
   gsl_vector *x = gsl_multifit_nlinear_position(w);
   double rcond;
 
+  using namespace std;
+
   /* compute reciprocal condition number of J(x) */
   gsl_multifit_nlinear_rcond(&rcond, w);
 
-  fprintf(stderr, "iter %2zu: b1 = %.4f, b2 = %.4f, b3 = %.4f, b4 = %.4f, cond(J) = %8.4f, |f(x)| = %.4f\n",
-          iter,
-          gsl_vector_get(x, 0),
-          gsl_vector_get(x, 1),
-          gsl_vector_get(x, 2),
-          gsl_vector_get(x, 3),
-          1.0 / rcond,
-          gsl_blas_dnrm2(f));
-}
+  fprintf(stderr, "iter %2zu: cond(J) = %8.4f, |f(x)| = %.4f\n", iter, 1.0 / rcond, gsl_blas_dnrm2(f));
+
+  for (int i=0; i<x->size; ++i) cout << "b" << i << ": " << gsl_vector_get(x, i) << ", ";
+  cout << endl << endl;
+};
 
 /* number of data points to fit */
-#define N 40
+#define N 10000
 
 int main (void) {
 
+  Gaussian * gauss = new Gaussian(1,0);
   // variables for data struct
   const int n = N;
   double x[n], y[n], weights[n];
-  FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, 2, 2);
+  FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, 7, 2);
   ffnn->connectFFNN();
   ffnn->addVariationalFirstDerivativeSubstrate();
 
   struct data d = { n, x, y, ffnn};
   //
+  int p = ffnn->getNBeta();
 
   //things for gsl multifit
   const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
@@ -144,7 +144,6 @@ int main (void) {
   gsl_multifit_nlinear_fdf fdf;
   gsl_multifit_nlinear_parameters fdf_params =
     gsl_multifit_nlinear_default_parameters();
-  int p = ffnn->getNBeta();
 
   gsl_vector *f;
   gsl_matrix *J;
@@ -163,8 +162,6 @@ int main (void) {
   const double ftol = 0.0;
   //
 
-  gsl_rng_env_setup();
-  r = gsl_rng_alloc(gsl_rng_default);
 
   // define the function to be minimized
   fdf.f = ffnn_f;
@@ -180,16 +177,15 @@ int main (void) {
   }
 
   for (i = 0; i < n; ++i) {
-    double t = i;
-    double yi = 1.0 + 5 * exp (-0.1 * t);
-    double si = 0.1 * yi;
-    double dy = gsl_ran_gaussian(r, si);
+    double lb = -10;
+    double ub = 10;
+    double dx = (ub-lb) / (n-1);
 
-    weights[i] = 1.0 / (si * si);
+    weights[i] = 1.0;
 
-    x[i] = i;
-    y[i] = yi + dy;
-    printf ("data: %zu %g %g\n", i, y[i], si);
+    x[i] = lb + i*dx;
+    y[i] = gauss->f(x[i]);
+    //printf ("data: %zu %g %g\n", i, x[i], y[i]);
   };
 
   // allocate workspace with default parameters
@@ -233,10 +229,7 @@ int main (void) {
 
     fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
-    fprintf (stderr, "b1      = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
-    fprintf (stderr, "b2      = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
-    fprintf (stderr, "b3      = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
-    fprintf (stderr, "b4      = %.5f +/- %.5f\n", FIT(3), c*ERR(3));
+    for(int i=0; i<p; ++i) fprintf (stderr, "b%zu      = %.5f +/- %.5f\n", i, FIT(i), c*ERR(i));
   }
 
   fprintf (stderr, "status = %s\n", gsl_strerror (status));
