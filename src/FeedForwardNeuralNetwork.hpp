@@ -31,6 +31,7 @@ protected:
 public:
     FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize);
     FeedForwardNeuralNetwork(const char * filename);  // file must be formatted as with the method storeOnFile()
+    FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn);
     FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf);
     ~FeedForwardNeuralNetwork();
 
@@ -44,6 +45,7 @@ public:
     NNLayer * getLayer(const int &li){return _L[li];}
     int getNBeta();
     double getBeta(const int &ib);
+    void getBeta(double * beta);
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
@@ -56,6 +58,7 @@ public:
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
     void setBeta(const int &ib, const double &beta);
+    void setBeta(const double * beta);
     void randomizeBetas();
 
     // Substrates for the calculations required

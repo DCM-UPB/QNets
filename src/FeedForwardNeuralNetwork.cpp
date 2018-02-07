@@ -34,7 +34,7 @@ int FeedForwardNeuralNetwork::getNBeta()
 double FeedForwardNeuralNetwork::getBeta(const int &ib)
 {
    using namespace std;
-   if ( ib >= this->getNBeta() )
+   if ( ib >= getNBeta() )
    {
       cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index out of boundaries" << endl;
       cout << ib << " against the maximum allowed " << this->getNBeta() << endl << endl;
@@ -63,6 +63,26 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
 }
 
 
+void FeedForwardNeuralNetwork::getBeta(double * beta){
+    using namespace std;
+    int idx=0;
+    for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
+    {
+        for (int j=0; j<_L[i]->getNUnits(); ++j)
+        {
+            if (_L[i]->getUnit(j)->getFeeder())
+            {
+                for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
+                {
+                    beta[idx] = _L[i]->getUnit(j)->getFeeder()->getBeta(k);
+                    idx++;
+                }
+            }
+        }
+    }
+}
+
+
 void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
 {
    using namespace std;
@@ -82,13 +102,35 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
             {
                for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
                {
-                  if (idx==ib) _L[i]->getUnit(j)->getFeeder()->setBeta(k,beta);
+                  if (idx==ib) _L[i]->getUnit(j)->getFeeder()->setBeta(k, beta);
                   idx++;
                }
             }
          }
       }
    }
+
+}
+
+
+void FeedForwardNeuralNetwork::setBeta(const double * beta)
+{
+    using namespace std;
+    int idx=0;
+    for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
+    {
+        for (int j=0; j<_L[i]->getNUnits(); ++j)
+        {
+            if (_L[i]->getUnit(j)->getFeeder())
+            {
+                for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
+                {
+                    _L[i]->getUnit(j)->getFeeder()->setBeta(k, beta[idx]);
+                    idx++;
+                }
+            }
+        }
+    }
 
 }
 
@@ -527,9 +569,35 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 }
 
 
+FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn){
+    // read and set the activation function and size of each layer
+    NNLayer * nnl;
+    for (int i=0; i<ffnn->getNLayers(); ++i){
+        nnl = new NNLayer(ffnn->getLayer(i)->getNUnits(), &_id_actf);   // first set the activation function to the id, then change it for each unit
+        for (int j=0; j<ffnn->getLayer(i)->getNUnits(); ++j){
+            nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(ffnn->getLayer(i)->getUnit(j)->getActivationFunction()->getIdCode()));
+        }
+        _L.push_back(nnl);
+    }
+    // read and set the substrates
+    _nvp = 0;
+    if (ffnn->isConnected()){
+        connectFFNN();
+        double beta[ffnn->getNBeta()];
+        ffnn->getBeta(beta);
+        setBeta(beta);
+    }
+    // read and set the substrates
+    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0;
+    if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();
+    if (ffnn->hasSecondDerivativeSubstrate()) addSecondDerivativeSubstrate();
+    if (ffnn->hasFirstVariationalDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
+}
+
+
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize)
 {
-   this->construct(insize, hidlaysize, outsize);
+   construct(insize, hidlaysize, outsize);
 }
 
 
