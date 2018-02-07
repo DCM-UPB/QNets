@@ -14,9 +14,6 @@ class NNLayer
 protected:
    std::vector<NNUnit *> _U;
 
-   IdentityActivationFunction _id_actf;
-   LogisticActivationFunction _log_actf;
-
 public:
    NNLayer(const int &nunits, ActivationFunctionInterface * actf);
    ~NNLayer();
@@ -25,7 +22,7 @@ public:
    int getNUnits(){return _U.size();}
    NNUnit * getUnit(const int & i){return _U[i];}
    ActivationFunctionInterface * getActivationFunction(){return _U[1]->getActivationFunction();}
-   
+
    // Modify structure
    void setSize(const int &nunits);
    void setActivationFunction(ActivationFunctionInterface * actf);
