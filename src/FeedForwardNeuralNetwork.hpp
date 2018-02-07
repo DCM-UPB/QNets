@@ -28,7 +28,7 @@ public:
     FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf);
     ~FeedForwardNeuralNetwork();
 
-    // Get information about the NN
+    // Get information about the NN structure
     int getNHiddenLayers(){return _L.size()-2;}
     int getNLayers(){return _L.size();}
     int getNInput(){return _L.front()->getNUnits()-1;}
@@ -36,9 +36,6 @@ public:
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
     ActivationFunctionInterface * getLayerActivationFunction(const int &li){return _L[li]->getActivationFunction();}
     NNLayer * getLayer(const int &li){return _L[li];}
-    int getNBeta();
-    double getBeta(const int &ib);
-    void getBeta(double * beta);
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
@@ -50,26 +47,34 @@ public:
     void setLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
+
+    // Connect the neural network
+    void connectFFNN();
+    void disconnectFFNN();
+
+    // Manage the betas, which exist only after that the FFNN has been connected
+    int getNBeta();
+    double getBeta(const int &ib);
+    void getBeta(double * beta);
     void setBeta(const int &ib, const double &beta);
     void setBeta(const double * beta);
     void randomizeBetas();
 
-    // Substrates for the calculations required
-    void addFirstDerivativeSubstrate();  // coordinates' first derivatives
-    void addSecondDerivativeSubstrate();  // coordinates' second derivatives
+    // Substrates for the calculations of derivatives
+    void addFirstDerivativeSubstrate();  // coordinates first derivatives
+    void addSecondDerivativeSubstrate();  // coordinates second derivatives
+
     // Variational Derivative: either this ...
     void addVariationalFirstDerivativeSubstrate();  // variational first derivatives
     // ... or this
     void addLastHiddenLayerVariationalFirstDerivativeSubstrate();  // variational first derivative for and from the last hidden layer
 
+    // shortcut for connecting and adding substrates
+    void connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1);
 
     // Set initial parameters
     void setInput(const double * in);
     void setInput(const int &i, const double &in);
-
-    // Connect the neural network
-    void connectFFNN();
-    void disconnectFFNN();
 
     // Computation
     void FFPropagate();

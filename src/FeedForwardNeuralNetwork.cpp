@@ -313,6 +313,14 @@ void FeedForwardNeuralNetwork::connectFFNN()
 }
 
 
+void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1){
+    connectFFNN();
+    if (flag_d1) addFirstDerivativeSubstrate();
+    if (flag_d2) addSecondDerivativeSubstrate();
+    if (flag_vd1) addVariationalFirstDerivativeSubstrate();
+}
+
+
 void FeedForwardNeuralNetwork::disconnectFFNN()
 {
    if ( !_flag_connected )
