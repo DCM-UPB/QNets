@@ -491,6 +491,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
         file >> nunits;
         nnl = new NNLayer(nunits, &_id_actf);   // first set the activation function to the id, then change it for each unit
         for (int j=0; j<nunits; ++j){
+            file >> actf;
             nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(actf));
         }
         _L.push_back(nnl);
