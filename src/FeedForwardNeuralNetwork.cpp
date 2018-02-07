@@ -91,6 +91,7 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
 
 }
 
+
 void FeedForwardNeuralNetwork::randomizeBetas()
 {
     std::random_device rdev;
@@ -180,14 +181,8 @@ void FeedForwardNeuralNetwork::FFPropagate()
 }
 
 
-void FeedForwardNeuralNetwork::setInput(const int &n, const double *in)
+void FeedForwardNeuralNetwork::setInput(const double *in)
 {
-   using namespace std;
-   // check n
-   if (n!=_L[0]->getNUnits()-1)
-   {
-      cout << "ERROR FeedForwardNeuralNetwor::setInput() : n is different from the number of units in the first layer = " << _L[0]->getNUnits()-1 << endl;
-   }
    // set the protovalues of the first layer units
    for (int i=1; i<_L[0]->getNUnits(); ++i)
    {
@@ -203,6 +198,19 @@ void FeedForwardNeuralNetwork::setInput(const int &n, const double *in)
       }
    }
 }
+
+
+void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
+{
+    // set the protovalues of the first layer units
+    _L[0]->getUnit(i+1)->setProtoValue(in);
+    // set the first derivatives
+    if (_flag_1d)
+    {
+        _L[0]->getUnit(i+1)->setFirstDerivativeValue(i, _L[0]->getUnit(i+1)->getActivationFunction()->f1d( _L[0]->getUnit(i)+1->getProtoValue() ) );
+    }
+}
+
 
 
 // --- Substrates
@@ -443,7 +451,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf){
    using namespace std;
-      
+
    // check input
    if (actf.size() < 3)
       throw std::invalid_argument( "There must be at least 3 layers" );
@@ -451,26 +459,26 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
       if (layer_actf.size() < 2)
          throw std::invalid_argument( "Each layer must contain at least 2 units (one is for the offset)" );
    }
-      
+
    // declare the NN with the right geometry
    this->construct(actf[0].size(), actf[1].size(), actf.back().size());
    for (unsigned int l=2; l<actf.size()-1; ++l){
       this->pushHiddenLayer(actf[l].size());
    }
-      
+
    // set the activation functions
    ActivationFunctionInterface * af;
    for (unsigned int l=0; l<actf.size(); ++l){
       for (unsigned int u=0; u<actf[l].size(); ++u){
          af = ActivationFunctionManager::provideActivationFunction(actf[l][u]);
-         
+
          if (af != 0){
             _L[l]->getUnit(u)->setActivationFunction(af);
          } else{
             cout << "ERROR FeedForwardNeuralNetwork(const int &nlayers, const int * layersize, const char ** actf) : given activation function " << actf[l][u] << " not known" << endl;
             throw std::invalid_argument( "invalid activation function id code" );
          }
-         
+
          //if (actf[l][u].compare(_id_actf.getIdCode()) == 0){
          //   _L[l]->getUnit(u)->setActivationFunction(&_id_actf);
          //}
@@ -486,7 +494,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
          //}
       }
    }
-   
+
 }
 
 

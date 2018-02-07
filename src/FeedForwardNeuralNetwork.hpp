@@ -15,7 +15,7 @@ class FeedForwardNeuralNetwork
 {
 private:
    void construct(const int &insize, const int &hidlaysize, const int &outsize);
-   
+
 protected:
     std::vector<NNLayer *> _L;
 
@@ -70,7 +70,8 @@ public:
     void setVariationalParameter(const int &i, const double &vp);
 
     // Set initial parameters
-    void setInput(const int &n, const double * in);  // in is an array of dimension n
+    void setInput(const double * in);
+    void setInput(const int &i, const double &in);
 
     // Connect the neural network
     void connectFFNN();
