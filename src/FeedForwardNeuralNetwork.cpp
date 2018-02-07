@@ -514,6 +514,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
         }
     }
     // read and set the substrates
+    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0;
     bool flag_1d, flag_2d, flag_v1d;
     file >> flag_1d;
     if (flag_1d) addFirstDerivativeSubstrate();
