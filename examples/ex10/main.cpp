@@ -17,43 +17,19 @@
 
 
 /*
-Example: Fit FFNN via NFM's Conjugate Gradient
+Example: Train FFNN via GSL's Non-Linear Fit with Levenberg-Marquardt solver
 
-In this example we want to demonstrate how a FFNN can be trained via Conjuage Gradient (CG) to fit a target function (in this case a gaussian).
+In this example we want to demonstrate how a FFNN can be trained via GSL's fit routines to fit target data (in this case a gaussian).
 
-This is done by minimizing the quadratic distance of NN to target function via class CG from NFM. The distance and gradient functions are integrated by MCI.
-Hence, we have to create the NN and target function, MCIObservableFunctionInterfaces for distance and gradient, and put everything together into a NoisyFunctionWithGradient for CG.
+The fit is achieved by minimizing the mean square distance of NN to data (by Levenberg-Marquardt), where the distance and gradient are integrated on a unifrom grid.
+Hence, we have to create the NN and target data, define functions for distance and gradient, and pass all the information to the GSL lib.
 
-The whole process is handled by the NNFitter1D class. As a little speciality, the fitting is done multiple times in parallel threads and the best fit overall is presented as result.
+For convenience, a NNFitter1D class is created, which handles the whole process in a user-friendly way.
 */
 
 
-//1D Target Function
-class Function1D {
-public:
-  //Function1D(){}
-  virtual ~Function1D(){}
-
-  // Function evaluation
-  virtual double f(const double &) = 0;
-  //                    ^input
-};
-
-// exp(-a*(x-b)^2)
-class Gaussian: public Function1D{
-private:
-  double _a;
-  double _b;
-
-public:
-  Gaussian(const double &a, const double &b): Function1D(){
-    _a = a;
-    _b = b;
-  }
-
-  double f(const double &x){
-    return exp(-_a*pow(x-_b, 2));
-  }
+double Gaussian(const double &x, const double &a, const double &b) {
+  return exp(-a*pow(x-b, 2));
 };
 
 struct data {
@@ -154,13 +130,14 @@ public:
     _ffnn->addVariationalFirstDerivativeSubstrate();
 
     _npar = _ffnn->getNBeta();
+    //    for (int i= 1; i<_npar; ++i) _ffnn->setBeta(i, 0.1);
   }
 
   ~NNFitter1D(){
     delete _ffnn;
   }
 
-  void findFit(bool doprint) {
+  void findFit(const int &nsteps,  const double &xtol, const double &gtol, const double &ftol, const bool &doprint) {
 
   // build data struct
   struct data d = { _ndata, _xdata, _ydata, _ffnn};
@@ -181,10 +158,6 @@ public:
   double chisq, chisq0;
   int status, info;
   size_t i;
-
-  const double xtol = 1e-8;
-  const double gtol = 1e-8;
-  const double ftol = 0.0;
   //
 
 
@@ -211,9 +184,9 @@ public:
   f = gsl_multifit_nlinear_residual(w);
   gsl_blas_ddot(f, f, &chisq0);
 
-  // solve the system with a maximum of 50 iterations
-  if (doprint) status = gsl_multifit_nlinear_driver(50, xtol, gtol, ftol, callback_verbose, NULL, &info, w);
-  else status = gsl_multifit_nlinear_driver(50, xtol, gtol, ftol, callback, NULL, &info, w);
+  // solve the system with a maximum of nsteps iterations
+  if (doprint) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback_verbose, NULL, &info, w);
+  else status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w);
 
   // compute covariance of best fit parameters
   J = gsl_multifit_nlinear_jac(w);
@@ -222,9 +195,15 @@ public:
   // compute final cost
   gsl_blas_ddot(f, f, &chisq);
 
+
+  #define FIT(i) gsl_vector_get(w->x, i)
+  #define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
+
+  for (int i=0; i<_npar; ++i) {
+    _ffnn->setBeta(i, FIT(i)); //set ffnn to best fit
+  }
+
   if (doprint) {
-    #define FIT(i) gsl_vector_get(w->x, i)
-    #define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
 
     double dof = _ndata - _npar;
     double c = GSL_MAX_DBL(1, sqrt(chisq / dof));
@@ -260,11 +239,16 @@ public:
     return dist / _ndata;
   }
 
-  // compare NN to data at n points starting from i0 in increments di
-  void compareFit(const int i0, const int di) {
-    using namespace std;;
+  // compare NN to data from index i0 to ie in increments di
+  void compareFit(const int i0=0, const int ie=-1, const int di = 1) {
+    using namespace std;
+
+    int realie; //set default ie although _ndata is not const
+    if (ie<0) realie = _ndata-1;
+    else realie = ie;
+
     int j=i0;
-    while(j<_ndata){
+    while(j<_ndata && j<=realie){
       _ffnn->setInput(1, &_xdata[j]);
       _ffnn->FFPropagate();
       cout << "x: " << _xdata[j] << " f(x): " << _ydata[j] << " nn(x): " << _ffnn->getOutput(1) << endl;
@@ -291,7 +275,6 @@ int main (void) {
   using namespace std;
 
   NNFitter1D * fitter;
-  Gaussian * gauss = new Gaussian(1,0);
 
   double lb = -10;
   double ub = 10;
@@ -321,9 +304,9 @@ int main (void) {
   cout << ", 2 units respectively" << endl;
   cout << "========================================================================" << endl;
   cout << endl;
-  cout << "In the following we use CG to minimize the mean-squared-distance of NN vs. target function, i.e. find optimal betas." << endl;
+  cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance of NN vs. target function, i.e. find optimal betas." << endl;
   cout << endl << endl;
-  cout << "Now we find the best fit ... " << endl;;
+  cout << "Now we find the best fit ... " << endl;
 
 
   // NON I/O CODE
@@ -332,13 +315,13 @@ int main (void) {
   double dx = (ub-lb) / (ndata-1);
   for (int i = 0; i < ndata; ++i) {
     xdata[i] = lb + i*dx;
-    ydata[i] = gauss->f(xdata[i]);
+    ydata[i] = Gaussian(xdata[i], 1, 0);
     weights[i] = 1.0;
     //printf ("data: %zu %g %g\n", i, x[i], y[i]);
   };
 
   fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights);
-  fitter->findFit(true);
+  fitter->findFit(100, 0.0, 0.0, 0.0, true);
   //
 
   cout << "Done." << endl;
@@ -347,19 +330,18 @@ int main (void) {
   cout << "Finally we compare the best fit NN to the target function:" << endl << endl;
 
   // NON I/O CODE
-  fitter->compareFit(0., 100);
+  fitter->compareFit(0, ndata, 100);
   //
 
   cout << endl;
   cout << "And print the output/NN to a file. The end." << endl;
 
   // NON I/O CODE
-  fitter->printFitOutput(-10, 10, 200);
+  fitter->printFitOutput(-10, 10.1, 200);
   fitter->printFitNN();
   //
 
   delete fitter;
-  delete gauss;
 
   return 0;
 }
