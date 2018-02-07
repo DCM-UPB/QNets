@@ -75,6 +75,7 @@ public:
     void FFPropagate();
 
     // Get outputs
+    void getOutput(double * out);
     double getOutput(const int &i);
     double getFirstDerivative(const int &i, const int &i1d); // i is the index of the unit, i1d the index of the derivative
     double getSecondDerivative(const int &i, const int &i2d); // i is the index of the unit, i2d the index of the derivative

@@ -167,28 +167,28 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
 
 void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, std::string what, std::string filename){
    using namespace std;
-   
+
    const double delta = (max-min)/npoints;
-   
+
    // compute the input points
    double * x = new double[npoints];
    x[0] = min;
    for (int i=1; i<npoints; ++i){
       x[i] = x[i-1] + delta;
    }
-   
+
    // allocate the output variables
    double * v = new double[npoints];      // NN output value
-   
+
    // compute the values
    const int ninput = ffnn->getNInput();
    double * input = new double[ninput];
    for (int i=0; i<ninput; ++i) input[i] = base_input[i];
    for (int i=0; i<npoints; ++i){
       input[input_i] = x[i];
-      ffnn->setInput(ninput, input);
+      ffnn->setInput(input);
       ffnn->FFPropagate();
-      
+
       if (what == "getOutput"){
          v[i] = ffnn->getOutput(output_i);
       } else if (what == "getFirstDerivative"){
@@ -201,7 +201,7 @@ void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, c
          throw std::invalid_argument( "writePlotFile(): the parameter 'what' was not valid" );
       }
    }
-   
+
    // write the results on files
    ofstream vFile;
    vFile.open(filename);
@@ -209,10 +209,8 @@ void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, c
       vFile << x[i] << "    " << v[i] << endl;
    }
    vFile.close();
-   
+
    delete[] x;
    delete[] v;
    delete[] input;
 }
-
-

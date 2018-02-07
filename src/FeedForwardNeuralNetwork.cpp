@@ -126,7 +126,15 @@ double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d
 
 double FeedForwardNeuralNetwork::getOutput(const int &i)
 {
-   return ( _L[_L.size()-1]->getUnit(i)->getValue() );
+   return _L.back()->getUnit(i+1)->getValue();
+}
+
+
+void FeedForwardNeuralNetwork::getOutput(double * out)
+{
+    for (int i=1; i<_L.back()->getNUnits(); ++i){
+        out[i-1] = _L.back()->getUnit(i)->getValue();
+    }
 }
 
 
@@ -165,7 +173,7 @@ void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
     // set the first derivatives
     if (_flag_1d)
     {
-        _L[0]->getUnit(i+1)->setFirstDerivativeValue(i, _L[0]->getUnit(i+1)->getActivationFunction()->f1d( _L[0]->getUnit(i)+1->getProtoValue() ) );
+        _L[0]->getUnit(i+1)->setFirstDerivativeValue(i, _L[0]->getUnit(i+1)->getActivationFunction()->f1d( _L[0]->getUnit(i)->getProtoValue() ) );
     }
 }
 
