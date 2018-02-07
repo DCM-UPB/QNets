@@ -8,6 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <random>
+#include <limits>
 
 
 // --- Variational Parameters
@@ -394,6 +395,9 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
    // open file
    ofstream file;
    file.open(filename);
+   // set precision
+   typedef std::numeric_limits<double> dbl;
+   file.precision(dbl::max_digits10);
    // store the number of layers
    file << getNLayers() << endl;
    // store the activaction function and size of each layer
@@ -408,7 +412,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
    // store all the variational parameters, if the FFNN is already connected
    file << _flag_connected << endl;
    if (_flag_connected){
-       for (int i=0; i<this->getNBeta(); ++i)
+       for (int i=0; i<getNBeta(); ++i)
        {
           file << getBeta(i) << " ";
        }
@@ -503,10 +507,10 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (connected){
         connectFFNN();
         double beta;
-        for (int i=0; i<this->getNBeta(); ++i)
+        for (int i=0; i<getNBeta(); ++i)
         {
             file >> beta;
-            this->setBeta(i,beta);
+            setBeta(i,beta);
         }
     }
     // read and set the substrates
