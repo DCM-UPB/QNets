@@ -62,12 +62,6 @@ public:
     // ... or this
     void addLastHiddenLayerVariationalFirstDerivativeSubstrate();  // variational first derivative for and from the last hidden layer
 
-    // Manage the variational parameters
-    // Requires the VariationalFirstDerivativeSubstrate
-    // OBSOLETE: Please use getNBeta, getBeta and setBeta instead
-    int getNVariationalParameters(){return _nvp;}
-    double getVariationalParameter(const int &i);
-    void setVariationalParameter(const int &i, const double &vp);
 
     // Set initial parameters
     void setInput(const double * in);

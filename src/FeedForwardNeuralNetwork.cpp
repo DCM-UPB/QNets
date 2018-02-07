@@ -103,48 +103,6 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 }
 
 
-void FeedForwardNeuralNetwork::setVariationalParameter(const int &i, const double &vp)
-{
-   // variables
-   std::vector<NNLayer *>::size_type il = 1;
-   bool flag = false;
-   // find where the variational parameter with the given index is stored, and set its value to vp
-   while ( (!flag) && (il<_L.size()) )
-   {
-      flag = _L[il]->setVariationalParameter(i,vp);
-      il++;
-   }
-   // check for errors
-   if (!flag)
-   {
-      using namespace std;
-      cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : variational parameter with the given id (" << i<< ") was not found." << endl << endl;
-   }
-}
-
-
-double FeedForwardNeuralNetwork::getVariationalParameter(const int &i)
-{
-   // variables
-   double vp;
-   std::vector<NNLayer *>::size_type il = 1;
-   bool flag = false;
-   // find and store the variational parameter with the given index i
-   while ( (!flag) && (il<_L.size()) )
-   {
-      flag = _L[il]->getVariationalParameter(i,vp);
-      il++;
-   }
-   // check for errors
-   if (!flag)
-   {
-      using namespace std;
-      cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : variational parameter with the given id (" << i<< ") was not found." << endl << endl;
-   }
-   // return the result
-   return vp;
-}
-
 
 // --- Computation
 
