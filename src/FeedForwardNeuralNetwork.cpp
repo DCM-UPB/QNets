@@ -120,7 +120,7 @@ double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2
 
 double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
 {
-   return ( _L[_L.size()-1]->getUnit(i)->getFirstDerivativeValue(i1d) );
+   return ( _L[_L.size()-1]->getUnit(i+1)->getFirstDerivativeValue(i1d) );
 }
 
 
