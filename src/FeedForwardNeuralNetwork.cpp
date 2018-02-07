@@ -405,12 +405,17 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
        }
        file << endl;
    }
-   // store all the variational parameters
-   for (int i=0; i<this->getNBeta(); ++i)
-   {
-      file << getBeta(i) << " ";
+   // store all the variational parameters, if the FFNN is already connected
+   file << _flag_connected << endl;
+   if (_flag_connected){
+       for (int i=0; i<this->getNBeta(); ++i)
+       {
+          file << getBeta(i) << " ";
+       }
+       file << endl;
    }
-   file << endl;
+   // store the information about the substrates
+   file << _flag_1d << " " << _flag_2d << " " << _flag_v1d << endl;
    file.close();
 }
 
@@ -468,43 +473,51 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 {
-   // open file
-   using namespace std;
+    // open file
+    using namespace std;
 
-   ifstream file;
-   file.open(filename);
-   string line;
-   // read the number of layers
-   int nlayers;
-   file >> nlayers;
-   // read and set the activation function and size of each layer
-   string actf;
-   int nunits;
-   NNLayer * nnl;
-   for (int i=0; i<nlayers; ++i)
-   {
-      file >> nunits;
-      nnl = new NNLayer(nunits, &_id_actf);   // first set the activation function to the id, then change it for each unit
-      for (int j=0; j<nunits; ++j){
-          nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(actf));
-      }
-      _L.push_back(nnl);
-   }
-   // set some other initial values
-   _flag_1d = false;
-   _flag_2d = false;
-   _flag_v1d = false;
-   _nvp=0;
-   // connect the NN
-   this->connectFFNN();
-   // set the beta
-   double beta;
-   for (int i=0; i<this->getNBeta(); ++i)
-   {
-      file >> beta;
-      this->setBeta(i,beta);
-   }
-   file.close();
+    ifstream file;
+    file.open(filename);
+    string line;
+    // read the number of layers
+    int nlayers;
+    file >> nlayers;
+    // read and set the activation function and size of each layer
+    string actf;
+    int nunits;
+    NNLayer * nnl;
+    for (int i=0; i<nlayers; ++i)
+    {
+        file >> nunits;
+        nnl = new NNLayer(nunits, &_id_actf);   // first set the activation function to the id, then change it for each unit
+        for (int j=0; j<nunits; ++j){
+            nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(actf));
+        }
+        _L.push_back(nnl);
+    }
+    // connect the NN, if it is the case
+    _nvp = 0;
+    bool connected;
+    file >> connected;
+    if (connected){
+        connectFFNN();
+        double beta;
+        for (int i=0; i<this->getNBeta(); ++i)
+        {
+            file >> beta;
+            this->setBeta(i,beta);
+        }
+    }
+    // read and set the substrates
+    bool flag_1d, flag_2d, flag_v1d;
+    file >> flag_1d;
+    if (flag_1d) addFirstDerivativeSubstrate();
+    file >> flag_2d;
+    if (flag_2d) addSecondDerivativeSubstrate();
+    file >> flag_v1d;
+    if (flag_v1d) addVariationalFirstDerivativeSubstrate();
+
+    file.close();
 }
 
 
