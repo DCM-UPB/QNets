@@ -52,6 +52,7 @@ public:
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
     void setBeta(const int &ib, const double &beta);
+    void randomizeBetas();
 
     // Substrates for the calculations required
     void addFirstDerivativeSubstrate();  // coordinates' first derivatives

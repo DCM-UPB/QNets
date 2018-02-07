@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-
+#include <random>
 
 
 // --- Variational Parameters
@@ -89,6 +89,16 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
       }
    }
 
+}
+
+void FeedForwardNeuralNetwork::randomizeBetas()
+{
+    std::random_device rdev;
+    std::mt19937_64 rgen = std::mt19937_64(rdev());
+    std::uniform_real_distribution<double> rd = std::uniform_real_distribution<double>(-3.,3.);
+
+    // set betas to new random values
+    for (int i=0; i<this->getNBeta(); ++i) this->setBeta(i, rd(rgen));
 }
 
 
