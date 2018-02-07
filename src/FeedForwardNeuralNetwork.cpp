@@ -354,7 +354,7 @@ void FeedForwardNeuralNetwork::setLayerActivationFunction(const int &li, Activat
 
 void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
 {
-   NNLayer * newhidlay = new NNLayer(size, &_log_actf);
+   NNLayer * newhidlay = new NNLayer(size, &std_activation_function::lgs_actf);
 
    std::vector<NNLayer *>::iterator it = _L.end()-1;
 
@@ -402,7 +402,7 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
       // set the identity activation function for some units of the new hidden layer
       for (int i=1; i<_L[_L.size()-1]->getNUnits(); ++i)
       {
-         _L[_L.size()-2]->getUnit(i)->setActivationFunction(&_id_actf);
+         _L[_L.size()-2]->getUnit(i)->setActivationFunction(&std_activation_function::id_actf);
       }
       // set some beta to 1 for the output layer
       for (int i=1; i<_L[_L.size()-1]->getNUnits(); ++i)
@@ -489,7 +489,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
    ActivationFunctionInterface * af;
    for (unsigned int l=0; l<actf.size(); ++l){
       for (unsigned int u=0; u<actf[l].size(); ++u){
-         af = ActivationFunctionManager::provideActivationFunction(actf[l][u]);
+         af = std_activation_function::provideActivationFunction(actf[l][u]);
 
          if (af != 0){
             _L[l]->getUnit(u)->setActivationFunction(af);
@@ -535,10 +535,10 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     for (int i=0; i<nlayers; ++i)
     {
         file >> nunits;
-        nnl = new NNLayer(nunits, &_id_actf);   // first set the activation function to the id, then change it for each unit
+        nnl = new NNLayer(nunits, &std_activation_function::id_actf);   // first set the activation function to the id, then change it for each unit
         for (int j=0; j<nunits; ++j){
             file >> actf;
-            nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(actf));
+            nnl->getUnit(j)->setActivationFunction(std_activation_function::provideActivationFunction(actf));
         }
         _L.push_back(nnl);
     }
@@ -573,9 +573,9 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     // read and set the activation function and size of each layer
     NNLayer * nnl;
     for (int i=0; i<ffnn->getNLayers(); ++i){
-        nnl = new NNLayer(ffnn->getLayer(i)->getNUnits(), &_id_actf);   // first set the activation function to the id, then change it for each unit
+        nnl = new NNLayer(ffnn->getLayer(i)->getNUnits(), &std_activation_function::id_actf);   // first set the activation function to the id, then change it for each unit
         for (int j=0; j<ffnn->getLayer(i)->getNUnits(); ++j){
-            nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(ffnn->getLayer(i)->getUnit(j)->getActivationFunction()->getIdCode()));
+            nnl->getUnit(j)->setActivationFunction(std_activation_function::provideActivationFunction(ffnn->getLayer(i)->getUnit(j)->getActivationFunction()->getIdCode()));
         }
         _L.push_back(nnl);
     }
@@ -602,9 +602,9 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int 
 
 
 void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysize, const int &outsize){
-   NNLayer * in = new NNLayer(insize, &_id_actf);
-   NNLayer * hidlay = new NNLayer(hidlaysize, &_log_actf);
-   NNLayer * out = new NNLayer(outsize, &_log_actf);
+   NNLayer * in = new NNLayer(insize, &std_activation_function::id_actf);
+   NNLayer * hidlay = new NNLayer(hidlaysize, &std_activation_function::lgs_actf);
+   NNLayer * out = new NNLayer(outsize, &std_activation_function::lgs_actf);
 
    _L.push_back(in);
    _L.push_back(hidlay);

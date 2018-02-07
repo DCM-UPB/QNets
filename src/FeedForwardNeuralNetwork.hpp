@@ -2,9 +2,6 @@
 #define FEED_FORWARD_NEURAL_NETWORK
 
 #include "ActivationFunctionInterface.hpp"
-#include "IdentityActivationFunction.hpp"
-#include "LogisticActivationFunction.hpp"
-#include "GaussianActivationFunction.hpp"
 #include "NNLayer.hpp"
 
 #include <vector>
@@ -18,10 +15,6 @@ private:
 
 protected:
     std::vector<NNLayer *> _L;
-
-    IdentityActivationFunction _id_actf;
-    LogisticActivationFunction _log_actf;
-    GaussianActivationFunction _gss_actf;
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
     bool _flag_1d, _flag_2d, _flag_v1d;  // flag that indicates if the substrates for the derivatives have been activated or not
