@@ -44,6 +44,10 @@ public:
     NNLayer * getLayer(const int &li){return _L[li];}
     int getNBeta();
     double getBeta(const int &ib);
+    bool isConnected(){return _flag_connected;}
+    bool hasFirstDerivativeSubstrate(){return _flag_1d;}
+    bool hasSecondDerivativeSubstrate(){return _flag_2d;}
+    bool hasFirstVariationalDerivativeSubstrate(){return _flag_v1d;}
 
     // Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
