@@ -77,9 +77,9 @@ public:
     // Get outputs
     void getOutput(double * out);
     double getOutput(const int &i);
-    double getFirstDerivative(const int &i, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the derivative (the input element)
-    double getSecondDerivative(const int &i, const int &i2d); // i is the index of the output element, i2d the index of the derivative
-    double getVariationalFirstDerivative(const int &i, const int &iv1d);  // i is the index of the unit, iv1d the index of the variational derivative
+    double getFirstDerivative(const int &i, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
+    double getSecondDerivative(const int &i, const int &i2d); // i is the index of the output element, i2d the index of the input element
+    double getVariationalFirstDerivative(const int &i, const int &iv1d);  // i is the index of the output element, iv1d the index of the beta element
 
     // Store FFNN on file
     void storeOnFile(const char * filename);

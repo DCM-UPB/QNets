@@ -108,19 +108,19 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 
 double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, const int &iv1d)
 {
-   return ( _L[_L.size()-1]->getUnit(i)->getVariationalFirstDerivativeValue(iv1d) );
+   return ( _L.back()->getUnit(i+1)->getVariationalFirstDerivativeValue(iv1d) );
 }
 
 
 double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2d)
 {
-   return ( _L[_L.size()-1]->getUnit(i+1)->getSecondDerivativeValue(i2d) );
+   return ( _L.back()->getUnit(i+1)->getSecondDerivativeValue(i2d) );
 }
 
 
 double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
 {
-   return ( _L[_L.size()-1]->getUnit(i+1)->getFirstDerivativeValue(i1d) );
+   return ( _L.back()->getUnit(i+1)->getFirstDerivativeValue(i1d) );
 }
 
 
