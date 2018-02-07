@@ -395,14 +395,16 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
    ofstream file;
    file.open(filename);
    // store the number of layers
-   file << this->getNLayers() << endl;
+   file << getNLayers() << endl;
    // store the activaction function and size of each layer
-   for (int i=0; i<this->getNLayers(); ++i)
+   for (int i=0; i<getNLayers(); ++i)
    {
-      file << _L[i]->getActivationFunction()->getIdCode() << " ";
-      file << this->getLayerSize(i) << " ";
+       file << getLayer(i)->getNUnits() << " ";
+       for (int j=0; j<getLayer(i)->getNUnits(); ++j){
+           file << getLayer(i)->getUnit(j)->getActivationFunction()->getIdCode() << " ";
+       }
+       file << endl;
    }
-   file << endl;
    // store all the variational parameters
    for (int i=0; i<this->getNBeta(); ++i)
    {
@@ -477,16 +479,15 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
    file >> nlayers;
    // read and set the activation function and size of each layer
    string actf;
-   int size;
+   int nunits;
    NNLayer * nnl;
    for (int i=0; i<nlayers; ++i)
    {
-      file >> actf;
-      file >> size;
-      if (actf.compare(_id_actf.getIdCode()) == 0) {nnl = new NNLayer(size, &_id_actf);}
-      else if (actf.compare(_log_actf.getIdCode()) == 0) {nnl = new NNLayer(size, &_log_actf);}
-      else if (actf.compare(_gss_actf.getIdCode()) == 0) {nnl = new NNLayer(size, &_gss_actf);}
-      else {cout << "ERROR FeedForwardNeuralNetwork(const char * filename) : activation function " << actf << " not known" << endl;}
+      file >> nunits;
+      nnl = new NNLayer(nunits, &_id_actf);   // first set the activation function to the id, then change it for each unit
+      for (int j=0; j<nunits; ++j){
+          nnl->getUnit(j)->setActivationFunction(ActivationFunctionManager::provideActivationFunction(actf));
+      }
       _L.push_back(nnl);
    }
    // set some other initial values
