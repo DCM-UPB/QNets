@@ -30,7 +30,7 @@ int main(){
    assert(!ffnn2->isConnected());
    assert(!ffnn2->hasFirstDerivativeSubstrate());
    assert(!ffnn2->hasSecondDerivativeSubstrate());
-   assert(!ffnn2->hasFirstVariationalDerivativeSubstrate());
+   assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
 
    assert(ffnn->getLayer(0)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
    assert(ffnn->getLayer(0)->getUnit(1)->getActivationFunction()->getIdCode() == "id_");
@@ -61,7 +61,7 @@ int main(){
    assert(ffnn2->isConnected());
    assert(!ffnn2->hasFirstDerivativeSubstrate());
    assert(!ffnn2->hasSecondDerivativeSubstrate());
-   assert(!ffnn2->hasFirstVariationalDerivativeSubstrate());
+   assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
 
    assert(ffnn->getNBeta() == ffnn2->getNBeta());
    for (int i=0; i<ffnn2->getNBeta(); ++i){
@@ -81,7 +81,7 @@ int main(){
    assert(ffnn2->isConnected());
    assert(ffnn2->hasFirstDerivativeSubstrate());
    assert(!ffnn2->hasSecondDerivativeSubstrate());
-   assert(!ffnn2->hasFirstVariationalDerivativeSubstrate());
+   assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
 
    delete ffnn2;
 
@@ -96,7 +96,7 @@ int main(){
    assert(ffnn2->isConnected());
    assert(ffnn2->hasFirstDerivativeSubstrate());
    assert(!ffnn2->hasSecondDerivativeSubstrate());
-   assert(ffnn2->hasFirstVariationalDerivativeSubstrate());
+   assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
 
    delete ffnn2;
 
@@ -111,7 +111,7 @@ int main(){
    assert(ffnn2->isConnected());
    assert(ffnn2->hasFirstDerivativeSubstrate());
    assert(ffnn2->hasSecondDerivativeSubstrate());
-   assert(ffnn2->hasFirstVariationalDerivativeSubstrate());
+   assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
 
 
 
