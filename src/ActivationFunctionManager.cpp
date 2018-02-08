@@ -1,6 +1,5 @@
 #include "ActivationFunctionManager.hpp"
 
-#include <stdexcept>
 
 
 
@@ -25,7 +24,7 @@ namespace std_actf{
             return &gss_actf;
         }
 
-        throw std::invalid_argument( "could not find an activation function with the provided idcode: " + idcode );
+        return 0;
     }
 
 }
