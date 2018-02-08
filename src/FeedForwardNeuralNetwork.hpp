@@ -39,7 +39,7 @@ public:
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
-    bool hasFirstVariationalDerivativeSubstrate(){return _flag_v1d;}
+    bool hasVariationalFirstDerivativeSubstrate(){return _flag_v1d;}
 
     // Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
@@ -79,11 +79,18 @@ public:
     // Computation
     void FFPropagate();
 
+    // Shortcut for computation: set input and get all values and derivatives with one calculations.
+    // If some derivatives are not supported (substrate missing) the pointers will be set to NULL.
+    void evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1);
+
     // Get outputs
     void getOutput(double * out);
     double getOutput(const int &i);
+    void getFirstDerivative(double ** d1);
     double getFirstDerivative(const int &i, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
+    void getSecondDerivative(double ** d2);
     double getSecondDerivative(const int &i, const int &i2d); // i is the index of the output element, i2d the index of the input element
+    void getVariationalFirstDerivative(double ** vd1);
     double getVariationalFirstDerivative(const int &i, const int &iv1d);  // i is the index of the output element, iv1d the index of the beta element
 
     // Store FFNN on file

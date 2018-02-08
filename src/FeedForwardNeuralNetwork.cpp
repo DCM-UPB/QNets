@@ -155,15 +155,45 @@ double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, con
 }
 
 
+void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
+{
+    for (int i=0; i<getNOutput(); ++i){
+        for (int iv1d=0; iv1d<getNBeta(); ++iv1d){
+            vd1[i][iv1d] = getVariationalFirstDerivative(i, iv1d);
+        }
+    }
+}
+
+
 double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2d)
 {
    return ( _L.back()->getUnit(i+1)->getSecondDerivativeValue(i2d) );
 }
 
 
+void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
+{
+    for (int i=0; i<getNOutput(); ++i){
+        for (int i2d=0; i2d<getNInput(); ++i2d){
+            d2[i][i2d] = getSecondDerivative(i, i2d);
+        }
+    }
+}
+
+
 double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
 {
    return ( _L.back()->getUnit(i+1)->getFirstDerivativeValue(i1d) );
+}
+
+
+void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1)
+{
+    for (int i=0; i<getNOutput(); ++i){
+        for (int i1d=0; i1d<getNInput(); ++i1d){
+            d1[i][i1d] = getFirstDerivative(i, i1d);
+        }
+    }
 }
 
 
@@ -177,6 +207,31 @@ void FeedForwardNeuralNetwork::getOutput(double * out)
 {
     for (int i=1; i<_L.back()->getNUnits(); ++i){
         out[i-1] = _L.back()->getUnit(i)->getValue();
+    }
+}
+
+
+void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1){
+    setInput(in);
+    FFPropagate();
+    getOutput(out);
+    if (hasFirstDerivativeSubstrate()){
+        getFirstDerivative(d1);
+    }
+    else {
+        d1 = NULL;
+    }
+    if (hasSecondDerivativeSubstrate()){
+        getSecondDerivative(d2);
+    }
+    else {
+        d2 = NULL;
+    }
+    if (hasVariationalFirstDerivativeSubstrate()){
+        getVariationalFirstDerivative(vd1);
+    }
+    else {
+        vd1 = NULL;
     }
 }
 
@@ -599,7 +654,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0;
     if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();
     if (ffnn->hasSecondDerivativeSubstrate()) addSecondDerivativeSubstrate();
-    if (ffnn->hasFirstVariationalDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
+    if (ffnn->hasVariationalFirstDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
 }
 
 
