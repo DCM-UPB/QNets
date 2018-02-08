@@ -17,3 +17,9 @@
 ## Unit Test 3
 
 `ut3/`: check that the cloning constructor of FFNN works properly
+
+
+
+## Unit Test 4
+
+`ut4/`: check that the compute and propagate work properly
