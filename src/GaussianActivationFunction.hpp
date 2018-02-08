@@ -10,8 +10,10 @@ class GaussianActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
+    GaussianActivationFunction(){}
+    ~GaussianActivationFunction(){}
 
-    std::string getIdCode(){return "gss";};
+    std::string getIdCode(){return "gss";}
 
     double f(const double &in);
 
