@@ -1,9 +1,10 @@
 #include "ActivationFunctionManager.hpp"
 
+#include <stdexcept>
 
 
 
-namespace std_activation_function{
+namespace std_actf{
 
 
     IdentityActivationFunction id_actf = IdentityActivationFunction();
@@ -12,19 +13,19 @@ namespace std_activation_function{
 
 
     ActivationFunctionInterface * provideActivationFunction(const std::string idcode){
-        if (idcode == (new IdentityActivationFunction)->getIdCode()){
+        if (idcode == id_actf.getIdCode()){
             return &id_actf;
         }
 
-        if (idcode == (new LogisticActivationFunction)->getIdCode()){
+        if (idcode == lgs_actf.getIdCode()){
             return &lgs_actf;
         }
 
-        if (idcode == (new GaussianActivationFunction)->getIdCode()){
+        if (idcode == gss_actf.getIdCode()){
             return &gss_actf;
         }
 
-        return 0;
+        throw std::invalid_argument( "could not find an activation function with the provided idcode: " + idcode );
     }
 
 }

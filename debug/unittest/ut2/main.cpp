@@ -14,10 +14,10 @@ int main(){
    // make a check while the FFNN is not connected yet
    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
    ffnn->pushHiddenLayer(4);
-   ffnn->getLayer(0)->getUnit(2)->setActivationFunction(std_activation_function::provideActivationFunction("lgs"));
-   ffnn->getLayer(1)->getUnit(3)->setActivationFunction(std_activation_function::provideActivationFunction("gss"));
-   ffnn->getLayer(2)->getUnit(1)->setActivationFunction(std_activation_function::provideActivationFunction("gss"));
-   ffnn->getLayer(3)->getUnit(2)->setActivationFunction(std_activation_function::provideActivationFunction("gss"));
+   ffnn->getLayer(0)->getUnit(2)->setActivationFunction(std_actf::provideActivationFunction("lgs"));
+   ffnn->getLayer(1)->getUnit(3)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+   ffnn->getLayer(2)->getUnit(1)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+   ffnn->getLayer(3)->getUnit(2)->setActivationFunction(std_actf::provideActivationFunction("gss"));
    ffnn->storeOnFile("ffnn_stage1.txt");
 
    FeedForwardNeuralNetwork * ffnn2 = new FeedForwardNeuralNetwork("ffnn_stage1.txt");

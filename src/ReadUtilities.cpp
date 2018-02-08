@@ -34,7 +34,7 @@ void readFFNNStructure(const char * filename, std::vector<std::vector<std::strin
       nwords = 0;
       while (iss >> word){
          nwords ++;
-         ActivationFunctionInterface * af = std_activation_function::provideActivationFunction(word);
+         ActivationFunctionInterface * af = std_actf::provideActivationFunction(word);
          if (af != 0) {
             line_actf_orig.push_back(word);
          } else {line_actf_orig.push_back(null_actf);}

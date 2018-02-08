@@ -10,7 +10,7 @@
 #include <string>
 
 
-namespace std_activation_function{
+namespace std_actf{
 
     extern IdentityActivationFunction id_actf;
     extern LogisticActivationFunction lgs_actf;
