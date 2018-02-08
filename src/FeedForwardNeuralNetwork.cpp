@@ -211,10 +211,11 @@ void FeedForwardNeuralNetwork::getOutput(double * out)
 }
 
 
-void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1){
+void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** &d1, double ** &d2, double ** &vd1){
     setInput(in);
     FFPropagate();
     getOutput(out);
+    using namespace std;
     if (hasFirstDerivativeSubstrate()){
         getFirstDerivative(d1);
     }
