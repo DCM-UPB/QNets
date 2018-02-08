@@ -80,7 +80,7 @@ public:
     void FFPropagate();
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
-    // If some derivatives are not supported (substrate missing) the pointers will be set to NULL.
+    // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
     void evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1);
 
     // Get outputs

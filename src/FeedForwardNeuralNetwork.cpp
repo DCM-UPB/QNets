@@ -584,7 +584,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     int nlayers;
     file >> nlayers;
     // read and set the activation function and size of each layer
-    string actf;
+    string actf_id;
     int nunits;
     NNLayer * nnl;
     for (int i=0; i<nlayers; ++i)
@@ -592,8 +592,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
         file >> nunits;
         nnl = new NNLayer(nunits, &std_activation_function::id_actf);   // first set the activation function to the id, then change it for each unit
         for (int j=0; j<nunits; ++j){
-            file >> actf;
-            nnl->getUnit(j)->setActivationFunction(std_activation_function::provideActivationFunction(actf));
+            file >> actf_id;
+            nnl->getUnit(j)->setActivationFunction(std_activation_function::provideActivationFunction(actf_id));
         }
         _L.push_back(nnl);
     }
