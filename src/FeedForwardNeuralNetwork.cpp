@@ -34,7 +34,7 @@ int FeedForwardNeuralNetwork::getNBeta()
 double FeedForwardNeuralNetwork::getBeta(const int &ib)
 {
    using namespace std;
-   if ( ib >= getNBeta() )
+   if ( ib<0 || ib >= getNBeta() )
    {
       cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index out of boundaries" << endl;
       cout << ib << " against the maximum allowed " << this->getNBeta() << endl << endl;
@@ -211,18 +211,18 @@ void FeedForwardNeuralNetwork::getOutput(double * out)
 }
 
 
-void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1){
+void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1 = NULL, double ** d2 = NULL, double ** vd1 = NULL){
     setInput(in);
     FFPropagate();
     getOutput(out);
     using namespace std;
-    if (hasFirstDerivativeSubstrate()){
+    if (hasFirstDerivativeSubstrate() && d1!=NULL){
         getFirstDerivative(d1);
     }
-    if (hasSecondDerivativeSubstrate()){
+    if (hasSecondDerivativeSubstrate() && d2!=NULL){
         getSecondDerivative(d2);
     }
-    if (hasVariationalFirstDerivativeSubstrate()){
+    if (hasVariationalFirstDerivativeSubstrate() && vd1!=NULL){
         getVariationalFirstDerivative(vd1);
     }
 }
@@ -360,7 +360,7 @@ void FeedForwardNeuralNetwork::connectFFNN()
 }
 
 
-void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1){
+void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false){
     connectFFNN();
     if (flag_d1) addFirstDerivativeSubstrate();
     if (flag_d2) addSecondDerivativeSubstrate();
