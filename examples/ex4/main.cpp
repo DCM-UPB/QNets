@@ -80,7 +80,7 @@ int main() {
     cin.ignore();
 
     // NON I/O CODE
-    ffnn->setInput(ninput, input);
+    ffnn->setInput(input);
     //
     cout << "Done! Now the NN values look like this:";
     cin.ignore();
@@ -111,7 +111,7 @@ int main() {
     cin.ignore();
 
     cout << "The output is 3-dimensional, as the first unit of the output layer is an offset." << endl << "The output values are ";
-    cout << ffnn->getOutput(1) << "    " << ffnn->getOutput(2) << "    " << ffnn->getOutput(3);
+    cout << ffnn->getOutput(0) << "    " << ffnn->getOutput(1) << "    " << ffnn->getOutput(2);
     cout << endl;
 
 

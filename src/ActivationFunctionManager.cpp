@@ -1,24 +1,30 @@
 #include "ActivationFunctionManager.hpp"
 
-#include "IdentityActivationFunction.hpp"
-#include "LogisticActivationFunction.hpp"
-#include "GaussianActivationFunction.hpp"
 
 
 
-ActivationFunctionInterface * ActivationFunctionManager::provideActivationFunction(const std::string idcode){
-        
-    if (idcode == (new IdentityActivationFunction)->getIdCode()){
-        return new IdentityActivationFunction;
+namespace std_actf{
+
+
+    IdentityActivationFunction id_actf = IdentityActivationFunction();
+    LogisticActivationFunction lgs_actf = LogisticActivationFunction();
+    GaussianActivationFunction gss_actf = GaussianActivationFunction();
+
+
+    ActivationFunctionInterface * provideActivationFunction(const std::string idcode){
+        if (idcode == id_actf.getIdCode()){
+            return &id_actf;
+        }
+
+        if (idcode == lgs_actf.getIdCode()){
+            return &lgs_actf;
+        }
+
+        if (idcode == gss_actf.getIdCode()){
+            return &gss_actf;
+        }
+
+        return 0;
     }
-    
-    if (idcode == (new LogisticActivationFunction)->getIdCode()){
-        return new LogisticActivationFunction;
-    }
-    
-    if (idcode == (new GaussianActivationFunction)->getIdCode()){
-        return new GaussianActivationFunction;
-    }
-    
-    return 0;
+
 }

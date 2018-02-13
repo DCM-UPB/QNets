@@ -75,7 +75,7 @@ int main() {
     cin.ignore();
 
     // NON I/O CODE
-    ffnn->setInput(ninput, input);
+    ffnn->setInput(input);
     //
     cout << "Done! Now the NN values look like this:";
     cin.ignore();
@@ -106,14 +106,24 @@ int main() {
     cin.ignore();
 
     cout << "The output values are ";
-    cout << ffnn->getOutput(1) << "    " << ffnn->getOutput(2) << "    " << ffnn->getOutput(3) << endl;
+    cout << ffnn->getOutput(0) << "    " << ffnn->getOutput(1) << "    " << ffnn->getOutput(2) << endl;
     cin.ignore();
-    
-    cout << "There are " << ffnn->getNVariationalParameters() << " variational parameters, this means that each output will have such number of derivatives. These are:";
+
+    cout << "There are " << ffnn->getNBeta() << " variational parameters, this means that each output will have such number of derivatives. These are:";
     cin.ignore();
-    
+
     cout << "1st output (unit 2 of the output layer): " << endl;
-    for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
+    for (int i1=0; i1<ffnn->getNBeta()/10; ++i1){
+       for (int i2=0; i2<10; ++i2){
+          if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) cout << "+";
+          cout << ffnn->getVariationalFirstDerivative(0, i1*10 + i2) << "    ";
+       }
+       cout << endl;
+    }
+    cin.ignore();
+
+    cout << "2nd output (unit 3 of the output layer): " << endl;
+    for (int i1=0; i1<ffnn->getNBeta()/10; ++i1){
        for (int i2=0; i2<10; ++i2){
           if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) cout << "+";
           cout << ffnn->getVariationalFirstDerivative(1, i1*10 + i2) << "    ";
@@ -121,22 +131,12 @@ int main() {
        cout << endl;
     }
     cin.ignore();
-    
-    cout << "2nd output (unit 3 of the output layer): " << endl;
-    for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
+
+    cout << "3rd output (unit 4 of the output layer): " << endl;
+    for (int i1=0; i1<ffnn->getNBeta()/10; ++i1){
        for (int i2=0; i2<10; ++i2){
           if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) cout << "+";
           cout << ffnn->getVariationalFirstDerivative(2, i1*10 + i2) << "    ";
-       }
-       cout << endl;
-    }
-    cin.ignore();
-    
-    cout << "3rd output (unit 4 of the output layer): " << endl;
-    for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
-       for (int i2=0; i2<10; ++i2){
-          if (ffnn->getVariationalFirstDerivative(3, i1*10 + i2) >= 0.) cout << "+";
-          cout << ffnn->getVariationalFirstDerivative(3, i1*10 + i2) << "    ";
        }
        cout << endl;
     }

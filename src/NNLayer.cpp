@@ -1,6 +1,7 @@
 #include "NNLayer.hpp"
 
 #include "NNRay.hpp"
+#include "ActivationFunctionManager.hpp"
 
 #include <iostream>
 
@@ -139,7 +140,7 @@ void NNLayer::disconnect()
 
 void NNLayer::setActivationFunction(ActivationFunctionInterface * actf)
 {
-   _U[0]->setActivationFunction(&_id_actf);
+   _U[0]->setActivationFunction(&std_actf::id_actf);
    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
    {
       _U[i]->setActivationFunction(actf);
@@ -155,7 +156,7 @@ void NNLayer::setSize(const int &nunits)
       delete _U[i];
    }
    _U.clear();
-   _U.push_back(new NNUnit(&_id_actf));
+   _U.push_back(new NNUnit(&std_actf::id_actf));
    _U[0]->setProtoValue(1.);
    for (int i=1; i<nunits; ++i)
    {
@@ -172,7 +173,7 @@ void NNLayer::setSize(const int &nunits)
 
 NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
 {
-   _U.push_back(new NNUnit(&_id_actf));
+   _U.push_back(new NNUnit(&std_actf::id_actf));
    _U[0]->setProtoValue(1.);
 
    for (int i=1; i<nunits; ++i)
