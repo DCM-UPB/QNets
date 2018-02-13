@@ -73,6 +73,7 @@ debug/unittest/*/run_single_unittest.sh
 examples/*/a.out
 examples/*/*.o
 examples/*/*.txt
+examples/*/*/*.txt
 
 doc/*.aux
 doc/*.dvi
