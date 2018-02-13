@@ -69,18 +69,18 @@ int main() {
 
     double * base_input = new double[ffnn->getNInput()]; // no need to set it, since it is 1-dim
     const int input_i = 0;
-    const int output_i = 1;
+    const int output_i = 0;
     const double min = -5;
     const double max = 5;
     const int npoints = 200;
-   
+
     cout << "We will compute the NN values and derivatives for input values varying in the range [" << min << ":" << max << "]. We will use a grid of " << npoints << " points." << endl;
 
     writePlotFile(ffnn, base_input, input_i, output_i, min, max, npoints, "getOutput", "v.txt");
     writePlotFile(ffnn, base_input, input_i, output_i, min, max, npoints, "getFirstDerivative", "v1d.txt");
     writePlotFile(ffnn, base_input, input_i, output_i, min, max, npoints, "getSecondDerivative", "v2d.txt");
 
-    
+
     cout << "Done! In the files v.txt, v1d.txt, and v2d.txt we stored the values, and you can use any software you like to plot them (perhaps gnuplot?).";
 
 
