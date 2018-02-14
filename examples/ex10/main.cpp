@@ -1,13 +1,12 @@
 
 #include <iostream>
 #include <cmath>
-#include <math.h>
+#include <numeric>
+#include <algorithm>
 
 #include "FeedForwardNeuralNetwork.hpp"
 #include "PrintUtilities.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_matrix.h>
@@ -52,9 +51,9 @@ int ffnn_f(const gsl_vector * betas, void * data, gsl_vector * f) {
 
   //get NN output
   for (int i=0; i<n; ++i) {
-    ffnn->setInput(1, &x[i]);
+    ffnn->setInput(0, x[i]);
     ffnn->FFPropagate();
-    gsl_vector_set(f, i, ffnn->getOutput(1) - y[i]);
+    gsl_vector_set(f, i, ffnn->getOutput(0) - y[i]);
   }
 
   return GSL_SUCCESS;
@@ -71,10 +70,10 @@ int ffnn_df(const gsl_vector * betas, void * data, gsl_matrix * J) {
   }
 
   for (int i=0; i<n; ++i) {
-    ffnn->setInput(1, &x[i]);
+    ffnn->setInput(0, x[i]);
     ffnn->FFPropagate();
     for (int j=0; j<ffnn->getNBeta(); ++j){
-      gsl_matrix_set(J, i, j, ffnn->getVariationalFirstDerivative(1, j));
+      gsl_matrix_set(J, i, j, ffnn->getVariationalFirstDerivative(0, j));
     }
   }
 
@@ -103,24 +102,49 @@ void callback_verbose(const size_t iter, void *params, const gsl_multifit_nlinea
   fprintf(stderr, "\n");
 };
 
+#define ACTF_X0 0.0
+#define ACTF_XD 20.0
+#define ACTF_Y0 0.5
+#define ACTF_YD 1.0
 class NNFitter1D {
 private:
-  int _ndata;
-  int _npar;
+  int _ndata, _npar;
 
   double * _xdata;
   double * _ydata;
   double * _weights;
 
+  double _xscale,  _yscale;
+  double _xshift,  _yshift;
+
   FeedForwardNeuralNetwork * _ffnn;
 
 public:
-  NNFitter1D(const int &nhlayer, int * nhunits, const int &ndata, double * xdata, double * ydata, double * weights) {
+  NNFitter1D(const int &nhlayer, int * nhunits, const int &ndata, const double * xdata, const double * ydata, double * weights) {
+    using namespace std;
 
     _ndata = ndata;
-    _xdata = xdata;
-    _ydata = ydata;
+
+    _xdata = new double[ndata]; // we need own copies to normalize the data
+    _ydata = new double[ndata];
     _weights = weights;
+
+    auto mimax = minmax_element(xdata, xdata + ndata);
+    auto mimay = minmax_element(ydata, ydata + ndata);
+    double x0 = 0.5*(*mimax.first + *mimax.second);
+    double y0 = 0.5*(*mimay.first + *mimay.second);
+    double xd = *mimax.second - *mimax.first;
+    double yd = *mimay.second - *mimay.first;
+
+    _xscale = xd/ACTF_XD;
+    _yscale = yd/ACTF_YD;
+    _xshift = ACTF_X0 - x0;
+    _yshift = ACTF_Y0 - y0;
+
+    for (int i = 0; i < ndata; ++i) {
+      _xdata[i] = (xdata[i] + _xshift) * _xscale;
+      _ydata[i] = (ydata[i] + _yshift) * _yscale;
+    }
 
     _ffnn = new FeedForwardNeuralNetwork(2, nhunits[0], 2);
     for (int i = 1; i<nhlayer; ++i) _ffnn->pushHiddenLayer(nhunits[i]);
@@ -252,11 +276,11 @@ public:
   double getFitDistance() {
     double dist = 0.0;
     for(int i=0; i<_ndata; ++i) {
-      _ffnn->setInput(1, &_xdata[i]);
+      _ffnn->setInput(0, _xdata[i]);
       _ffnn->FFPropagate();
-      dist += pow(_ydata[i]-_ffnn->getOutput(1), 2);
+      dist += pow(_ydata[i]-_ffnn->getOutput(0), 2);
     }
-    return dist / _ndata;
+    return dist / _ndata / pow(_yscale, 2);
   }
 
   // compare NN to data from index i0 to ie in increments di
@@ -269,9 +293,9 @@ public:
 
     int j=i0;
     while(j<_ndata && j<=realie){
-      _ffnn->setInput(1, &_xdata[j]);
+      _ffnn->setInput(0, _xdata[j]);
       _ffnn->FFPropagate();
-      cout << "x: " << _xdata[j] << " f(x): " << _ydata[j] << " nn(x): " << _ffnn->getOutput(1) << endl;
+      cout << "x: " << _xdata[j] / _xscale - _xshift << " f(x): " << _ydata[j] / _yscale - _yshift << " nn(x): " << _ffnn->getOutput(0) / _yscale - _yshift << endl;
       j+=di;
     }
     cout << endl;
@@ -280,7 +304,7 @@ public:
   // print output of fitted NN to file
   void printFitOutput(const double &min, const double &max, const int &npoints) {
     double * base_input = new double[_ffnn->getNInput()];
-    writePlotFile(_ffnn, base_input, 0, 1, min, max, npoints, "getOutput", "v.txt");
+    writePlotFile(_ffnn, base_input, 1, 1, min, max, npoints, "getOutput", "v.txt");
     delete [] base_input;
   }
 
@@ -343,6 +367,7 @@ int main (void) {
     //printf ("data: %zu %g %g\n", i, x[i], y[i]);
   };
 
+
   fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights);
   fitter->findFit(100, maxresi, false);
   //
@@ -361,7 +386,7 @@ int main (void) {
 
   fitter->getFFNN()->connectFFNN();
   // NON I/O CODE
-  fitter->printFitOutput(-10, 10.1, 200);
+  fitter->printFitOutput(-3, 3.1, 200);
   fitter->printFitNN();
   //
 
