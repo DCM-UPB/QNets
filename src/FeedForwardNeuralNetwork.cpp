@@ -153,8 +153,9 @@ void FeedForwardNeuralNetwork::randomizeBetas()
             if (_L[i]->getUnit(j)->getFeeder())
             {
                 nsource = _L[i]->getUnit(j)->getFeeder()->getNBeta();
-                // m^-(1/2) = sigma = (b-a)/sqrt(12)
-                bah = sqrt(3) * pow(nsource, -0.5);
+                // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
+                // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
+                bah = 4 * pow(nsource, -0.5); // (b-a)/2
                 rd = uniform_real_distribution<double>(-bah,bah);
 
                 for (int k=0; k<nsource; ++k)
@@ -232,11 +233,12 @@ void FeedForwardNeuralNetwork::getOutput(double * out)
 }
 
 
-void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1 = NULL, double ** d2 = NULL, double ** vd1 = NULL){
+void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1){
     setInput(in);
     FFPropagate();
-    getOutput(out);
-    using namespace std;
+    if (out!=NULL) {
+        getOutput(out);
+    }
     if (hasFirstDerivativeSubstrate() && d1!=NULL){
         getFirstDerivative(d1);
     }
@@ -373,6 +375,8 @@ void FeedForwardNeuralNetwork::addFirstDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::connectFFNN()
 {
+   if(_flag_connected) this->disconnectFFNN();
+
    for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
    {
       _L[i]->connectOnTopOfLayer(_L[i-1]);
@@ -381,7 +385,7 @@ void FeedForwardNeuralNetwork::connectFFNN()
 }
 
 
-void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false){
+void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1){
     connectFFNN();
     if (flag_d1) addFirstDerivativeSubstrate();
     if (flag_d2) addSecondDerivativeSubstrate();

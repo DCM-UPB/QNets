@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <fstream>
 #include <stdexcept>
+#include <cmath>
 
 
 void printFFNNStructure(FeedForwardNeuralNetwork * ffnn)
@@ -165,10 +166,10 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
 
 
 
-void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, std::string what, std::string filename){
+void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, std::string what, std::string filename, const double &xscale, const double &yscale, const double &xshift, const double &yshift){
    using namespace std;
 
-   const double delta = (max-min)/npoints;
+   const double delta = (max-min)/(npoints-1);
 
    // compute the input points
    double * x = new double[npoints];
@@ -183,20 +184,20 @@ void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, c
    // compute the values
    const int ninput = ffnn->getNInput();
    double * input = new double[ninput];
-   for (int i=0; i<ninput; ++i) input[i] = base_input[i];
+   for (int i=0; i<ninput; ++i) input[i] = (base_input[i] + xshift) * xscale;
    for (int i=0; i<npoints; ++i){
-      input[input_i] = x[i];
+      input[input_i] = (x[i] + xshift) * xscale;
       ffnn->setInput(input);
       ffnn->FFPropagate();
 
       if (what == "getOutput"){
-         v[i] = ffnn->getOutput(output_i);
+         v[i] = ffnn->getOutput(output_i) / yscale - yshift;
       } else if (what == "getFirstDerivative"){
-         v[i] = ffnn->getFirstDerivative(output_i, input_i);
+         v[i] = ffnn->getFirstDerivative(output_i, input_i) / yscale * xscale;
       } else if (what == "getSecondDerivative"){
-         v[i] = ffnn->getSecondDerivative(output_i, input_i);
+         v[i] = ffnn->getSecondDerivative(output_i, input_i) / pow(yscale, 2) * pow(xscale, 2);
       } else if (what == "getVariationalFirstDerivative"){
-         v[i] = ffnn->getVariationalFirstDerivative(output_i, input_i);
+         v[i] = ffnn->getVariationalFirstDerivative(output_i, input_i) / yscale;
       } else {
          throw std::invalid_argument( "writePlotFile(): the parameter 'what' was not valid" );
       }

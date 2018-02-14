@@ -70,7 +70,7 @@ public:
     void addLastHiddenLayerVariationalFirstDerivativeSubstrate();  // variational first derivative for and from the last hidden layer
 
     // shortcut for connecting and adding substrates
-    void connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1);
+    void connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false);
 
     // Set initial parameters
     void setInput(const double * in);
@@ -81,7 +81,7 @@ public:
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
     // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
-    void evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1);
+    void evaluate(const double * in, double * out = NULL, double ** d1 = NULL, double ** d2 = NULL, double ** vd1 = NULL);
 
     // Get outputs
     void getOutput(double * out);
