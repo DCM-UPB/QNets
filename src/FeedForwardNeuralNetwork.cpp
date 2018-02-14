@@ -137,12 +137,33 @@ void FeedForwardNeuralNetwork::setBeta(const double * beta)
 
 void FeedForwardNeuralNetwork::randomizeBetas()
 {
-    std::random_device rdev;
-    std::mt19937_64 rgen = std::mt19937_64(rdev());
-    std::uniform_real_distribution<double> rd = std::uniform_real_distribution<double>(-3.,3.);
+    using namespace std;
 
-    // set betas to new random values
-    for (int i=0; i<this->getNBeta(); ++i) this->setBeta(i, rd(rgen));
+    random_device rdev;
+    mt19937_64 rgen = std::mt19937_64(rdev());
+    uniform_real_distribution<double> rd;
+
+    int nsource;
+    double bah;
+
+    for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
+    {
+        for (int j=0; j<_L[i]->getNUnits(); ++j)
+        {
+            if (_L[i]->getUnit(j)->getFeeder())
+            {
+                nsource = _L[i]->getUnit(j)->getFeeder()->getNBeta();
+                // m^-(1/2) = sigma = (b-a)/sqrt(12)
+                bah = sqrt(3) * pow(nsource, -0.5);
+                rd = uniform_real_distribution<double>(-bah,bah);
+
+                for (int k=0; k<nsource; ++k)
+                {
+                    _L[i]->getUnit(j)->getFeeder()->setBeta(k, rd(rgen));
+                }
+            }
+        }
+    }
 }
 
 

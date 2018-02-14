@@ -102,8 +102,9 @@ void callback_verbose(const size_t iter, void *params, const gsl_multifit_nlinea
   fprintf(stderr, "\n");
 };
 
+#define ACTF_XS 1.0
 #define ACTF_X0 0.0
-#define ACTF_XD 20.0
+#define ACTF_XD 3.4641016153*ACTF_XS
 #define ACTF_Y0 0.5
 #define ACTF_YD 1.0
 class NNFitter1D {
@@ -149,8 +150,8 @@ public:
     _ffnn = new FeedForwardNeuralNetwork(2, nhunits[0], 2);
     for (int i = 1; i<nhlayer; ++i) _ffnn->pushHiddenLayer(nhunits[i]);
     _ffnn->connectFFNN();
-    _ffnn->connectFFNN();
     _ffnn->addVariationalFirstDerivativeSubstrate();
+    _ffnn->randomizeBetas();
 
     _npar = _ffnn->getNBeta();
     //    for (int i= 1; i<_npar; ++i) _ffnn->setBeta(i, 0.1);
@@ -386,7 +387,7 @@ int main (void) {
 
   fitter->getFFNN()->connectFFNN();
   // NON I/O CODE
-  fitter->printFitOutput(-3, 3.1, 200);
+  //fitter->printFitOutput(-3, 3.1, 200);
   fitter->printFitNN();
   //
 

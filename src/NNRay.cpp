@@ -111,8 +111,12 @@ double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d)
 
 NNRay::NNRay(NNLayer * nnl)
 {
+
+   // m^-(1/2) = sigma = (b-a)/sqrt(12)
+   const double bah = sqrt(3) * pow(nnl->getNUnits(), -0.5);
+
    _rgen = std::mt19937_64(_rdev());
-   _rd = std::uniform_real_distribution<double>(-3.,3.);
+   _rd = std::uniform_real_distribution<double>(-bah,bah);
 
    for (int i=0; i<nnl->getNUnits(); ++i)
    {
