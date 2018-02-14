@@ -102,9 +102,10 @@ void callback_verbose(const size_t iter, void *params, const gsl_multifit_nlinea
   fprintf(stderr, "\n");
 };
 
-#define ACTF_XS 1.0
+// hardcoded target values of logistic actf
 #define ACTF_X0 0.0
-#define ACTF_XD 3.4641016153*ACTF_XS
+#define ACTF_XS 1.0
+#define ACTF_XD ACTF_XS*3.464101615 //uniform distribution: sigma=(b-a)/sqrt(12)
 #define ACTF_Y0 0.5
 #define ACTF_YD 1.0
 class NNFitter1D {
@@ -118,10 +119,12 @@ private:
   double _xscale,  _yscale;
   double _xshift,  _yshift;
 
+  bool _flag_d1, _flag_d2;
+
   FeedForwardNeuralNetwork * _ffnn;
 
 public:
-  NNFitter1D(const int &nhlayer, int * nhunits, const int &ndata, const double * xdata, const double * ydata, double * weights) {
+  NNFitter1D(const int &nhlayer, int * nhunits, const int &ndata, const double * xdata, const double * ydata, double * weights, const bool flag_d1 = false, const bool flag_d2 = false) {
     using namespace std;
 
     _ndata = ndata;
@@ -130,6 +133,7 @@ public:
     _ydata = new double[ndata];
     _weights = weights;
 
+    // calculate values for normalization
     auto mimax = minmax_element(xdata, xdata + ndata);
     auto mimay = minmax_element(ydata, ydata + ndata);
     double x0 = 0.5*(*mimax.first + *mimax.second);
@@ -137,8 +141,8 @@ public:
     double xd = *mimax.second - *mimax.first;
     double yd = *mimay.second - *mimay.first;
 
-    _xscale = xd/ACTF_XD;
-    _yscale = yd/ACTF_YD;
+    _xscale = ACTF_XD/xd;
+    _yscale = ACTF_YD/yd;
     _xshift = ACTF_X0 - x0;
     _yshift = ACTF_Y0 - y0;
 
@@ -147,9 +151,14 @@ public:
       _ydata[i] = (ydata[i] + _yshift) * _yscale;
     }
 
+    _flag_d1 = flag_d1;
+    _flag_d2 = flag_d2;
+
     _ffnn = new FeedForwardNeuralNetwork(2, nhunits[0], 2);
     for (int i = 1; i<nhlayer; ++i) _ffnn->pushHiddenLayer(nhunits[i]);
     _ffnn->connectFFNN();
+    if (flag_d1) _ffnn->addFirstDerivativeSubstrate();
+    if (flag_d2) _ffnn->addSecondDerivativeSubstrate();
     _ffnn->addVariationalFirstDerivativeSubstrate();
     _ffnn->randomizeBetas();
 
@@ -159,6 +168,8 @@ public:
 
   ~NNFitter1D(){
     delete _ffnn;
+    delete [] _xdata;
+    delete [] _ydata;
   }
 
   void findFit(const int &nsteps, const double &maxresi, const bool &doprint) {
@@ -303,10 +314,11 @@ public:
   }
 
   // print output of fitted NN to file
-  void printFitOutput(const double &min, const double &max, const int &npoints) {
-    double * base_input = new double[_ffnn->getNInput()];
-    writePlotFile(_ffnn, base_input, 1, 1, min, max, npoints, "getOutput", "v.txt");
-    delete [] base_input;
+  void printFitOutput(const double &min, const double &max, const int &npoints, const bool &print_d1 = false, const bool &print_d2 = false) {
+    double base_input = 0.0;
+    writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getOutput", "v.txt", _xscale, _yscale, _xshift, _yshift);
+    if (print_d1 && _flag_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", _xscale, _yscale, _xshift, _yshift);
+    if (print_d2 && _flag_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", _xscale, _yscale, _xshift, _yshift);
   }
 
   // store fitted NN in file
@@ -369,7 +381,7 @@ int main (void) {
   };
 
 
-  fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights);
+  fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights, true, true);
   fitter->findFit(100, maxresi, false);
   //
 
@@ -385,9 +397,8 @@ int main (void) {
   cout << endl;
   cout << "And print the output/NN to a file. The end." << endl;
 
-  fitter->getFFNN()->connectFFNN();
   // NON I/O CODE
-  //fitter->printFitOutput(-3, 3.1, 200);
+  fitter->printFitOutput(-10, 10, 200, true, true);
   fitter->printFitNN();
   //
 
