@@ -23,7 +23,7 @@ In this example we want to demonstrate how a FFNN can be trained via GSL's fit r
 The fit is achieved by minimizing the mean square distance of NN to data (by Levenberg-Marquardt), where the distance and gradient are integrated on a unifrom grid.
 Hence, we have to create the NN and target data, define functions for distance and gradient, and pass all the information to the GSL lib.
 
-For convenience, a NNFitter1D class is created, which handles the whole process in a user-friendly way.
+For convenience, a NNFitter1D class is created, which handles the whole process in a user-friendly way, including normalization of the data.
 */
 
 
