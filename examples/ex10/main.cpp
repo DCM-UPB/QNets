@@ -277,7 +277,7 @@ public:
     if (bestchi <= maxchi) {
       fprintf(stderr, "Fit residual %f meets tolerance %f. Exiting with good fit.\n\n", bestchi, maxchi);
       break;
-    } else if (ifit == nfits) {
+    } else if (ifit >= nfits) {
       fprintf(stderr, "Maximum number of fits reached (%zu). Exiting with best fit residual %f.\n\n", nfits, bestchi);
       break;
     } else {
@@ -381,10 +381,10 @@ int main (void) {
   cout << "========================================================================" << endl;
   cout << endl;
   cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance of NN vs. target function, i.e. find optimal betas." << endl;
-  cout << "Please enter the the maximum tolerable fit residual. " << endl;
-  cin >> maxchi;
   cout << endl;
-  cout << "Please enter the maximum number of fitting runs. " << endl;
+  cout << "Please enter the the maximum tolerable fit residual. ";
+  cin >> maxchi;
+  cout << "Please enter the maximum number of fitting runs. ";
   cin >> nfits;
   cout << endl << endl;
   cout << "Now we find the best fit ... " << endl;
@@ -403,7 +403,7 @@ int main (void) {
 
 
   fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights, true, true);
-  fitter->findFit(100, 10, maxchi, false);
+  fitter->findFit(100, nfits, maxchi, false);
   //
 
   cout << "Done." << endl;

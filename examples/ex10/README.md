@@ -8,7 +8,7 @@ and how the fit results vary with number of units/layers.
 
 If you look at activation functions like the logistic function, you will see that they can roughly
 be divided into 3 parts: a 'linear' part, a non-linear part with still large gradients and then
-the remaining area of saturation, with small gradient. To prevent gradient signals from becoming too 
+the remaining area of saturation, with small gradient. To prevent gradient signals from becoming too
 small, we want to avoid the saturation, but still include the non-linear part. For the logistic function
 this means something like the interval [-4,4].
 
@@ -27,7 +27,29 @@ In the symmetric case with b=-a=4 we get for a_beta:
 
 b_beta = 4 / sqrt(n)
 
-So concluding, if we can assume data to be normalized to mean 0 and variance 1, we can draw the betas from a uniform
-distribution in [-b_beta, b_beta] to achieve logistic function x's mostly in [-4,4].
+So concluding, if we can assume data to be normalized to mean 0 and variance 1, we can draw the betas
+from a uniform distribution in [-b_beta, b_beta] to achieve logistic function x's mostly in [-4,4].
 
 ## Fitting results&discussion
+
+To compare the performance for fitting a gaussian, several neural networks with various numbers units
+and layers have been fitted (best out of 100 fits each) to the same gaussian data, by minimizing the
+standard mean squared error.
+The configurations were one layer with 5, 10, 15, 20 units and two layers with 5/5, 10/5, 5/10 and 10/10 units.
+Plots comparing the function and derivative values as well as the overall root mean squared error can
+be found in the 'plots' folder.
+
+Overall, one can say that all configurations except the 5_0 yield visually excellent fits, even when looking
+at the first derivative. The same does not hold for the second derivative, which is obviously not correctly
+reproduced by any of the fitted neural networks.
+Now, the plots of the root mean squared errors reveal a clear hierarchy (even for the second derivative),
+with the 10_10 configuration coming out as best fit overall.
+While the 5_0 and 10_10 are on their respective ends of the spectrum, where they were expected to be, at
+least for the derivatives the hierarchy does not follow the number of units / layers strictly.
+Since the number of fits from which the best fits were chosen, this is unlikely to be explained by
+statistical error alone. Still, the exact reasons for these deviations from expectation remain unclear.
+
+Nevertheless, it can be concluded that even with one hidden layer and only 10 units a gaussian and its
+first derivative are approximated reasonably well, even though the fitting cost function did not include
+the derivative. The second derivative seems to be a lot more challenging to reproduce though.
+We also learn that in general the fits get better with more units/layers, but that this is not strictly the case.
