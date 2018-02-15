@@ -172,11 +172,12 @@ public:
     delete [] _ydata;
   }
 
-  void findFit(const int &nsteps, const double &maxresi, const bool &doprint) {
+  void findFit(const int &nsteps, const int &nfits, const double &maxchi, const bool &doprint) {
   /*
   Fit NN to data with following parameters:
   nsteps : number of fitting iterations
-  maxresi : maximum tolerable residual to consider a fit good
+  nfits : maximum number of fits to achieve good fit
+  maxchi : maximum tolerable residual to consider a fit good
   doprint: print verbose output while fitting
   */
 
@@ -193,13 +194,12 @@ public:
   gsl_matrix *J;
   gsl_matrix * covar = gsl_matrix_alloc (_npar, _npar);
 
-  double x_init[_ffnn->getNBeta()];
+  double x_init[_npar], x_best[_npar], x_best_err[_npar];
   gsl_vector_view gx = gsl_vector_view_array (x_init, _npar);
   gsl_vector_view wts = gsl_vector_view_array(_weights, _ndata);
-  double chisq, chisq0;
+  double chisq, chisq0, chi0, chi, c, dof = _ndata - _npar, bestchi = -1.0;
   int status, info;
-  size_t i;
-  bool goodfit = false;
+  size_t i, ifit;
 
   double xtol = 0.0;
   double gtol = 0.0;
@@ -218,7 +218,11 @@ public:
   // allocate workspace with default parameters
   w = gsl_multifit_nlinear_alloc (T, &fdf_params, _ndata, _npar);
 
-  while(!goodfit) {
+  #define FIT(i) gsl_vector_get(w->x, i)
+  #define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
+
+  ifit = 0;
+  while(true) {
     // initial parameters
     for (i = 0; i<_npar; ++i) {
       x_init[i] = _ffnn->getBeta(i);
@@ -230,6 +234,7 @@ public:
     // compute initial cost function
     f = gsl_multifit_nlinear_residual(w);
     gsl_blas_ddot(f, f, &chisq0);
+    chi0 = sqrt(chisq0);
 
     // solve the system with a maximum of nsteps iterations
     if (doprint) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback_verbose, NULL, &info, w);
@@ -241,42 +246,55 @@ public:
 
     // compute final cost
     gsl_blas_ddot(f, f, &chisq);
+    chi = sqrt(chisq);
+    c = GSL_MAX_DBL(1, sqrt(chisq / dof));
 
-    if (sqrt(chisq) <= maxresi) {
-      goodfit = true;
-    } else {
-      _ffnn->randomizeBetas();
-      fprintf(stderr, "Fit residual %f above tolerance %f after max number of iterations. Let's try again.\n", sqrt(chisq), maxresi);
+    if (doprint) {
+      fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w), gsl_multifit_nlinear_trs_name(w));
+      fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w));
+      fprintf(stderr, "function evaluations: %zu\n", fdf.nevalf);
+      fprintf(stderr, "Jacobian evaluations: %zu\n", fdf.nevaldf);
+      fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
+      fprintf(stderr, "initial |f(x)| = %f\n", chi0);
+      fprintf(stderr, "final   |f(x)| = %f\n", chi);
+      fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
+
+      for(i=0; i<_npar; ++i) fprintf(stderr, "b%zu      = %.5f +/- %.5f\n", i, FIT(i), c*ERR(i));
+
+      fprintf(stderr, "status = %s\n", gsl_strerror (status));
     }
 
-  }
+    if(ifit < 1 || chi < bestchi) {
+      for(i = 0; i<_npar; ++i){
+        x_best[i] = FIT(i);
+        x_best_err[i] = c*ERR(i);
+      }
+      bestchi = chi;
+    }
 
+    ++ifit;
 
-  #define FIT(i) gsl_vector_get(w->x, i)
-  #define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
-
-  for (int i=0; i<_npar; ++i) {
-    _ffnn->setBeta(i, FIT(i)); //set ffnn to best fit
+    if (bestchi <= maxchi) {
+      fprintf(stderr, "Fit residual %f meets tolerance %f. Exiting with good fit.\n\n", bestchi, maxchi);
+      break;
+    } else if (ifit == nfits) {
+      fprintf(stderr, "Maximum number of fits reached (%zu). Exiting with best fit residual %f.\n\n", nfits, bestchi);
+      break;
+    } else {
+      _ffnn->randomizeBetas();
+      fprintf(stderr, "Fit residual %f above tolerance %f. Let's try again.\n", chi, maxchi);
+    }
   }
 
   if (doprint) {
+    fprintf(stderr, "best fit summary:\n");
+    for(i=0; i<_npar; ++i) fprintf(stderr, "b%zu      = %.5f +/- %.5f\n", i, x_best[i], x_best_err[i]);
+    fprintf(stderr, "|f(x)| = %f\n", bestchi);
+    fprintf(stderr, "chisq/dof = %g\n", bestchi*bestchi / dof);
+  }
 
-    double dof = _ndata - _npar;
-    double c = GSL_MAX_DBL(1, sqrt(chisq / dof));
-
-    fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w), gsl_multifit_nlinear_trs_name(w));
-    fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w));
-    fprintf(stderr, "function evaluations: %zu\n", fdf.nevalf);
-    fprintf(stderr, "Jacobian evaluations: %zu\n", fdf.nevaldf);
-    fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
-    fprintf(stderr, "initial |f(x)| = %f\n", sqrt(chisq0));
-    fprintf(stderr, "final   |f(x)| = %f\n", sqrt(chisq));
-
-    fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
-
-    for(int i=0; i<_npar; ++i) fprintf (stderr, "b%zu      = %.5f +/- %.5f\n", i, FIT(i), c*ERR(i));
-
-    fprintf (stderr, "status = %s\n", gsl_strerror (status));
+  for (i=0; i<_npar; ++i) {
+    _ffnn->setBeta(i, x_best[i]); //set ffnn to best fit
   }
 
   gsl_multifit_nlinear_free(w);
@@ -340,8 +358,8 @@ int main (void) {
   double ydata[ndata];
   double weights[ndata];
 
-  int nl, nhl, nhu[2];
-  double maxresi;
+  int nl, nhl, nhu[2], nfits = 1;
+  double maxchi;
 
   cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
   cout << "========================================================================" << endl;
@@ -363,8 +381,11 @@ int main (void) {
   cout << "========================================================================" << endl;
   cout << endl;
   cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance of NN vs. target function, i.e. find optimal betas." << endl;
-  cout << "Please enter the the maximum tolerable fit residual." << endl;
-  cin >> maxresi;
+  cout << "Please enter the the maximum tolerable fit residual. " << endl;
+  cin >> maxchi;
+  cout << endl;
+  cout << "Please enter the maximum number of fitting runs. " << endl;
+  cin >> nfits;
   cout << endl << endl;
   cout << "Now we find the best fit ... " << endl;
 
@@ -382,7 +403,7 @@ int main (void) {
 
 
   fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights, true, true);
-  fitter->findFit(100, maxresi, false);
+  fitter->findFit(100, 10, maxchi, false);
   //
 
   cout << "Done." << endl;
