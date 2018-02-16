@@ -27,22 +27,24 @@ For convenience, a NNFitter1D class is created, which handles the whole process 
 */
 
 
-double Gaussian(const double &x, const double &a, const double &b) {
+double gaussian(const double &x, const double &a, const double &b) {
   return exp(-a*pow(x-b, 2));
 };
 
-struct data {
+// holds the required information for cost function and gradient calculation
+struct fitdata {
   const int n;
   double * x;
   double * y;
   FeedForwardNeuralNetwork * ffnn;
 };
 
-int ffnn_f(const gsl_vector * betas, void * data, gsl_vector * f) {
-  const int n = ((struct data *)data)->n;
-  const double * x = ((struct data *)data)->x;
-  const double * y = ((struct data *)data)->y;
-  FeedForwardNeuralNetwork * ffnn = ((struct data *)data)->ffnn;
+// cost function for fitting
+int ffnn_f(const gsl_vector * betas, void * fitdata, gsl_vector * f) {
+  const int n = ((struct fitdata *)fitdata)->n;
+  const double * x = ((struct fitdata *)fitdata)->x;
+  const double * y = ((struct fitdata *)fitdata)->y;
+  FeedForwardNeuralNetwork * ffnn = ((struct fitdata *)fitdata)->ffnn;
 
   //set new NN betas
   for (int i=0; i<ffnn->getNBeta(); ++i){
@@ -59,10 +61,11 @@ int ffnn_f(const gsl_vector * betas, void * data, gsl_vector * f) {
   return GSL_SUCCESS;
 };
 
-int ffnn_df(const gsl_vector * betas, void * data, gsl_matrix * J) {
-  const int n = ((struct data *)data)->n;
-  const double * x = ((struct data *)data)->x;
-  FeedForwardNeuralNetwork * ffnn = ((struct data *)data)->ffnn;
+// gradient of cost function
+int ffnn_df(const gsl_vector * betas, void * fitdata, gsl_matrix * J) {
+  const int n = ((struct fitdata *)fitdata)->n;
+  const double * x = ((struct fitdata *)fitdata)->x;
+  FeedForwardNeuralNetwork * ffnn = ((struct fitdata *)fitdata)->ffnn;
 
   //set new NN betas
   for (int i=0; i<ffnn->getNBeta(); ++i){
@@ -80,6 +83,7 @@ int ffnn_df(const gsl_vector * betas, void * data, gsl_matrix * J) {
   return GSL_SUCCESS;
 };
 
+// gets called once for every fit iteration
 void callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w) {
   double rcond;
 
@@ -87,7 +91,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
   gsl_multifit_nlinear_rcond(&rcond, w);
 };
 
-
+// more verbose version of callback
 void callback_verbose(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w) {
   gsl_vector *f = gsl_multifit_nlinear_residual(w);
   gsl_vector *x = gsl_multifit_nlinear_position(w);
@@ -103,11 +107,12 @@ void callback_verbose(const size_t iter, void *params, const gsl_multifit_nlinea
 };
 
 // hardcoded target values of logistic actf
-#define ACTF_X0 0.0
-#define ACTF_XS 1.0
-#define ACTF_XD ACTF_XS*3.464101615 //uniform distribution: sigma=(b-a)/sqrt(12)
-#define ACTF_Y0 0.5
-#define ACTF_YD 1.0
+#define ACTF_X0 0.0 // target data mean
+#define ACTF_XS 1.0 // target data standard deviation
+#define ACTF_XD ACTF_XS*3.464101615 //uniform distribution [a,b]: (b-a) = sigma*sqrt(12)
+#define ACTF_Y0 0.5 // target output mean
+#define ACTF_YD 1.0 // target output interval size
+
 class NNFitter1D {
 private:
   int _ndata, _npar;
@@ -131,7 +136,7 @@ public:
 
     _xdata = new double[ndata]; // we need own copies to normalize the data
     _ydata = new double[ndata];
-    _weights = weights;
+    _weights = weights; // allow to account for noisy data by weighing in the error
 
     // calculate values for normalization
     auto mimax = minmax_element(xdata, xdata + ndata);
@@ -181,8 +186,8 @@ public:
   doprint: print verbose output while fitting
   */
 
-  // build data struct
-  struct data d = { _ndata, _xdata, _ydata, _ffnn};
+  // build fitdata struct
+  struct fitdata d = { _ndata, _xdata, _ydata, _ffnn};
 
   //things for gsl multifit
   const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
@@ -396,9 +401,8 @@ int main (void) {
   double dx = (ub-lb) / (ndata-1);
   for (int i = 0; i < ndata; ++i) {
     xdata[i] = lb + i*dx;
-    ydata[i] = Gaussian(xdata[i], 1, 0);
-    weights[i] = 1.0;
-    //printf ("data: %zu %g %g\n", i, x[i], y[i]);
+    ydata[i] = gaussian(xdata[i], 1, 0);
+    weights[i] = 1.0; // our data have no error, so set all weights to 1
   };
 
 
