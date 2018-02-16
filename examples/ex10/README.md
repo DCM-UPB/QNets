@@ -17,13 +17,14 @@ can control the statistical distribution of those incoming signals, like on the 
 signals of mean 0 and variance 1 and a weight distribution with variance Var(beta):
 
 Var(sum) = sum_n(Var(beta) * Var(1)) = n Var(beta)
+
 Sigma(sum) = sqrt(Var(sum)) = sqrt(n) Sigma(beta)
 
 If we assume uniform distributions for sum and beta, we can calculate the interval bounds directly:
 
 (b-a) = sqrt(12) * Sigma(sum) = sqrt(12) * sqrt(n) * (b_beta - a_beta) / sqrt(12) = sqrt(n) * (b_beta-a_beta)
 
-In the symmetric case with b=-a=4 we get for a_beta:
+In the symmetric case with b=-a=4 we get for b_beta:
 
 b_beta = 4 / sqrt(n)
 
