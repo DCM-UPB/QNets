@@ -34,7 +34,7 @@ So concluding, if we can assume data to be normalized to mean 0 and variance 1, 
 from a uniform distribution in [-b_beta, b_beta] to achieve logistic function x's mostly in [-4,4].
 
 
-IMPORTANT: there are some limitations on what has beed said here
+IMPORTANT: there are some limitations on what has been said here
 1 - the range [-4, 4] is optimal for the logistic function, not for all the activation functions
 2 - the output of a logistic function does not have mean 0 and variance 1. This implies that this way of setting the betas cannot be extended to the layers following the first hidden layer
 
