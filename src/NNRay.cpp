@@ -111,8 +111,12 @@ double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d)
 
 NNRay::NNRay(NNLayer * nnl)
 {
+   // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
+   // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
+   const double bah = 4 * pow(nnl->getNUnits(), -0.5); // (b-a)/2
+
    _rgen = std::mt19937_64(_rdev());
-   _rd = std::uniform_real_distribution<double>(-3.,3.);
+   _rd = std::uniform_real_distribution<double>(-bah,bah);
 
    for (int i=0; i<nnl->getNUnits(); ++i)
    {

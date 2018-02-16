@@ -74,6 +74,7 @@ debug/unittest/*/*.txt
 examples/*/a.out
 examples/*/*.o
 examples/*/*.txt
+examples/*/*/*.txt
 
 doc/*.aux
 doc/*.dvi

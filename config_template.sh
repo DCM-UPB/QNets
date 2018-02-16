@@ -1,5 +1,7 @@
 #!/bin/bash
 
+OS_NAME=$(uname)
+
 # Library name
 LIBNAME="ffnn"
 
@@ -14,3 +16,7 @@ OPTFLAGS="-O3"
 
 # Debuggin flags
 DEBUGFLAGS="-g -O0"
+
+# GSL (GNU Scientific Library)
+LGSL="-L/usr/local/lib"
+LIBGSL="-lgsl -lgslcblas"

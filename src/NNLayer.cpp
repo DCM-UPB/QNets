@@ -115,7 +115,7 @@ void NNLayer::addFirstDerivativeSubstrate(const int &nx0)
 
 void NNLayer::connectOnTopOfLayer(NNLayer * nnl)
 {
-   NNRay * ray;
+   NNUnitFeederInterface * ray;
    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
    {
       ray = new NNRay(nnl);
