@@ -171,9 +171,32 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 
 // --- Computation
 
+
+double FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d){
+    return _L.back()->getUnit(i+1)->getCrossFirstDerivativeValue(i1d, iv1d);
+}
+
+
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(double *** d1vd1){
+    for (int i=0; i<getNOutput(); ++i){
+        getCrossFirstDerivative(i, d1vd1[i]);
+    }
+}
+
+
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d1vd1){
+    for (int i1d=0; i1d<getNInput(); ++i1d){
+        for (int iv1d=0; iv1d<getNBeta(); ++iv1d){
+            d1vd1[i1d][iv1d] = getCrossFirstDerivative(i, i1d, iv1d);
+        }
+    }
+}
+
+
+
 double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, const int &iv1d)
 {
-    return ( _L.back()->getUnit(i+1)->getVariationalFirstDerivativeValue(iv1d) );
+    return _L.back()->getUnit(i+1)->getVariationalFirstDerivativeValue(iv1d);
 }
 
 
