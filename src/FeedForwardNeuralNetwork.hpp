@@ -17,7 +17,7 @@ protected:
     std::vector<NNLayer *> _L;
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
-    bool _flag_1d, _flag_2d, _flag_v1d;  // flag that indicates if the substrates for the derivatives have been activated or not
+    bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d;  // flag that indicates if the substrates for the derivatives have been activated or not
 
     int _nvp;  // global number of variational parameters
 
@@ -40,6 +40,7 @@ public:
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
     bool hasVariationalFirstDerivativeSubstrate(){return _flag_v1d;}
+    bool hasCrossFirstDerivativeSubstrate(){return _flag_c1d;}
 
     // Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
@@ -68,6 +69,9 @@ public:
     void addVariationalFirstDerivativeSubstrate();  // variational first derivatives
     // ... or this
     void addLastHiddenLayerVariationalFirstDerivativeSubstrate();  // variational first derivative for and from the last hidden layer
+
+    // Substrate for the cross derivatives d/dx d/dbeta
+    void addCrossFirstDerivativeSubstrate();  // cross derivatives
 
     // shortcut for connecting and adding substrates
     void connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false);

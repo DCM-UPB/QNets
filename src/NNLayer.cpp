@@ -84,6 +84,15 @@ int NNLayer::setVariationalParametersID(const int &id_vp)
 }
 
 
+void NNLayer::addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp)
+{
+   for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
+   {
+      _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
+   }
+}
+
+
 void NNLayer::addVariationalFirstDerivativeSubstrate(const int &nvp)
 {
    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
