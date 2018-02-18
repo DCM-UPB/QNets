@@ -43,6 +43,7 @@ public:
     double getVariationalFirstDerivativeFeed(const int &iv1d);
     double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d);
 
+    // Beta Index
     bool isBetaIndexUsedInThisRay(const int &id);
     bool isBetaIndexUsedForThisRay(const int &id);
 
