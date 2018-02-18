@@ -32,6 +32,9 @@ public:
     // derivative in respect to the variational parameters
     virtual double getVariationalFirstDerivativeFeed(const int &i) = 0;  // get   sum_j( db_j/db_i x_j + b_j dx_j/db_i ), where i is the index of the variational parameter (j might not cross it)
     virtual double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d) = 0;  // get   d^2/dxdb sum_j( b_j x_j ), where i1d is the index for x, and iv1d is the index for b
+
+    virtual bool isBetaIndexUsedInThisRay(const int &id) = 0;
+    virtual bool isBetaIndexUsedForThisRay(const int &id) = 0;
 };
 
 

@@ -4,6 +4,38 @@
 #include <algorithm>
 
 
+
+
+bool NNRay::isBetaIndexUsedInThisRay(const int &id){
+    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
+    if ( it_beta != _intensity_id.end() ){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+
+bool NNRay::isBetaIndexUsedForThisRay(const int &id){
+    if (isBetaIndexUsedInThisRay(id)){
+        return true;
+    }
+
+    for (NNUnit * u: _source){
+        NNUnitFeederInterface * feeder = u->getFeeder();
+        if (feeder != 0){
+            if (feeder->isBetaIndexUsedForThisRay(id)){
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+
 // --- Variational Parameters
 
 bool NNRay::setVariationalParameterValue(const int &id, const double &value){
@@ -92,7 +124,7 @@ double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d){
 
 double NNRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
     double feed = 0.;
-    
+
     // if the variational parameter with index iv1d is in the ray add the following element
     std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), iv1d);
     if ( it_beta != _intensity_id.end() ){
