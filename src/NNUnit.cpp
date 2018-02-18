@@ -10,10 +10,10 @@ void NNUnit::computeValues(){
         _pv = _feeder->getFeed();
         _v = _actf->f(_pv);
         // shared useful values
-        double a1d;
+        double a1d = 0.;
         if (_v1d || _v2d || _v1vd || _v1d1vd) a1d = _actf->f1d(_pv);
 
-        double a2d = 0;
+        double a2d = 0.;
         if (_v2d || _v1vd) a2d = _actf->f2d(_pv);
 
         if (_v1d || _v2d){
