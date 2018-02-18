@@ -10,7 +10,8 @@ void NNUnit::computeValues(){
         _pv = _feeder->getFeed();
         _v = _actf->f(_pv);
         // shared useful values
-        double a1d = _actf->f1d(_pv);
+        const double a1d = _actf->f1d(_pv);
+        const double a2d = _actf->f2d(_pv);
         if (_v1d || _v2d){
             for (int i=0; i<_nx0; ++i)
             {
@@ -26,7 +27,6 @@ void NNUnit::computeValues(){
         }
         // second derivative
         if (_v2d){
-            double a2d = _actf->f2d(_pv);
             for (int i=0; i<_nx0; ++i)
             {
                 _v2d[i] = a1d * _feeder->getSecondDerivativeFeed(i) +
@@ -45,6 +45,9 @@ void NNUnit::computeValues(){
             for (int i=0; i<_nx0; ++i){
                 for (int j=0; j<_nvp; ++j){
                     _v1d1vd[i][j] = a1d * _feeder->getCrossFirstDerivativeFeed(i, j);
+                    if (_feeder->isBetaIndexUsedForThisRay(j)){
+                        _v1d1vd[i][j] += a2d * _feeder->getFirstDerivativeFeed(i);
+                    }
                 }
             }
         }
