@@ -9,6 +9,8 @@
 int main(){
    using namespace std;
 
+   const double TINY = 0.0001
+
    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
    ffnn->pushHiddenLayer(4);
    ffnn->connectFFNN();
@@ -67,12 +69,12 @@ int main(){
    //cout << "anal_dfxdx = " << anal_dfxdx << endl;
    //cout << "num_dfxdx = " << num_dfxdx << endl;
    //cout << endl;
-   assert(abs(anal_dfxdx-num_dfxdx) < 0.001);
+   assert(abs(anal_dfxdx-num_dfxdx) < TINY);
 
    //cout << "anal_dfydx = " << anal_dfydx << endl;
    //cout << "num_dfydx = " << num_dfydx << endl;
    //cout << endl;
-   assert(abs(anal_dfydx-num_dfydx) < 0.001);
+   assert(abs(anal_dfydx-num_dfydx) < TINY);
 
    double num_d2fxdx2 = (fx1-2.*fx+fxm1)/(dx*dx);
    double num_d2fydx2 = (fy1-2.*fy+fym1)/(dx*dx);
@@ -80,12 +82,12 @@ int main(){
    //cout << "anal_d2fxdx2 = " << anal_d2fxdx2 << endl;
    //cout << "num_d2fxdx2 = " << num_d2fxdx2 << endl;
    //cout << endl;
-   assert(abs(anal_d2fxdx2-num_d2fxdx2) < 0.001);
+   assert(abs(anal_d2fxdx2-num_d2fxdx2) < TINY);
 
    //cout << "anal_d2fydx2 = " << anal_d2fydx2 << endl;
    //cout << "num_d2fydx2 = " << num_d2fydx2 << endl;
    //cout << endl;
-   assert(abs(anal_d2fydx2-num_d2fydx2) < 0.001);
+   assert(abs(anal_d2fydx2-num_d2fydx2) < TINY);
 
 
 
@@ -128,7 +130,7 @@ int main(){
    //cout << "anal_dfydx = " << anal_dfydx << endl;
    //cout << "num_dfydx = " << num_dfydx << endl;
    //cout << endl;
-   assert(abs(anal_dfydx-num_dfydx) < 0.001);
+   assert(abs(anal_dfydx-num_dfydx) < TINY);
 
    num_d2fxdx2 = (fx1-2.*fx+fxm1)/(dx*dx);
    num_d2fydx2 = (fy1-2.*fy+fym1)/(dx*dx);
@@ -136,12 +138,12 @@ int main(){
    //cout << "anal_d2fxdx2 = " << anal_d2fxdx2 << endl;
    //cout << "num_d2fxdx2 = " << num_d2fxdx2 << endl;
    //cout << endl;
-   assert(abs(anal_d2fydx2-num_d2fydx2) < 0.001);
+   assert(abs(anal_d2fydx2-num_d2fydx2) < TINY);
 
    //cout << "anal_d2fydx2 = " << anal_d2fydx2 << endl;
    //cout << "num_d2fydx2 = " << num_d2fydx2 << endl;
    //cout << endl;
-   assert(abs(anal_d2fydx2-num_d2fydx2) < 0.001);
+   assert(abs(anal_d2fydx2-num_d2fydx2) < TINY);
 
 
 
@@ -172,12 +174,12 @@ int main(){
       //cout << "anal_dfxdbeta = " << anal_dfxdbeta[i] << endl;
       //cout << "num_dfxdbeta = " << num_dfxdbeta << endl;
       //cout << endl;
-      assert(abs(anal_dfxdbeta[i]-num_dfxdbeta) < 0.001);
+      assert(abs(anal_dfxdbeta[i]-num_dfxdbeta) < TINY);
 
       //cout << "anal_dfydbeta = " << anal_dfydbeta[i] << endl;
       //cout << "num_dfydbeta = " << num_dfydbeta << endl;
       //cout << endl;
-      assert(abs(anal_dfydbeta[i]-num_dfydbeta) < 0.001);
+      assert(abs(anal_dfydbeta[i]-num_dfydbeta) < TINY);
 
       ffnn->setBeta(i, orig_beta);
    }
