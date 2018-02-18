@@ -318,6 +318,13 @@ void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
 
 void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 {
+    using namespace std;
+
+    // cross first derivatives require first and variational first derivatives
+    if (!_flag_1d || !_flag_v1d){
+        throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
+    }
+
     // set the substrate in the units
     for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
     {

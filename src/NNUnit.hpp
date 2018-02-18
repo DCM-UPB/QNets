@@ -19,6 +19,7 @@ protected:
    double * _v1d; // first derivatives
    double * _v2d; // second derivative
    double * _fdf; // internal variable, used to store the values of the _feeder->getFirstDerivativeFeed(i)
+   double * _fvdf; // internal variable, used to store the values of the _feeder->getVariationalFirstDerivativeFeed(i)
 
    // variational derivatives
    int _nvp;
