@@ -10,55 +10,52 @@ void NNUnit::computeValues(){
         _pv = _feeder->getFeed();
         _v = _actf->f(_pv);
         // shared useful values
-        double * a1d = 0;
-        double * a2d = 0;
+        double a1d;
+        if (_v1d || _v2d || _v1vd || _v1d1vd) a1d = _actf->f1d(_pv);
+
+        double a2d = 0;
+        if (_v2d || _v1vd) a2d = _actf->f2d(_pv);
+
         if (_v1d || _v2d){
-            for (int i=0; i<_nx0; ++i)    _fdf[i] = _feeder->getFirstDerivativeFeed(i);
+            for (int i=0; i<_nx0; ++i) _fdf[i] = _feeder->getFirstDerivativeFeed(i);
         }
+
         if (_v1vd || _v1d1vd){
-            for (int i=0; i<_nvp; ++i)    _fvdf[i] = _feeder->getVariationalFirstDerivativeFeed(i);
+            for (int i=0; i<_nvp; ++i) _fvdf[i] = _feeder->getVariationalFirstDerivativeFeed(i);
         }
+
         // first derivative
         if (_v1d){
-            a1d = new double(_actf->f1d(_pv));
             for (int i=0; i<_nx0; ++i)
             {
-                _v1d[i] = *a1d * _fdf[i];
+                _v1d[i] = a1d * _fdf[i];
             }
         }
         // second derivative
         if (_v2d){
-            if (a1d != 0) a1d = new double(_actf->f1d(_pv));
-            a2d = new double(_actf->f2d(_pv));
             for (int i=0; i<_nx0; ++i)
             {
-                _v2d[i] = *a1d * _feeder->getSecondDerivativeFeed(i) + *a2d * _fdf[i] * _fdf[i];
+                _v2d[i] = a1d * _feeder->getSecondDerivativeFeed(i) + a2d * _fdf[i] * _fdf[i];
             }
         }
         // variational first derivative
         if (_v1vd){
-            if (a1d != 0) a1d = new double(_actf->f1d(_pv));
             for (int i=0; i<_nvp; ++i)
             {
-                _v1vd[i] = *a1d * _fvdf[i];
+                _v1vd[i] = a1d * _fvdf[i];
             }
         }
         // cross first derivative
         if (_v1d1vd){
-            if (a1d != 0) a1d = new double(_actf->f1d(_pv));
-            if (a2d != 0) a2d = new double(_actf->f2d(_pv));
             for (int i=0; i<_nx0; ++i){
                 for (int j=0; j<_nvp; ++j){
-                    _v1d1vd[i][j] = *a1d * _feeder->getCrossFirstDerivativeFeed(i, j);
+                    _v1d1vd[i][j] = a1d * _feeder->getCrossFirstDerivativeFeed(i, j);
                     if (_feeder->isBetaIndexUsedForThisRay(j)){
-                        _v1d1vd[i][j] += *a2d * _fdf[i] * _fvdf[j];
+                        _v1d1vd[i][j] += a2d * _fdf[i] * _fvdf[j];
                     }
                 }
             }
         }
-
-        if (a1d) delete a1d;
-        if (a2d) delete a2d;
     }
     else{
         _v = _actf->f(_pv);

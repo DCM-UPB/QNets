@@ -64,10 +64,7 @@ int NNLayer::getNVariationalParameters()
 
 void NNLayer::computeValues()
 {
-   for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-   {
-      _U[i]->computeValues();
-   }
+    for (NNUnit * u : _U) u->computeValues();
 }
 
 
