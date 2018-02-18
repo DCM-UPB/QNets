@@ -46,7 +46,7 @@ void NNUnit::computeValues(){
                 for (int j=0; j<_nvp; ++j){
                     _v1d1vd[i][j] = a1d * _feeder->getCrossFirstDerivativeFeed(i, j);
                     if (_feeder->isBetaIndexUsedForThisRay(j)){
-                        _v1d1vd[i][j] += a2d * _feeder->getFirstDerivativeFeed(i);
+                        _v1d1vd[i][j] += a2d * _feeder->getFirstDerivativeFeed(i) * _feeder->getVariationalFirstDerivativeFeed(j);
                     }
                 }
             }

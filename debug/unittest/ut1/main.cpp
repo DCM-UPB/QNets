@@ -9,7 +9,7 @@
 int main(){
    using namespace std;
 
-   const double TINY = 0.0001
+   const double TINY = 0.0001;
 
    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
    ffnn->pushHiddenLayer(4);
@@ -22,7 +22,7 @@ int main(){
 
 
    double x[2] = {1.7, -0.2};
-   double dx = 0.00001;
+   double dx = 0.0001;
    double x1[2];
 
 
