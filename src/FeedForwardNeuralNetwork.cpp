@@ -316,6 +316,26 @@ void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
 
 // --- Substrates
 
+
+void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
+{
+    using namespace std;
+
+    // cross first derivatives require first and variational first derivatives
+    if (!_flag_1d || !_flag_v1d){
+        throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
+    }
+
+    // set the substrate in the units
+    for (std::vector<NNLayer *>::size_type i=_L.size()-2; i<_L.size(); ++i)
+    {
+        _L[i]->addCrossFirstDerivativeSubstrate(getNInput(), _nvp);
+    }
+
+    _flag_c1d = true;
+}
+
+
 void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 {
     using namespace std;
@@ -328,13 +348,7 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
     // set the substrate in the units
     for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
     {
-        _L[i]->addCrossFirstDerivativeSubstrate(getNInput(), getNBeta());
-    }
-    // set the id of the variational parameters for all the feeders
-    int id_vp=0;
-    for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
-    {
-        id_vp = _L[i]->setVariationalParametersID(id_vp);
+        _L[i]->addCrossFirstDerivativeSubstrate(getNInput(), _nvp);
     }
 
     _flag_c1d = true;
@@ -359,6 +373,8 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerVariationalFirstDerivativeSubst
     {
         id_vp = _L[i]->setVariationalParametersID(id_vp);
     }
+
+    _flag_v1d = true;
 }
 
 

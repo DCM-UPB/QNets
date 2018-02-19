@@ -81,6 +81,7 @@ public:
 
     // Substrate for the cross derivatives d/dx d/dbeta
     void addCrossFirstDerivativeSubstrate();  // cross derivatives
+    void addLastHiddenLayerCrossFirstDerivativeSubstrate();
 
     // shortcut for connecting and adding substrates
     void connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false);
