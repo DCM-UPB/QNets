@@ -76,6 +76,7 @@ class FeedForwardNeuralNetwork
    void addFirstDerivativeSubstrate();
    void addSecondDerivativeSubstrate();
    void addVariationalFirstDerivativeSubstrate();
+   void addCrossFirstDerivativeSubstrate();
 
    // Connect the FFNN,
    void connectFFNN();
@@ -89,10 +90,15 @@ class FeedForwardNeuralNetwork
 
    // Get the ouput after the FFNN Propagation
    double getOutput(const int &i);
-   double getFirstDerivative(const int &i, const int &i1d);
-   double getSecondDerivative(const int &i, const int &i2d);
+   double getFirstDerivative(const int &i,
+                             const int &i1d);
+   double getSecondDerivative(const int &i,
+                              const int &i2d);
    double getVariationalFirstDerivative(const int &i,
-         const int &iv1d);
+                                        const int &iv1d);
+   double getCrossFirstDerivative(const int &i,
+                                  const int &i1d,
+                                  const int &iv1d);
 
    // Store the FFNN structure on a file
    void storeOnFile(const char * filename);
@@ -164,6 +170,7 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
    \item \verb+addSecondDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivatives of the FFNN in respect to the input, i.e. $\frac{\partial^2 u^{H+1}_i}{\partial {u^0_i}^2}$;
    \item \verb+addVariationalFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivative of the FFNN in respect to the variational parameters $\beta$, i.e. $\frac{\partial u^{H+1}_i}{\partial \beta_{i}}$;
    %\item \verb+addLastHiddenLayerVariationalFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first variational derivatives of the $\beta$ in the last hidden layer only;
+   \item \verb+addCrossFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the cross derivatives of the FFNN in respect to the input and the variational parameters $\beta$, i.e. $\frac{\partial^2 u^{H+1}_i}{\partial \beta_{j} \, \partial {u^0_i}}$;
    \item \verb+connectFFNN+: Connect all the units in the FFNN. After this call it is possible to use the FFNN for computing quantities;
    \item \verb+disconnectFFNN+: Disconnect all the units;
    \item \verb+setInput+: Set the values of the units in the input layer. \verb+n+ is the size of the array \verb+in+, and if it does not suite the size of the input layer an error message will be thrown;
@@ -172,6 +179,7 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
    \item \verb+getFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$;
    \item \verb+getSecondDerivative+: Get the second derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i2d+}$;
    \item \verb+getVariationalFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $\beta$ with $\verb+ib+ = \verb+iv1d+$. See \verb+getBeta+ for a definition of \verb+ib+;
+   \item \verb+getCrossFirstDerivative+: Get the cross derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$ and $\beta$ with $\verb+ib+ = \verb+iv1d+$;
    \item \verb+storeOnFile+: Store the FFNNon a file, making possible to retrieve it later on. If the activation functions have been customised, this procedure will not succeed.
 \end{itemize}
 
