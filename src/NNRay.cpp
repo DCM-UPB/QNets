@@ -9,9 +9,8 @@
 // --- Variational Parameters
 
 bool NNRay::setVariationalParameterValue(const int &id, const double &value){
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
-    if ( it_beta != _intensity_id.end() ){
-        _intensity[ *it_beta - _intensity_id_shift ] = value;
+    if ( isBetaIndexUsedInThisRay(id) ){
+        _intensity[ id - _intensity_id_shift ] = value;
         return true;
     }
     else{
@@ -21,9 +20,8 @@ bool NNRay::setVariationalParameterValue(const int &id, const double &value){
 
 
 bool NNRay::getVariationalParameterValue(const int &id, double &value){
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
-    if ( it_beta != _intensity_id.end() ){
-        value = _intensity[ *it_beta - _intensity_id_shift ];
+    if ( isBetaIndexUsedInThisRay(id) ){
+        value = _intensity[ id - _intensity_id_shift ];
         return true;
     }
     else{
@@ -79,9 +77,8 @@ double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d){
     double feed = 0.;
 
     // if the variational parameter with index iv1d is in the ray add the following element
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), iv1d);
-    if ( it_beta != _intensity_id.end() ){
-        feed += _source[ *it_beta - _intensity_id_shift ]->getValue();
+    if ( isBetaIndexUsedInThisRay(iv1d) ){
+        feed += _source[ iv1d - _intensity_id_shift ]->getValue();
     }
     // add all other components
     for (std::vector<NNUnit *>::size_type i=1; i<_source.size(); ++i){
@@ -96,9 +93,8 @@ double NNRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
     double feed = 0.;
 
     // if the variational parameter with index iv1d is in the ray add the following element
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), iv1d);
-    if ( it_beta != _intensity_id.end() ){
-        feed += _source[ *it_beta - _intensity_id_shift ]->getFirstDerivativeValue(i1d);
+    if ( isBetaIndexUsedInThisRay(iv1d) ){
+        feed += _source[ iv1d - _intensity_id_shift ]->getFirstDerivativeValue(i1d);
     }
     // add all other components
     for (std::vector<NNUnit *>::size_type i=1; i<_source.size(); ++i){
