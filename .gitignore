@@ -87,3 +87,4 @@ doc/*.fdb_latexmk
 doc/*.fls
 doc/*.ilg
 doc/*.ind
+doc/auto
