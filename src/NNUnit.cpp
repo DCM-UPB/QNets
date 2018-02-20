@@ -27,23 +27,23 @@ void NNUnit::computeValues(){
         // first derivative
         if (_v1d){
             for (int i=0; i<_nx0; ++i)
-            {
-                _v1d[i] = a1d * _fdf[i];
-            }
+                {
+                    _v1d[i] = a1d * _fdf[i];
+                }
         }
         // second derivative
         if (_v2d){
             for (int i=0; i<_nx0; ++i)
-            {
-                _v2d[i] = a1d * _feeder->getSecondDerivativeFeed(i) + a2d * _fdf[i] * _fdf[i];
-            }
+                {
+                    _v2d[i] = a1d * _feeder->getSecondDerivativeFeed(i) + a2d * _fdf[i] * _fdf[i];
+                }
         }
         // variational first derivative
         if (_v1vd){
             for (int i=0; i<_nvp; ++i)
-            {
-                _v1vd[i] = a1d * _fvdf[i];
-            }
+                {
+                    _v1vd[i] = a1d * _fvdf[i];
+                }
         }
         // cross first derivative
         if (_v1d1vd){
@@ -70,9 +70,9 @@ void NNUnit::setFirstDerivativeSubstrate(const int &nx0)
     _nx0 = nx0;
     _v1d = new double[_nx0];
     for (int i=0; i<_nx0; ++i)
-    {
-        _v1d[i]=0.;
-    }
+        {
+            _v1d[i]=0.;
+        }
 
     if (!_fdf){
         _fdf = new double[nx0];
@@ -85,9 +85,9 @@ void NNUnit::setSecondDerivativeSubstrate(const int &nx0)
     _nx0 = nx0;
     _v2d = new double[_nx0];
     for (int i=0; i<_nx0; ++i)
-    {
-        _v2d[i]=0.;
-    }
+        {
+            _v2d[i]=0.;
+        }
 
     if (!_fdf){
         _fdf = new double[nx0];
@@ -102,9 +102,9 @@ void NNUnit::setVariationalFirstDerivativeSubstrate(const int &nvp)
     _nvp = nvp;
     _v1vd = new double[_nvp];
     for (int i=0; i<_nvp; ++i)
-    {
-        _v1vd[i]=0.;
-    }
+        {
+            _v1vd[i]=0.;
+        }
 
     if (!_fvdf){
         _fvdf = new double[nvp];

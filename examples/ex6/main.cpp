@@ -114,31 +114,31 @@ int main() {
 
     cout << "1st output (unit 2 of the output layer): " << endl;
     for (int i1=0; i1<ffnn->getNBeta()/10; ++i1){
-       for (int i2=0; i2<10; ++i2){
-          if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) cout << "+";
-          cout << ffnn->getVariationalFirstDerivative(0, i1*10 + i2) << "    ";
-       }
-       cout << endl;
+        for (int i2=0; i2<10; ++i2){
+            if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) cout << "+";
+            cout << ffnn->getVariationalFirstDerivative(0, i1*10 + i2) << "    ";
+        }
+        cout << endl;
     }
     cin.ignore();
 
     cout << "2nd output (unit 3 of the output layer): " << endl;
     for (int i1=0; i1<ffnn->getNBeta()/10; ++i1){
-       for (int i2=0; i2<10; ++i2){
-          if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) cout << "+";
-          cout << ffnn->getVariationalFirstDerivative(1, i1*10 + i2) << "    ";
-       }
-       cout << endl;
+        for (int i2=0; i2<10; ++i2){
+            if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) cout << "+";
+            cout << ffnn->getVariationalFirstDerivative(1, i1*10 + i2) << "    ";
+        }
+        cout << endl;
     }
     cin.ignore();
 
     cout << "3rd output (unit 4 of the output layer): " << endl;
     for (int i1=0; i1<ffnn->getNBeta()/10; ++i1){
-       for (int i2=0; i2<10; ++i2){
-          if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) cout << "+";
-          cout << ffnn->getVariationalFirstDerivative(2, i1*10 + i2) << "    ";
-       }
-       cout << endl;
+        for (int i2=0; i2<10; ++i2){
+            if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) cout << "+";
+            cout << ffnn->getVariationalFirstDerivative(2, i1*10 + i2) << "    ";
+        }
+        cout << endl;
     }
 
 

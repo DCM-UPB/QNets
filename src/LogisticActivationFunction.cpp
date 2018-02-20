@@ -8,19 +8,19 @@
 
 double LogisticActivationFunction::f(const double &in)
 {
-   return (1./(1.+exp(-in)));
+    return (1./(1.+exp(-in)));
 }
 
 
 double LogisticActivationFunction::f1d(const double &in)
 {
-   double f=this->f(in);
-   return (f*(1.-f));
+    double f=this->f(in);
+    return (f*(1.-f));
 }
 
 
 double LogisticActivationFunction::f2d(const double &in)
 {
-   double f=this->f(in);
-   return (f*(1.-f)*(1.-2.*f));
+    double f=this->f(in);
+    return (f*(1.-f)*(1.-2.*f));
 }

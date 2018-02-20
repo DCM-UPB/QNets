@@ -10,14 +10,14 @@ $CC $FLAGS $DEBUGFLAGS -fpic -c *.cpp
 
 case ${OS_NAME} in
     "Darwin")
-    ROOT_FOLDER=$(dirname $(pwd))
-    echo "$CC $FLAGS $DEBUGFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so  -o lib${LIBNAME}.so *.o"
-    $CC $FLAGS $DEBUGFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so -o lib${LIBNAME}.so *.o
-    ;;
+        ROOT_FOLDER=$(dirname $(pwd))
+        echo "$CC $FLAGS $DEBUGFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so  -o lib${LIBNAME}.so *.o"
+        $CC $FLAGS $DEBUGFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so -o lib${LIBNAME}.so *.o
+        ;;
     "Linux")
-    echo "$CC $FLAGS $DEBUGFLAGS -shared -o lib${LIBNAME}.so *.o"
-    $CC $FLAGS $DEBUGFLAGS -shared -o lib${LIBNAME}.so *.o
-    ;;
+        echo "$CC $FLAGS $DEBUGFLAGS -shared -o lib${LIBNAME}.so *.o"
+        $CC $FLAGS $DEBUGFLAGS -shared -o lib${LIBNAME}.so *.o
+        ;;
 esac
 
 mv lib${LIBNAME}.so ../
