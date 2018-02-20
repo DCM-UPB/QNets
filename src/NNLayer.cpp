@@ -64,10 +64,7 @@ int NNLayer::getNVariationalParameters()
 
 void NNLayer::computeValues()
 {
-   for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-   {
-      _U[i]->computeValues();
-   }
+    for (NNUnit * u : _U) u->computeValues();
 }
 
 
@@ -81,6 +78,15 @@ int NNLayer::setVariationalParametersID(const int &id_vp)
       id = _U[i]->getFeeder()->setVariationalParametersIndexes(id);
    }
    return id;
+}
+
+
+void NNLayer::addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp)
+{
+   for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
+   {
+      _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
+   }
 }
 
 

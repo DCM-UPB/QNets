@@ -19,10 +19,14 @@ protected:
    double * _v1d; // first derivatives
    double * _v2d; // second derivative
    double * _fdf; // internal variable, used to store the values of the _feeder->getFirstDerivativeFeed(i)
+   double * _fvdf; // internal variable, used to store the values of the _feeder->getVariationalFirstDerivativeFeed(i)
 
    // variational derivatives
    int _nvp;
    double * _v1vd; // variational first derivatives
+
+   // cross derivatives d/dx d/dbeta
+   double ** _v1d1vd;  // first index input derivative, second index variational parameter
 
    // Feeder of the unit
    // The feeder of a unit is a class that takes care of providing the input (protovalue) to the unit, when called via: _feeder->getFeed()
@@ -50,6 +54,11 @@ public:
    void setVariationalFirstDerivativeSubstrate(const int &nvp);
    void setVariationalFirstDerivativeValue(const int &i1vd, const double &v1vd){_v1vd[i1vd]=v1vd;}
    double getVariationalFirstDerivativeValue(const int &i1vd){return _v1vd[i1vd];}  // return first derivative value
+
+   // Cross derivatives
+   void setCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp);
+   void setCrossFirstDerivative(const int &i1d, const int &i1vd, const double &v1d1vd){_v1d1vd[i1d][i1vd]=v1d1vd;}
+   double getCrossFirstDerivativeValue(const int &i1d, const int &i1vd){return _v1d1vd[i1d][i1vd];}
 
    // Getters
    double getValue(){return _v;}

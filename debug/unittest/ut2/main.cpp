@@ -149,8 +149,6 @@ int main(){
 
    delete ffnn2;
 
-
-
    delete ffnn;
 
    return 0;

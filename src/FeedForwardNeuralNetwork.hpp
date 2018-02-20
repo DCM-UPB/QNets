@@ -17,7 +17,7 @@ protected:
     std::vector<NNLayer *> _L;
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
-    bool _flag_1d, _flag_2d, _flag_v1d;  // flag that indicates if the substrates for the derivatives have been activated or not
+    bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d;  // flag that indicates if the substrates for the derivatives have been activated or not
 
     int _nvp;  // global number of variational parameters
 
@@ -28,7 +28,9 @@ public:
     FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf);
     ~FeedForwardNeuralNetwork();
 
-    // Get information about the NN structure
+
+
+    // --- Get information about the NN structure
     int getNHiddenLayers(){return _L.size()-2;}
     int getNLayers(){return _L.size();}
     int getNInput(){return _L.front()->getNUnits()-1;}
@@ -40,19 +42,25 @@ public:
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
     bool hasVariationalFirstDerivativeSubstrate(){return _flag_v1d;}
+    bool hasCrossFirstDerivativeSubstrate(){return _flag_c1d;}
 
-    // Modify NN structure
+
+    // --- Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
     void setLayerSize(const int &li, const int &size);
     void setLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
 
-    // Connect the neural network
+
+
+    // --- Connect the neural network
     void connectFFNN();
     void disconnectFFNN();
 
-    // Manage the betas, which exist only after that the FFNN has been connected
+
+
+    // --- Manage the betas, which exist only after that the FFNN has been connected
     int getNBeta();
     double getBeta(const int &ib);
     void getBeta(double * beta);
@@ -60,7 +68,9 @@ public:
     void setBeta(const double * beta);
     void randomizeBetas();
 
-    // Substrates for the calculations of derivatives
+
+
+    // --- Substrates for the calculations of derivatives
     void addFirstDerivativeSubstrate();  // coordinates first derivatives
     void addSecondDerivativeSubstrate();  // coordinates second derivatives
 
@@ -69,6 +79,10 @@ public:
     // ... or this
     void addLastHiddenLayerVariationalFirstDerivativeSubstrate();  // variational first derivative for and from the last hidden layer
 
+    // Substrate for the cross derivatives d/dx d/dbeta
+    void addCrossFirstDerivativeSubstrate();  // cross derivatives
+    void addLastHiddenLayerCrossFirstDerivativeSubstrate();
+
     // shortcut for connecting and adding substrates
     void connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false);
 
@@ -76,24 +90,37 @@ public:
     void setInput(const double * in);
     void setInput(const int &i, const double &in);
 
-    // Computation
+
+
+    // --- Computation
     void FFPropagate();
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
     // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
     void evaluate(const double * in, double * out = NULL, double ** d1 = NULL, double ** d2 = NULL, double ** vd1 = NULL);
 
-    // Get outputs
+
+
+    // --- Get outputs
     void getOutput(double * out);
     double getOutput(const int &i);
+
     void getFirstDerivative(double ** d1);
     double getFirstDerivative(const int &i, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
+
     void getSecondDerivative(double ** d2);
     double getSecondDerivative(const int &i, const int &i2d); // i is the index of the output element, i2d the index of the input element
+
     void getVariationalFirstDerivative(double ** vd1);
     double getVariationalFirstDerivative(const int &i, const int &iv1d);  // i is the index of the output element, iv1d the index of the beta element
 
-    // Store FFNN on file
+    void getCrossFirstDerivative(double *** d1vd1);
+    void getCrossFirstDerivative(const int &i, double ** d1vd1);
+    double getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d);
+
+
+
+    // --- Store FFNN on file
     void storeOnFile(const char * filename);
 
 };
