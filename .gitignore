@@ -64,6 +64,9 @@ config.sh
 *exe*
 
 src/*.o
+src/*.dSYM
+src/*.swp
+src/*.swo
 
 debug/*.o
 debug/*.txt
