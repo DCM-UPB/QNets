@@ -31,7 +31,7 @@ public:
     void addFirstDerivativeSubstrate(const int &nx0);
     /* add the first derivative substrate to all units
        nx0 is the number of units used as input, i.e.
-      the number of derivatives that will be computed */
+       the number of derivatives that will be computed */
 
     void addSecondDerivativeSubstrate(const int &nx0);
     /* add the second derivative substrate to all units
@@ -44,8 +44,8 @@ public:
 
     void addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp);
     /* add the cross first derivative substrate to all units.
-    nx0 is the number of units used as input
-    nvp is the number of variational parameters in the NN */
+       nx0 is the number of units used as input
+       nvp is the number of variational parameters in the NN */
 
     int setVariationalParametersID(const int &id_vp);   // assign the id of the variational parameters to the feeders
 

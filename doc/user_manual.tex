@@ -117,7 +117,7 @@ The units are connected through a net of connections, parametrised by a value $\
 
 \begin{figure}[htpb]
   \centering
-    \includegraphics[width=.9\textwidth]{FFNN.pdf}
+  \includegraphics[width=.9\textwidth]{FFNN.pdf}
   \caption{Graphical representation of a Feed Forward Neural Network (FFNN). For a sake of clearness, only some connections are displayed.}
   \label{fig:FFNN}
 \end{figure}
@@ -127,60 +127,60 @@ A FFNN can be interpreted as a function $f_H: \mathbb{R}^N \rightarrow \mathbb{R
 The label $H$ represents the number of hidden layers of the FFNN.
 Then, once that all the parameters $\beta$ are set, the FFNN output can be computed with the recursive formula:
 \begin{equation}
-   u^l_i = \actf( u^{l-1}_{k} \beta^{l,k}_{i}  )
+  u^l_i = \actf( u^{l-1}_{k} \beta^{l,k}_{i}  )
 \end{equation}
 where $\actf: \mathbb{R} \rightarrow \mathbb{R}$ is a so-called \emph{activation function} and we have made use of the Einstein notation, for which repeated symbols on different levels imply a summation, e.g. $x_i^j y^i = \sum_i x_i^j y^i$.
 The activation function is required to account for non-linear effects.
 The FFNN library provides three activation functions by default, but the user has the possibility to define and use its own, even though its storage on a file it is not supported (explained later).
 These three activation functions are:
 \begin{enumerate}
-   \item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$;
-   \item the \emph{gaussian}: $\gssaf(x) \equiv e^{-x^2}$;
-   \item the \emph{identity}: $\idaf(x) \equiv x$. This function is linear and therefore should not be used normally, but it can be useful in some special circumstances.
+\item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$;
+\item the \emph{gaussian}: $\gssaf(x) \equiv e^{-x^2}$;
+\item the \emph{identity}: $\idaf(x) \equiv x$. This function is linear and therefore should not be used normally, but it can be useful in some special circumstances.
 \end{enumerate}
 By default the logistic function is used for all connections.
 
 The use of the FFNN library should be organised in four major steps:
 \begin{enumerate}
-   \item generate the geometry of the FFNN;
-   \item add substrates, required for computing the derivatives, if necessary;
-   \item connect the FFNN;
-   \item set the input and propagate it through the FFNN in order to get the output.
+\item generate the geometry of the FFNN;
+\item add substrates, required for computing the derivatives, if necessary;
+\item connect the FFNN;
+\item set the input and propagate it through the FFNN in order to get the output.
 \end{enumerate}
 
 Now that the notation of the FFNN has been introduced, and we have briefly seen its structure and math, let us see the methods of this class:
 \begin{itemize}
-   \item \verb+FeedForwardNeuralNetwork+: There are two possible constructors. The first one takes $3$ \verb+int+, which represents the size of the input, hidden (only one), and output layers. The user can change its shape later on. The values of $\beta$ will be set to some random values. The second constructor takes the path to a file where a FFNN has been stored;
-   \item \verb+getNHiddenLayers+: Return the number of hidden layers $H$;
-   \item \verb+getNLayers+: Return the total number of layers, i.e. $H+2$;
-   \item \verb+getLayerSize+: Return the size of the layer \verb+li+. Remember that $\verb+li+=0$ is reserved for the input layer and $\verb+li+=H+1$ for the output layer;
-   \item \verb+getLayerActivationFunction+: Return a pointer to the activation function used to obtain the layer \verb+li+. In the next section we will present the class \verb+ActivationFunctionInterface+;
-   \item \verb+getNBeta+: Return the total number of $\beta$;
-   \item \verb+getBeta+: Return the value of the $\beta^{l,p}_n$ corresponding to the \verb+ib+:
-   $$
-   {\verb+ib+} = {\verb+p+} + ({\verb+n+}-1) \, \verb+getLayerSize+({\verb+l+}-1) + \sum_{i=1}^{{\verb+l+}-1} \, \verb+getLayerSize+(i) \, \verb+getLayerSize+(i+1)
-   $$
-   \item \verb+setBeta+: Set the value of a beta;
-   \item \verb+pushHiddenLayer+: Add an hidden layer of size \verb+size+ between the last hidden layer and the output layer. Notice that all the beta related to this layer will be set randomly;
-   \item \verb+popHiddenLayer+: Remove the last hidden layer (the one connected to the output layer);
-   \item \verb+setLayerSize+: Set the size of a Layer;
-   \item \verb+setGlobalActivationFunctions+: Set a global activation function for all the connections in the FFNN;
-   \item \verb+setLayerActivationFunction+: Set the activation function used to generate the layer \verb+li+;
-   \item \verb+addFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivatives of the FFNN in respect to the input, i.e. $\frac{\partial u^{H+1}_i}{\partial u^0_i}$;
-   \item \verb+addSecondDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivatives of the FFNN in respect to the input, i.e. $\frac{\partial^2 u^{H+1}_i}{\partial {u^0_i}^2}$;
-   \item \verb+addVariationalFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivative of the FFNN in respect to the variational parameters $\beta$, i.e. $\frac{\partial u^{H+1}_i}{\partial \beta_{i}}$;
-   %\item \verb+addLastHiddenLayerVariationalFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first variational derivatives of the $\beta$ in the last hidden layer only;
-   \item \verb+addCrossFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the cross derivatives of the FFNN in respect to the input and the variational parameters $\beta$, i.e. $\frac{\partial^2 u^{H+1}_i}{\partial \beta_{j} \, \partial {u^0_i}}$;
-   \item \verb+connectFFNN+: Connect all the units in the FFNN. After this call it is possible to use the FFNN for computing quantities;
-   \item \verb+disconnectFFNN+: Disconnect all the units;
-   \item \verb+setInput+: Set the values of the units in the input layer. \verb+n+ is the size of the array \verb+in+, and if it does not suite the size of the input layer an error message will be thrown;
-   \item \verb+FFPropagate+: Compute the output values, including the derivatives if the substrates have been set accordingly;
-   \item \verb+getOutput+: Get the value of the unit \verb+i+ in the output layer;
-   \item \verb+getFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$;
-   \item \verb+getSecondDerivative+: Get the second derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i2d+}$;
-   \item \verb+getVariationalFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $\beta$ with $\verb+ib+ = \verb+iv1d+$. See \verb+getBeta+ for a definition of \verb+ib+;
-   \item \verb+getCrossFirstDerivative+: Get the cross derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$ and $\beta$ with $\verb+ib+ = \verb+iv1d+$;
-   \item \verb+storeOnFile+: Store the FFNNon a file, making possible to retrieve it later on. If the activation functions have been customised, this procedure will not succeed.
+\item \verb+FeedForwardNeuralNetwork+: There are two possible constructors. The first one takes $3$ \verb+int+, which represents the size of the input, hidden (only one), and output layers. The user can change its shape later on. The values of $\beta$ will be set to some random values. The second constructor takes the path to a file where a FFNN has been stored;
+\item \verb+getNHiddenLayers+: Return the number of hidden layers $H$;
+\item \verb+getNLayers+: Return the total number of layers, i.e. $H+2$;
+\item \verb+getLayerSize+: Return the size of the layer \verb+li+. Remember that $\verb+li+=0$ is reserved for the input layer and $\verb+li+=H+1$ for the output layer;
+\item \verb+getLayerActivationFunction+: Return a pointer to the activation function used to obtain the layer \verb+li+. In the next section we will present the class \verb+ActivationFunctionInterface+;
+\item \verb+getNBeta+: Return the total number of $\beta$;
+\item \verb+getBeta+: Return the value of the $\beta^{l,p}_n$ corresponding to the \verb+ib+:
+  $$
+  {\verb+ib+} = {\verb+p+} + ({\verb+n+}-1) \, \verb+getLayerSize+({\verb+l+}-1) + \sum_{i=1}^{{\verb+l+}-1} \, \verb+getLayerSize+(i) \, \verb+getLayerSize+(i+1)
+  $$
+\item \verb+setBeta+: Set the value of a beta;
+\item \verb+pushHiddenLayer+: Add an hidden layer of size \verb+size+ between the last hidden layer and the output layer. Notice that all the beta related to this layer will be set randomly;
+\item \verb+popHiddenLayer+: Remove the last hidden layer (the one connected to the output layer);
+\item \verb+setLayerSize+: Set the size of a Layer;
+\item \verb+setGlobalActivationFunctions+: Set a global activation function for all the connections in the FFNN;
+\item \verb+setLayerActivationFunction+: Set the activation function used to generate the layer \verb+li+;
+\item \verb+addFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivatives of the FFNN in respect to the input, i.e. $\frac{\partial u^{H+1}_i}{\partial u^0_i}$;
+\item \verb+addSecondDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivatives of the FFNN in respect to the input, i.e. $\frac{\partial^2 u^{H+1}_i}{\partial {u^0_i}^2}$;
+\item \verb+addVariationalFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first derivative of the FFNN in respect to the variational parameters $\beta$, i.e. $\frac{\partial u^{H+1}_i}{\partial \beta_{i}}$;
+  % \item \verb+addLastHiddenLayerVariationalFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the first variational derivatives of the $\beta$ in the last hidden layer only;
+\item \verb+addCrossFirstDerivativeSubstrate+: Add a substrate that allows for the computation of the cross derivatives of the FFNN in respect to the input and the variational parameters $\beta$, i.e. $\frac{\partial^2 u^{H+1}_i}{\partial \beta_{j} \, \partial {u^0_i}}$;
+\item \verb+connectFFNN+: Connect all the units in the FFNN. After this call it is possible to use the FFNN for computing quantities;
+\item \verb+disconnectFFNN+: Disconnect all the units;
+\item \verb+setInput+: Set the values of the units in the input layer. \verb+n+ is the size of the array \verb+in+, and if it does not suite the size of the input layer an error message will be thrown;
+\item \verb+FFPropagate+: Compute the output values, including the derivatives if the substrates have been set accordingly;
+\item \verb+getOutput+: Get the value of the unit \verb+i+ in the output layer;
+\item \verb+getFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$;
+\item \verb+getSecondDerivative+: Get the second derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i2d+}$;
+\item \verb+getVariationalFirstDerivative+: Get the first derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $\beta$ with $\verb+ib+ = \verb+iv1d+$. See \verb+getBeta+ for a definition of \verb+ib+;
+\item \verb+getCrossFirstDerivative+: Get the cross derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$ and $\beta$ with $\verb+ib+ = \verb+iv1d+$;
+\item \verb+storeOnFile+: Store the FFNNon a file, making possible to retrieve it later on. If the activation functions have been customised, this procedure will not succeed.
 \end{itemize}
 
 

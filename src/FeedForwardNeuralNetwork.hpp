@@ -11,7 +11,7 @@
 class FeedForwardNeuralNetwork
 {
 private:
-   void construct(const int &insize, const int &hidlaysize, const int &outsize);
+    void construct(const int &insize, const int &hidlaysize, const int &outsize);
 
 protected:
     std::vector<NNLayer *> _L;

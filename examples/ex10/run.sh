@@ -19,14 +19,14 @@ $CC $FLAGS $FLAG_TO_USE -Wall -I${ROOT_FOLDER}/src/ -I/usr/local/include -c *.cp
 
 # For Mac OS, the install name is wrong and must be corrected
 case ${OS_NAME} in
-   "Darwin")
-      echo "$CC $FLAGS $FLAG_TO_USE -L${ROOT_FOLDER} $LGSL -o exe *.o -l$LIBNAME $LIBGSL"
-      $CC $FLAGS $FLAG_TO_USE -L${ROOT_FOLDER} $LGSL -o exe *.o -l$LIBNAME $LIBGSL
-      ;;
-   "Linux")
-      echo "$CC $FLAGS $FLAG_TO_USE $LGSL -I${ROOT_FOLDER}/src -L${ROOT_FOLDER} -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}" $LIBGSL
-      $CC $FLAGS $FLAG_TO_USE $LGSL -I${ROOT_FOLDER}/src/ -L${ROOT_FOLDER} -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME} $LIBGSL
-      ;;
+    "Darwin")
+        echo "$CC $FLAGS $FLAG_TO_USE -L${ROOT_FOLDER} $LGSL -o exe *.o -l$LIBNAME $LIBGSL"
+        $CC $FLAGS $FLAG_TO_USE -L${ROOT_FOLDER} $LGSL -o exe *.o -l$LIBNAME $LIBGSL
+        ;;
+    "Linux")
+        echo "$CC $FLAGS $FLAG_TO_USE $LGSL -I${ROOT_FOLDER}/src -L${ROOT_FOLDER} -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}" $LIBGSL
+        $CC $FLAGS $FLAG_TO_USE $LGSL -I${ROOT_FOLDER}/src/ -L${ROOT_FOLDER} -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME} $LIBGSL
+        ;;
 esac
 
 echo "Rebuilt the executable file"

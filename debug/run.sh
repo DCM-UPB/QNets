@@ -16,7 +16,7 @@ RPATH="$(dirname $(pwd))"
 
 # Build the library using the debugging flags
 cd ..
-   ./build_debug_library.sh
+./build_debug_library.sh
 cd debug
 echo "Rebuilt the library with the debugging flags"
 echo ""
@@ -26,16 +26,16 @@ echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -c *.cpp"
 $CC $FLAGS $DEBUGFLAGS -Wall -I$(pwd)/../src/ -c *.cpp
 
 case ${OS_NAME} in
-   "Darwin")
-      echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src -L$(pwd)/.. -L${RPATH} -o exe *.o -l${LIBNAME}"
-      $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -L$(pwd)/../ -L${RPATH} -o exe *.o -l${LIBNAME}
-      # echo "install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe"
-      # install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
-      ;;
-   "Linux")
-      echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
-      $CC $FLAGS $DEBUGFLAGS -L$(pwd)/../ -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
-      ;;
+    "Darwin")
+        echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src -L$(pwd)/.. -L${RPATH} -o exe *.o -l${LIBNAME}"
+        $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -L$(pwd)/../ -L${RPATH} -o exe *.o -l${LIBNAME}
+        # echo "install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe"
+        # install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
+        ;;
+    "Linux")
+        echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
+        $CC $FLAGS $DEBUGFLAGS -L$(pwd)/../ -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
+        ;;
 esac
 
 echo "Rebuilt the debugging executable"
