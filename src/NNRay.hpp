@@ -42,10 +42,11 @@ public:
     double getSecondDerivativeFeed(const int &i2d);
     double getVariationalFirstDerivativeFeed(const int &iv1d);
     double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d);
+    double getCrossSecondDerivativeFeed(const int &i2d, const int &iv1d);
 
     // Beta Index
-    bool isBetaIndexUsedInThisRay(const int &id);
-    bool isBetaIndexUsedForThisRay(const int &id);
+    bool isBetaIndexUsedInThisRay(const int &id);   // beta is directly used?
+    bool isBetaIndexUsedForThisRay(const int &id);   // beta is used directly or indirectly?
 
 };
 

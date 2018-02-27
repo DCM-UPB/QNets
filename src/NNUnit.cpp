@@ -16,12 +16,21 @@ void NNUnit::computeValues(){
         double a2d = 0.;
         if (_v2d || _v1vd) a2d = _actf->f2d(_pv);
 
+        double a3d = 0.;
+        if (_v1d2vd) a3d = _actf->f3d(_pv);
+
         if (_v1d || _v2d){
             for (int i=0; i<_nx0; ++i) _fdf[i] = _feeder->getFirstDerivativeFeed(i);
         }
 
-        if (_v1vd || _v1d1vd){
+        if (_v1vd || _v1d1vd || _v1d2vd){
             for (int i=0; i<_nvp; ++i) _fvdf[i] = _feeder->getVariationalFirstDerivativeFeed(i);
+        }
+
+        if (_v1d1vd || _v1d2vd){
+            for (int i=0; i<_nx0; ++i){
+                for (int j=0; j<_nvp; ++j) _fcvdf[i][j] = _feeder->getCrossFirstDerivativeFeed(i, j);
+            }
         }
 
         // first derivative
@@ -49,9 +58,21 @@ void NNUnit::computeValues(){
         if (_v1d1vd){
             for (int i=0; i<_nx0; ++i){
                 for (int j=0; j<_nvp; ++j){
-                    _v1d1vd[i][j] = a1d * _feeder->getCrossFirstDerivativeFeed(i, j);
+                    _v1d1vd[i][j] = a1d * _fcvdf[i][j];
                     if (_feeder->isBetaIndexUsedForThisRay(j)){
                         _v1d1vd[i][j] += a2d * _fdf[i] * _fvdf[j];
+                    }
+                }
+            }
+        }
+        // cross second derivative
+        if (_v1d2vd){
+            for (int i=0; i<_nx0; ++i){
+                for (int j=0; j<_nvp; ++j){
+                    _v1d2vd[i][j] = a1d * _feeder->getCrossSecondDerivativeFeed(i, j);
+                    if (_feeder->isBetaIndexUsedForThisRay(j)){
+                        _v1d2vd[i][j] += 2. * a2d * _fdf[i] * _fcvdf[i][j];
+                        _v1d2vd[i][j] += a3d * _fdf[i] * _fdf[i] * _fvdf[i];
                     }
                 }
             }
@@ -128,6 +149,33 @@ void NNUnit::setCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp){
     if (!_fvdf){
         _fvdf = new double[nvp];
     }
+
+    if (!_fcvdf){
+        _fcvdf = new double*[nx0];
+        for (int i=0; i<nx0; ++i) _fcvdf[i] = new double[nvp];
+    }
+}
+
+
+void NNUnit::setCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp){
+    _nx0 = nx0;
+    _nvp = nvp;
+    _v1d2vd = new double*[_nx0];
+    for (int i=0; i<_nx0; ++i){
+        _v1d2vd[i] = new double[_nvp];
+        for (int j=0; j<_nvp; ++j){
+            _v1d2vd[i][j] = 0.;
+        }
+    }
+
+    if (!_fvdf){
+        _fvdf = new double[nvp];
+    }
+
+    if (!_fcvdf){
+        _fcvdf = new double*[nx0];
+        for (int i=0; i<nx0; ++i) _fcvdf[i] = new double[nvp];
+    }
 }
 
 
@@ -144,6 +192,7 @@ NNUnit::NNUnit(ActivationFunctionInterface * actf){
     _fvdf = NULL;
     _v1vd = NULL;
     _v1d1vd = NULL;
+    _v1d2vd = NULL;
 }
 
 // --- Destructor
@@ -155,4 +204,20 @@ NNUnit::~NNUnit(){
     if (_fdf) delete[] _fdf;
     if (_fvdf) delete[] _fvdf;
     if (_v1vd) delete[] _v1vd;
+    if (_v1d1vd){
+        for (int i=0; i<_nx0; ++i){
+            delete[] _v1d1vd[i];
+        }
+        delete[] _v1d1vd;
+    }
+    if (_v1d2vd){
+        for (int i=0; i<_nx0; ++i){
+            delete[] _v1d2vd[i];
+        }
+        delete[] _v1d2vd;
+    }
+    if (_fcvdf){
+        for (int i=0; i<_nx0; ++i) delete[] _fcvdf[i];
+        delete[] _fcvdf;
+    }
 }
