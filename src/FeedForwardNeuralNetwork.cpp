@@ -317,7 +317,7 @@ void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
 // --- Substrates
 
 
-void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
+void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate()
 {
     using namespace std;
 
@@ -333,6 +333,43 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
         }
 
     _flag_c1d = true;
+}
+
+
+void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
+{
+    using namespace std;
+
+    // cross first derivatives require first and variational first derivatives
+    if (!_flag_1d || !_flag_v1d || !_flag_2d){
+        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
+    }
+
+    // set the substrate in the units
+    for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i){
+            _L[i]->addCrossSecondDerivativeSubstrate(getNInput(), _nvp);
+        }
+
+    _flag_c2d = true;
+}
+
+
+
+void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
+{
+    using namespace std;
+
+    // cross first derivatives require first and variational first derivatives
+    if (!_flag_1d || !_flag_v1d || !_flag_2d){
+        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
+    }
+
+    // set the substrate in the units
+    for (std::vector<NNLayer *>::size_type i=_L.size()-2; i<_L.size(); ++i){
+            _L[i]->addCrossSecondDerivativeSubstrate(getNInput(), _nvp);
+        }
+
+    _flag_c2d = true;
 }
 
 
@@ -446,11 +483,13 @@ void FeedForwardNeuralNetwork::connectFFNN()
 }
 
 
-void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1){
+void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1, bool flag_c1d, bool flag_c2d){
     connectFFNN();
     if (flag_d1) addFirstDerivativeSubstrate();
     if (flag_d2) addSecondDerivativeSubstrate();
     if (flag_vd1) addVariationalFirstDerivativeSubstrate();
+    if (flag_c1d) addCrossFirstDerivativeSubstrate();
+    if (flag_c2d) addCrossSecondDerivativeSubstrate();
 }
 
 
@@ -602,7 +641,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
         file << endl;
     }
     // store the information about the substrates
-    file << _flag_1d << " " << _flag_2d << " " << _flag_v1d << " " << _flag_c1d << endl;
+    file << _flag_1d << " " << _flag_2d << " " << _flag_v1d << " " << _flag_c1d << " " << _flag_c2d << endl;
     file.close();
 }
 
@@ -683,8 +722,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
             }
     }
     // read and set the substrates
-    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0;
-    bool flag_1d, flag_2d, flag_v1d, flag_c1d;
+    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
+    bool flag_1d, flag_2d, flag_v1d, flag_c1d, flag_c2d;
     file >> flag_1d;
     if (flag_1d) addFirstDerivativeSubstrate();
     file >> flag_2d;
@@ -693,6 +732,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (flag_v1d) addVariationalFirstDerivativeSubstrate();
     file >> flag_c1d;
     if (flag_c1d) addCrossFirstDerivativeSubstrate();
+    file >> flag_c2d;
+    if (flag_c2d) addCrossSecondDerivativeSubstrate();
 
     file.close();
 }
@@ -717,11 +758,12 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
         setBeta(beta);
     }
     // read and set the substrates
-    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0;
+    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
     if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();
     if (ffnn->hasSecondDerivativeSubstrate()) addSecondDerivativeSubstrate();
     if (ffnn->hasVariationalFirstDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
     if (ffnn->hasCrossFirstDerivativeSubstrate()) addCrossFirstDerivativeSubstrate();
+    if (ffnn->hasCrossSecondDerivativeSubstrate()) addCrossSecondDerivativeSubstrate();
 }
 
 
@@ -745,6 +787,7 @@ void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysiz
     _flag_2d = false;
     _flag_v1d = false;
     _flag_c1d = false;
+    _flag_c2d = false;
 
     _nvp=0;
 }
@@ -765,6 +808,7 @@ FeedForwardNeuralNetwork::~FeedForwardNeuralNetwork()
     _flag_2d = false;
     _flag_v1d = false;
     _flag_c1d = false;
+    _flag_c2d = false;
 
     _nvp=0;
 }
