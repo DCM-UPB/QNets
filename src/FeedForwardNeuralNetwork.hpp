@@ -121,6 +121,10 @@ public:
     void getCrossFirstDerivative(const int &i, double ** d1vd1);
     double getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d);
 
+    void getCrossSecondDerivative(double *** d1vd1);
+    void getCrossSecondDerivative(const int &i, double ** d1vd1);
+    double getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d);
+
 
 
     // --- Store FFNN on file
