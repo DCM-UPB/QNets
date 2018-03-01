@@ -344,7 +344,7 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate(
 
     // cross first derivatives require first and variational first derivatives
     if (!_flag_1d || !_flag_v1d){
-        throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
+        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
     }
 
     // set the substrate in the units
@@ -382,12 +382,12 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
 
     // cross first derivatives require first and variational first derivatives
     if (!_flag_1d || !_flag_v1d || !_flag_2d){
-        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
+        throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
     }
 
     // set the substrate in the units
     for (std::vector<NNLayer *>::size_type i=_L.size()-2; i<_L.size(); ++i){
-            _L[i]->addCrossSecondDerivativeSubstrate(getNInput(), _nvp);
+            _L[i]->addCrossFirstDerivativeSubstrate(getNInput(), _nvp);
         }
 
     _flag_c2d = true;
