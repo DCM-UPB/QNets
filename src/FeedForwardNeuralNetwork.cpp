@@ -350,7 +350,7 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate(
     // set the substrate in the units
     for (std::vector<NNLayer *>::size_type i=_L.size()-2; i<_L.size(); ++i)
         {
-            _L[i]->addCrossFirstDerivativeSubstrate(getNInput(), _nvp);
+            _L[i]->addCrossSecondDerivativeSubstrate(getNInput(), _nvp);
         }
 
     _flag_c1d = true;
