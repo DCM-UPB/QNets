@@ -20,9 +20,10 @@ protected:
     double * _v2d;    // second derivative
 
     // internal variables, for numerical optimization. They store some values during the computeValues() method
-    double * _fdf;    // _feeder->getFirstDerivativeFeed(i)
-    double * _fvdf;    // _feeder->getVariationalFirstDerivativeFeed(i)
-    double ** _fcvdf;    // _feeder->getCrossFirstDerivativeFeed(i, j)
+    double * _first_der;    // _feeder->getFirstDerivativeFeed(i)
+    double * _second_der;    // _feeder->getSecondDerivativeFeed(i)
+    double * _first_var_der;    // _feeder->getVariationalFirstDerivativeFeed(i)
+    double ** _cross_first_der;    // _feeder->getCrossFirstDerivativeFeed(i, j)
 
     // variational derivatives
     int _nvp;
@@ -30,7 +31,7 @@ protected:
 
     // cross derivatives d/dx d/dbeta
     double ** _v1d1vd;   // first index input derivative, second index variational parameter
-    double ** _v1d2vd;   // first index input derivative, second index variational parameter
+    double ** _v2d1vd;   // first index input derivative, second index variational parameter
 
     // Feeder of the unit
     // The feeder of a unit is a class that takes care of providing the input (protovalue) to the unit, when called via: _feeder->getFeed()
@@ -64,8 +65,8 @@ public:
     void setCrossFirstDerivative(const int &i1d, const int &i1vd, const double &v1d1vd){_v1d1vd[i1d][i1vd]=v1d1vd;}
     double getCrossFirstDerivativeValue(const int &i1d, const int &i1vd){return _v1d1vd[i1d][i1vd];}
     void setCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp);
-    void setCrossSecondDerivative(const int &i1d, const int &i1vd, const double &v1d2vd){_v1d2vd[i1d][i1vd]=v1d2vd;}
-    double getCrossSecondDerivativeValue(const int &i1d, const int &i1vd){return _v1d2vd[i1d][i1vd];}
+    void setCrossSecondDerivative(const int &i1d, const int &i1vd, const double &v1d2vd){_v2d1vd[i1d][i1vd]=v1d2vd;}
+    double getCrossSecondDerivativeValue(const int &i1d, const int &i1vd){return _v2d1vd[i1d][i1vd];}
 
     // Getters
     double getValue(){return _v;}

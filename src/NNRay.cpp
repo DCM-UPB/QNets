@@ -105,16 +105,16 @@ double NNRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
 }
 
 
-double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv1d){
+double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
     double feed = 0.;
 
     // if the variational parameter with index iv1d is in the ray add the following element
-    if ( isBetaIndexUsedInThisRay(iv1d) ){
-        feed += _source[ iv1d - _intensity_id_shift ]->getSecondDerivativeValue(i2d);
+    if ( isBetaIndexUsedInThisRay(iv2d) ){
+        feed += _source[ iv2d - _intensity_id_shift ]->getSecondDerivativeValue(i2d);
     }
     // add all other components
     for (std::vector<NNUnit *>::size_type i=1; i<_source.size(); ++i){
-        feed += _intensity[i] * _source[i]->getCrossSecondDerivativeValue(i2d, iv1d);
+        feed += _intensity[i] * _source[i]->getCrossSecondDerivativeValue(i2d, iv2d);
     }
 
     return feed;

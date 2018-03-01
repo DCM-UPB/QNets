@@ -23,7 +23,7 @@ int main(){
 
 
     double x[2] = {1.7, -0.2};
-    double dx = 0.00001;
+    const double dx = 0.0001;
     double x1[2];
 
 
@@ -297,13 +297,13 @@ int main(){
             const double num_dfxdx2dbeta = (fxdxdbeta - 2.*fxdbeta + fxmdxdbeta - fxdx + 2.*fx - fxmdx)/(dx*dx*dx);
             const double num_dfydx2dbeta = (fydxdbeta - 2.*fydbeta + fymdxdbeta - fydx + 2.*fy - fymdx)/(dx*dx*dx);
 
-            cout << "anal_dfx2dxdbeta[" << i2d << "][" << iv1d << "]    " << anal_dfxdx2dbeta[i2d][iv1d] << endl;
-            cout << " --- > num_dfxdx2dbeta    " << num_dfxdx2dbeta << endl;
-            //assert(abs(anal_dfxdx2dbeta[i2d][iv1d]-num_dfxdx2dbeta) < TINY);
+            // cout << "anal_dfx2dxdbeta[" << i2d << "][" << iv1d << "]    " << anal_dfxdx2dbeta[i2d][iv1d] << endl;
+            // cout << " --- > num_dfxdx2dbeta    " << num_dfxdx2dbeta << endl << endl;
+            assert(abs(anal_dfxdx2dbeta[i2d][iv1d]-num_dfxdx2dbeta) < TINY);
 
-            cout << "anal_dfydx2dbeta[" << i2d << "][" << iv1d << "]    " << anal_dfydx2dbeta[i2d][iv1d] << endl;
-            cout << " --- > num_dfydx2dbeta    " << num_dfydx2dbeta << endl;
-            //assert(abs(anal_dfydx2dbeta[i2d][iv1d]-num_dfydx2dbeta) < TINY);
+            // cout << "anal_dfydx2dbeta[" << i2d << "][" << iv1d << "]    " << anal_dfydx2dbeta[i2d][iv1d] << endl;
+            // cout << " --- > num_dfydx2dbeta    " << num_dfydx2dbeta << endl << endl;
+            assert(abs(anal_dfydx2dbeta[i2d][iv1d]-num_dfydx2dbeta) < TINY);
 
             ffnn->setInput(i2d, orig_x);
             ffnn->setBeta(iv1d, orig_beta);
