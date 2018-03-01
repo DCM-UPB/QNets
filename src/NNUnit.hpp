@@ -65,7 +65,7 @@ public:
     void setCrossFirstDerivative(const int &i1d, const int &i1vd, const double &v1d1vd){_v1d1vd[i1d][i1vd]=v1d1vd;}
     double getCrossFirstDerivativeValue(const int &i1d, const int &i1vd){return _v1d1vd[i1d][i1vd];}
     void setCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp);
-    void setCrossSecondDerivative(const int &i1d, const int &i1vd, const double &v1d2vd){_v2d1vd[i1d][i1vd]=v1d2vd;}
+    void setCrossSecondDerivative(const int &i1d, const int &i1vd, const double &v2d1vd){_v2d1vd[i1d][i1vd]=v2d1vd;}
     double getCrossSecondDerivativeValue(const int &i1d, const int &i1vd){return _v2d1vd[i1d][i1vd];}
 
     // Getters
