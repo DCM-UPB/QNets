@@ -342,7 +342,7 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate(
 {
     using namespace std;
 
-    // cross first derivatives require first and variational first derivatives
+    // cross second derivatives require first, second, and variational first derivatives
     if (!_flag_1d || !_flag_v1d || !_flag_2d){
         throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
     }
@@ -361,7 +361,7 @@ void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
 {
     using namespace std;
 
-    // cross first derivatives require first and variational first derivatives
+    // cross second derivatives require first, second, and variational first derivatives
     if (!_flag_1d || !_flag_v1d || !_flag_2d){
         throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
     }
