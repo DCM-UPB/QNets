@@ -20,6 +20,8 @@ public:
     double f1d(const double &in);
 
     double f2d(const double &in);
+
+    double f3d(const double &in);
 };
 
 

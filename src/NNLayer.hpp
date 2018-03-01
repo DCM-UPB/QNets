@@ -47,6 +47,11 @@ public:
        nx0 is the number of units used as input
        nvp is the number of variational parameters in the NN */
 
+    void addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp);
+    /* add the cross second derivative substrate to all units.
+       nx0 is the number of units used as input
+       nvp is the number of variational parameters in the NN */
+
     int setVariationalParametersID(const int &id_vp);   // assign the id of the variational parameters to the feeders
 
 

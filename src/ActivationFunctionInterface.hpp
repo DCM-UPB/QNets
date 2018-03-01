@@ -22,6 +22,9 @@ public:
 
     // second derivative of the activation function
     virtual double f2d(const double &) = 0;
+
+    // third derivative of the activation function
+    virtual double f3d(const double &) = 0;
 };
 
 

@@ -19,10 +19,11 @@ int main(){
     ffnn->addSecondDerivativeSubstrate();
     ffnn->addVariationalFirstDerivativeSubstrate();
     ffnn->addCrossFirstDerivativeSubstrate();
+    ffnn->addCrossSecondDerivativeSubstrate();
 
 
     double x[2] = {1.7, -0.2};
-    double dx = 0.00001;
+    const double dx = 0.0001;
     double x1[2];
 
 
@@ -186,7 +187,7 @@ int main(){
 
 
 
-    // --- cross derivatives
+    // --- cross first derivatives
 
     double ** anal_dfxdxdbeta = new double*[ffnn->getNInput()];
     for (int i=0; i<ffnn->getNInput(); ++i){
@@ -240,6 +241,89 @@ int main(){
             ffnn->setBeta(iv1d, orig_beta);
         }
     }
+
+
+    // --- cross second derivatives
+
+    double ** anal_dfxdx2dbeta = new double*[ffnn->getNInput()];
+    for (int i=0; i<ffnn->getNInput(); ++i){
+        anal_dfxdx2dbeta[i] = new double[ffnn->getNBeta()];
+    }
+    double ** anal_dfydx2dbeta = new double*[ffnn->getNInput()];
+    for (int i=0; i<ffnn->getNInput(); ++i){
+        anal_dfydx2dbeta[i] = new double[ffnn->getNBeta()];
+    }
+
+    ffnn->setInput(x);
+    ffnn->FFPropagate();
+    ffnn->getCrossSecondDerivative(0, anal_dfxdx2dbeta);
+    ffnn->getCrossSecondDerivative(1, anal_dfydx2dbeta);
+
+    for (int i2d=0; i2d<ffnn->getNInput(); ++i2d){
+        for (int iv1d=0; iv1d<ffnn->getNBeta(); ++iv1d){
+            const double orig_x = x[i2d];
+            const double orig_beta = ffnn->getBeta(iv1d);
+
+            ffnn->setInput(i2d, orig_x+dx);
+            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->FFPropagate();
+            const double fxdxdbeta = ffnn->getOutput(0);
+            const double fydxdbeta = ffnn->getOutput(1);
+
+            ffnn->setInput(i2d, orig_x);
+            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->FFPropagate();
+            const double fxdbeta = ffnn->getOutput(0);
+            const double fydbeta = ffnn->getOutput(1);
+
+            ffnn->setInput(i2d, orig_x-dx);
+            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->FFPropagate();
+            const double fxmdxdbeta = ffnn->getOutput(0);
+            const double fymdxdbeta = ffnn->getOutput(1);
+
+            ffnn->setInput(i2d, orig_x+dx);
+            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->FFPropagate();
+            const double fxdx = ffnn->getOutput(0);
+            const double fydx = ffnn->getOutput(1);
+
+            ffnn->setInput(i2d, orig_x-dx);
+            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->FFPropagate();
+            const double fxmdx = ffnn->getOutput(0);
+            const double fymdx = ffnn->getOutput(1);
+
+            const double num_dfxdx2dbeta = (fxdxdbeta - 2.*fxdbeta + fxmdxdbeta - fxdx + 2.*fx - fxmdx)/(dx*dx*dx);
+            const double num_dfydx2dbeta = (fydxdbeta - 2.*fydbeta + fymdxdbeta - fydx + 2.*fy - fymdx)/(dx*dx*dx);
+
+            // cout << "anal_dfx2dxdbeta[" << i2d << "][" << iv1d << "]    " << anal_dfxdx2dbeta[i2d][iv1d] << endl;
+            // cout << " --- > num_dfxdx2dbeta    " << num_dfxdx2dbeta << endl << endl;
+            assert(abs(anal_dfxdx2dbeta[i2d][iv1d]-num_dfxdx2dbeta) < TINY);
+
+            // cout << "anal_dfydx2dbeta[" << i2d << "][" << iv1d << "]    " << anal_dfydx2dbeta[i2d][iv1d] << endl;
+            // cout << " --- > num_dfydx2dbeta    " << num_dfydx2dbeta << endl << endl;
+            assert(abs(anal_dfydx2dbeta[i2d][iv1d]-num_dfydx2dbeta) < TINY);
+
+            ffnn->setInput(i2d, orig_x);
+            ffnn->setBeta(iv1d, orig_beta);
+        }
+    }
+
+
+
+
+    // free resources
+    for (int i=0; i<ffnn->getNInput(); ++i){
+        delete[] anal_dfxdxdbeta[i];
+        delete[] anal_dfydxdbeta[i];
+        delete[] anal_dfxdx2dbeta[i];
+        delete[] anal_dfydx2dbeta[i];
+    }
+    delete[] anal_dfxdxdbeta;
+    delete[] anal_dfydxdbeta;
+    delete[] anal_dfxdx2dbeta;
+    delete[] anal_dfydx2dbeta;
 
 
     delete ffnn;
