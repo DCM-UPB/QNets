@@ -412,6 +412,7 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
     _flag_c1d = true;
 }
 
+
 void FeedForwardNeuralNetwork::addLastHiddenLayerVariationalFirstDerivativeSubstrate()
 {
     // count the total number of variational parameters
