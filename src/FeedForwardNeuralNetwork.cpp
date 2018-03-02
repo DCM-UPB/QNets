@@ -797,6 +797,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     }
     // read and set the substrates
     _nvp = 0;
+    _flag_connected = false;
     if (ffnn->isConnected()){
         connectFFNN();
         double beta[ffnn->getNBeta()];
