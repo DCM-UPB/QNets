@@ -109,21 +109,24 @@ public:
     double getOutput(const int &i);
 
     void getFirstDerivative(double ** d1);
-    double getFirstDerivative(const int &i, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
+    void getFirstDerivative(const int &iu, double * d1);  // iu is the unit index
+    double getFirstDerivative(const int &iu, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
 
     void getSecondDerivative(double ** d2);
+    void getSecondDerivative(const int &i, double * d2);  // i is the output index
     double getSecondDerivative(const int &i, const int &i2d); // i is the index of the output element, i2d the index of the input element
 
     void getVariationalFirstDerivative(double ** vd1);
+    void getVariationalFirstDerivative(const int &i, double * vd1);  // i is the output index
     double getVariationalFirstDerivative(const int &i, const int &iv1d);  // i is the index of the output element, iv1d the index of the beta element
 
     void getCrossFirstDerivative(double *** d1vd1);
-    void getCrossFirstDerivative(const int &i, double ** d1vd1);
-    double getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d);
+    void getCrossFirstDerivative(const int &i, double ** d1vd1);  // i is the output index
+    double getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d);  // i is the index of the output element, i1d, of the input element, iv1d the index of the beta element
 
     void getCrossSecondDerivative(double *** d1vd1);
-    void getCrossSecondDerivative(const int &i, double ** d1vd1);
-    double getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d);
+    void getCrossSecondDerivative(const int &i, double ** d1vd1);  // i is the output index
+    double getCrossSecondDerivative(const int &i, const int &i2d, const int &iv1d);  // i is the index of the output element, i2d, of the input element, iv1d the index of the beta element
 
 
 

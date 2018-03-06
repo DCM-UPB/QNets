@@ -221,6 +221,14 @@ double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, con
 }
 
 
+void FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, double * vd1)
+{
+    for (int iv1d=0; iv1d<getNInput(); ++iv1d){
+        vd1[iv1d] = getVariationalFirstDerivative(i, iv1d);
+    }
+}
+
+
 void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
 {
     for (int i=0; i<getNOutput(); ++i){
@@ -237,6 +245,14 @@ double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2
 }
 
 
+void FeedForwardNeuralNetwork::getSecondDerivative(const int &i, double * d2)
+{
+    for (int i2d=0; i2d<getNInput(); ++i2d){
+        d2[i2d] = getSecondDerivative(i, i2d);
+    }
+}
+
+
 void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
 {
     for (int i=0; i<getNOutput(); ++i){
@@ -250,6 +266,14 @@ void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
 double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
 {
     return ( _L.back()->getUnit(i+1)->getFirstDerivativeValue(i1d) );
+}
+
+
+void FeedForwardNeuralNetwork::getFirstDerivative(const int &i, double * d1)
+{
+    for (int i1d=0; i1d<getNInput(); ++i1d){
+        d1[i1d] = getFirstDerivative(i, i1d);
+    }
 }
 
 
@@ -773,6 +797,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     }
     // read and set the substrates
     _nvp = 0;
+    _flag_connected = false;
     if (ffnn->isConnected()){
         connectFFNN();
         double beta[ffnn->getNBeta()];
