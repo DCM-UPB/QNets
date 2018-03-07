@@ -207,6 +207,7 @@ NNUnit::NNUnit(ActivationFunctionInterface * actf){
     _first_der = NULL;
     _second_der = NULL;
     _first_var_der = NULL;
+    _cross_first_der = NULL;
     _v1vd = NULL;
     _v1d1vd = NULL;
     _v2d1vd = NULL;
