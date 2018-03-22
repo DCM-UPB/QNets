@@ -14,6 +14,13 @@ public:
     ActivationFunctionInterface * getCopy(){return new GaussianActivationFunction();}
     std::string getIdCode(){return "GSS";}
 
+    // input should be in the rage [-3 : 3]
+    double getIdealInputMu(){return 0.;}
+    double getIdealInputSigma(){return ;}
+
+    double getOutputMu(){return ;}
+    double getOutputSigma(){return ;}
+
     // computation
     double f(const double &in);
 
