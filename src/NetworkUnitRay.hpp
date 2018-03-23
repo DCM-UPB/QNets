@@ -40,6 +40,10 @@ public:
     virtual std::string getParams();
     virtual void setParams(const std::string &params);
 
+    // sources
+    int getNSources(){return _source.size();}
+    NNUnit * getSource(const int &i){return _source[i];}
+
     // beta
     int getNBeta();
     double getBeta(const int &i);

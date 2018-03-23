@@ -2,6 +2,7 @@
 #define NETWORK_UNIT_FEEDER_INTERFACE
 
 #include "SerializableComponent.hpp"
+#include "NetworkUnit.hpp"
 
 #include <string>
 
@@ -12,6 +13,10 @@ public:
 
     // set class id code
     std::string getClassIdCode() {return "feeder";}
+
+    // sources, i.e. the units from which the values are taken from
+    virtual int getNSources() = 0;
+    virtual NetworkUnit * getSource(const int &i) = 0;
 
     // get info on beta
     virtual int getNBeta() = 0;
