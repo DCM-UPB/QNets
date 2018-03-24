@@ -35,3 +35,9 @@
 ## Unit Test 6
 
 `ut6/`: check the utility functions of the string code system
+
+
+
+## Unit Test 7
+
+`ut7/`: check the SmartBetaGenerator functions
