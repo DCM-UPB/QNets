@@ -542,15 +542,15 @@ void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d
 void FeedForwardNeuralNetwork::disconnectFFNN()
 {
     if ( !_flag_connected )
-        {
-            using namespace std;
-            cout << "ERROR: FeedForwardNeuralNetwork::disconnectFFNN() : trying to disconnect an already disconnected FFNN" << endl << endl;
-        }
+    {
+        using namespace std;
+        cout << "ERROR: FeedForwardNeuralNetwork::disconnectFFNN() : trying to disconnect an already disconnected FFNN" << endl << endl;
+    }
 
     for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
-        {
-            _L[i]->disconnect();
-        }
+    {
+        _L[i]->disconnect();
+    }
     _flag_connected = false;
 }
 
@@ -758,6 +758,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     _nvp = 0;
     bool connected;
     file >> connected;
+    _flag_connected = false;
     if (connected){
         connectFFNN();
         double beta;
