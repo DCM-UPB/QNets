@@ -18,10 +18,6 @@ public:
     virtual int getNSources() = 0;
     virtual NetworkUnit * getSource(const int &i) = 0;
 
-    // sources, i.e. the NN units from which the values are taken from
-    virtual int getNSources() = 0;
-    virtual NNUnit * getSource(const int &i) = 0;
-
     // get info on beta
     virtual int getNBeta() = 0;
     virtual double getBeta(const int &i) = 0;

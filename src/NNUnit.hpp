@@ -1,7 +1,12 @@
 #ifndef NN_UNIT
 #define NN_UNIT
 
+<<<<<<< HEAD
 #include "FedNetworkUnit.hpp"
+=======
+class NNUnit;  // necessary to solve circular dependence
+
+>>>>>>> 983e7ec... style
 #include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
 #include "NetworkUnitFeederInterface.hpp"
