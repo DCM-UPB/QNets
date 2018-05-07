@@ -1,6 +1,6 @@
 #include "NNTrainerGSL.hpp"
 
-
+/*
 // cost function without regularization and derivative terms
 int ffnn_f(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
     const int n = ((struct fit_data *)fit_data)->n;
@@ -166,7 +166,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
     gsl_vector *x = gsl_multifit_nlinear_position(w);
     double rcond = 0.0;
 
-    /* compute reciprocal condition number of J(x) */
+    // compute reciprocal condition number of J(x)
     gsl_multifit_nlinear_rcond(&rcond, w);
 
     fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.4f\n", iter, 1.0 / rcond, gsl_blas_dnrm2(f));
@@ -175,6 +175,9 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
     fprintf(stderr, "\n");
 };
 
+*/
+
+/*
 #define ACTF_X0 0.0 // target data mean
 #define ACTF_XS 1.0 // target data standard deviation
 #define ACTF_XD ACTF_XS*3.464101615 //uniform distribution [a,b]: (b-a) = sigma*sqrt(12)
@@ -260,13 +263,12 @@ public:
     }
 
     void findFit(const int &nsteps, const int &nfits, const double &maxchi, const bool &verbose) {
-        /*
-          Fit NN to data with following parameters:
-          nsteps : number of fitting iterations
-          nfits : maximum number of fits to achieve good fit
-          maxchi : maximum tolerable residual to consider a fit good
-          verbose: print verbose output while fitting
-        */
+
+       //   Fit NN to data with following parameters:
+       //   nsteps : number of fitting iterations
+       //   nfits : maximum number of fits to achieve good fit
+       //   maxchi : maximum tolerable residual to consider a fit good
+       //   verbose: print verbose output while fitting
 
         // build fit_data struct
         struct fit_data d = { _ndata, _xdata, _ydata, _d1data, _d2data, _weights, _lambda_d1, _lambda_d2, _lambda_r, _flag_d1, _flag_d2, _ffnn};
@@ -488,8 +490,8 @@ public:
 
     FeedForwardNeuralNetwork * getFFNN() {return _ffnn;}
 };
-
-
+*/
+/*
 int main (void) {
     using namespace std;
 
@@ -583,3 +585,4 @@ int main (void) {
 
     return 0;
 }
+*/

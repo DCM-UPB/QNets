@@ -10,13 +10,14 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlinear.h>
 
+
 class NNTrainerGSL: public NNTrainer
 {
 
 public:
-    ~NNTrainerGSL;
+      //~NNTrainerGSL();
 
-    void findFit();
+      void findFit();
 
 };
 
