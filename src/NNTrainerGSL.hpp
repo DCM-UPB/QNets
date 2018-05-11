@@ -18,9 +18,7 @@ protected:
     NNTrainingDataGSL * _tdata;
 
 public:
-    //NNTrainerGSL(NNTrainingDataGSL * tdata, FeedForwardNeuralNetwork * ffnn) {_tdata = tdata; _ffnn = ffnn;};
     void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose);
-
 };
 
 

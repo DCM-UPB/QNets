@@ -12,7 +12,7 @@ protected:
     NNTrainingData * _tdata;
 
 public:
-     NNTrainer(NNTrainingData * tdata, FeedForwardNeuralNetwork * ffnn) {_tdata = tdata; _ffnn = ffnn;};
+    NNTrainer(NNTrainingData * tdata, FeedForwardNeuralNetwork * ffnn) {_tdata = tdata; _ffnn = ffnn;};
     //~NNTrainer();
 
     void bestFit(const int nsteps, const int nfits, const double maxresi, const bool verbose) {
@@ -63,7 +63,7 @@ public:
 
     };
 
-    void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose); // to be implemented by child
+    virtual void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose); // to be implemented by child
 };
 
 
