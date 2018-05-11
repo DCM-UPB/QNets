@@ -8,7 +8,7 @@
 
 
 // cost function without regularization and derivative terms
-int ffnn_f(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
+int ffnn_f_pure(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
     const int ydim = ((struct NNTrainingDataGSL *)fit_data)->ydim;
     const double * const * const x = ((struct NNTrainingDataGSL *)fit_data)->x;
@@ -36,7 +36,7 @@ int ffnn_f(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 };
 
 // gradient of cost function without regularization and derivative terms
-int ffnn_df(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
+int ffnn_df_pure(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
     const int ydim = ((struct NNTrainingDataGSL *)fit_data)->ydim;
     const double * const * const x = ((struct NNTrainingDataGSL *)fit_data)->x;
@@ -151,6 +151,51 @@ int ffnn_df_deriv(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
     return GSL_SUCCESS;
 };
 
+// cost function for fitting, without derivative but with regularization
+int ffnn_f_pure_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
+    const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
+    const int xdim = ((struct NNTrainingDataGSL *)fit_data)->xdim;
+    const int ydim = ((struct NNTrainingDataGSL *)fit_data)->ydim;
+    const double lambda_r = ((struct NNTrainingDataGSL *)fit_data)->lambda_r;
+    FeedForwardNeuralNetwork * const ffnn = ((struct NNTrainingDataGSL *)fit_data)->ffnn;
+
+    const int nbeta = ffnn->getNBeta(), nshift3 = n*ydim + n*ydim*xdim, n_reg = nshift3 + nbeta;
+    const double lambda_r_red = sqrt(lambda_r / nbeta);
+
+    ffnn_f_pure(betas, fit_data, f);
+
+    //append regularization
+    for (int i=nshift3; i<n_reg; ++i) {
+        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift3));
+    }
+
+    return GSL_SUCCESS;
+};
+
+// gradient of cost function without derivatives but with regularization
+int ffnn_df_pure_reg(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
+    const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
+    const int xdim = ((struct NNTrainingDataGSL *)fit_data)->xdim;
+    const int ydim = ((struct NNTrainingDataGSL *)fit_data)->ydim;
+    const double lambda_r = ((struct NNTrainingDataGSL *)fit_data)->lambda_r;
+    FeedForwardNeuralNetwork * ffnn = ((struct NNTrainingDataGSL *)fit_data)->ffnn;
+
+    const int nbeta = ffnn->getNBeta(), nshift3 = n*ydim + n*ydim*xdim, n_reg = nshift3 + nbeta;
+    const double lambda_r_red = sqrt(lambda_r / nbeta);
+
+    ffnn_df_pure(betas, fit_data, J);
+
+    //append regularization gradient
+    for (int i=nshift3; i<n_reg; ++i) {
+        for (int j=0; j<nbeta; ++j) {
+            gsl_matrix_set(J, i, j, 0.0);
+        }
+        gsl_matrix_set(J, i, i-nshift3, lambda_r_red);
+    }
+
+    return GSL_SUCCESS;
+};
+
 // cost function for fitting, with derivative and regularization
 int ffnn_f_deriv_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
@@ -212,30 +257,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
 };
 
 
-/*
-
-class NNFitter1D {
-private:
-    int _ndata, _npar;
-
-    double * _xdata;
-    double * _ydata;
-    double * _d1data;
-    double * _d2data;
-    double * _weights;
-
-    double _lambda_r, _lambda_d1, _lambda_d2;
-
-    double _xscale,  _yscale;
-    double _xshift,  _yshift;
-
-    bool _flag_d1, _flag_d2;
-
-    FeedForwardNeuralNetwork * _ffnn;
-
-public:
-    NNFitter1D(const int &nhlayer, int * nhunits, const int &ndata, const double * xdata, const double * ydata, const double * d1data, const double * d2data, double * weights, const double &lambda_d1, const double &lambda_d2, const double &lambda_r, const bool flag_d1 = false, const bool flag_d2 = false) {
-        using namespace std;
+/* backup of old initialization/normalization code
 
         _ndata = ndata;
 
@@ -283,202 +305,165 @@ public:
             _d2data[i] = d2data[i] * _yscale / pow(_xscale, 2);
         }
     }
+*/
 
-    ~NNFitter1D(){
-        delete _ffnn;
-        delete [] _xdata;
-        delete [] _ydata;
-        delete [] _d1data;
-        delete [] _d2data;
-    }
+void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose) {
 
-    void findFit(const int &nsteps, const int &nfits, const double &maxchi, const bool &verbose) {
-
-       //   Fit NN to data with following parameters:
-       //   nsteps : number of fitting iterations
-       //   nfits : maximum number of fits to achieve good fit
-       //   maxchi : maximum tolerable residual to consider a fit good
-       //   verbose: print verbose output while fitting
-
-        // build fit_data struct
-        struct fit_data d = { _ndata, _xdata, _ydata, _d1data, _d2data, _weights, _lambda_d1, _lambda_d2, _lambda_r, _flag_d1, _flag_d2, _ffnn};
-
-        //things for gsl multifit
-        const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
-        gsl_multifit_nlinear_fdf fdf, fdf_noreg, fdf_pure;
-        gsl_multifit_nlinear_workspace * w, * w_noreg, * w_pure;
-        gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
-
-        gsl_vector *f;
-        gsl_matrix *J;
-        gsl_matrix * covar = gsl_matrix_alloc (_npar, _npar);
-
-        double x_init[_npar], x_best[_npar], x_best_err[_npar];
-        gsl_vector_view gx = gsl_vector_view_array (x_init, _npar);
-        double chisq, chisq0, chi0, chi;
-        double chisq_noreg, chi_noreg, chisq_pure, chi_pure;
-        double c, bestchi = -1.0;
-        const int dof = _ndata - _npar, ndata_full = 3*_ndata + _npar, ndata_noreg = 3*_ndata;
-        int status, info, i, ifit;
-
-        const double xtol = 0.0;
-        const double gtol = 0.0;
-        const double ftol = 0.0;
-        //
+    //   Fit NN to data with following parameters:
+    //   nsteps : number of fitting iterations
+    //   nfits : maximum number of fits to achieve good fit
+    //   maxchi : maximum tolerable residual to consider a fit good
+    //   verbose: print verbose output while fitting
 
 
-        // define the function to be minimized
-        fdf.f = ffnn_f_deriv_reg;
-        fdf.df = ffnn_df_deriv_reg;   // set to NULL for finite-difference Jacobian
-        fdf.fvv = NULL;     // not using geodesic acceleration
-        fdf.n = ndata_full;
-        fdf.p = _npar;
-        fdf.params = &d;
+    int npar = _ffnn->getNBeta(), ndata = _tdata->n;
+    const gsl_multifit_nlinear_type *T_full = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
+    gsl_multifit_nlinear_fdf fdf_full, fdf_noreg, fdf_pure;
+    gsl_multifit_nlinear_workspace * w_full, * w_noreg, * w_pure;
+    gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
 
-        // the same without regularization
+    gsl_vector *f;
+    gsl_matrix *J;
+    gsl_matrix * covar = gsl_matrix_alloc (npar, npar);
+
+    double fit_init[npar];
+    gsl_vector_view gx = gsl_vector_view_array (fit_init, npar);
+    double chisq, chisq0, chi0;
+    double chisq_noreg, chisq_pure;
+    double c;
+    const int dof = ndata - npar;
+    int ndata_noreg, ndata_full;
+    int status, info;
+
+    const double xtol = 0.0;
+    const double gtol = 0.0;
+    const double ftol = 0.0;
+
+    const bool flag_d = _tdata->flag_d1 || _tdata->flag_d2;
+
+    // first the pure fdf
+    fdf_pure.f = ffnn_f_pure;
+    fdf_pure.df = ffnn_df_pure;
+    fdf_pure.fvv = NULL;
+    fdf_pure.n = ndata;
+    fdf_pure.p = npar;
+    fdf_pure.params = &_tdata;
+
+    if (flag_d) {
+        ndata_noreg = ndata * _tdata->ydim + ndata * _tdata->ydim * _tdata->xdim;
+
+        // deriv fdf without regularization
         fdf_noreg.f = ffnn_f_deriv;
         fdf_noreg.df = ffnn_df_deriv;
         fdf_noreg.fvv = NULL;
         fdf_noreg.n = ndata_noreg;
-        fdf_noreg.p = _npar;
-        fdf_noreg.params = &d;
-
-        // and now also without derivative
-        fdf_pure.f = ffnn_f;
-        fdf_pure.df = ffnn_df;
-        fdf_pure.fvv = NULL;
-        fdf_pure.n = _ndata;
-        fdf_pure.p = _npar;
-        fdf_pure.params = &d;
-
-        // allocate workspace with default parameters
-        w = gsl_multifit_nlinear_alloc (T, &fdf_params, ndata_full, _npar);
-        w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &fdf_params, ndata_noreg, _npar);
-        w_pure = gsl_multifit_nlinear_alloc (T_pure, &fdf_params, _ndata, _npar);
-
-#define FIT(i) gsl_vector_get(w->x, i)
-#define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
-
-        ifit = 0;
-        while(true) {
-            // initial parameters
-            _ffnn->randomizeBetas();
-            for (i = 0; i<_npar; ++i) {
-                x_init[i] = _ffnn->getBeta(i);
-            }
-
-            // initialize solver with starting point
-            gsl_multifit_nlinear_init(&gx.vector, &fdf, w);
-
-            // compute initial cost function
-            f = gsl_multifit_nlinear_residual(w);
-            gsl_blas_ddot(f, f, &chisq0);
-            chi0 = sqrt(chisq0);
-
-            // solve the system with a maximum of nsteps iterations
-            if (verbose) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w);
-            else status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, NULL, NULL, &info, w);
-
-            // compute covariance of best fit parameters
-            J = gsl_multifit_nlinear_jac(w);
-            gsl_multifit_nlinear_covar(J, 0.0, covar);
-
-            // compute final cost
-            gsl_blas_ddot(f, f, &chisq);
-            chi = sqrt(chisq);
-            c = GSL_MAX_DBL(1, sqrt(chisq / dof));
-
-            // unregularized cost calculation
-            for (i = 0; i<_npar; ++i) {
-                x_init[i] = FIT(i);
-            }
-            gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
-            f = gsl_multifit_nlinear_residual(w_noreg);
-            gsl_blas_ddot(f, f, &chisq_noreg);
-            chi_noreg = sqrt(chisq_noreg);
-
-            // pure (no deriv, no reg) cost calculation
-            gsl_multifit_nlinear_init(&gx.vector, &fdf_pure, w_pure);
-            f = gsl_multifit_nlinear_residual(w_pure);
-            gsl_blas_ddot(f, f, &chisq_pure);
-            chi_pure = sqrt(chisq_pure);
-
-            if (verbose) {
-                fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w), gsl_multifit_nlinear_trs_name(w));
-                fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w));
-                fprintf(stderr, "function evaluations: %zu\n", fdf.nevalf);
-                fprintf(stderr, "Jacobian evaluations: %zu\n", fdf.nevaldf);
-                fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
-                fprintf(stderr, "initial |f(x)| = %f\n", chi0);
-                fprintf(stderr, "final   |f(x)| = %f\n", chi);
-                fprintf(stderr, "w/o reg |f(x)| = %f\n", chi_noreg);
-                fprintf(stderr, "pure    |f(x)| = %f\n", chi_pure);
-                fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
-
-                for(i=0; i<_npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, FIT(i), c*ERR(i));
-
-                fprintf(stderr, "status = %s\n", gsl_strerror (status));
-            }
-
-            if(ifit < 1 || chi_noreg < bestchi) {
-                for(i = 0; i<_npar; ++i){
-                    x_best[i] = FIT(i);
-                    x_best_err[i] = c*ERR(i);
-                }
-                bestchi = chi_noreg;
-            }
-
-            ++ifit;
-
-            if (chi_noreg <= maxchi) {
-                fprintf(stderr, "Unregularized fit residual %f (reg: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", chi_noreg, chi, chi_pure, maxchi);
-                break;
-            } else {
-                fprintf(stderr, "Unregularized fit residual %f (reg: %f, pure: %f) above tolerance %f.\n", chi_noreg, chi, chi_pure, maxchi);
-                if (ifit >= nfits) {
-                    fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized fit residual %f.\n\n", nfits, bestchi);
-                    break;
-                }
-                fprintf(stderr, "Let's try again.\n");
-            }
-        }
-
-
-        for (i=0; i<_npar; ++i) {
-            _ffnn->setBeta(i, x_best[i]); //set ffnn to best fit
-            x_init[i] = x_best[i];
-        }
-        //regularized cost calculation
-        gsl_multifit_nlinear_init(&gx.vector, &fdf, w);
-        f = gsl_multifit_nlinear_residual(w);
-        gsl_blas_ddot(f, f, &chisq);
-        chi = sqrt(chisq);
-
-        // unregularized cost calculation
-        gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
-        f = gsl_multifit_nlinear_residual(w_noreg);
-        gsl_blas_ddot(f, f, &chisq_noreg);
-        chi_noreg = sqrt(chisq_noreg);
-
-        // unregularized cost calculation
-        gsl_multifit_nlinear_init(&gx.vector, &fdf_pure, w_pure);
-        f = gsl_multifit_nlinear_residual(w_pure);
-        gsl_blas_ddot(f, f, &chisq_pure);
-        chi_pure = sqrt(chisq_pure);
-
-        //  if (verbose) {
-        fprintf(stderr, "best fit summary:\n");
-        for(i=0; i<_npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, x_best[i], x_best_err[i]);
-        fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n", chi, chi_noreg, chi_pure);
-        fprintf(stderr, "chisq/dof = %f (w/o reg: %f, pure: %f)\n\n", chisq / dof, chisq_noreg / dof, chisq_pure / dof);
-        //}
-
-        gsl_multifit_nlinear_free(w);
-        gsl_multifit_nlinear_free(w_noreg);
-        gsl_multifit_nlinear_free(w_pure);
-        gsl_matrix_free(covar);
-
+        fdf_noreg.p = npar;
+        fdf_noreg.params = &_tdata;
     }
+    else {
+        ndata_noreg = ndata;
+        fdf_noreg = fdf_pure;
+    };
+
+    if (_tdata->flag_r) {
+        ndata_full = ndata_noreg + npar;
+
+        if (flag_d) {
+            // deriv with regularization
+            fdf_full.f = ffnn_f_deriv_reg;
+            fdf_full.df = ffnn_df_deriv_reg;
+            fdf_full.fvv = NULL;
+            fdf_full.n = ndata_full;
+            fdf_full.p = npar;
+            fdf_full.params = &_tdata;
+        }
+        else {
+            // pure fdf with regularization
+            fdf_full.f = ffnn_f_pure_reg;
+            fdf_full.df = ffnn_df_pure_reg;
+            fdf_full.fvv = NULL;
+            fdf_full.n = ndata_full;
+            fdf_full.p = npar;
+            fdf_full.params = &_tdata;
+        }
+    }
+    else {
+        ndata_full = ndata_noreg;
+        fdf_full = fdf_noreg;
+    };
+
+    // allocate workspace with default parameters
+    w_full = gsl_multifit_nlinear_alloc (T_full, &fdf_params, ndata_full, npar);
+    w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &fdf_params, ndata_noreg, npar);
+    w_pure = gsl_multifit_nlinear_alloc (T_pure, &fdf_params, ndata, npar);
+
+    // initialize solver with starting point
+    gsl_multifit_nlinear_init(&gx.vector, &fdf_full, w_full);
+
+    // compute initial cost function
+    f = gsl_multifit_nlinear_residual(w_full);
+    gsl_blas_ddot(f, f, &chisq0);
+    chi0 = sqrt(chisq0);
+
+    // solve the system with a maximum of nsteps iterations
+    if (verbose) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w_full);
+    else status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, NULL, NULL, &info, w_full);
+
+    // compute covariance of best fit parameters
+    J = gsl_multifit_nlinear_jac(w_full);
+    gsl_multifit_nlinear_covar(J, 0.0, covar);
+
+    // compute final cost
+    gsl_blas_ddot(f, f, &chisq);
+    resi_full = sqrt(chisq);
+    c = GSL_MAX_DBL(1, sqrt(chisq / dof));
+
+    // unregularized cost calculation
+    for (int i = 0; i<npar; ++i) {
+        fit[i] = gsl_vector_get(w_full->x, i);
+        err[i] = c*sqrt(gsl_matrix_get(covar,i,i));
+
+        fit_init[i] = fit[i]; // to calculate the other residuals
+    }
+    gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
+    f = gsl_multifit_nlinear_residual(w_noreg);
+    gsl_blas_ddot(f, f, &chisq_noreg);
+    resi_noreg = sqrt(chisq_noreg);
+
+    // pure (no deriv, no reg) cost calculation
+    gsl_multifit_nlinear_init(&gx.vector, &fdf_pure, w_pure);
+    f = gsl_multifit_nlinear_residual(w_pure);
+    gsl_blas_ddot(f, f, &chisq_pure);
+    resi_pure = sqrt(chisq_pure);
+
+    if (verbose) {
+        fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w_full), gsl_multifit_nlinear_trs_name(w_full));
+        fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w_full));
+        fprintf(stderr, "function evaluations: %zu\n", fdf_full.nevalf);
+        fprintf(stderr, "Jacobian evaluations: %zu\n", fdf_full.nevaldf);
+        fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
+        fprintf(stderr, "initial |f(x)| = %f\n", chi0);
+        fprintf(stderr, "final   |f(x)| = %f\n", resi_full);
+        fprintf(stderr, "w/o reg |f(x)| = %f\n", resi_noreg);
+        fprintf(stderr, "pure    |f(x)| = %f\n", resi_pure);
+        fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
+
+        for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, fit[i], err[i]);
+
+        fprintf(stderr, "status = %s\n", gsl_strerror (status));
+    }
+
+    gsl_multifit_nlinear_free(w_full);
+    gsl_multifit_nlinear_free(w_noreg);
+    gsl_multifit_nlinear_free(w_pure);
+    gsl_matrix_free(covar);
+
+
+
+}
+
+
+/*
 
     // compute fit distance for best betas
     double getFitDistance() {
