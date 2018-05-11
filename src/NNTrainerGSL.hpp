@@ -2,6 +2,7 @@
 #define NN_TRAINER_GSL
 
 #include "NNTrainer.hpp"
+#include "NNTrainingDataGSL.hpp"
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -13,11 +14,13 @@
 
 class NNTrainerGSL: public NNTrainer
 {
+protected:
+    NNTrainingDataGSL * _tdata;
 
 public:
-      //~NNTrainerGSL();
+    //NNTrainerGSL(NNTrainingDataGSL * tdata, FeedForwardNeuralNetwork * ffnn) {_tdata = tdata; _ffnn = ffnn;};
 
-      void findFit();
+    void findFit();
 
 };
 
