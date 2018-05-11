@@ -34,13 +34,14 @@ int ffnn_f(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 
     return GSL_SUCCESS;
 };
-/*
+
 // gradient of cost function without regularization and derivative terms
 int ffnn_df(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
-    const double * x = ((struct NNTrainingDataGSL *)fit_data)->x;
-    const double * w = ((struct NNTrainingDataGSL *)fit_data)->w;
-    FeedForwardNeuralNetwork * ffnn = ((struct NNTrainingDataGSL *)fit_data)->ffnn;
+    const int ydim = ((struct NNTrainingDataGSL *)fit_data)->ydim;
+    const double * const * const x = ((struct NNTrainingDataGSL *)fit_data)->x;
+    const double * const * const w = ((struct NNTrainingDataGSL *)fit_data)->w;
+    FeedForwardNeuralNetwork * const ffnn = ((struct NNTrainingDataGSL *)fit_data)->ffnn;
 
     const int nbeta = ffnn->getNBeta();
 
@@ -51,10 +52,12 @@ int ffnn_df(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
 
     //calculate cost gradient
     for (int i=0; i<n; ++i) {
-        ffnn->setInput(0, x[i]);
+        ffnn->setInput(x[i]);
         ffnn->FFPropagate();
-        for (int j=0; j<nbeta; ++j) {
-            gsl_matrix_set(J, i, j, w[i] * ffnn->getVariationalFirstDerivative(0, j));
+        for (int j=0; j<ydim; ++j) {
+            for (int k=0; k<nbeta; ++k) {
+                gsl_matrix_set(J, i*ydim + j, k, w[i][j] * ffnn->getVariationalFirstDerivative(j, k));
+            }
         }
     }
 
@@ -64,18 +67,20 @@ int ffnn_df(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
 // cost function with derivative but without regularization
 int ffnn_f_deriv(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingDataGSL *)fit_data)->n;
-    const double * x = ((struct NNTrainingDataGSL *)fit_data)->x;
-    const double * y = ((struct NNTrainingDataGSL *)fit_data)->y;
-    const double * yd1 = ((struct NNTrainingDataGSL *)fit_data)->yd1;
-    const double * yd2 = ((struct NNTrainingDataGSL *)fit_data)->yd2;
-    const double * w = ((struct NNTrainingDataGSL *)fit_data)->w;
+    const int xdim = ((struct NNTrainingDataGSL *)fit_data)->xdim;
+    const int ydim = ((struct NNTrainingDataGSL *)fit_data)->ydim;
+    const double * const * const x = ((struct NNTrainingDataGSL *)fit_data)->x;
+    const double * const * const y = ((struct NNTrainingDataGSL *)fit_data)->y;
+    const double * const * const * const yd1 = ((struct NNTrainingDataGSL *)fit_data)->yd1;
+    const double * const * const * const yd2 = ((struct NNTrainingDataGSL *)fit_data)->yd2;
+    const double * const * const w = ((struct NNTrainingDataGSL *)fit_data)->w;
     const double lambda_d1 = ((struct NNTrainingDataGSL *)fit_data)->lambda_d1;
     const double lambda_d2 = ((struct NNTrainingDataGSL *)fit_data)->lambda_d2;
     const bool flag_d1 = ((struct NNTrainingDataGSL *)fit_data)->flag_d1;
     const bool flag_d2 = ((struct NNTrainingDataGSL *)fit_data)->flag_d2;
-    FeedForwardNeuralNetwork * ffnn = ((struct NNTrainingDataGSL *)fit_data)->ffnn;
+    FeedForwardNeuralNetwork * const ffnn = ((struct NNTrainingDataGSL *)fit_data)->ffnn;
 
-    const int nbeta = ffnn->getNBeta(), twon = 2*n;
+    const int nbeta = ffnn->getNBeta(), nshift = n*ydim, nshift2 = nshift + n*ydim*xdim;
     const double lambda_d1_red = sqrt(lambda_d1), lambda_d2_red = sqrt(lambda_d2);
 
     //set new NN betas
@@ -85,15 +90,25 @@ int ffnn_f_deriv(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 
     //get difference NN vs data
     for (int i=0; i<n; ++i) {
-        ffnn->setInput(0, x[i]);
+        ffnn->setInput(x[i]);
         ffnn->FFPropagate();
-        gsl_vector_set(f, i, w[i] * (ffnn->getOutput(0) - y[i]));
-        if (flag_d1) gsl_vector_set(f, i+n, w[i] * lambda_d1_red * (ffnn->getFirstDerivative(0, 0) - yd1[i]));
-        if (flag_d2) gsl_vector_set(f, i+twon, w[i] * lambda_d2_red * (ffnn->getSecondDerivative(0, 0) - yd2[i]));
+        for (int j=0; j<ydim; ++j) {
+            const int ishift = i*ydim;
+            const int inshift = ishift + nshift;
+            const int inshift2 = ishift + nshift2;
+
+            gsl_vector_set(f, ishift + j, w[i][j] * (ffnn->getOutput(j) - y[i][j]));
+            for (int k=0; k<xdim; ++k) {
+                if (flag_d1) gsl_vector_set(f, inshift + k*nshift + j, w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(k, j) - yd1[i][j][k]));
+                if (flag_d2) gsl_vector_set(f, inshift2 + k*nshift + j, w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(k, j) - yd2[i][j][k]));
+            }
+        }
     }
 
     return GSL_SUCCESS;
 };
+
+/*
 
 // gradient of cost function with derivative but without regularization
 int ffnn_df_deriv(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
