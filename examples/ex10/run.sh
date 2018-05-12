@@ -41,5 +41,5 @@ echo ""
 echo ""
 echo ""
 ./exe
-python plot.py
+#python plot.py
 #valgrind --leak-check=full --track-origins=yes ./exe

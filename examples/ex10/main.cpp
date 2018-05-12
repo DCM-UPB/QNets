@@ -4,15 +4,8 @@
 #include <numeric>
 #include <algorithm>
 
-#include "FeedForwardNeuralNetwork.hpp"
+#include "NNTrainerGSL.hpp"
 #include "PrintUtilities.hpp"
-
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_multifit_nlinear.h>
 
 
 /*
@@ -26,345 +19,65 @@
   For convenience, a NNFitter1D class is created, which handles the whole process in a user-friendly way, including normalization of the data.
 */
 
-
-double gaussian(const double &x, const double &a, const double &b) {
+double gaussian(const double x, const double a, const double b) {
     return exp(-a*pow(x-b, 2));
 };
 
-// holds the required information for cost function and gradient calculation
-struct fitdata {
-    const int n;
-    double * x;
-    double * y;
-    FeedForwardNeuralNetwork * ffnn;
+// first derivative of gaussian
+double gaussian_ddx(const double x, const double a, const double b) {
+    return 2.0*a*(b-x) * exp(-a*pow(x-b, 2));
 };
 
-// cost function for fitting
-int ffnn_f(const gsl_vector * betas, void * fitdata, gsl_vector * f) {
-    const int n = ((struct fitdata *)fitdata)->n;
-    const double * x = ((struct fitdata *)fitdata)->x;
-    const double * y = ((struct fitdata *)fitdata)->y;
-    FeedForwardNeuralNetwork * ffnn = ((struct fitdata *)fitdata)->ffnn;
-
-    //set new NN betas
-    for (int i=0; i<ffnn->getNBeta(); ++i){
-        ffnn->setBeta(i, gsl_vector_get(betas, i));
-    }
-
-    //get NN output
-    for (int i=0; i<n; ++i) {
-        ffnn->setInput(0, x[i]);
-        ffnn->FFPropagate();
-        gsl_vector_set(f, i, ffnn->getOutput(0) - y[i]);
-    }
-
-    return GSL_SUCCESS;
+// first derivative of gaussian
+double gaussian_d2dx(const double x, const double a, const double b) {
+    return (pow(2.0*a*(b-x), 2) - 2.0*a) * exp(-a*pow(x-b, 2));
 };
 
-// gradient of cost function
-int ffnn_df(const gsl_vector * betas, void * fitdata, gsl_matrix * J) {
-    const int n = ((struct fitdata *)fitdata)->n;
-    const double * x = ((struct fitdata *)fitdata)->x;
-    FeedForwardNeuralNetwork * ffnn = ((struct fitdata *)fitdata)->ffnn;
-
-    //set new NN betas
-    for (int i=0; i<ffnn->getNBeta(); ++i){
-        ffnn->setBeta(i, gsl_vector_get(betas, i));
-    }
-
-    for (int i=0; i<n; ++i) {
-        ffnn->setInput(0, x[i]);
-        ffnn->FFPropagate();
-        for (int j=0; j<ffnn->getNBeta(); ++j){
-            gsl_matrix_set(J, i, j, ffnn->getVariationalFirstDerivative(0, j));
-        }
-    }
-
-    return GSL_SUCCESS;
-};
-
-// gets called once for every fit iteration
-void callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w) {
-    double rcond;
-
-    /* compute reciprocal condition number of J(x) */
-    gsl_multifit_nlinear_rcond(&rcond, w);
-};
-
-// more verbose version of callback
-void callback_verbose(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w) {
-    gsl_vector *f = gsl_multifit_nlinear_residual(w);
-    gsl_vector *x = gsl_multifit_nlinear_position(w);
-    double rcond;
-
-    /* compute reciprocal condition number of J(x) */
-    gsl_multifit_nlinear_rcond(&rcond, w);
-
-    fprintf(stderr, "iter %2zu: cond(J) = %8.4f, |f(x)| = %.4f\n", iter, 1.0 / rcond, gsl_blas_dnrm2(f));
-
-    for (int i=0; i<x->size; ++i) fprintf(stderr, "b%i: %f, ", i,  gsl_vector_get(x, i));
-    fprintf(stderr, "\n");
-};
 
 // hardcoded target values of logistic actf
+
 #define ACTF_X0 0.0 // target data mean
 #define ACTF_XS 1.0 // target data standard deviation
 #define ACTF_XD ACTF_XS*3.464101615 //uniform distribution [a,b]: (b-a) = sigma*sqrt(12)
 #define ACTF_Y0 0.5 // target output mean
 #define ACTF_YD 1.0 // target output interval size
 
-class NNFitter1D {
-private:
-    int _ndata, _npar;
-
-    double * _xdata;
-    double * _ydata;
-    double * _weights;
-
-    double _xscale,  _yscale;
-    double _xshift,  _yshift;
-
-    bool _flag_d1, _flag_d2;
-
-    FeedForwardNeuralNetwork * _ffnn;
-
-public:
-    NNFitter1D(const int &nhlayer, int * nhunits, const int &ndata, const double * xdata, const double * ydata, double * weights, const bool flag_d1 = false, const bool flag_d2 = false) {
-        using namespace std;
-
-        _ndata = ndata;
-
-        _xdata = new double[ndata]; // we need own copies to normalize the data
-        _ydata = new double[ndata];
-        _weights = weights; // allow to account for noisy data by weighing in the error
-
-        // calculate values for normalization
-        auto mimax = minmax_element(xdata, xdata + ndata);
-        auto mimay = minmax_element(ydata, ydata + ndata);
-        double x0 = 0.5*(*mimax.first + *mimax.second);
-        double y0 = 0.5*(*mimay.first + *mimay.second);
-        double xd = *mimax.second - *mimax.first;
-        double yd = *mimay.second - *mimay.first;
-
-        _xscale = ACTF_XD/xd;
-        _yscale = ACTF_YD/yd;
-        _xshift = ACTF_X0 - x0;
-        _yshift = ACTF_Y0 - y0;
-
-        for (int i = 0; i < ndata; ++i) {
-            _xdata[i] = (xdata[i] + _xshift) * _xscale;
-            _ydata[i] = (ydata[i] + _yshift) * _yscale;
-        }
-
-        _flag_d1 = flag_d1;
-        _flag_d2 = flag_d2;
-
-        _ffnn = new FeedForwardNeuralNetwork(2, nhunits[0], 2);
-        for (int i = 1; i<nhlayer; ++i) _ffnn->pushHiddenLayer(nhunits[i]);
-        _ffnn->connectFFNN();
-        if (flag_d1) _ffnn->addFirstDerivativeSubstrate();
-        if (flag_d2) _ffnn->addSecondDerivativeSubstrate();
-        _ffnn->addVariationalFirstDerivativeSubstrate();
-        _ffnn->randomizeBetas();
-
-        _npar = _ffnn->getNBeta();
-        //    for (int i= 1; i<_npar; ++i) _ffnn->setBeta(i, 0.1);
-    }
-
-    ~NNFitter1D(){
-        delete _ffnn;
-        delete [] _xdata;
-        delete [] _ydata;
-    }
-
-    void findFit(const int &nsteps, const int &nfits, const double &maxchi, const bool &doprint) {
-        /*
-          Fit NN to data with following parameters:
-          nsteps : number of fitting iterations
-          nfits : maximum number of fits to achieve good fit
-          maxchi : maximum tolerable residual to consider a fit good
-          doprint: print verbose output while fitting
-        */
-
-        // build fitdata struct
-        struct fitdata d = { _ndata, _xdata, _ydata, _ffnn};
-
-        //things for gsl multifit
-        const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
-        gsl_multifit_nlinear_fdf fdf;
-        gsl_multifit_nlinear_workspace * w;
-        gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
-
-        gsl_vector *f;
-        gsl_matrix *J;
-        gsl_matrix * covar = gsl_matrix_alloc (_npar, _npar);
-
-        double x_init[_npar], x_best[_npar], x_best_err[_npar];
-        gsl_vector_view gx = gsl_vector_view_array (x_init, _npar);
-        gsl_vector_view wts = gsl_vector_view_array(_weights, _ndata);
-        double chisq, chisq0, chi0, chi, c, dof = _ndata - _npar, bestchi = -1.0;
-        int status, info;
-        size_t i, ifit;
-
-        double xtol = 0.0;
-        double gtol = 0.0;
-        double ftol = 0.0;
-        //
-
-
-        // define the function to be minimized
-        fdf.f = ffnn_f;
-        fdf.df = ffnn_df;   // set to NULL for finite-difference Jacobian
-        fdf.fvv = NULL;     // not using geodesic acceleration
-        fdf.n = _ndata;
-        fdf.p = _npar;
-        fdf.params = &d;
-
-        // allocate workspace with default parameters
-        w = gsl_multifit_nlinear_alloc (T, &fdf_params, _ndata, _npar);
-
-#define FIT(i) gsl_vector_get(w->x, i)
-#define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
-
-        ifit = 0;
-        while(true) {
-            // initial parameters
-            for (i = 0; i<_npar; ++i) {
-                x_init[i] = _ffnn->getBeta(i);
-            }
-
-            // initialize solver with starting point and weights
-            gsl_multifit_nlinear_winit(&gx.vector, &wts.vector, &fdf, w);
-
-            // compute initial cost function
-            f = gsl_multifit_nlinear_residual(w);
-            gsl_blas_ddot(f, f, &chisq0);
-            chi0 = sqrt(chisq0);
-
-            // solve the system with a maximum of nsteps iterations
-            if (doprint) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback_verbose, NULL, &info, w);
-            else status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w);
-
-            // compute covariance of best fit parameters
-            J = gsl_multifit_nlinear_jac(w);
-            gsl_multifit_nlinear_covar(J, 0.0, covar);
-
-            // compute final cost
-            gsl_blas_ddot(f, f, &chisq);
-            chi = sqrt(chisq);
-            c = GSL_MAX_DBL(1, sqrt(chisq / dof));
-
-            if (doprint) {
-                fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w), gsl_multifit_nlinear_trs_name(w));
-                fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w));
-                fprintf(stderr, "function evaluations: %zu\n", fdf.nevalf);
-                fprintf(stderr, "Jacobian evaluations: %zu\n", fdf.nevaldf);
-                fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
-                fprintf(stderr, "initial |f(x)| = %f\n", chi0);
-                fprintf(stderr, "final   |f(x)| = %f\n", chi);
-                fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
-
-                for(i=0; i<_npar; ++i) fprintf(stderr, "b%zu      = %.5f +/- %.5f\n", i, FIT(i), c*ERR(i));
-
-                fprintf(stderr, "status = %s\n", gsl_strerror (status));
-            }
-
-            if(ifit < 1 || chi < bestchi) {
-                for(i = 0; i<_npar; ++i){
-                    x_best[i] = FIT(i);
-                    x_best_err[i] = c*ERR(i);
-                }
-                bestchi = chi;
-            }
-
-            ++ifit;
-
-            if (bestchi <= maxchi) {
-                fprintf(stderr, "Fit residual %f meets tolerance %f. Exiting with good fit.\n\n", bestchi, maxchi);
-                break;
-            } else if (ifit >= nfits) {
-                fprintf(stderr, "Maximum number of fits reached (%zu). Exiting with best fit residual %f.\n\n", nfits, bestchi);
-                break;
-            } else {
-                _ffnn->randomizeBetas();
-                fprintf(stderr, "Fit residual %f above tolerance %f. Let's try again.\n", chi, maxchi);
-            }
-        }
-
-        if (doprint) {
-            fprintf(stderr, "best fit summary:\n");
-            for(i=0; i<_npar; ++i) fprintf(stderr, "b%zu      = %.5f +/- %.5f\n", i, x_best[i], x_best_err[i]);
-            fprintf(stderr, "|f(x)| = %f\n", bestchi);
-            fprintf(stderr, "chisq/dof = %g\n", bestchi*bestchi / dof);
-        }
-
-        for (i=0; i<_npar; ++i) {
-            _ffnn->setBeta(i, x_best[i]); //set ffnn to best fit
-        }
-
-        gsl_multifit_nlinear_free(w);
-        gsl_matrix_free(covar);
-
-    }
-
-    // compute fit distance for CG's best betas
-    double getFitDistance() {
-        double dist = 0.0;
-        for(int i=0; i<_ndata; ++i) {
-            _ffnn->setInput(0, _xdata[i]);
-            _ffnn->FFPropagate();
-            dist += pow(_ydata[i]-_ffnn->getOutput(0), 2);
-        }
-        return dist / _ndata / pow(_yscale, 2);
-    }
-
-    // compare NN to data from index i0 to ie in increments di
-    void compareFit(const int i0=0, const int ie=-1, const int di = 1) {
-        using namespace std;
-
-        const int realie = (ie<0)? _ndata-1:ie; //set default ie although _ndata is not const
-        //if (ie<0) realie = _ndata-1;
-        //else realie = ie;
-
-        int j=i0;
-        while(j<_ndata && j<=realie){
-            _ffnn->setInput(0, _xdata[j]);
-            _ffnn->FFPropagate();
-            cout << "x: " << _xdata[j] / _xscale - _xshift << " f(x): " << _ydata[j] / _yscale - _yshift << " nn(x): " << _ffnn->getOutput(0) / _yscale - _yshift << endl;
-            j+=di;
-        }
-        cout << endl;
-    }
-
-    // print output of fitted NN to file
-    void printFitOutput(const double &min, const double &max, const int &npoints, const bool &print_d1 = false, const bool &print_d2 = false) {
-        double base_input = 0.0;
-        writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getOutput", "v.txt", _xscale, _yscale, _xshift, _yshift);
-        if (print_d1 && _flag_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", _xscale, _yscale, _xshift, _yshift);
-        if (print_d2 && _flag_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", _xscale, _yscale, _xshift, _yshift);
-    }
-
-    // store fitted NN in file
-    void printFitNN() {_ffnn->storeOnFile("nn.txt");}
-
-    FeedForwardNeuralNetwork * getFFNN() {return _ffnn;}
-};
-
 
 int main (void) {
     using namespace std;
 
-    NNFitter1D * fitter;
+    FeedForwardNeuralNetwork * ffnn;
+    NNTrainerGSL * trainer;
 
     double lb = -10;
     double ub = 10;
     int ndata = 2001;
-    double xdata[ndata];
-    double ydata[ndata];
-    double weights[ndata];
+    double ** xdata;
+    double ** ydata;
+    double *** d1data;
+    double *** d2data;
+    double ** weights;
 
     int nl, nhl, nhu[2], nfits = 1;
-    double maxchi;
+    double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
+
+    bool verbose = false, flag_d1 = false, flag_d2 = false, flag_r = false;
+
+    //manual allocation of data arrays for the data struct
+    xdata = new double*[ndata];
+    ydata = new double*[ndata];
+    d1data = new double**[ndata];
+    d2data = new double**[ndata];
+    weights = new double*[ndata];
+    for (int i = 0; i<ndata; ++i) {
+        xdata[i] = new double[1];
+        ydata[i] = new double[1];
+        d1data[i] = new double*[1];
+        d1data[i][0] = new double[1];
+        d2data[i] = new double*[1];
+        d2data[i][0] = new double[1];
+        weights[i] = new double[1];
+    }
 
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
@@ -385,8 +98,14 @@ int main (void) {
     cout << ", 2 units respectively" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance of NN vs. target function, i.e. find optimal betas." << endl;
+    cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance+regularization of NN vs. target function, i.e. find optimal betas." << endl;
     cout << endl;
+    cout << "Please enter the first derivative lambda. ";
+    cin >> lambda_d1;
+    cout << "Please enter the second derivative lambda. ";
+    cin >> lambda_d2;
+    cout << "Please enter the regularization lambda. ";
+    cin >> lambda_r;
     cout << "Please enter the the maximum tolerable fit residual. ";
     cin >> maxchi;
     cout << "Please enter the maximum number of fitting runs. ";
@@ -397,16 +116,53 @@ int main (void) {
 
     // NON I/O CODE
 
+    ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
+    for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
+    ffnn->connectFFNN();
+    ffnn->addVariationalFirstDerivativeSubstrate();
+    if (lambda_d1 > 0) {ffnn->addFirstDerivativeSubstrate(); ffnn->addCrossFirstDerivativeSubstrate(); flag_d1 = true;};
+    if (lambda_d2 > 0) {ffnn->addSecondDerivativeSubstrate(); ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
+    if (lambda_r > 0) flag_r = true;
+
     // this is the data to be fitted
     double dx = (ub-lb) / (ndata-1);
     for (int i = 0; i < ndata; ++i) {
-        xdata[i] = lb + i*dx;
-        ydata[i] = gaussian(xdata[i], 1, 0);
-        weights[i] = 1.0; // our data have no error, so set all weights to 1
+        xdata[i][0] = lb + i*dx;
+        ydata[i][0] = gaussian(xdata[i][0], 1, 0);
+        d1data[i][0][0] = gaussian_ddx(xdata[i][0], 1, 0);
+        d2data[i][0][0] = gaussian_d2dx(xdata[i][0], 1, 0);
+        weights[i][0] = 1.0; // our data have no error, so set all weights to 1
+        if (verbose) printf ("data: %i %g %g\n", i, xdata[i][0], ydata[i][0]);
     };
 
+    // calculate values for normalization
+    auto mimax = minmax_element(&xdata[0][0], &xdata[ndata-1][0]);
+    auto mimay = minmax_element(&ydata[0][0], &ydata[ndata-1][0]);
+    double x0 = 0.5*(*mimax.first + *mimax.second);
+    double y0 = 0.5*(*mimay.first + *mimay.second);
+    double xd = *mimax.second - *mimax.first;
+    double yd = *mimay.second - *mimay.first;
 
-    fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, weights, true, true);
+    double xscale = ACTF_XD/xd;
+    double yscale = ACTF_YD/yd;
+    double xshift = ACTF_X0 - x0;
+    double yshift = ACTF_Y0 - y0;
+
+    for (int i = 0; i < ndata; ++i) {
+        xdata[i][0] = (xdata[i][0] + xshift) * xscale;
+        ydata[i][0] = (ydata[i][0] + yshift) * yscale;
+        d1data[i][0][0] = d1data[i][0][0] * yscale / xscale;
+        d2data[i][0][0] = d2data[i][0][0] * yscale / pow(xscale, 2);
+    }
+
+
+    NNTrainingData tdata{ndata, 1, 1, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, flag_d1, flag_d2, flag_r, ffnn};
+    trainer = new NNTrainerGSL(&tdata);
+
+    trainer->bestFit(100, nfits, maxchi, true);
+
+        /*
+    fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, true, true);
     fitter->findFit(100, nfits, maxchi, false);
     //
 
@@ -428,6 +184,7 @@ int main (void) {
     //
 
     delete fitter;
-
+    */
     return 0;
+
 }
