@@ -63,7 +63,7 @@ public:
 
     };
 
-    virtual void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose); // to be implemented by child
+    virtual void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose) {return;}; // to be implemented by child
 };
 
 

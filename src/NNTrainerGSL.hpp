@@ -2,7 +2,7 @@
 #define NN_TRAINER_GSL
 
 #include "NNTrainer.hpp"
-#include "NNTrainingDataGSL.hpp"
+#include "NNTrainingData.hpp"
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -14,8 +14,6 @@
 
 class NNTrainerGSL: public NNTrainer
 {
-protected:
-    NNTrainingDataGSL * _tdata;
 
 public:
     void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose);

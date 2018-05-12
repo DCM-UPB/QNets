@@ -15,6 +15,7 @@ struct NNTrainingData {
     const double * const * const w; // sqrt of data weights, i.e. 1/e_i , where e_i is the error on ith data !!! NOT 1/e_i^2 !!!
     const double lambda_d1, lambda_d2, lambda_r; // derivative and regularization weights
     const bool flag_d1, flag_d2, flag_r; // use derivatives / regularization?
+    FeedForwardNeuralNetwork * const ffnn; // Storing a pointer to the to-be-trained FFNN
 };
 
 #endif
