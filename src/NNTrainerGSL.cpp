@@ -92,8 +92,8 @@ int ffnn_f_deriv(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 
             gsl_vector_set(f, ishift + j, w[i][j] * (ffnn->getOutput(j) - y[i][j]));
             for (int k=0; k<xdim; ++k) {
-                if (flag_d1) gsl_vector_set(f, inshift + k*nshift + j, w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(k, j) - yd1[i][j][k]));
-                if (flag_d2) gsl_vector_set(f, inshift2 + k*nshift + j, w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(k, j) - yd2[i][j][k]));
+                if (flag_d1) gsl_vector_set(f, inshift + k*nshift + j, w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]));
+                if (flag_d2) gsl_vector_set(f, inshift2 + k*nshift + j, w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]));
             }
         }
     }
@@ -134,8 +134,8 @@ int ffnn_df_deriv(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
 
                 gsl_matrix_set(J, ishift + j, ibeta, w[i][j] * ffnn->getVariationalFirstDerivative(j, ibeta));
                 for (int k=0; k<xdim; ++k) {
-                    if(flag_d1) gsl_matrix_set(J, inshift + k*nshift + j, ibeta, w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(k, j, ibeta));
-                    if(flag_d2) gsl_matrix_set(J, inshift2 + k*nshift + j, ibeta, w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(k, j, ibeta));
+                    if(flag_d1) gsl_matrix_set(J, inshift + k*nshift + j, ibeta, w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ibeta));
+                    if(flag_d2) gsl_matrix_set(J, inshift2 + k*nshift + j, ibeta, w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ibeta));
                 }
             }
         }
@@ -290,7 +290,7 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
     fdf_pure.fvv = NULL;
     fdf_pure.n = ndata;
     fdf_pure.p = npar;
-    fdf_pure.params = &_tdata;
+    fdf_pure.params = _tdata;
 
     if (flag_d) {
         ndata_noreg = ndata * _tdata->ydim + ndata * _tdata->ydim * _tdata->xdim;
@@ -301,7 +301,7 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
         fdf_noreg.fvv = NULL;
         fdf_noreg.n = ndata_noreg;
         fdf_noreg.p = npar;
-        fdf_noreg.params = &_tdata;
+        fdf_noreg.params = _tdata;
     }
     else {
         ndata_noreg = ndata;
@@ -318,7 +318,7 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
             fdf_full.fvv = NULL;
             fdf_full.n = ndata_full;
             fdf_full.p = npar;
-            fdf_full.params = &_tdata;
+            fdf_full.params = _tdata;
         }
         else {
             // pure fdf with regularization
@@ -327,7 +327,7 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
             fdf_full.fvv = NULL;
             fdf_full.n = ndata_full;
             fdf_full.p = npar;
-            fdf_full.params = &_tdata;
+            fdf_full.params = _tdata;
         }
     }
     else {

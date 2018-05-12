@@ -3,7 +3,7 @@
 
 #include "FeedForwardNeuralNetwork.hpp"
 #include "NNTrainingData.hpp"
-
+#include <iostream>
 class NNTrainer
 {
 
@@ -26,9 +26,15 @@ public:
             _ffnn->randomizeBetas();
             for (int i = 0; i<npar; ++i) {
                 fit[i] = _ffnn->getBeta(i);
+                std::cout<<fit[i]<<std::endl;
             }
 
             findFit(nsteps, fit, err, resi_full, resi_noreg, resi_pure, verbose);
+
+            for (int i = 0; i<npar; ++i) {
+                fit[i] = _ffnn->getBeta(i);
+                std::cout<<fit[i]<<std::endl;
+            }
 
             if(ifit < 1 || abs(resi_noreg) < bestresi_noreg) {
                 for(int i = 0; i<npar; ++i){
