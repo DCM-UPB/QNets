@@ -12,13 +12,13 @@ protected:
     NNTrainingData * _tdata;
 
 public:
-    NNTrainer(NNTrainingData * tdata, FeedForwardNeuralNetwork * ffnn) {_tdata = tdata; _ffnn = ffnn;};
+    NNTrainer(NNTrainingData * tdata) {_tdata = tdata; _ffnn = tdata->ffnn;};
     //~NNTrainer();
 
-    void bestFit(const int nsteps, const int nfits, const double maxresi, const bool verbose) {
+    void bestFit(const int nsteps, const int nfits, const double tolresi, const bool verbose) {
         int npar = _ffnn->getNBeta();
         double fit[npar], bestfit[npar], err[npar], bestfit_err[npar];
-        double resi_pure, resi_noreg, resi_full, bestresi_pure, bestresi_noreg = -1.0, bestresi_full;
+        double resi_pure = -1.0, resi_noreg = -1.0, resi_full = -1.0, bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
 
         int ifit = 0;
         while(true) {
@@ -30,7 +30,7 @@ public:
 
             NNTrainer::findFit(nsteps, fit, err, resi_full, resi_noreg, resi_pure, verbose);
 
-            if(ifit < 1 || resi_noreg < bestresi_noreg) {
+            if(ifit < 1 || abs(resi_noreg) < bestresi_noreg) {
                 for(int i = 0; i<npar; ++i){
                     bestfit[i] = fit[i];
                     bestfit_err[i] = err[i];
@@ -42,11 +42,11 @@ public:
 
             ++ifit;
 
-            if (resi_noreg <= maxresi) {
-                if (verbose) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", resi_noreg, resi_full, resi_pure, maxresi);
+            if (abs(resi_noreg) <= tolresi) {
+                if (verbose) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", resi_noreg, resi_full, resi_pure, tolresi);
                 break;
             } else {
-                if (verbose) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, maxresi);
+                if (verbose) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, tolresi);
                 if (ifit >= nfits) {
                     if (verbose) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized fit residual %f.\n\n", nfits, bestresi_noreg);
                     break;

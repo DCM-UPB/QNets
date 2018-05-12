@@ -1,12 +1,5 @@
 #include "NNTrainerGSL.hpp"
 
-#define ACTF_X0 0.0 // target data mean
-#define ACTF_XS 1.0 // target data standard deviation
-#define ACTF_XD ACTF_XS*3.464101615 //uniform distribution [a,b]: (b-a) = sigma*sqrt(12)
-#define ACTF_Y0 0.5 // target output mean
-#define ACTF_YD 1.0 // target output interval size
-
-
 // cost function without regularization and derivative terms
 int ffnn_f_pure(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingData *)fit_data)->n;

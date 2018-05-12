@@ -16,6 +16,7 @@ class NNTrainerGSL: public NNTrainer
 {
 
 public:
+    NNTrainerGSL(NNTrainingData * tdata): NNTrainer(tdata){};
     void findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose);
 };
 
