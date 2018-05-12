@@ -28,7 +28,7 @@ public:
                 fit[i] = _ffnn->getBeta(i);
             }
 
-            NNTrainer::findFit(nsteps, fit, err, resi_full, resi_noreg, resi_pure, verbose);
+            findFit(nsteps, fit, err, resi_full, resi_noreg, resi_pure, verbose);
 
             if(ifit < 1 || abs(resi_noreg) < bestresi_noreg) {
                 for(int i = 0; i<npar; ++i){
