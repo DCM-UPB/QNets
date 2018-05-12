@@ -47,6 +47,7 @@ int main (void) {
     using namespace std;
 
     FeedForwardNeuralNetwork * ffnn;
+    NNTrainingData * tdata;
     NNTrainerGSL * trainer;
 
     double lb = -10;
@@ -136,17 +137,22 @@ int main (void) {
     };
 
     // calculate values for normalization
-    auto mimax = minmax_element(&xdata[0][0], &xdata[ndata-1][0]);
+    /*auto mimax = minmax_element(&xdata[0][0], &xdata[ndata-1][0]);
     auto mimay = minmax_element(&ydata[0][0], &ydata[ndata-1][0]);
     double x0 = 0.5*(*mimax.first + *mimax.second);
     double y0 = 0.5*(*mimay.first + *mimay.second);
     double xd = *mimax.second - *mimax.first;
-    double yd = *mimay.second - *mimay.first;
+    double yd = *mimay.second - *mimay.first;*/
 
-    double xscale = ACTF_XD/xd;
-    double yscale = ACTF_YD/yd;
-    double xshift = ACTF_X0 - x0;
-    double yshift = ACTF_Y0 - y0;
+    double xscale = 0.1;//ACTF_XD/xd;
+    double yscale = 1.0;//ACTF_YD/yd;
+    double xshift = 0.0;//ACTF_X0 - x0;
+    double yshift = 0.0;//ACTF_Y0 - y0;
+
+    cout << "xscale: " << xscale << endl;
+    cout << "yscale: " << yscale << endl;
+    cout << "xshift: " << xshift << endl;
+    cout << "yshift: " << yshift << endl;
 
     for (int i = 0; i < ndata; ++i) {
         xdata[i][0] = (xdata[i][0] + xshift) * xscale;
@@ -156,10 +162,11 @@ int main (void) {
     }
 
 
-    NNTrainingData tdata{ndata, 1, 1, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, flag_d1, flag_d2, flag_r, ffnn};
-    trainer = new NNTrainerGSL(&tdata);
+    tdata = new NNTrainingData{ndata, 1, 1, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, flag_d1, flag_d2, flag_r, ffnn};
 
-    trainer->bestFit(100, nfits, maxchi, true);
+    trainer = new NNTrainerGSL(tdata);
+
+    trainer->bestFit(2, nfits, maxchi, true);
 
         /*
     fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, true, true);
