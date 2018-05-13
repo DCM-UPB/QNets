@@ -121,9 +121,11 @@ int main (void) {
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
     ffnn->connectFFNN();
     ffnn->addVariationalFirstDerivativeSubstrate();
-    if (lambda_d1 > 0 || lambda_d2 > 0) {ffnn->addFirstDerivativeSubstrate(); ffnn->addCrossFirstDerivativeSubstrate();};// first deriv also required for second cross deriv
+    ffnn->addFirstDerivativeSubstrate(); // we always want those derivatives for printout
+    ffnn->addSecondDerivativeSubstrate();
+    if (lambda_d1 > 0 || lambda_d2 > 0) {ffnn->addCrossFirstDerivativeSubstrate();};// first deriv also required for second cross deriv
     if (lambda_d1 > 0) flag_d1 = true;
-    if (lambda_d2 > 0) {ffnn->addSecondDerivativeSubstrate(); ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
+    if (lambda_d2 > 0) {ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
     if (lambda_r > 0) flag_r = true;
 
     // this is the data to be fitted
@@ -168,7 +170,6 @@ int main (void) {
     trainer = new NNTrainerGSL(tdata);
 
     trainer->bestFit(100, nfits, maxchi, 1);
-
 
 
     cout << "Done." << endl;

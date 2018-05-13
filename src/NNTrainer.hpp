@@ -35,7 +35,7 @@ public:
                 fit[i] = _ffnn->getBeta(i);
             }
 
-            if(ifit < 1 || abs(resi_noreg) < bestresi_noreg) {
+            if(ifit < 1 || (resi_noreg>=0 && resi_noreg < bestresi_noreg)) {
                 for(int i = 0; i<npar; ++i){
                     bestfit[i] = fit[i];
                     bestfit_err[i] = err[i];
@@ -100,8 +100,8 @@ public:
     void printFitOutput(const double min, const double max, const int npoints, const double xscale, const double yscale, const double xshift, const double yshift, const bool print_d1 = false, const bool print_d2 = false) {
         double base_input = 0.0;
         writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getOutput", "v.txt", xscale, yscale, xshift, yshift);
-        if (print_d1 && _tdata->flag_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", xscale, yscale, xshift, yshift);
-        if (print_d2 && _tdata->flag_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", xscale, yscale, xshift, yshift);
+        if (print_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", xscale, yscale, xshift, yshift);
+        if (print_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", xscale, yscale, xshift, yshift);
     }
 
     // store fitted NN in file
