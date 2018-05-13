@@ -121,7 +121,8 @@ int main (void) {
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
     ffnn->connectFFNN();
     ffnn->addVariationalFirstDerivativeSubstrate();
-    if (lambda_d1 > 0) {ffnn->addFirstDerivativeSubstrate(); ffnn->addCrossFirstDerivativeSubstrate(); flag_d1 = true;};
+    if (lambda_d1 > 0 || lambda_d2 > 0) {ffnn->addFirstDerivativeSubstrate(); ffnn->addCrossFirstDerivativeSubstrate();};// first deriv also required for second cross deriv
+    if (lambda_d1 > 0) flag_d1 = true;
     if (lambda_d2 > 0) {ffnn->addSecondDerivativeSubstrate(); ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
     if (lambda_r > 0) flag_r = true;
 
@@ -166,7 +167,7 @@ int main (void) {
 
     trainer = new NNTrainerGSL(tdata);
 
-    trainer->bestFit(2, nfits, maxchi, true);
+    trainer->bestFit(100, nfits, maxchi, true);
 
         /*
     fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, true, true);

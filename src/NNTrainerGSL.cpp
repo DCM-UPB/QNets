@@ -1,4 +1,5 @@
 #include "NNTrainerGSL.hpp"
+#include <iostream>
 
 // cost function without regularization and derivative terms
 int ffnn_f_pure(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
@@ -147,19 +148,17 @@ int ffnn_df_deriv(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
 // cost function for fitting, without derivative but with regularization
 int ffnn_f_pure_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
-    const int xdim = ((struct NNTrainingData *)fit_data)->xdim;
-    const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
     const double lambda_r = ((struct NNTrainingData *)fit_data)->lambda_r;
     FeedForwardNeuralNetwork * const ffnn = ((struct NNTrainingData *)fit_data)->ffnn;
 
-    const int nbeta = ffnn->getNBeta(), nshift3 = n*ydim + n*ydim*xdim, n_reg = nshift3 + nbeta;
+    const int nbeta = ffnn->getNBeta(), n_reg = n + nbeta;
     const double lambda_r_red = sqrt(lambda_r / nbeta);
 
     ffnn_f_pure(betas, fit_data, f);
 
     //append regularization
-    for (int i=nshift3; i<n_reg; ++i) {
-        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift3));
+    for (int i=n; i<n_reg; ++i) {
+        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-n));
     }
 
     return GSL_SUCCESS;
@@ -168,22 +167,20 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 // gradient of cost function without derivatives but with regularization
 int ffnn_df_pure_reg(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
-    const int xdim = ((struct NNTrainingData *)fit_data)->xdim;
-    const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
     const double lambda_r = ((struct NNTrainingData *)fit_data)->lambda_r;
     FeedForwardNeuralNetwork * ffnn = ((struct NNTrainingData *)fit_data)->ffnn;
 
-    const int nbeta = ffnn->getNBeta(), nshift3 = n*ydim + n*ydim*xdim, n_reg = nshift3 + nbeta;
+    const int nbeta = ffnn->getNBeta(), n_reg = n + nbeta;
     const double lambda_r_red = sqrt(lambda_r / nbeta);
 
     ffnn_df_pure(betas, fit_data, J);
 
     //append regularization gradient
-    for (int i=nshift3; i<n_reg; ++i) {
+    for (int i=n; i<n_reg; ++i) {
         for (int j=0; j<nbeta; ++j) {
             gsl_matrix_set(J, i, j, 0.0);
         }
-        gsl_matrix_set(J, i, i-nshift3, lambda_r_red);
+        gsl_matrix_set(J, i, i-n, lambda_r_red);
     }
 
     return GSL_SUCCESS;
@@ -251,6 +248,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
 
 
 void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose) {
+    using namespace std;
 
     //   Fit NN to data with following parameters:
     //   nsteps : number of fitting iterations
@@ -293,7 +291,7 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
     fdf_pure.params = _tdata;
 
     if (flag_d) {
-        ndata_noreg = ndata * _tdata->ydim + ndata * _tdata->ydim * _tdata->xdim;
+        ndata_noreg = ndata * _tdata->ydim + 2*(ndata * _tdata->ydim * _tdata->xdim);
 
         // deriv fdf without regularization
         fdf_noreg.f = ffnn_f_deriv;
@@ -334,6 +332,10 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
         ndata_full = ndata_noreg;
         fdf_full = fdf_noreg;
     };
+
+    cout << "ndata: " << ndata << endl;
+    cout << "ndata_noreg: " << ndata_noreg << endl;
+    cout << "ndata_full: " << ndata_full << endl;
 
     // allocate workspace with default parameters
     w_full = gsl_multifit_nlinear_alloc (T_full, &fdf_params, ndata_full, npar);
