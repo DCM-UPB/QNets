@@ -1,5 +1,4 @@
 #include "NNTrainerGSL.hpp"
-#include <iostream>
 
 // cost function without regularization and derivative terms
 int ffnn_f_pure(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
@@ -247,14 +246,20 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
 };
 
 
-void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const bool verbose) {
-    using namespace std;
+void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const bool verbose) {
 
-    //   Fit NN to data with following parameters:
+    //   Fit NN with the following passed variables:
+    //   fit: holds the to be fitted variables, i.e. betas
+    //   err: holds the corresponding fit error
+    //   resi_full: holds the full residual value, including all terms
+    //   resi_noreg: holds the residual value without regularization
+    //   resi_pure: holds the function-only residual value
+    //
+    //   and with the following parameters:
     //   nsteps : number of fitting iterations
-    //   nfits : maximum number of fits to achieve good fit
-    //   maxchi : maximum tolerable residual to consider a fit good
     //   verbose: print verbose output while fitting
+
+
 
 
     int npar = _ffnn->getNBeta(), ndata = _tdata->n;
@@ -331,10 +336,6 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
         ndata_full = ndata_noreg;
         fdf_full = fdf_noreg;
     };
-
-    cout << "ndata: " << ndata << endl;
-    cout << "ndata_noreg: " << ndata_noreg << endl;
-    cout << "ndata_full: " << ndata_full << endl;
 
     // allocate workspace with default parameters
     w_full = gsl_multifit_nlinear_alloc (T_full, &fdf_params, ndata_full, npar);
