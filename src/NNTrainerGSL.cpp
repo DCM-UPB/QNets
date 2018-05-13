@@ -92,8 +92,8 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const fit_data, gsl_vector * f
 
             gsl_vector_set(f, ishift + j, w[i][j] * (ffnn->getOutput(j) - y[i][j]));
             for (int k=0; k<xdim; ++k) {
-                if (flag_d1) gsl_vector_set(f, inshift + k*nshift + j, w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]));
-                if (flag_d2) gsl_vector_set(f, inshift2 + k*nshift + j, w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]));
+                gsl_vector_set(f, inshift + k*nshift + j, flag_d1? w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]) : 0.0);
+                gsl_vector_set(f, inshift2 + k*nshift + j, flag_d2? w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]) : 0.0);
             }
         }
     }
@@ -134,8 +134,8 @@ int ffnn_df_deriv(const gsl_vector * betas, void * const fit_data, gsl_matrix * 
 
                 gsl_matrix_set(J, ishift + j, ibeta, w[i][j] * ffnn->getVariationalFirstDerivative(j, ibeta));
                 for (int k=0; k<xdim; ++k) {
-                    if(flag_d1) gsl_matrix_set(J, inshift + k*nshift + j, ibeta, w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ibeta));
-                    if(flag_d2) gsl_matrix_set(J, inshift2 + k*nshift + j, ibeta, w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ibeta));
+                    gsl_matrix_set(J, inshift + k*nshift + j, ibeta, flag_d1? w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ibeta) : 0.0);
+                    gsl_matrix_set(J, inshift2 + k*nshift + j, ibeta, flag_d2? w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ibeta) : 0.0);
                 }
             }
         }
