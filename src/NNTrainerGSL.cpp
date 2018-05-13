@@ -1,7 +1,7 @@
 #include "NNTrainerGSL.hpp"
 
 // cost function without regularization and derivative terms
-int ffnn_f_pure(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
+int ffnn_f_pure(const gsl_vector * betas, void * const fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
     const double * const * const x = ((struct NNTrainingData *)fit_data)->x;
@@ -29,7 +29,7 @@ int ffnn_f_pure(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 };
 
 // gradient of cost function without regularization and derivative terms
-int ffnn_df_pure(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
+int ffnn_df_pure(const gsl_vector * betas, void * const fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
     const double * const * const x = ((struct NNTrainingData *)fit_data)->x;
@@ -58,7 +58,7 @@ int ffnn_df_pure(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
 };
 
 // cost function with derivative but without regularization
-int ffnn_f_deriv(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
+int ffnn_f_deriv(const gsl_vector * betas, void * const fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const int xdim = ((struct NNTrainingData *)fit_data)->xdim;
     const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
@@ -102,7 +102,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 };
 
 // gradient of cost function with derivative but without regularization
-int ffnn_df_deriv(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
+int ffnn_df_deriv(const gsl_vector * betas, void * const fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const int xdim = ((struct NNTrainingData *)fit_data)->xdim;
     const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
@@ -145,7 +145,7 @@ int ffnn_df_deriv(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
 };
 
 // cost function for fitting, without derivative but with regularization
-int ffnn_f_pure_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
+int ffnn_f_pure_reg(const gsl_vector * betas, void * const fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const double lambda_r = ((struct NNTrainingData *)fit_data)->lambda_r;
     FeedForwardNeuralNetwork * const ffnn = ((struct NNTrainingData *)fit_data)->ffnn;
@@ -164,7 +164,7 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
 };
 
 // gradient of cost function without derivatives but with regularization
-int ffnn_df_pure_reg(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
+int ffnn_df_pure_reg(const gsl_vector * betas, void * const fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const double lambda_r = ((struct NNTrainingData *)fit_data)->lambda_r;
     FeedForwardNeuralNetwork * ffnn = ((struct NNTrainingData *)fit_data)->ffnn;
@@ -186,7 +186,7 @@ int ffnn_df_pure_reg(const gsl_vector * betas, void * fit_data, gsl_matrix * J) 
 };
 
 // cost function for fitting, with derivative and regularization
-int ffnn_f_deriv_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) {
+int ffnn_f_deriv_reg(const gsl_vector * betas, void * const fit_data, gsl_vector * f) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const int xdim = ((struct NNTrainingData *)fit_data)->xdim;
     const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
@@ -207,7 +207,7 @@ int ffnn_f_deriv_reg(const gsl_vector * betas, void * fit_data, gsl_vector * f) 
 };
 
 // gradient of cost function with derivatives and regularization
-int ffnn_df_deriv_reg(const gsl_vector * betas, void * fit_data, gsl_matrix * J) {
+int ffnn_df_deriv_reg(const gsl_vector * betas, void * const fit_data, gsl_matrix * J) {
     const int n = ((struct NNTrainingData *)fit_data)->n;
     const int xdim = ((struct NNTrainingData *)fit_data)->xdim;
     const int ydim = ((struct NNTrainingData *)fit_data)->ydim;
@@ -403,49 +403,11 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
 
 
 
-}
+};
 
 
 /*
 
-    // compute fit distance for best betas
-    double getFitDistance() {
-        double dist = 0.0;
-        for(int i=0; i<_ndata; ++i) {
-            _ffnn->setInput(0, _xdata[i]);
-            _ffnn->FFPropagate();
-            dist += pow(_ydata[i]-_ffnn->getOutput(0), 2);
-        }
-        return dist / _ndata / pow(_yscale, 2);
-    }
 
-    // compare NN to data from index i0 to ie in increments di
-    void compareFit(const int i0=0, const int ie=-1, const int di = 1) {
-        using namespace std;
-
-        const int realie = (ie<0)? _ndata-1:ie; //set default ie although _ndata is not const
-
-        int j=i0;
-        while(j<_ndata && j<=realie){
-            _ffnn->setInput(0, _xdata[j]);
-            _ffnn->FFPropagate();
-            cout << "x: " << _xdata[j] / _xscale - _xshift << " f(x): " << _ydata[j] / _yscale - _yshift << " nn(x): " << _ffnn->getOutput(0) / _yscale - _yshift << endl;
-            j+=di;
-        }
-        cout << endl;
-    }
-
-    // print output of fitted NN to file
-    void printFitOutput(const double &min, const double &max, const int &npoints, const bool &print_d1 = false, const bool &print_d2 = false) {
-        double base_input = 0.0;
-        writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getOutput", "v.txt", _xscale, _yscale, _xshift, _yshift);
-        if (print_d1 && _flag_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", _xscale, _yscale, _xshift, _yshift);
-        if (print_d2 && _flag_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", _xscale, _yscale, _xshift, _yshift);
-    }
-
-    // store fitted NN in file
-    void printFitNN() {_ffnn->storeOnFile("nn.txt");}
-
-    FeedForwardNeuralNetwork * getFFNN() {return _ffnn;}
 };
 */

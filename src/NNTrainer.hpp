@@ -2,17 +2,18 @@
 #define NN_TRAINER
 
 #include "FeedForwardNeuralNetwork.hpp"
+#include "PrintUtilities.hpp"
 #include "NNTrainingData.hpp"
 
 class NNTrainer
 {
 
 protected:
-    FeedForwardNeuralNetwork * _ffnn;
-    NNTrainingData * _tdata;
+    NNTrainingData * const _tdata;
+    FeedForwardNeuralNetwork * const _ffnn;
 
 public:
-    NNTrainer(NNTrainingData * tdata) {_tdata = tdata; _ffnn = tdata->ffnn;};
+    NNTrainer(NNTrainingData * const tdata) : _tdata(tdata), _ffnn(tdata->ffnn) {};
     //~NNTrainer();
 
     void bestFit(const int nsteps, const int nfits, const double tolresi, const bool verbose) {
@@ -66,6 +67,45 @@ public:
         }
 
     };
+    /*
+    // compute fit distance for best betas
+    double getFitDistance() {
+        double dist = 0.0;
+        for(int i=0; i<_ndata; ++i) {
+            _ffnn->setInput(0, _xdata[i]);
+            _ffnn->FFPropagate();
+            dist += pow(_ydata[i]-_ffnn->getOutput(0), 2);
+        }
+        return dist / _ndata / pow(_yscale, 2);
+    }
+
+    // compare NN to data from index i0 to ie in increments di
+    void compareFit(const int i0=0, const int ie=-1, const int di = 1) {
+        using namespace std;
+
+        const int realie = (ie<0)? _ndata-1:ie; //set default ie although _ndata is not const
+
+        int j=i0;
+        while(j<_ndata && j<=realie){
+            _ffnn->setInput(0, _xdata[j]);
+            _ffnn->FFPropagate();
+            cout << "x: " << _xdata[j] / _xscale - _xshift << " f(x): " << _ydata[j] / _yscale - _yshift << " nn(x): " << _ffnn->getOutput(0) / _yscale - _yshift << endl;
+            j+=di;
+        }
+        cout << endl;
+    }
+    */
+
+    // print output of fitted NN to file
+    void printFitOutput(const double min, const double max, const int npoints, const double xscale, const double yscale, const double xshift, const double yshift, const bool print_d1 = false, const bool print_d2 = false) {
+        double base_input = 0.0;
+        writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getOutput", "v.txt", xscale, yscale, xshift, yshift);
+        if (print_d1 && _tdata->flag_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", xscale, yscale, xshift, yshift);
+        if (print_d2 && _tdata->flag_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", xscale, yscale, xshift, yshift);
+    }
+
+    // store fitted NN in file
+    void printFitNN() {_ffnn->storeOnFile("nn.txt");}
 
     virtual void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const bool verbose) = 0; // to be implemented by child
 };
