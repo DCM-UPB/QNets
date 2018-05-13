@@ -246,7 +246,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
 };
 
 
-void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const bool verbose) {
+void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const int verbose) {
 
     //   Fit NN with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
@@ -351,7 +351,7 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
     chi0 = sqrt(chisq0);
 
     // solve the system with a maximum of nsteps iterations
-    if (verbose) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w_full);
+    if (verbose > 1) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w_full);
     else status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, NULL, NULL, &info, w_full);
 
     // compute covariance of best fit parameters
@@ -379,7 +379,7 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
     gsl_blas_ddot(f, f, &chisq_pure);
     resi_pure = sqrt(chisq_pure);
 
-    if (verbose) {
+    if (verbose > 1) {
         fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w_full), gsl_multifit_nlinear_trs_name(w_full));
         fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w_full));
         fprintf(stderr, "function evaluations: %zu\n", fdf_full.nevalf);

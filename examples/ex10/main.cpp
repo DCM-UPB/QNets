@@ -167,7 +167,7 @@ int main (void) {
 
     trainer = new NNTrainerGSL(tdata);
 
-    trainer->bestFit(100, nfits, maxchi, false);
+    trainer->bestFit(100, nfits, maxchi, 1);
 
 
 
@@ -183,7 +183,7 @@ int main (void) {
 
     cout << endl;
     */
-    cout << "We print the output/NN to a file. The end." << endl;
+    cout << "Now we print the output/NN to a file. The end." << endl;
 
     // NON I/O CODE
     trainer->printFitOutput(-10, 10, 200, xscale, yscale, xshift, yshift, true, true);

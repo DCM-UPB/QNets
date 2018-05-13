@@ -16,7 +16,7 @@ public:
     NNTrainer(NNTrainingData * const tdata) : _tdata(tdata), _ffnn(tdata->ffnn) {};
     //~NNTrainer();
 
-    void bestFit(const int nsteps, const int nfits, const double tolresi, const bool verbose) {
+    void bestFit(const int nsteps, const int nfits, const double tolresi, const int verbose) {
         int npar = _ffnn->getNBeta();
         double fit[npar], bestfit[npar], err[npar], bestfit_err[npar];
         double resi_pure = -1.0, resi_noreg = -1.0, resi_full = -1.0, bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
@@ -47,20 +47,20 @@ public:
 
             ++ifit;
 
-            if (abs(resi_noreg) <= tolresi) {
-                if (verbose) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", resi_noreg, resi_full, resi_pure, tolresi);
+            if (resi_noreg>=0 && resi_noreg <= tolresi) {
+                if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", resi_noreg, resi_full, resi_pure, tolresi);
                 break;
             } else {
-                if (verbose) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, tolresi);
+                if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, tolresi);
                 if (ifit >= nfits) {
-                    if (verbose) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized fit residual %f.\n\n", nfits, bestresi_noreg);
+                    if (verbose > 0) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized fit residual %f.\n\n", nfits, bestresi_noreg);
                     break;
                 }
-                if (verbose) fprintf(stderr, "Let's try again.\n");
+                if (verbose > 0) fprintf(stderr, "Let's try again.\n");
             }
         }
 
-        if (verbose) {
+        if (verbose > 0) {
             fprintf(stderr, "best fit summary:\n");
             for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, bestfit[i], bestfit_err[i]);
             fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n", bestresi_full, bestresi_noreg, bestresi_pure);
@@ -107,7 +107,7 @@ public:
     // store fitted NN in file
     void printFitNN() {_ffnn->storeOnFile("nn.txt");}
 
-    virtual void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const bool verbose) = 0; // to be implemented by child
+    virtual void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const int verbose) = 0; // to be implemented by child
 };
 
 
