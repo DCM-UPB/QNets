@@ -4,6 +4,7 @@
 #include "FeedForwardNeuralNetwork.hpp"
 #include "PrintUtilities.hpp"
 #include "NNTrainingData.hpp"
+#include <sstream>
 
 class NNTrainer
 {
@@ -98,10 +99,19 @@ public:
 
     // print output of fitted NN to file
     void printFitOutput(const double min, const double max, const int npoints, const double xscale, const double yscale, const double xshift, const double yshift, const bool print_d1 = false, const bool print_d2 = false) {
+        using namespace std;
         double base_input = 0.0;
-        writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getOutput", "v.txt", xscale, yscale, xshift, yshift);
-        if (print_d1) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getFirstDerivative", "d1.txt", xscale, yscale, xshift, yshift);
-        if (print_d2) writePlotFile(_ffnn, &base_input, 0, 0, min, max, npoints, "getSecondDerivative", "d2.txt", xscale, yscale, xshift, yshift);
+
+        for (int i = 0; i<_tdata->xdim; ++i) {
+            for (int j = 0; j<_tdata->ydim; ++j) {
+                stringstream ss;
+                ss << i << "_" << j << ".txt";
+                writePlotFile(_ffnn, &base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str(), xscale, yscale, xshift, yshift);
+                if (print_d1) writePlotFile(_ffnn, &base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str(), xscale, yscale, xshift, yshift);
+                if (print_d2) writePlotFile(_ffnn, &base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str(), xscale, yscale, xshift, yshift);
+            }
+        }
+
     }
 
     // store fitted NN in file
