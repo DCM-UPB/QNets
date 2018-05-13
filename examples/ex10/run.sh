@@ -2,7 +2,7 @@
 
 source ../../config.sh
 
-FLAG_TO_USE="${DEBUGFLAGS}"
+FLAG_TO_USE="${OPTFLAGS}"
 
 \rm -f exe
 \rm -f *.o
@@ -41,5 +41,5 @@ echo ""
 echo ""
 echo ""
 ./exe
-#python plot.py
+python plot.py
 #valgrind --leak-check=full --track-origins=yes ./exe

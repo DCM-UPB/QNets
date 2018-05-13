@@ -167,16 +167,14 @@ int main (void) {
 
     trainer = new NNTrainerGSL(tdata);
 
-    trainer->bestFit(100, nfits, maxchi, true);
+    trainer->bestFit(100, nfits, maxchi, false);
 
-        /*
-    fitter = new NNFitter1D(nhl, nhu, ndata, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, true, true);
-    fitter->findFit(100, nfits, maxchi, false);
-    //
+
 
     cout << "Done." << endl;
     cout << "========================================================================" << endl;
     cout << endl;
+    /*
     cout << "Finally we compare the best fit NN to the target function:" << endl << endl;
 
     // NON I/O CODE
@@ -184,15 +182,16 @@ int main (void) {
     //
 
     cout << endl;
-    cout << "And print the output/NN to a file. The end." << endl;
+    */
+    cout << "We print the output/NN to a file. The end." << endl;
 
     // NON I/O CODE
-    fitter->printFitOutput(-10, 10, 200, true, true);
-    fitter->printFitNN();
+    trainer->printFitOutput(-10, 10, 200, xscale, yscale, xshift, yshift, true, true);
+    trainer->printFitNN();
     //
 
-    delete fitter;
-    */
+    //! A LOT OF DELETES MISSING !
+
     return 0;
 
 }
