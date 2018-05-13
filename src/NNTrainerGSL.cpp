@@ -267,8 +267,7 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
     gsl_matrix *J;
     gsl_matrix * covar = gsl_matrix_alloc (npar, npar);
 
-    double fit_init[npar];
-    gsl_vector_view gx = gsl_vector_view_array (fit_init, npar);
+    gsl_vector_view gx = gsl_vector_view_array (fit, npar);
     double chisq, chisq0, chi0;
     double chisq_noreg, chisq_pure;
     double c;
@@ -367,8 +366,6 @@ void NNTrainerGSL::findFit(const int nsteps, double * const fit, double * const 
     for (int i = 0; i<npar; ++i) {
         fit[i] = gsl_vector_get(w_full->x, i);
         err[i] = c*sqrt(gsl_matrix_get(covar,i,i));
-
-        fit_init[i] = fit[i]; // to calculate the other residuals
     }
     gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
     f = gsl_multifit_nlinear_residual(w_noreg);
