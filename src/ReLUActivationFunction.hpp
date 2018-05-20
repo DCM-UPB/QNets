@@ -8,9 +8,10 @@
 class ReLUActivationFunction: public ActivationFunctionInterface
 {
 protected:
+    const double _alpha;
 
 public:
-    ReLUActivationFunction(){}
+    ReLUActivationFunction(const double alpha = 0.0): _alpha(alpha) {}
     ~ReLUActivationFunction(){}
 
     std::string getIdCode(){return "relu";}

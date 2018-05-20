@@ -12,7 +12,7 @@ double SineActivationFunction::f(const double &in)
 
 double SineActivationFunction::f1d(const double &in)
 {
-    return -cos(in);
+    return cos(in);
 }
 
 
@@ -24,5 +24,5 @@ double SineActivationFunction::f2d(const double &in)
 
 double SineActivationFunction::f3d(const double &in)
 {
-    return cos(in);
+    return -cos(in);
 }
