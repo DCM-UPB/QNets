@@ -140,7 +140,7 @@ Then, once that all the parameters $\beta$ are set, the FFNN output can be compu
 where $\actf: \mathbb{R} \rightarrow \mathbb{R}$ is a so-called \emph{activation function} and we have made use of the Einstein notation, for which repeated symbols on different levels imply a summation, e.g. $x_i^j y^i = \sum_i x_i^j y^i$.
 The activation function is required to account for non-linear effects.
 The FFNN library provides several well-known activation functions by default, but the user has the possibility to define and use its own, even though its storage on a file it is not supported (explained later).
-These three activation functions are:
+These available activation functions are:
 \begin{enumerate}
 \item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$ \\
 The current default for hidden and output units (except offsets).
