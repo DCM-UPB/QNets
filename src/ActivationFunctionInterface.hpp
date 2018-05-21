@@ -31,15 +31,9 @@ public:
     {
         // generic implementation
         v = f(in);
-
-        if (flag_d1) v1d = this->f1d(in);
-        else v1d = 0.;
-
-        if (flag_d2) v2d = this->f2d(in);
-        else v2d = 0.;
-
-        if (flag_d3) v3d = this->f3d(in);
-        else v3d = 0.;
+        v1d = flag_d1 ? this->f1d(in) : 0.0;
+        v2d = flag_d2 ? this->f2d(in) : 0.0;
+        v3d = flag_d3 ? this->f3d(in) : 0.0;
     };
 };
 
