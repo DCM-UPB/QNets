@@ -125,31 +125,46 @@ double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
 // --- Beta Index
 
 bool NNRay::isBetaIndexUsedInThisRay(const int &id){
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
-    if ( it_beta != _intensity_id.end() ){
-        return true;
+    boolean * answer = _beta_used_in_this_ray.find(id);
+    if (answer != _beta_used_in_this_ray.end()){
+        return *answer;
     } else {
-        return false;
+        std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
+        if ( it_beta != _intensity_id.end() ){
+            _beta_used_in_this_ray[id] = true;
+            return true;
+        } else {
+            _beta_used_in_this_ray[id] = false;
+            return false;
+        }
     }
 }
 
 
 
 bool NNRay::isBetaIndexUsedForThisRay(const int &id){
-    if (isBetaIndexUsedInThisRay(id)){
-        return true;
-    }
+    boolean * answer = _beta_used_for_this_ray.find(id);
+    if (answer != _beta_used_for_this_ray.end()){
+        return *answer;
+    } else {
+        if (isBetaIndexUsedInThisRay(id)){
+            _beta_used_for_this_ray[id] = true;
+            return true;
+        }
 
-    for (NNUnit * u: _source){
-        NNUnitFeederInterface * feeder = u->getFeeder();
-        if (feeder != 0){
-            if (feeder->isBetaIndexUsedForThisRay(id)){
-                return true;
+        for (NNUnit * u: _source){
+            NNUnitFeederInterface * feeder = u->getFeeder();
+            if (feeder != 0){
+                if (feeder->isBetaIndexUsedForThisRay(id)){
+                    _beta_used_for_this_ray[id] = true;
+                    return true;
+                }
             }
         }
-    }
 
-    return false;
+        _beta_used_for_this_ray[id] = false;
+        return false;
+    }
 }
 
 

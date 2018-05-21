@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <random>
+#include <map>
 
 class NNRay: public NNUnitFeederInterface{
 protected:
@@ -21,9 +22,17 @@ protected:
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
     int _intensity_id_shift;  // shift of the previous vector
 
+    // store information about which beta are used in or for this ray
+    // NB: 'in' this ray means that the beta is part of the ray
+    //     'for' this ray means that the beta is either used in this ray or in another
+    //           ray that genreates an output that is directly or indirectly used
+    //           in this ray (sources)
+    std::map<int, boolean> _beta_used_in_this_ray;
+    std::map<int, boolean> _beta_used_for_this_ray;
+
 public:
     NNRay(NNLayer * nnl);
-    virtual ~NNRay();
+    virtual ~NNRay(){_beta_used_in_this_ray.clear(); _beta_used_for_this_ray.clear()};
 
     // beta
     int getNBeta(){return _intensity.size();}
