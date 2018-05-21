@@ -125,7 +125,7 @@ double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
 // --- Beta Index
 
 bool NNRay::isBetaIndexUsedInThisRay(const int &id){
-    std::map<int,bool>::iterator it = _beta_used_for_this_ray.find(id);
+    std::map<int,bool>::iterator it = _beta_used_in_this_ray.find(id);
     if (it != _beta_used_in_this_ray.end()){
         return it->second;
     } else {
