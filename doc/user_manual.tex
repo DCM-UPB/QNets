@@ -10,6 +10,7 @@
 \usepackage[unicode=true,colorlinks=true,linkcolor=RoyalBlue,citecolor=RoyalBlue]{hyperref}
 \usepackage{natbib}
 \usepackage{lipsum}
+\usepackage{hyperref}
 
 \title{The Feed Forward Neural Network library}
 \author{Francesco Calcavecchia}
@@ -152,13 +153,13 @@ Unlike normal activation functions it is symmetric around origin and not monoton
 Periodic activation function for special use cases.
 \item the \emph{identity}: $\idaf(x) \equiv x$ \\
 This function is linear and therefore should not be used for hidden units, but it is used per default for offset units.
-\item the \emph{ReLU function}: $\reluaf(x) \equiv 
+\item the \emph{PReLU\footnote{\href{https://arxiv.org/abs/1502.01852}{arXiv:1502.01852}} function}: $\reluaf(x) \equiv 
 \begin{cases}
   x & \text{if $x>0$} \\
   \alpha * x & \text{if $x<=0$}
 \end{cases}$ \\
-The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and because their gradient doesn't vanish, Rectified Linear Units are widely used in deep neural networks. However, the function is not differentiable at x=0 and has flat derivatives elsewhere. 
-\item the \emph{SELU function}: $\seluaf(x) \equiv \lambda * 
+The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and because their gradient doesn't vanish, (Parametric) Rectified Linear Units are widely used in deep neural networks. However, the function is not differentiable at x=0 and has flat derivatives elsewhere. 
+\item the \emph{SELU\footnote{\href{https://arxiv.org/abs/1706.02515}{arXiv:1706.02515}} function}: $\seluaf(x) \equiv \lambda * 
 \begin{cases}
   x & \text{if $x>0$} \\
   \alpha * e^{x}- \alpha & \text{if $x<=0$}
