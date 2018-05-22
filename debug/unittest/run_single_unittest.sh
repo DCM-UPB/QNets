@@ -18,7 +18,7 @@ $CC $FLAGS $DEBUGFLAGS -Wall -I${ROOT_FOLDER}/src/ -c *.cpp
 
 case ${OS_NAME} in
     "Linux")
-        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -Wl,-rpath=$(pwd)/../ -o exe *.o -l${LIBNAME}
+        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -Wl,-rpath=$(pwd)/../../../ -o exe *.o -l${LIBNAME}
         ;;
     "Darwin")
         $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -o exe *.o -l${LIBNAME}
