@@ -15,7 +15,7 @@ int main (void) {
     const int nhl = 2;
     const int nhu[nhl] = {6,3};
 
-    const int neval_actf = 100000000;
+    const int neval_actf = 20000000;
     const int neval_ffp = 500000;
 
     const int nactfs = 7;
@@ -37,26 +37,35 @@ int main (void) {
     }
     for (int i=0; i<neval_actf; ++i) indata[i] = rd(rgen);
 
+    // ACTF deriv benchmark
     for (int iactf=0; iactf<nactfs; ++iactf) {
-
-        // ACTF deriv benchmark
         cout << "ACTF derivative benchmark with " << neval_actf << " evaluations for " << actf_ids[iactf] << " activation function." << endl;
         cout << "====================================================================================" << endl << endl;
         cout << "individual function calls:" << endl;
         cout << "f:          " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, false, false, false) << " seconds" << endl;
         cout << "f+d1:       " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, false, false, false) << " seconds" << endl;
+        cout << "f+d2:       " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, true, false, false) << " seconds" << endl;
+        cout << "f+d3:       " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, false, true, false) << " seconds" << endl;
         cout << "f+d1+d2:    " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, true, false, false) << " seconds" << endl;
+        cout << "f+d1+d3:    " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, false, true, false) << " seconds" << endl;
+        cout << "f+d2+d3:    " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, true, true, false) << " seconds" << endl;
         cout << "f+d1+d2+d3: " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, true, true, false) << " seconds" << endl;
         cout << endl;
         cout << "fad function call:" << endl;
         cout << "f:          " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, false, false, true) << " seconds" << endl;
         cout << "f+d1:       " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, false, false, true) << " seconds" << endl;
+        cout << "f+d2:       " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, true, false, true) << " seconds" << endl;
+        cout << "f+d3:       " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, false, true, true) << " seconds" << endl;
         cout << "f+d1+d2:    " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, true, false, true) << " seconds" << endl;
+        cout << "f+d1+d3:    " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, false, true, true) << " seconds" << endl;
+        cout << "f+d2+d3:    " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, false, true, true, true) << " seconds" << endl;
         cout << "f+d1+d2+d3: " << benchmark_actf_derivs(std_actf::provideActivationFunction(actf_ids[iactf]), indata, neval_actf, true, true, true, true) << " seconds" << endl;
         cout << "====================================================================================" << endl << endl;
         cout << endl;
+    }
 
-        // FFPropagate benchmark
+    // FFPropagate benchmark
+    for (int iactf=0; iactf<nactfs; ++iactf) {
         ffnn = new FeedForwardNeuralNetwork(xndim+1, nhu[0], yndim+1);
         for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
         ffnn->connectFFNN();
