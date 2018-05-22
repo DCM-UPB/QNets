@@ -13,7 +13,7 @@ public:
     SineActivationFunction(){}
     ~SineActivationFunction(){}
 
-    std::string getIdCode(){return "sine";}
+    std::string getIdCode(){return "sin";}
 
     double f(const double &in);
 
