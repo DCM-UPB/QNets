@@ -4,7 +4,7 @@
 
 ## Unit Test 1
 
-`ut1/`: check that the derivatives are computed correctly
+`ut1/`: check that the FFNN derivatives are computed correctly
 
 
 
@@ -23,3 +23,9 @@
 ## Unit Test 4
 
 `ut4/`: check that the compute and propagate work properly
+
+
+
+## Unit Test 5
+
+`ut5/`: check that the activation functions derivatives are correct
