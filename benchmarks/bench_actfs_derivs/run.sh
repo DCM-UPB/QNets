@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../../../config.sh
+source ../../config.sh
 
 FLAG_TO_USE="${OPTFLAGS}"
 
@@ -8,7 +8,7 @@ FLAG_TO_USE="${OPTFLAGS}"
 \rm -f *.o
 
 # project root directory
-ROOT_FOLDER=$(dirname $(dirname $(dirname $(pwd))))
+ROOT_FOLDER=$(dirname $(dirname $(pwd)))
 
 #runtime dynamic library path
 RPATH="${ROOT_FOLDER}"
