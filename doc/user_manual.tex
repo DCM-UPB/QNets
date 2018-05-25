@@ -144,7 +144,7 @@ The FFNN library provides several well-known activation functions by default, bu
 These available activation functions are:
 \begin{enumerate}
 \item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$ \\
-The current default for hidden and output units (except offsets).
+The current default for hidden and output units.
 \item the \emph{tansig function}: $\tansaf(x) \equiv \frac{2}{1+e^{-2x}} - 1$ \\
 Faster approximation to the regular tanh. Similar to logistic function, but with output in [-1,1].  
 \item the \emph{gaussian}: $\gssaf(x) \equiv e^{-x^2}$ \\
@@ -152,7 +152,7 @@ Unlike normal activation functions it is symmetric around origin and not monoton
 \item the \emph{sine function}: $\sinaf(x) \equiv sin(x)$ \\
 Periodic activation function for special use cases.
 \item the \emph{identity}: $\idaf(x) \equiv x$ \\
-This function is linear and therefore should not be used for hidden units, but it is used per default for offset units.
+This function is linear and therefore should not be used for (all) hidden units.
 \item the \emph{PReLU\footnote{\href{https://arxiv.org/abs/1502.01852}{arXiv:1502.01852}} function}: $\reluaf(x) \equiv 
 \begin{cases}
   x & \text{if $x>0$} \\
