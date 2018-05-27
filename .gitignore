@@ -73,7 +73,8 @@ debug/*.txt
 debug/unittest/*/*.o
 debug/unittest/*/run_single_unittest.sh
 debug/unittest/*/*.txt
-debug/benchmarks/*/*.o
+
+benchmarks/*/*.o
 
 examples/*/a.out
 examples/*/*.o
