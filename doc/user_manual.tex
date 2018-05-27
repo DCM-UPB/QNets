@@ -145,7 +145,7 @@ These available activation functions are:
 \begin{enumerate}
 \item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$ \\
 The current default for hidden and output units.
-\item the \emph{tansig function}: $\tansaf(x) \equiv \frac{2}{1+e^{-2*x}} - 1$ \\
+\item the \emph{tansig function}: $\tansaf(x) \equiv \frac{2}{1+e^{-2x}} - 1$ \\
 Faster approximation to the regular tanh. Similar to logistic function, but with output in [-1,1].  
 \item the \emph{gaussian}: $\gssaf(x) \equiv e^{-x^2}$ \\
 Unlike normal activation functions it is symmetric around origin and not monotonic. Still there are use cases for it.
@@ -156,13 +156,13 @@ This function is linear and therefore should not be used for (all) hidden units.
 \item the \emph{PReLU\footnote{\href{https://arxiv.org/abs/1502.01852}{arXiv:1502.01852}} function}: $\reluaf(x) \equiv 
 \begin{cases}
   x & \text{if $x>0$} \\
-  \alpha * x & \text{if $x<=0$}
+  \alpha x & \text{if $x<=0$}
 \end{cases}$ \\
 The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and because their gradient doesn't vanish, (Parametric) Rectified Linear Units are widely used in deep neural networks. However, the function is not differentiable at x=0 and has flat derivatives elsewhere. 
-\item the \emph{SELU\footnote{\href{https://arxiv.org/abs/1706.02515}{arXiv:1706.02515}} function}: $\seluaf(x) \equiv \lambda * 
+\item the \emph{SELU\footnote{\href{https://arxiv.org/abs/1706.02515}{arXiv:1706.02515}} function}: $\seluaf(x) \equiv \lambda 
 \begin{cases}
   x & \text{if $x>0$} \\
-  \alpha * e^{x}- \alpha & \text{if $x<=0$}
+  \alpha e^{x}- \alpha & \text{if $x<=0$}
 \end{cases}$ \\
 The Scaled Exponential Units (with two fixed hyper-parameters $\alpha$ and $\lambda$) solve some problems of ReLUs and can provide a self-normalizing network. But still they are not differentiable at x=0. 
 
