@@ -1,6 +1,24 @@
 #!/bin/bash
-# Script to compile and run a single main.cpp of a benchmark, with gperftools profiling enabled
-# This script is meant to be sourced by another script which sets the appropriate ROOT_PATH
+# Script to compile and run a single main.cpp of a benchmark, with optimization according to OPTFLAGS.
+# This script is meant to be sourced by another script which sets the appropriate ROOT_PATH.
+
+# remember current path
+MYPATH="$(pwd)"
+
+# Build the library using the optimization flags
+echo ""
+echo ""
+echo "Building the library with optimization flags..."
+echo ""
+echo ""
+cd "${ROOT_PATH}"
+./build.sh
+cd "${MYPATH}"
+echo ""
+echo ""
+echo "Done."
+echo ""
+echo ""
 
 source "${ROOT_PATH}/config.sh"
 
@@ -22,7 +40,7 @@ echo ""
 echo ""
 
 
-# Build the debugging main executable
+# Build the main executable
 echo "$CC $FLAGS $FLAG_TO_USE -Wall -I"${SRC_PATH}" -I/usr/local/include -I"${COM_PATH}" -c *.cpp"
 $CC $FLAGS $FLAG_TO_USE -Wall -I"${SRC_PATH}" -I/usr/local/include -I"${COM_PATH}" -c *.cpp
 
