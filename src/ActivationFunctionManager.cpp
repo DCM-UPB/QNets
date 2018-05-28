@@ -4,14 +4,22 @@
 
 namespace std_actf{
 
+    IdentityActivationFunction id_actf = IdentityActivationFunction();
+    LogisticActivationFunction lgs_actf = LogisticActivationFunction();
+    GaussianActivationFunction gss_actf = GaussianActivationFunction();
+    ReLUActivationFunction relu_actf = ReLUActivationFunction();
+    SELUActivationFunction selu_actf = SELUActivationFunction();
+    TanSigmoidActivationFunction tans_actf = TanSigmoidActivationFunction();
+    SineActivationFunction sin_actf = SineActivationFunction();
+
     std::vector<ActivationFunctionInterface *> supported_actf = {
-        new IdentityActivationFunction(),
-        new LogisticActivationFunction(),
-        new GaussianActivationFunction(),
-        new ReLUActivationFunction(),
-        new SELUActivationFunction(),
-        new TanSigmoidActivationFunction(),
-        new SineActivationFunction()
+        &id_actf,
+        &lgs_actf,
+        &gss_actf,
+        &relu_actf,
+        &selu_actf,
+        &tans_actf,
+        &sin_actf
     };
 
     ActivationFunctionInterface * provideActivationFunction(const std::string idcode){
