@@ -41,21 +41,56 @@ class benchmark_actf_derivs:
 
         self.data[actf_name] = actf_data # store last actf's data
 
-def plot_compare_actfs(benchmark_list, **kwargs):
 
+def plot_compare_actfs(benchmark_list, **kwargs):
     nbm = len(benchmark_list)
+    xlabels = benchmark_list[0].data['lgs']['fad'].keys()
 
     fig = figure()
     itp = 0
     for benchmark in benchmark_list:
-        for itm, mode in enumerate(['individual', 'fad']):
+        for mode in ['individual', 'fad']:
+
             itp+=1
             ax = fig.add_subplot(nbm, 2, itp)
-            ax.set_title(benchmark.label + ' version, ' + mode + ' function calls')
-            ax.set_ylabel('Time per evaluation [ns]')
             for actf in benchmark.data.keys():
-                ax.errorbar(benchmark.data[actf][mode].keys(), [v[0] for v in benchmark.data[actf][mode].values()], xerr=None, yerr=[v[1] for v in benchmark.data[actf][mode].values()], **kwargs)
+                values = [v[0] for v in benchmark.data[actf][mode].values()]
+                errors = [v[1] for v in benchmark.data[actf][mode].values()]
+                ax.errorbar(xlabels, values, xerr=None, yerr=errors, **kwargs)
+
+            ax.set_title(benchmark.label + ' version, ' + mode + ' function calls')
+            ax.set_ylabel('Time per eval [ns]')
             ax.legend(benchmark.data.keys())
+
+    fig.tight_layout()
+    return fig
+
+
+def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
+    nbm = len(benchmark_list)
+    nactf = len(actf_list)
+    if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']))
+    else: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad'])) + 0.5*width
+    xlabels = benchmark_list[0].data[actf_list[0]]['fad'].keys()
+
+    fig = figure()
+    itp = 0
+    for actf in actf_list:
+        for mode in ['individual', 'fad']:
+
+            itp+=1
+            ax = fig.add_subplot(nactf, 2, itp)
+            for itb, benchmark in enumerate(benchmark_list):
+                values = [v[0] for v in benchmark.data[actf][mode].values()]
+                errors = [v[1] for v in benchmark.data[actf][mode].values()]
+                ax.bar(ind + itb*width, values, width, yerr=errors, **kwargs)
+
+            ax.set_title(actf + ' actf, ' + mode + ' function calls')
+            ax.set_ylabel(r'Time per eval [$\mu s$]')
+            ax.set_xticks(ind + 0.5*(nbm-1)*width)
+            ax.set_xticklabels(xlabels)
+            ax.legend([benchmark.label for benchmark in benchmark_list])
+
     fig.tight_layout()
     return fig
 
@@ -68,5 +103,6 @@ except:
     benchmark_list = [benchmark_new]
 
 fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
+fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'selu', 'relu'])
 
 show()
