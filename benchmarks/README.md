@@ -15,8 +15,10 @@ Currently there are the following benchmarks:
 Enter the desired benchmark's directory and execute:
    `./run.sh`
 
-Each benchmark will write the result into a file `benchmark_new.out` and will then execute a script for visualization.
-To let the plot compare the new result versus an older one, you have to provide the old output file as `benchmark_old.out`.
+Each benchmark will write the result into a file `benchmark_new.out`. For visualization execute the plot script:
+   `python plot.py`
+
+To let the plot compare the new result versus an older one, you have to provide the old output file in the folder as `benchmark_old.out`.
 
 # Profiling
 

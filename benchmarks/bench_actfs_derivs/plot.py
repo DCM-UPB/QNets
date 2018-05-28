@@ -47,6 +47,8 @@ def plot_compare_actfs(benchmark_list, **kwargs):
     xlabels = benchmark_list[0].data['lgs']['fad'].keys()
 
     fig = figure()
+    fig.suptitle('ACTF derivative benchmark, comparing activation functions',fontsize=14)
+
     itp = 0
     for benchmark in benchmark_list:
         for mode in ['individual', 'fad']:
@@ -62,7 +64,6 @@ def plot_compare_actfs(benchmark_list, **kwargs):
             ax.set_ylabel('Time per eval [ns]')
             ax.legend(benchmark.data.keys())
 
-    fig.tight_layout()
     return fig
 
 
@@ -74,6 +75,8 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
     xlabels = benchmark_list[0].data[actf_list[0]]['fad'].keys()
 
     fig = figure()
+    fig.suptitle('ACTF derivative benchmark, comparing versions',fontsize=14)
+
     itp = 0
     for actf in actf_list:
         for mode in ['individual', 'fad']:
@@ -86,12 +89,11 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
                 ax.bar(ind + itb*width, values, width, yerr=errors, **kwargs)
 
             ax.set_title(actf + ' actf, ' + mode + ' function calls')
-            ax.set_ylabel(r'Time per eval [$\mu s$]')
+            ax.set_ylabel(r'Time per eval [ns]')
             ax.set_xticks(ind + 0.5*(nbm-1)*width)
             ax.set_xticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list])
 
-    fig.tight_layout()
     return fig
 
 
@@ -103,6 +105,6 @@ except:
     benchmark_list = [benchmark_new]
 
 fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
-fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'selu', 'relu'])
+fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
 
 show()
