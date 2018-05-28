@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <iomanip>
 
 #include "ActivationFunctionManager.hpp"
 #include "PrintUtilities.hpp"
@@ -7,19 +8,29 @@
 
 #include "FFNNBenchmarks.cpp"
 
-int main (void) {
-    using namespace std;
+using namespace std;
 
-    FeedForwardNeuralNetwork * ffnn;
+void run_single_benchmark(const string label, FeedForwardNeuralNetwork * const ffnn, const double * const * const xdata, const int neval, const int nruns) {
+    pair<double, double> result;
+    const double time_scale = 1000000.; //microseconds
+
+    result = sample_benchmark_FFPropagate(ffnn, xdata, neval, nruns);
+    cout << label << ":" << setw(max(1, 20-(int)label.length())) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " microseconds" << endl;
+}
+
+int main (void) {
+
+    const int neval = 2000;
+    const int nruns = 25;
 
     const double xndim = 2, yndim = 1;
     const int nhl = 2;
     const int nhu[nhl] = {6,3};
 
-    const int neval = 500000;
-
     const int nactfs = 7;
     const string actf_ids[nactfs] = {"lgs", "gss", "id_", "tans", "sin", "relu", "selu"};
+
+    FeedForwardNeuralNetwork * ffnn;
 
     double ** const xdata = new double*[neval]; // xndim input data for propagate bench
     for (int i=0; i<neval; ++i) xdata[i] = new double[2];
@@ -53,22 +64,31 @@ int main (void) {
             ffnn->getLayer(nhl+1)->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction("id_"));
         }
 
-        cout << "FFPropagate benchmark with " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
-        cout << "====================================================================================" << endl << endl;
+        cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
+        cout << "=========================================================================================" << endl << endl;
         cout << "NN structure looks like:" << endl;
         printFFNNStructure(ffnn);
-        cout << endl << endl;
-        cout << "Benchmark results:" << endl;
-        cout << "noderivs: " << benchmark_FFPropagate(ffnn, xdata, neval) << " seconds" << endl;
-        ffnn->addFirstDerivativeSubstrate();
-        ffnn->addSecondDerivativeSubstrate();
-        ffnn->addVariationalFirstDerivativeSubstrate();
-        cout << "stdderivs: " << benchmark_FFPropagate(ffnn, xdata, neval) << " seconds" << endl;
-        ffnn->addCrossFirstDerivativeSubstrate();
-        ffnn->addCrossSecondDerivativeSubstrate();
-        cout << "allderivs: " << benchmark_FFPropagate(ffnn, xdata, neval) << " seconds" << endl;
-        cout << "====================================================================================" << endl << endl;
         cout << endl;
+        cout << "Benchmark results (time per propagation):" << endl;
+
+        run_single_benchmark("f", ffnn, xdata, neval, nruns);
+
+        ffnn->addFirstDerivativeSubstrate();
+        run_single_benchmark("f+d1", ffnn, xdata, neval, nruns);
+
+        ffnn->addSecondDerivativeSubstrate();
+        run_single_benchmark("f+d1+d2", ffnn, xdata, neval, nruns);
+
+        ffnn->addVariationalFirstDerivativeSubstrate();
+        run_single_benchmark("f+d1+d2+vd1", ffnn, xdata, neval, nruns);
+
+        ffnn->addCrossFirstDerivativeSubstrate();
+        run_single_benchmark("f+d1+d2+vd1+cd1", ffnn, xdata, neval, nruns);
+
+        ffnn->addCrossSecondDerivativeSubstrate();
+        run_single_benchmark("f+d1+d2+vd1+cd1+cd2", ffnn, xdata, neval, nruns);
+
+        cout << "=========================================================================================" << endl << endl << endl;
 
         delete ffnn;
     }
