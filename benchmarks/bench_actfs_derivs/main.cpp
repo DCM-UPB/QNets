@@ -4,7 +4,7 @@
 #include "ActivationFunctionManager.hpp"
 #include "PrintUtilities.hpp"
 
-#include "../tools/FFNNBenchmarks.cpp"
+#include "FFNNBenchmarks.cpp"
 
 int main (void) {
     using namespace std;

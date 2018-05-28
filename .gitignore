@@ -75,6 +75,7 @@ debug/unittest/*/run_single_unittest.sh
 debug/unittest/*/*.txt
 
 benchmarks/*/*.o
+benchmarks/*/benchmark_*.out
 
 examples/*/a.out
 examples/*/*.o
