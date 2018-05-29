@@ -47,7 +47,7 @@ def plot_compare_actfs(benchmark_list, **kwargs):
     xlabels = benchmark_list[0].data['lgs']['fad'].keys()
 
     fig = figure()
-    fig.suptitle('ACTF derivative benchmark, comparing activation functions',fontsize=14)
+    fig.suptitle('Actf derivative benchmark, comparing all actfs',fontsize=14)
 
     itp = 0
     for benchmark in benchmark_list:
@@ -75,7 +75,7 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
     xlabels = benchmark_list[0].data[actf_list[0]]['fad'].keys()
 
     fig = figure()
-    fig.suptitle('ACTF derivative benchmark, comparing versions',fontsize=14)
+    fig.suptitle('Actf derivative benchmark, comparing versions for selected actfs',fontsize=14)
 
     itp = 0
     for actf in actf_list:
@@ -83,13 +83,14 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
 
             itp+=1
             ax = fig.add_subplot(nactf, 2, itp)
+            scales = array([100./v[0] for v in benchmark_list[0].data[actf][mode].values()]) # we will normalize data to the first benchmark's results
             for itb, benchmark in enumerate(benchmark_list):
-                values = [v[0] for v in benchmark.data[actf][mode].values()]
-                errors = [v[1] for v in benchmark.data[actf][mode].values()]
+                values = array([v[0] for v in benchmark.data[actf][mode].values()])*scales
+                errors = array([v[1] for v in benchmark.data[actf][mode].values()])*scales
                 ax.bar(ind + itb*width, values, width, yerr=errors, **kwargs)
 
             ax.set_title(actf + ' actf, ' + mode + ' function calls')
-            ax.set_ylabel(r'Time per eval [ns]')
+            ax.set_ylabel(r'Time per eval (%)')
             ax.set_xticks(ind + 0.5*(nbm-1)*width)
             ax.set_xticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list])
@@ -97,14 +98,16 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
     return fig
 
 
+# Script
+
 benchmark_new = benchmark_actf_derivs('benchmark_new.out', 'new')
 try:
     benchmark_old = benchmark_actf_derivs('benchmark_old.out', 'old')
-    benchmark_list = [benchmark_new, benchmark_old]
+    benchmark_list = [benchmark_old, benchmark_new]
 except:
     benchmark_list = [benchmark_new]
 
 fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
-fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
+if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
 
 show()

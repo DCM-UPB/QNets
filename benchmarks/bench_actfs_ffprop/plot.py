@@ -35,7 +35,7 @@ def plot_compare_actfs(benchmark_list, **kwargs):
     xlabels = benchmark_list[0].data['lgs'].keys()
 
     fig = figure()
-    fig.suptitle('FFPropagate benchmark, comparing activation functions',fontsize=14)
+    fig.suptitle('FFPropagate benchmark, comparing all actfs',fontsize=14)
 
     itp = 0
     for benchmark in benchmark_list:
@@ -63,21 +63,21 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
     xlabels = benchmark_list[0].data[actf_list[0]].keys()
 
     fig = figure()
-    fig.suptitle('FFPropagate benchmark, comparing versions',fontsize=14)
+    fig.suptitle('FFPropagate benchmark, comparing versions for selected actfs',fontsize=14)
 
     itp = 0
     for actf in actf_list:
 
             itp+=1
             ax = fig.add_subplot(nactf, 1, itp)
+            scales = array([100./v[0] for v in benchmark_list[0].data[actf].values()]) # we will normalize data to the first benchmark's results
             for itb, benchmark in enumerate(benchmark_list):
-                values = [v[0] for v in benchmark.data[actf].values()]
-                errors = [v[1] for v in benchmark.data[actf].values()]
+                values = array([v[0] for v in benchmark.data[actf].values()])*scales
+                errors = array([v[1] for v in benchmark.data[actf].values()])*scales
                 ax.bar(ind + itb*width, values, width, yerr=errors, **kwargs)
 
-            ax.set_yscale('log')
             ax.set_title(actf + ' actf')
-            ax.set_ylabel(r'Time per propagation [$\mu s$]')
+            ax.set_ylabel('Time per propagation [%]')
             ax.set_xticks(ind + 0.5*(nbm-1)*width)
             ax.set_xticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list])
@@ -88,11 +88,11 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
 benchmark_new = benchmark_actf_ffprop('benchmark_new.out', 'new')
 try:
     benchmark_old = benchmark_actf_ffprop('benchmark_old.out', 'old')
-    benchmark_list = [benchmark_new, benchmark_old]
+    benchmark_list = [benchmark_old, benchmark_new]
 except:
     benchmark_list = [benchmark_new]
 
 fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
-fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
+if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
 
 show()
