@@ -16,9 +16,12 @@ Enter the desired benchmark's directory and execute:
    `./run.sh`
 
 Each benchmark will write the result into a file `benchmark_new.out`. For visualization execute the plot script:
-   `python plot.py`
+   `python plot.py benchmark_new.out`
 
-To let the plot compare the new result versus an older one, you have to provide the old output file in the folder as `benchmark_old.out`.
+To let the plot compare the new result versus an older one, you have to provide the old output file like:
+   `python plot.py benchmark_old.out benchmark_new.out`.
+
+You may also change new/old to more meaningful labels, anything like benchmark_*.out is allowed (except extra _ or . characters).
 
 # Profiling
 

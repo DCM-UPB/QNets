@@ -1,4 +1,5 @@
 from pylab import *
+import sys
 
 class benchmark_actf_derivs:
 
@@ -100,14 +101,17 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
 
 # Script
 
-benchmark_new = benchmark_actf_derivs('benchmark_new.out', 'new')
-try:
-    benchmark_old = benchmark_actf_derivs('benchmark_old.out', 'old')
-    benchmark_list = [benchmark_old, benchmark_new]
-except:
-    benchmark_list = [benchmark_new]
+benchmark_list = []
+for benchmark_file in sys.argv[1:]:
+    try:
+        benchmark = benchmark_actf_derivs(benchmark_file, benchmark_file.split('_')[1].split('.')[0])
+        benchmark_list.append(benchmark)
+    except:
+        print("Warning: Couldn't load benchmark file " + benchmark_file + "!")
 
-fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
-if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
+if len(benchmark_list)<1: print("Error: Not even one benchmark loaded!")
+else:
+    fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
+    if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
 
 show()
