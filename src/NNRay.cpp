@@ -34,25 +34,30 @@ bool NNRay::getVariationalParameterValue(const int &id, double &value){
 int NNRay::setVariationalParametersIndexes(const int &starting_index){
     _intensity_id_shift=starting_index;
 
-    int idx=starting_index;
-    _intensity_id.clear();
-    for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i){
-        _intensity_id.push_back(idx);
-        _betas_used_in_this_ray.push_back(idx);
-        _betas_used_for_this_ray.push_back(idx);
-
-        idx++;
-    }
     for (NNUnit * u: _source){
         NNUnitFeederInterface * feeder = u->getFeeder();
         if (feeder != 0){
-            for (int i=0; i<idx; ++i) {
+            for (int i=0; i<starting_index; ++i) {
                 if (feeder->isBetaIndexUsedForThisRay(i)){
-                    _betas_used_for_this_ray.push_back(i);
+                    _betas_used_for_this_ray.insert(i);
                 }
             }
         }
     }
+
+    int idx=starting_index;
+    _intensity_id.clear();
+    for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i){
+        _intensity_id.push_back(idx);
+        _betas_used_in_this_ray.insert(idx);
+        _betas_used_for_this_ray.insert(idx);
+
+        idx++;
+    }
+    //both betas_used vectors are sorted -> binary_search can be used later
+    //std::cout << is_sorted(_betas_used_in_this_ray.begin(), _betas_used_in_this_ray.end()) << std::endl;
+    //std::cout << is_sorted(_betas_used_for_this_ray.begin(), _betas_used_for_this_ray.end()) << std::endl;
+
     return idx;
 }
 
@@ -138,7 +143,9 @@ double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
 // --- Beta Index
 
 bool NNRay::isBetaIndexUsedInThisRay(const int &id){
-    if (std::find(_betas_used_in_this_ray.begin(), _betas_used_in_this_ray.end(), id) != _betas_used_in_this_ray.end()) {
+    //if (std::binary_search(_betas_used_in_this_ray.begin(), _betas_used_in_this_ray.end(), id)) {
+    //if (std::find(_betas_used_in_this_ray.begin(), _betas_used_in_this_ray.end(), id) != _betas_used_in_this_ray.end()) {
+    if ( _betas_used_in_this_ray.find(id) != _betas_used_in_this_ray.end()) {
         return true;
     }
     else {
@@ -163,7 +170,9 @@ bool NNRay::isBetaIndexUsedInThisRay(const int &id){
 
 
 bool NNRay::isBetaIndexUsedForThisRay(const int &id){
-    if (std::find(_betas_used_for_this_ray.begin(), _betas_used_for_this_ray.end(), id) != _betas_used_for_this_ray.end()) {
+    //if (std::binary_search(_betas_used_for_this_ray.begin(), _betas_used_for_this_ray.end(), id)) {
+    //if (std::find(_betas_used_for_this_ray.begin(), _betas_used_for_this_ray.end(), id) != _betas_used_for_this_ray.end()) {
+    if ( _betas_used_for_this_ray.find(id) != _betas_used_for_this_ray.end()) {
         return true;
     }
     else {

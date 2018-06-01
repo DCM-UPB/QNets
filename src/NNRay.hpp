@@ -6,8 +6,9 @@
 #include "NNUnitFeederInterface.hpp"
 
 #include <vector>
+#include <set>
 #include <random>
-#include <map>
+//#include <map>
 
 class NNRay: public NNUnitFeederInterface{
 protected:
@@ -27,8 +28,10 @@ protected:
     //     'for' this ray means that the beta is either used in this ray or in another
     //           ray that genreates an output that is directly or indirectly used
     //           in this ray (sources)
-    std::vector<int> _betas_used_in_this_ray;
-    std::vector<int> _betas_used_for_this_ray;
+    //std::map<int,bool> _beta_used_in_this_ray;
+    //std::map<int,bool> _beta_used_for_this_ray;
+    std::set<int> _betas_used_in_this_ray;
+    std::set<int> _betas_used_for_this_ray;
 
 public:
     NNRay(NNLayer * nnl);
