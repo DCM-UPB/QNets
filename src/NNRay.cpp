@@ -38,7 +38,20 @@ int NNRay::setVariationalParametersIndexes(const int &starting_index){
     _intensity_id.clear();
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i){
         _intensity_id.push_back(idx);
+        _betas_used_in_this_ray.push_back(idx);
+        _betas_used_for_this_ray.push_back(idx);
+
         idx++;
+    }
+    for (NNUnit * u: _source){
+        NNUnitFeederInterface * feeder = u->getFeeder();
+        if (feeder != 0){
+            for (int i=0; i<idx; ++i) {
+                if (feeder->isBetaIndexUsedForThisRay(i)){
+                    _betas_used_for_this_ray.push_back(i);
+                }
+            }
+        }
     }
     return idx;
 }
@@ -125,6 +138,13 @@ double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
 // --- Beta Index
 
 bool NNRay::isBetaIndexUsedInThisRay(const int &id){
+    if (std::find(_betas_used_in_this_ray.begin(), _betas_used_in_this_ray.end(), id) != _betas_used_in_this_ray.end()) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    /*
     std::map<int,bool>::iterator it = _beta_used_in_this_ray.find(id);
     if (it != _beta_used_in_this_ray.end()){
         return it->second;
@@ -137,12 +157,19 @@ bool NNRay::isBetaIndexUsedInThisRay(const int &id){
             _beta_used_in_this_ray[id] = false;
             return false;
         }
-    }
+        }*/
 }
 
 
 
 bool NNRay::isBetaIndexUsedForThisRay(const int &id){
+    if (std::find(_betas_used_for_this_ray.begin(), _betas_used_for_this_ray.end(), id) != _betas_used_for_this_ray.end()) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    /*
     std::map<int,bool>::iterator it = _beta_used_for_this_ray.find(id);
     if (it != _beta_used_for_this_ray.end()){
         return it->second;
@@ -164,7 +191,7 @@ bool NNRay::isBetaIndexUsedForThisRay(const int &id){
 
         _beta_used_for_this_ray[id] = false;
         return false;
-    }
+    }*/
 }
 
 
@@ -194,6 +221,6 @@ NNRay::~NNRay(){
     _source.clear();
     _intensity.clear();
     _intensity_id.clear();
-    _beta_used_in_this_ray.clear();
-    _beta_used_for_this_ray.clear();
+    _betas_used_in_this_ray.clear();
+    _betas_used_for_this_ray.clear();
 }
