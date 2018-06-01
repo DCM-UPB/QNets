@@ -55,11 +55,12 @@ def plot_compare_actfs(benchmark_list, **kwargs):
     return fig
 
 
-def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
+def plot_compare_runs(benchmark_list, actf_list, width = 0.75, **kwargs):
     nbm = len(benchmark_list)
+    bwidth = width/float(nbm)
     nactf = len(actf_list)
     if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]]))
-    else: ind = arange(len(benchmark_list[0].data[actf_list[0]])) + 0.5*width
+    else: ind = arange(len(benchmark_list[0].data[actf_list[0]])) + 0.5*bwidth
     xlabels = benchmark_list[0].data[actf_list[0]].keys()
 
     fig = figure()
@@ -74,11 +75,11 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.35, **kwargs):
             for itb, benchmark in enumerate(benchmark_list):
                 values = array([v[0] for v in benchmark.data[actf].values()])*scales
                 errors = array([v[1] for v in benchmark.data[actf].values()])*scales
-                ax.bar(ind + itb*width, values, width, yerr=errors, **kwargs)
+                ax.bar(ind + itb*bwidth, values, bwidth, yerr=errors, **kwargs)
 
             ax.set_title(actf + ' actf')
             ax.set_ylabel('Time per propagation [%]')
-            ax.set_xticks(ind + 0.5*(nbm-1)*width)
+            ax.set_xticks(ind + 0.5*(nbm-1)*bwidth)
             ax.set_xticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list])
 
