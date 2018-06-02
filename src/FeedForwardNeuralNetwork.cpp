@@ -10,7 +10,10 @@
 #include <random>
 #include <limits>
 #include <algorithm>
+
+#ifdef OPENMP
 #include <thread> //to detect the number of hardware threads on the system
+#endif
 
 // --- Variational Parameters
 
@@ -319,16 +322,37 @@ void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double 
     }
 }
 
-#define UNITS_PER_THREAD 1
+#ifdef OPENMP
 bool compare_NUnits(NNLayer * A, NNLayer * B) { return A->getNUnits()<B->getNUnits(); }
+#endif
+
 void FeedForwardNeuralNetwork::FFPropagate()
 {
-#pragma omp parallel num_threads(std::max(1, std::min((int)std::thread::hardware_concurrency(), ( (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 ) / UNITS_PER_THREAD )))
+
+#ifdef OPENMP
+
+    int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 );
+    if (nthreads>1) {
+#pragma omp parallel num_threads(nthreads)
+        for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
+            {
+                _L[i]->computeValues(); // actual omp for inside computeValues
+#pragma omp barrier // just to be sure
+            }
+    }
+    else {
+
+#endif
+
     for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            _L[i]->computeValues(); // actual omp for inside computeValues
-#pragma omp barrier // just to be sure
+            _L[i]->computeValues();
         }
+
+#ifdef OPENMP
+    }
+#endif
+
 }
 
 
