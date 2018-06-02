@@ -75,10 +75,13 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.75, **kwargs):
             for itb, benchmark in enumerate(benchmark_list):
                 values = array([v[0] for v in benchmark.data[actf].values()])*scales
                 errors = array([v[1] for v in benchmark.data[actf].values()])*scales
-                ax.bar(ind + itb*bwidth, values, bwidth, yerr=errors, **kwargs)
+                rects = ax.bar(ind + itb*bwidth, values, bwidth, yerr=errors, **kwargs)
+                for rect in rects:
+                    ax.text(rect.get_x() + rect.get_width()/2., 1, '%d' % int(rect.get_height()), ha='center', va='bottom')
 
             ax.set_title(actf + ' actf')
             ax.set_ylabel('Time per propagation [%]')
+            ax.set_ylim([0,200])
             ax.set_xticks(ind + 0.5*(nbm-1)*bwidth)
             ax.set_xticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list])
