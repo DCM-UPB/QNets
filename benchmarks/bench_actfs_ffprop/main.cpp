@@ -20,12 +20,12 @@ void run_single_benchmark(const string label, FeedForwardNeuralNetwork * const f
 
 int main (void) {
 
-    const int neval = 2000;
-    const int nruns = 25;
+    const int neval = 1000;
+    const int nruns = 5;
 
-    const double xndim = 2, yndim = 1;
+    const int xndim = 4, yndim = 1;
     const int nhl = 2;
-    const int nhu[nhl] = {6,3};
+    const int nhu[nhl] = {9,5};
 
     const int nactfs = 7;
     const string actf_ids[nactfs] = {"lgs", "gss", "id_", "tans", "sin", "relu", "selu"};
@@ -33,7 +33,7 @@ int main (void) {
     FeedForwardNeuralNetwork * ffnn;
 
     double ** const xdata = new double*[neval]; // xndim input data for propagate bench
-    for (int i=0; i<neval; ++i) xdata[i] = new double[2];
+    for (int i=0; i<neval; ++i) xdata[i] = new double[xndim];
 
     // generate some random input
     random_device rdev;
