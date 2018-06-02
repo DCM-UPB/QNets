@@ -18,10 +18,10 @@ $CC $FLAGS $DEBUGFLAGS -Wall -I${ROOT_FOLDER}/src/ -c *.cpp
 
 case ${OS_NAME} in
     "Linux")
-        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -Wl,-rpath=${ROOT_FOLDER} -o exe *.o -l${LIBNAME}
+        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -Wl,-rpath=${ROOT_FOLDER} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
         ;;
     "Darwin")
-        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -o exe *.o -l${LIBNAME}
+        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
         install_name_tool -change lib${LIBNAME}.so ${ROOT_FOLDER}/lib${LIBNAME}.so exe
         ;;
     *)

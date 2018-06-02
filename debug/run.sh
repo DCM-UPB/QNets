@@ -27,14 +27,14 @@ $CC $FLAGS $DEBUGFLAGS -Wall -I$(pwd)/../src/ -c *.cpp
 
 case ${OS_NAME} in
     "Darwin")
-        echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src -L$(pwd)/.. -L${RPATH} -o exe *.o -l${LIBNAME}"
-        $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -L$(pwd)/../ -L${RPATH} -o exe *.o -l${LIBNAME}
+        echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src -L$(pwd)/.. -L${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL"
+        $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -L$(pwd)/../ -L${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
         # echo "install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe"
         # install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
         ;;
     "Linux")
-        echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
-        $CC $FLAGS $DEBUGFLAGS -L$(pwd)/../ -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
+        echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -Wl,-rpath=${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL"
+        $CC $FLAGS $DEBUGFLAGS -L$(pwd)/../ -Wl,-rpath=${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
         ;;
 esac
 
