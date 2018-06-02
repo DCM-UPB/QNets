@@ -319,15 +319,15 @@ void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double 
     }
 }
 
-bool myfn(NNLayer * A, NNLayer * B) { return A->getNUnits()<B->getNUnits(); }
-
+#define UNITS_PER_THREAD 1
+bool compare_NUnits(NNLayer * A, NNLayer * B) { return A->getNUnits()<B->getNUnits(); }
 void FeedForwardNeuralNetwork::FFPropagate()
 {
-    int nthreads = std::max(1, (int)std::thread::hardware_concurrency());
-#pragma omp parallel num_threads(std::min(nthreads, std::max(1, ((*std::max_element(_L.begin(), _L.end(), myfn))->getNUnits()-1)/3)))
+#pragma omp parallel num_threads(std::max(1, std::min((int)std::thread::hardware_concurrency(), ( (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 ) / UNITS_PER_THREAD )))
     for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            _L[i]->computeValues();
+            _L[i]->computeValues(); // actual omp for inside computeValues
+#pragma omp barrier // just to be sure
         }
 }
 
