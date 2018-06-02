@@ -64,8 +64,12 @@ int NNLayer::getNVariationalParameters()
 
 void NNLayer::computeValues()
 {
-#pragma omp parallel for schedule(dynamic, 1)
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i) _U[i]->computeValues();
+    _U[0]->computeValues(); // offset unit
+    if (_U.size()>6 && this->getNVariationalParameters() > 0) { // only use omp for when it is useful
+#pragma omp for schedule(static, 1)
+        for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i) _U[i]->computeValues();
+    }
+    else for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i) _U[i]->computeValues();
 }
 
 

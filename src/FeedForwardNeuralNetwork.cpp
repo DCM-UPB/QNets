@@ -9,7 +9,8 @@
 #include <stdexcept>
 #include <random>
 #include <limits>
-
+#include <algorithm>
+#include <thread> //to detect the number of hardware threads on the system
 
 // --- Variational Parameters
 
@@ -318,9 +319,12 @@ void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double 
     }
 }
 
+bool myfn(NNLayer * A, NNLayer * B) { return A->getNUnits()<B->getNUnits(); }
 
 void FeedForwardNeuralNetwork::FFPropagate()
 {
+    int nthreads = std::max(1, (int)std::thread::hardware_concurrency());
+#pragma omp parallel num_threads(std::min(nthreads, std::max(1, ((*std::max_element(_L.begin(), _L.end(), myfn))->getNUnits()-1)/3)))
     for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
             _L[i]->computeValues();
