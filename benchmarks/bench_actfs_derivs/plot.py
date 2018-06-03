@@ -76,8 +76,8 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.8, **kwargs):
 
     bwidth = width/float(nbm)
     nactf = len(actf_list)
-    if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad'])-1, -1, -1)
-    else: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad'])-1, -1, -1) + 0.5*bwidth
+    if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']), 0, -1)
+    else: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']), 0, -1) + 0.5*bwidth
     xlabels = benchmark_list[0].data[actf_list[0]]['fad'].keys()
 
     fig = figure()
@@ -93,14 +93,14 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.8, **kwargs):
             for itb, benchmark in enumerate(benchmark_list[1:]):
                 values = array([v[0] for v in benchmark.data[actf][mode].values()])*scales
                 errors = array([v[1] for v in benchmark.data[actf][mode].values()])*scales
-                rects = ax.barh(ind + itb*bwidth, values, bwidth, xerr=errors, **kwargs)
+                rects = ax.barh(ind - itb*bwidth, values, bwidth, xerr=errors, **kwargs)
                 for rect in rects:
                     ax.text(1, rect.get_y() + rect.get_height()/2., '%d' % int(rect.get_width()), ha='left', va='center', fontsize=8)
 
             ax.set_title(actf + ' actf, ' + mode + ' function calls')
             if ita==len(actf_list)-1: ax.set_xlabel(r'Time per eval (%)')
             ax.set_xlim([0,200])
-            ax.set_yticks(ind + 0.5*(nbm-1)*bwidth)
+            ax.set_yticks(ind - 0.5*(nbm-1)*bwidth)
             ax.set_yticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list[1:]])
 

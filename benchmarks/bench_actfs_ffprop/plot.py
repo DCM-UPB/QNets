@@ -63,8 +63,8 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.8, **kwargs):
 
     bwidth = width/float(nbm)
     nactf = len(actf_list)
-    if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]])-1, -1, -1)
-    else: ind = arange(len(benchmark_list[0].data[actf_list[0]])-1, -1, -1) + 0.5*bwidth
+    if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]]), 0, -1)
+    else: ind = arange(len(benchmark_list[0].data[actf_list[0]]), 0, -1) - 0.5*bwidth
     xlabels = benchmark_list[0].data[actf_list[0]].keys()
 
     fig = figure()
@@ -79,14 +79,14 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.8, **kwargs):
             for itb, benchmark in enumerate(benchmark_list[1:]):
                 values = array([v[0] for v in benchmark.data[actf].values()])*scales
                 errors = array([v[1] for v in benchmark.data[actf].values()])*scales
-                rects = ax.barh(ind + itb*bwidth, values, bwidth, xerr=errors, **kwargs)
+                rects = ax.barh(ind - itb*bwidth, values, bwidth, xerr=errors, **kwargs)
                 for rect in rects:
                     ax.text(1., rect.get_y() + rect.get_height()/2., '%d' % int(rect.get_width()), ha='left', va='center', fontsize=8)
 
             ax.set_title(actf + ' actf')
             if ita==len(actf_list)-1: ax.set_xlabel('Time per propagation [%]')
             ax.set_xlim([0,200])
-            ax.set_yticks(ind + 0.5*(nbm-1)*bwidth)
+            ax.set_yticks(ind - 0.5*(nbm-1)*bwidth)
             ax.set_yticklabels(xlabels)
             ax.legend([benchmark.label for benchmark in benchmark_list[1:]])
 
