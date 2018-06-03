@@ -1,8 +1,6 @@
 #include "NNUnit.hpp"
 #include "NNUnitFeederInterface.hpp"
 
-#include <iostream>
-
 // --- Computation
 
 void NNUnit::computeValues(){

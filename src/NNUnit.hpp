@@ -33,7 +33,7 @@ public:
     NNUnitFeederInterface * getFeeder(){return _feeder;}
 
     // Computation
-    void computeValues();
+    virtual void computeValues();
 };
 
 
