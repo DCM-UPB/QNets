@@ -330,7 +330,8 @@ void FeedForwardNeuralNetwork::FFPropagate()
 {
 
 #ifdef OPENMP
-
+// compile with -DOPENMP -fopenmp flags to use parallelization here
+    
     int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 );
     if (nthreads>1) {
 #pragma omp parallel num_threads(nthreads)
