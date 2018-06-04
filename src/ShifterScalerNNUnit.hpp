@@ -15,13 +15,8 @@ protected:
 public:
 
     // Constructor
-    ShifterScalerNNUnit(ActivationFunctionInterface * actf, NNUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerUnit(shift, scale) {};
+    ShifterScalerNNUnit(ActivationFunctionInterface * actf, NNUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerUnit(feeder, shift, scale) {};
 
-    // Computation
-    void computeValues() {
-        NNUnit::computeValues();
-        ShifterScalerUnit::_applyShiftScale();
-    };
 };
 
 

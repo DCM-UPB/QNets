@@ -1,11 +1,12 @@
 #ifndef SHIFTER_SCALER_UNIT
 #define SHIFTER_SCALER_UNIT
 
-#include "NetworkUnitInterface.hpp"
+#include "NetworkUnit.hpp"
+#include "NNUnitFeederInterface.hpp"
 
 
 // Unit with linear output function applied after activation
-class ShifterScalerUnit: public NetworkUnitInterface
+class ShifterScalerUnit: virtual public NetworkUnit
 {
 protected:
     double _shift; // _shift will be added to the activation value
@@ -22,7 +23,7 @@ protected:
 
 public:
     // Constructor
-    ShifterScalerUnit(const double shift = 0., const double scale = 1.) {_shift = shift; _scale = scale;}
+    ShifterScalerUnit(NNUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NetworkUnit(feeder) {_shift = shift; _scale = scale;}
 
     // Setters
     void setShift(const double shift){_shift=shift;}
@@ -32,6 +33,10 @@ public:
     double getShift() {return _shift;}
     double getScale() {return _scale;}
 
+    virtual void computeValues() {
+        NetworkUnit::computeValues();
+        _applyShiftScale();
+    }
 };
 
 #endif
