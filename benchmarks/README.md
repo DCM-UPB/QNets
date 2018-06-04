@@ -3,6 +3,8 @@
 This directory contains benchmarks to test the performance of certain parts of the library.
 The `common` subfolder contains common source code and script files that are used by the individual benchmarks in `bench_*` folders.
 
+A conda environment that can be used to run the python script is available as `conda-env.yml`
+
 Currently there are the following benchmarks:
 
    `bench_actfs_deriv`: Benchmark of activation function derivative calculation for various activation functions.
@@ -22,6 +24,7 @@ To let the plot compare the new result versus an older one, you have to provide 
    `python plot.py benchmark_old.out benchmark_new.out`.
 
 You may also change new/old to more meaningful labels, anything like benchmark_*.out is allowed (except extra _ or . characters).
+
 
 # Profiling
 
