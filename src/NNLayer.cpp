@@ -64,7 +64,10 @@ int NNLayer::getNVariationalParameters()
 
 void NNLayer::computeValues()
 {
-    for (NNUnit * u : _U) u->computeValues();
+#ifdef OPENMP
+#pragma omp for schedule(static, 1)
+#endif
+    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
 }
 
 
