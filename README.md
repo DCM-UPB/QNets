@@ -15,3 +15,11 @@ In `examples/` there are several examples.
 Insert the system parameters in a file named `config.sh` (use `config_template.sh` as template) and then simply execute the command
 
    `./build.sh`
+
+
+## Multi-threading: OpenMP
+
+This library supports multi-threading computation with a shared memory paradigm, thanks to OpenMP.
+
+To activate this feature add the flags `-DOPENMP -fopenmp` to `OPTFLAGS` in the `config.sh` file.
+You also need to add the line of code `#define OPENMP` at the beginning of the file `FeedForwardNeuralNetwork.hpp` (or `.cpp`).
