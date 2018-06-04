@@ -6,6 +6,7 @@
 #include "NNUnitFeederInterface.hpp"
 
 #include <vector>
+#include <set>
 #include <random>
 
 class NNRay: public NNUnitFeederInterface{
@@ -20,6 +21,14 @@ protected:
     std::vector<double> _intensity;   // intensity of each sorgent unit, i.e. its weight
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
     int _intensity_id_shift;  // shift of the previous vector
+
+    // store information about which beta are used in or for this ray
+    // NB: 'in' this ray means that the beta is part of the ray
+    //     'for' this ray means that the beta is either used in this ray or in another
+    //           ray that genreates an output that is directly or indirectly used
+    //           in this ray (sources)
+    std::set<int> _betas_used_in_this_ray;
+    std::set<int> _betas_used_for_this_ray;
 
 public:
     NNRay(NNLayer * nnl);

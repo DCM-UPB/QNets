@@ -1,9 +1,6 @@
 #include "NNRay.hpp"
 
-#include <iostream>
 #include <algorithm>
-
-
 
 
 // --- Variational Parameters
@@ -32,14 +29,35 @@ bool NNRay::getVariationalParameterValue(const int &id, double &value){
 
 
 int NNRay::setVariationalParametersIndexes(const int &starting_index){
-    _intensity_id_shift=starting_index;
+    // Here we assign external vp indexes to internal indexes.
+    // Also, we create two betas_used sets which are explained in the header.
+    // NOTE: The current method assumes, that no index larger than max_id,
+    //       max_id = starting_index + source.size() - 1 ,
+    //       may be in use FOR (and trivially IN) this ray. 
+    // NOTE2: betas_used sets are automatically sorted -> binary_search can be used later
+    
+    for (NNUnit * u: _source){
+        NNUnitFeederInterface * feeder = u->getFeeder();
+        if (feeder != 0){
+            for (int i=0; i<starting_index; ++i) {
+                if (feeder->isBetaIndexUsedForThisRay(i)){
+                    _betas_used_for_this_ray.insert(i);
+                }
+            }
+        }
+    }
 
+    _intensity_id_shift=starting_index;
     int idx=starting_index;
     _intensity_id.clear();
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i){
         _intensity_id.push_back(idx);
+        _betas_used_in_this_ray.insert(idx);
+        _betas_used_for_this_ray.insert(idx);
+
         idx++;
     }
+
     return idx;
 }
 
@@ -121,37 +139,26 @@ double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
 }
 
 
-
 // --- Beta Index
 
 bool NNRay::isBetaIndexUsedInThisRay(const int &id){
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
-    if ( it_beta != _intensity_id.end() ){
+    if ( _betas_used_in_this_ray.find(id) != _betas_used_in_this_ray.end()) {
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
 
 
-
 bool NNRay::isBetaIndexUsedForThisRay(const int &id){
-    if (isBetaIndexUsedInThisRay(id)){
+    if ( _betas_used_for_this_ray.find(id) != _betas_used_for_this_ray.end()) {
         return true;
     }
-
-    for (NNUnit * u: _source){
-        NNUnitFeederInterface * feeder = u->getFeeder();
-        if (feeder != 0){
-            if (feeder->isBetaIndexUsedForThisRay(id)){
-                return true;
-            }
-        }
+    else {
+        return false;
     }
-
-    return false;
 }
-
 
 
 // --- Constructor
@@ -179,4 +186,6 @@ NNRay::~NNRay(){
     _source.clear();
     _intensity.clear();
     _intensity_id.clear();
+    _betas_used_in_this_ray.clear();
+    _betas_used_for_this_ray.clear();
 }
