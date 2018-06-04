@@ -61,7 +61,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 
     // variables used inside the loop
     int maxNBeta;
-    NNUnitFeederInterface * feeder;
+    NetworkUnitFeederInterface * feeder;
 
     for (int u=0; u<maxNUnits; ++u){
         // max number of beta (i.e. variational parameters) for the units u over all layers

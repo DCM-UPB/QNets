@@ -3,7 +3,7 @@
 
 #include "NetworkUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
-#include "NNUnitFeederInterface.hpp"
+#include "NetworkUnitFeederInterface.hpp"
 
 
 // Unit of an Artificial Neural Network
@@ -17,7 +17,7 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf, NNUnitFeederInterface * feeder = NULL) : NetworkUnit(feeder) {_actf = actf;}
+    NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : NetworkUnit(feeder) {_actf = actf;}
 
     // Setters
     void setActivationFunction(ActivationFunctionInterface * actf){_actf=actf;}

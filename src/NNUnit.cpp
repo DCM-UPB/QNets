@@ -1,5 +1,4 @@
 #include "NNUnit.hpp"
-#include "NNUnitFeederInterface.hpp"
 
 // --- Computation
 

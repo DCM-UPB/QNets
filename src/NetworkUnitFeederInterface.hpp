@@ -1,13 +1,13 @@
-#ifndef NN_UNIT_FEEDER_INTERFACE
-#define NN_UNIT_FEEDER_INTERFACE
+#ifndef NETWORK_UNIT_FEEDER_INTERFACE
+#define NETWORK_UNIT_FEEDER_INTERFACE
 
 
-class NNUnitFeederInterface
+class NetworkUnitFeederInterface
 {
 protected:
 
 public:
-    virtual ~NNUnitFeederInterface(){}
+    virtual ~NetworkUnitFeederInterface(){}
 
     // get info on beta
     virtual int getNBeta() = 0;
@@ -15,7 +15,7 @@ public:
     virtual void setBeta(const int &i, const double &b) = 0;
 
     // feed
-    virtual double getFeed() = 0;  // get   sum_j( b_j x_j )
+    virtual double getFeed() = 0;  // i.e.  get sum_j( b_j x_j )
 
     // derivatives
     virtual double getFirstDerivativeFeed(const int &i) = 0;  // get   sum_j( b_j dx_j/dx0_i ), where x0 is the coordinate in the input layer

@@ -4,7 +4,7 @@
 #include "ShifterScalerUnit.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
-#include "NNUnitFeederInterface.hpp"
+#include "NetworkUnitFeederInterface.hpp"
 
 
 // ShiftScaled Neural Network Unit
@@ -15,7 +15,7 @@ protected:
 public:
 
     // Constructor
-    ShifterScalerNNUnit(ActivationFunctionInterface * actf, NNUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerUnit(feeder, shift, scale) {};
+    ShifterScalerNNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerUnit(feeder, shift, scale) {};
 
 };
 

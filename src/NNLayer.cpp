@@ -1,150 +1,26 @@
 #include "NNLayer.hpp"
 
-#include "NNRay.hpp"
+#include "NetworkUnitRay.hpp"
 #include "ActivationFunctionManager.hpp"
 
 #include <iostream>
 
 
-// --- Variational Parameters
-
-bool NNLayer::setVariationalParameter(const int &id, const double &vp)
-{
-    std::vector<NNUnit *>::size_type i=1;
-    NNUnitFeederInterface * feeder;
-    bool flag = false;
-    while ( (!flag) && (i<_U.size()) )
-        {
-            feeder = _U[i]->getFeeder();
-            if (feeder)
-                {
-                    flag = feeder->setVariationalParameterValue(id,vp);
-                }
-            i++;
-        }
-    return flag;
-}
-
-
-bool NNLayer::getVariationalParameter(const int &id, double &vp)
-{
-    std::vector<NNUnit *>::size_type i=1;
-    NNUnitFeederInterface * feeder;
-    bool flag = false;
-    while ( (!flag) && (i<_U.size()) )
-        {
-            feeder = _U[i]->getFeeder();
-            if (feeder)
-                {
-                    flag = feeder->getVariationalParameterValue(id, vp);
-                }
-            i++;
-        }
-    return flag;
-}
-
-
-int NNLayer::getNVariationalParameters()
-{
-    int nvp=0;
-    NNUnitFeederInterface * feeder;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            feeder = _U[i]->getFeeder();
-            if (feeder)
-                {
-                    nvp += feeder->getNVariationalParameters();
-                }
-        }
-    return nvp;
-}
-
-
-// --- Computation
-
-void NNLayer::computeValues()
-{
-#ifdef OPENMP
-#pragma omp for schedule(static, 1)
-#endif
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
-}
-
-
-// --- Values to compute
-
-int NNLayer::setVariationalParametersID(const int &id_vp)
-{
-    int id = id_vp;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            id = _U[i]->getFeeder()->setVariationalParametersIndexes(id);
-        }
-    return id;
-}
-
-
-void NNLayer::addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setCrossSecondDerivativeSubstrate(nx0, nvp);
-        }
-}
-
-
-void NNLayer::addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
-        }
-}
-
-
-void NNLayer::addVariationalFirstDerivativeSubstrate(const int &nvp)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setVariationalFirstDerivativeSubstrate(nvp);
-        }
-}
-
-
-void NNLayer::addSecondDerivativeSubstrate(const int &nx0)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setSecondDerivativeSubstrate(nx0);
-        }
-}
-
-
-void NNLayer::addFirstDerivativeSubstrate(const int &nx0)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setFirstDerivativeSubstrate(nx0);
-        }
-}
-
-
 // --- Connection
 
-void NNLayer::connectOnTopOfLayer(NNLayer * nnl)
+void NNLayer::connectOnTopOfLayer(NetworkLayerInterface * nl)
 {
-    NNUnitFeederInterface * ray;
+    NetworkUnitFeederInterface * ray;
     for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
         {
-            ray = new NNRay(nnl);
+            ray = new NetworkUnitRay(nl);
             _U[i]->setFeeder(ray);
         }
 }
 
-
 void NNLayer::disconnect()
 {
-    NNUnitFeederInterface * ray;
+    NetworkUnitFeederInterface * ray;
     for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
         {
             ray = _U[i]->getFeeder();
@@ -182,11 +58,6 @@ void NNLayer::setSize(const int &nunits)
         }
 }
 
-
-// --- Getters
-
-
-
 // --- Constructor
 
 NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
@@ -200,14 +71,13 @@ NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
         }
 }
 
-
 // --- Destructor
 
 NNLayer::~NNLayer()
 {
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
+    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i)
         {
             delete _U[i];
         }
-    _U.clear();
+    // clear is done by base destructor
 }
