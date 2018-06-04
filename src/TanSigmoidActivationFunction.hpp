@@ -1,19 +1,19 @@
-#ifndef GAUSSIAN_ACTIVATION_FUNCTION
-#define GAUSSIAN_ACTIVATION_FUNCTION
+#ifndef TANSIGMOID_ACTIVATION_FUNCTION
+#define TANSIGMOID_ACTIVATION_FUNCTION
 
 #include "ActivationFunctionInterface.hpp"
 #include <string>
 
 
-class GaussianActivationFunction: public ActivationFunctionInterface
+class TanSigmoidActivationFunction: public ActivationFunctionInterface
 {
 protected:
 
 public:
-    GaussianActivationFunction(){}
-    ~GaussianActivationFunction(){}
+    TanSigmoidActivationFunction(){}
+    ~TanSigmoidActivationFunction(){}
 
-    std::string getIdCode(){return "gss";}
+    std::string getIdCode(){return "tans";}
 
     double f(const double &in);
 

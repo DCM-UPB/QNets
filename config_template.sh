@@ -14,6 +14,9 @@ FLAGS="-std=c++11 -Wall"
 # Optimization flags
 OPTFLAGS="-O3"
 
+# Profiling flags
+GPERFFLAGS="${OPTFLAGS} -DWITHGPERFTOOLS -lprofiler"
+
 # Debuggin flags
 DEBUGFLAGS="-g -O0"
 

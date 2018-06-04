@@ -10,6 +10,7 @@
 \usepackage[unicode=true,colorlinks=true,linkcolor=RoyalBlue,citecolor=RoyalBlue]{hyperref}
 \usepackage{natbib}
 \usepackage{lipsum}
+\usepackage{hyperref}
 
 \title{The Feed Forward Neural Network library}
 \author{Francesco Calcavecchia}
@@ -19,8 +20,12 @@
 \newcommand{\MRTWO}{$ \text{M}(\text{RT})^2 \;$}
 \newcommand{\actf}{\text{a}_f}
 \newcommand{\logaf}{\sigma_{\text{lgs}}}
+\newcommand{\tansaf}{\sigma_{\text{tans}}}
 \newcommand{\gssaf}{\sigma_{\text{gss}}}
+\newcommand{\sinaf}{\sigma_{\text{sin}}}
 \newcommand{\idaf}{\sigma_{\text{id}}}
+\newcommand{\reluaf}{\sigma_{\text{ReLU}}}
+\newcommand{\seluaf}{\sigma_{\text{SELU}}}
 
 
 \begin{document}
@@ -135,14 +140,33 @@ Then, once that all the parameters $\beta$ are set, the FFNN output can be compu
 \end{equation}
 where $\actf: \mathbb{R} \rightarrow \mathbb{R}$ is a so-called \emph{activation function} and we have made use of the Einstein notation, for which repeated symbols on different levels imply a summation, e.g. $x_i^j y^i = \sum_i x_i^j y^i$.
 The activation function is required to account for non-linear effects.
-The FFNN library provides three activation functions by default, but the user has the possibility to define and use its own, even though its storage on a file it is not supported (explained later).
-These three activation functions are:
+The FFNN library provides several well-known activation functions by default, but the user has the possibility to define and use its own, even though its storage on a file it is not supported (explained later).
+These available activation functions are:
 \begin{enumerate}
-\item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$;
-\item the \emph{gaussian}: $\gssaf(x) \equiv e^{-x^2}$;
-\item the \emph{identity}: $\idaf(x) \equiv x$. This function is linear and therefore should not be used normally, but it can be useful in some special circumstances.
+\item the \emph{logistic function}: $\logaf(x) \equiv \frac{1}{1+e^{-x}}$ \\
+The current default for hidden and output units.
+\item the \emph{tansig function}: $\tansaf(x) \equiv \frac{2}{1+e^{-2x}} - 1$ \\
+Faster approximation to the regular tanh. Similar to logistic function, but with output in [-1,1].  
+\item the \emph{gaussian}: $\gssaf(x) \equiv e^{-x^2}$ \\
+Unlike normal activation functions it is symmetric around origin and not monotonic. Still there are use cases for it.
+\item the \emph{sine function}: $\sinaf(x) \equiv sin(x)$ \\
+Periodic activation function for special use cases.
+\item the \emph{identity}: $\idaf(x) \equiv x$ \\
+This function is linear and therefore should not be used for (all) hidden units.
+\item the \emph{PReLU\footnote{\href{https://arxiv.org/abs/1502.01852}{arXiv:1502.01852}} function}: $\reluaf(x) \equiv 
+\begin{cases}
+  x & \text{if $x>0$} \\
+  \alpha x & \text{if $x<=0$}
+\end{cases}$ \\
+The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and because their gradient doesn't vanish, (Parametric) Rectified Linear Units are widely used in deep neural networks. However, the function is not differentiable at x=0 and has flat derivatives elsewhere. 
+\item the \emph{SELU\footnote{\href{https://arxiv.org/abs/1706.02515}{arXiv:1706.02515}} function}: $\seluaf(x) \equiv \lambda 
+\begin{cases}
+  x & \text{if $x>0$} \\
+  \alpha e^{x}- \alpha & \text{if $x<=0$}
+\end{cases}$ \\
+The Scaled Exponential Units (with two fixed hyper-parameters $\alpha$ and $\lambda$) solve some problems of ReLUs and can provide a self-normalizing network. But still they are not differentiable at x=0. 
+
 \end{enumerate}
-By default the logistic function is used for all connections.
 
 The use of the FFNN library should be organised in four major steps:
 \begin{enumerate}
@@ -197,7 +221,7 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
 
 \begin{verbatim}
 // #include "ActivationFunctionInterface.hpp"
-calss ActivationFunctionInterface
+class ActivationFunctionInterface
 {
    public:
 
@@ -209,11 +233,14 @@ calss ActivationFunctionInterface
 
       // second derivative of the activation function
       virtual double f2d(const double &) = 0;
+
+      // third derivative of the activation function
+      virtual double f3d(const double &) = 0:
 };
 \end{verbatim}
 
 The \verb+ActivationFunctionInterface+ is a pure virtual class, which can be used to generate customised activation functions to feed a FFNN.
-It is necessary to provide the methods \verb+f+, \verb+f1d+, and \verb+f2d+.
+It is necessary to provide the methods \verb+f+, \verb+f1d+, \verb+f2d+ and \verb+f3d+.
 As example we report the class for the logistic function:
 
 \begin{verbatim}
@@ -236,6 +263,12 @@ class LogisticActivationFunction: public ActivationFunctionInterface
       {
          double f=this->f(in);
          return (f*(1.-f)*(1.-2.*f));
+      }
+
+      double f3d(const double &in)
+      {
+         const double f = this->f(in);
+         return f * (1. - f) * (1. - 6.*f + 6*f*f);
       }
 };
 

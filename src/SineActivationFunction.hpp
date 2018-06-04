@@ -1,19 +1,19 @@
-#ifndef GAUSSIAN_ACTIVATION_FUNCTION
-#define GAUSSIAN_ACTIVATION_FUNCTION
+#ifndef SINE_ACTIVATION_FUNCTION
+#define SINE_ACTIVATION_FUNCTION
 
 #include "ActivationFunctionInterface.hpp"
 #include <string>
 
 
-class GaussianActivationFunction: public ActivationFunctionInterface
+class SineActivationFunction: public ActivationFunctionInterface
 {
 protected:
 
 public:
-    GaussianActivationFunction(){}
-    ~GaussianActivationFunction(){}
+    SineActivationFunction(){}
+    ~SineActivationFunction(){}
 
-    std::string getIdCode(){return "gss";}
+    std::string getIdCode(){return "sin";}
 
     double f(const double &in);
 

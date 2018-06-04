@@ -8,16 +8,13 @@ void NNUnit::computeValues(){
     if (_feeder){
         // unit value
         _pv = _feeder->getFeed();
-        _v = _actf->f(_pv);
         // shared useful values
-        double a1d = 0.;
-        if (_v1d || _v2d || _v1vd || _v1d1vd) a1d = _actf->f1d(_pv);
+        double a1d, a2d, a3d;
 
-        double a2d = 0.;
-        if (_v2d || _v1vd) a2d = _actf->f2d(_pv);
-
-        double a3d = 0.;
-        if (_v2d1vd) a3d = _actf->f3d(_pv);
+        const bool flag_d1 = _v1d || _v2d || _v1vd || _v1d1vd;
+        const bool flag_d2 = _v2d || _v1vd;
+        const bool flag_d3 = _v2d1vd;
+        _actf->fad(_pv, _v, a1d, a2d, a3d, flag_d1, flag_d2, flag_d3);
 
         if (_v1d || _v2d){
             for (int i=0; i<_nx0; ++i) _first_der[i] = _feeder->getFirstDerivativeFeed(i);

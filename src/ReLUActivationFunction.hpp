@@ -1,19 +1,20 @@
-#ifndef GAUSSIAN_ACTIVATION_FUNCTION
-#define GAUSSIAN_ACTIVATION_FUNCTION
+#ifndef RELU_ACTIVATION_FUNCTION
+#define RELU_ACTIVATION_FUNCTION
 
 #include "ActivationFunctionInterface.hpp"
 #include <string>
 
 
-class GaussianActivationFunction: public ActivationFunctionInterface
+class ReLUActivationFunction: public ActivationFunctionInterface
 {
 protected:
+    const double _alpha;
 
 public:
-    GaussianActivationFunction(){}
-    ~GaussianActivationFunction(){}
+    ReLUActivationFunction(const double alpha = 0.0): _alpha(alpha) {}
+    ~ReLUActivationFunction(){}
 
-    std::string getIdCode(){return "gss";}
+    std::string getIdCode(){return "relu";}
 
     double f(const double &in);
 
