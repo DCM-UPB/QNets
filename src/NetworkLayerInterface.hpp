@@ -14,10 +14,11 @@ template<typename UnitType>
 class NetworkLayerInterface
 {
 protected:
-    std::vector<UnitType *> _U; // T is expected to be at least NetworkUnit
+    std::vector<UnitType *> _U; // UnitType is expected to be at least NetworkUnit
 
 public:
     /* Pseudo header
+
     virtual ~NetworkLayerInterface();
 
     // --- Getters

@@ -45,12 +45,6 @@ void NetworkUnit::computeActivation(){
 }
 
 void NetworkUnit::computeDerivatives(){
-
-    //const bool flag_d1 = _v1d || _v2d || _v1vd || _v1d1vd;
-    //const bool flag_d2 = _v2d || _v1vd;
-    //const bool flag_d3 = _v2d1vd;
-    //_actf->fad(_pv, _v, a1d, a2d, a3d, flag_d1, flag_d2, flag_d3);
-
     if (_feeder) {
         // first derivative
         if (_v1d){
@@ -99,13 +93,6 @@ void NetworkUnit::computeDerivatives(){
                 }
             }
         }
-    }
-    else {
-        if (_v1d) for (int i=0; i<_nx0; ++i) _v1d[i] = 0.;
-        if (_v2d) for (int i=0; i<_nx0; ++i) _v2d[i] = 0.;
-        if (_v1vd) for (int i=0; i<_nvp; ++i) _v1vd[i] = 0.;
-        if (_v1d1vd) for (int i=0; i<_nx0; ++i) for (int j=0; j<_nvp; ++j) _v1d1vd[i][j] = 0.;
-        if (_v2d1vd) for (int i=0; i<_nx0; ++i) for (int j=0; j<_nvp; ++j) _v2d1vd[i][j] = 0.;
     }
 }
 

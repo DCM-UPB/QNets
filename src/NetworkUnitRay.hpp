@@ -10,6 +10,7 @@
 #include <random>
 #include <algorithm>
 
+
 template <typename UnitType>
 class NetworkUnitRay: public NetworkUnitFeederInterface {
 protected:
@@ -128,6 +129,7 @@ public:
         for (std::vector<NetworkUnit *>::size_type i=1; i<_source.size(); ++i){
             feed += _intensity[i]*_source[i]->getFirstDerivativeValue(i1d);
         }
+
         return feed;
     }
 

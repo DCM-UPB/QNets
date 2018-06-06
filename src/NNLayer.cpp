@@ -2,8 +2,6 @@
 
 #include "ActivationFunctionManager.hpp"
 
-#include <iostream>
-
 
 // --- Modify structure
 
@@ -27,20 +25,6 @@ void NNLayer::setSize(const int &nunits)
     _U.clear();
     _U.push_back(new NNUnit(std_actf::provideActivationFunction("lgs")));
     _U[0]->setProtoValue(1.);
-    for (int i=1; i<nunits; ++i)
-        {
-            _U.push_back(new NNUnit(actf));
-        }
-}
-
-
-// --- Constructor
-
-NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
-{
-    _U.push_back(new NNUnit(std_actf::provideActivationFunction("id_")));
-    _U[0]->setProtoValue(1.);
-
     for (int i=1; i<nunits; ++i)
         {
             _U.push_back(new NNUnit(actf));
