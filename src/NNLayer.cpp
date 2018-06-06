@@ -1,33 +1,8 @@
 #include "NNLayer.hpp"
 
-#include "NetworkUnitRay.hpp"
 #include "ActivationFunctionManager.hpp"
 
 #include <iostream>
-
-
-// --- Connection
-
-void NNLayer::connectOnTopOfLayer(NetworkLayerInterface * nl)
-{
-    NetworkUnitFeederInterface * ray;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            ray = new NetworkUnitRay(nl);
-            _U[i]->setFeeder(ray);
-        }
-}
-
-void NNLayer::disconnect()
-{
-    NetworkUnitFeederInterface * ray;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            ray = _U[i]->getFeeder();
-            delete ray;
-            _U[i]->setFeeder(NULL);
-        }
-}
 
 
 // --- Modify structure
@@ -58,6 +33,7 @@ void NNLayer::setSize(const int &nunits)
         }
 }
 
+
 // --- Constructor
 
 NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
@@ -69,15 +45,4 @@ NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
         {
             _U.push_back(new NNUnit(actf));
         }
-}
-
-// --- Destructor
-
-NNLayer::~NNLayer()
-{
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            delete _U[i];
-        }
-    // clear is done by base destructor
 }

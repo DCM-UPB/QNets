@@ -3,6 +3,8 @@
 
 #include "ActivationFunctionInterface.hpp"
 #include "NNLayer.hpp"
+#include "NetworkLayerInterface.hpp"
+#include "NetworkUnit.hpp"
 
 #include <vector>
 #include <string>
@@ -14,6 +16,7 @@ private:
     void construct(const int &insize, const int &hidlaysize, const int &outsize);
 
 protected:
+    //std::vector<NetworkLayerInterface<NetworkUnit> *> _L;
     std::vector<NNLayer *> _L;
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
@@ -36,7 +39,6 @@ public:
     int getNInput(){return _L.front()->getNUnits()-1;}
     int getNOutput(){return _L.back()->getNUnits()-1;}
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
-    ActivationFunctionInterface * getLayerActivationFunction(const int &li){return _L[li]->getActivationFunction();}
     NNLayer * getLayer(const int &li){return _L[li];}
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
