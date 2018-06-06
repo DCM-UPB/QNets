@@ -10,11 +10,11 @@
 #include <vector>
 #include <memory>
 
-template<class T>
+template<typename UnitType>
 class NetworkLayerInterface
 {
 protected:
-    std::vector<T *> _U; // T is expected to be at least NetworkUnit
+    std::vector<UnitType *> _U; // T is expected to be at least NetworkUnit
 
 public:
     /* Pseudo header
@@ -85,7 +85,7 @@ public:
     // --- Getters
 
     int getNUnits(){return _U.size();}
-    T * getUnit(const int & i){return _U[i];}
+    UnitType * getUnit(const int & i){return _U[i];}
 
 
     // --- Modify structure
@@ -209,19 +209,19 @@ public:
 
     void computeValues()
     {
-        for (T * u : _U) u->computeValues();
+        for (UnitType * u : _U) u->computeValues();
     }
 
 
     // --- Connection
 
-    template <class U>
-    void connectOnTopOfLayer(NetworkLayerInterface<U> * nl)
+    template <typename LayerUnitType>
+    void connectOnTopOfLayer(NetworkLayerInterface<LayerUnitType> * nl)
     {
         NetworkUnitFeederInterface * ray;
         for (std::vector<NetworkUnit *>::size_type i=1; i<_U.size(); ++i)
             {
-                ray = new NetworkUnitRay<U>(nl);
+                ray = new NetworkUnitRay<LayerUnitType>(nl);
                 _U[i]->setFeeder(ray);
             }
     }

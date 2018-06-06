@@ -2,7 +2,6 @@
 #define NN_LAYER
 
 #include "NetworkLayerInterface.hpp"
-#include "NetworkUnitRay.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 
@@ -19,7 +18,6 @@ public:
     // --- Modify structure
     void setSize(const int &nunits);
     void setActivationFunction(ActivationFunctionInterface * actf);
-
 };
 
 

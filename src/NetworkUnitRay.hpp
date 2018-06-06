@@ -1,18 +1,17 @@
 #ifndef NETWORK_UNIT_RAY
 #define NETWORK_UNIT_RAY
 
+#include "NetworkUnitFeederInterface.hpp"
 #include "NetworkUnit.hpp"
 #include "NetworkLayerInterface.hpp"
-#include "NetworkUnitFeederInterface.hpp"
-#include "NNLayer.hpp"
 
 #include <vector>
 #include <set>
 #include <random>
 #include <algorithm>
 
-template <class T>
-class NetworkUnitRay: public NetworkUnitFeederInterface{
+template <typename UnitType>
+class NetworkUnitRay: public NetworkUnitFeederInterface {
 protected:
     // random number generator, used to initialize the intensities
     std::random_device _rdev;
@@ -20,7 +19,7 @@ protected:
     std::uniform_real_distribution<double> _rd;
 
     // key component of the ray: the source and their intensisities
-    std::vector<T *> _source;   // units from which the ray takes the values from
+    std::vector<UnitType *> _source;   // units from which the ray takes the values from
     std::vector<double> _intensity;   // intensity of each sorgent unit, i.e. its weight
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
     int _intensity_id_shift;  // shift of the previous vector
@@ -64,6 +63,7 @@ public:
     */
 
     // Due to template usage this implementation code must be inside the header (or not all required versions will be compiled when including)
+
 
     // --- Betas
 
@@ -207,7 +207,7 @@ public:
             return true;
         }
 
-        for (T * u: _source){
+        for (UnitType * u: _source){
             NetworkUnitFeederInterface * feeder = u->getFeeder();
             if (feeder != 0){
                 if (feeder->isBetaIndexUsedForThisRay(id)){
@@ -221,8 +221,9 @@ public:
 
 
     // --- Constructor
-    
-    NetworkUnitRay(NetworkLayerInterface<T> * nl){
+
+    template <typename LayerType>
+    NetworkUnitRay(LayerType * nl) { // nl){
         // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
         // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
         const double bah = 4 * pow(nl->getNUnits(), -0.5); // (b-a)/2
@@ -238,7 +239,6 @@ public:
         _intensity_id.clear();
     }
 
-
     // --- Destructor
 
     ~NetworkUnitRay(){
@@ -246,7 +246,6 @@ public:
         _intensity.clear();
         _intensity_id.clear();
     }
-
 
 };
 
