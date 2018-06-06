@@ -36,23 +36,17 @@ protected:
     double ** _v1d1vd;   // first index input derivative, second index variational parameter
     double ** _v2d1vd;   // first index input derivative, second index variational parameter
 
-    // Feeder of the unit
-    // The feeder of a unit is a class that takes care of providing the input to the unit, when called via: _feeder->getFeed()
-    NetworkUnitFeederInterface * _feeder;
-
 public:
     // Constructor and destructor
-    NetworkUnit(NetworkUnitFeederInterface * feeder = NULL);
+    NetworkUnit();
     virtual ~NetworkUnit();
 
     // Setters
     void setProtoValue(const double &pv){_pv=pv;}
-    void setFeeder(NetworkUnitFeederInterface * feeder){_feeder = feeder;}
 
     // Getters
     double getValue(){return _v;}
     double getProtoValue(){return _pv;}
-    NetworkUnitFeederInterface * getFeeder(){return _feeder;}
 
     // Coordinate derivatives
     void setFirstDerivativeSubstrate(const int &nx0);
@@ -76,9 +70,9 @@ public:
     double getCrossSecondDerivativeValue(const int &i2d, const int &i1vd){return _v2d1vd[i2d][i1vd];}
 
     // Computation, may be changed by child
-    virtual void computeFeed();
-    virtual void computeActivation();
-    virtual void computeDerivatives();
+    virtual void computeFeed() {};
+    virtual void computeOutput(); // _pv->_v, defaults to identity
+    virtual void computeDerivatives() {};
 
     // should execute the methods above (default implementation), but may be extended
     virtual void computeValues();

@@ -1,13 +1,13 @@
 #ifndef NN_UNIT
 #define NN_UNIT
 
-#include "NetworkUnit.hpp"
+#include "FedNetworkUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 
 
 // Unit of an Artificial Neural Network
-class NNUnit: virtual public NetworkUnit
+class NNUnit: public FedNetworkUnit
 {
 protected:
 
@@ -17,7 +17,7 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : NetworkUnit(feeder) {_actf = actf;}
+    NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {_actf = actf;}
 
     // Setters
     void setActivationFunction(ActivationFunctionInterface * actf){_actf=actf;}

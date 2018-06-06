@@ -4,101 +4,18 @@
 
 // --- Computation
 
-void NetworkUnit::computeFeed(){
-    if (_feeder){
-        // unit value
-        _pv = _feeder->getFeed();
-
-        // feed derivatives
-        if (_first_der){
-            for (int i=0; i<_nx0; ++i) _first_der[i] = _feeder->getFirstDerivativeFeed(i);
-        }
-
-        if (_second_der){
-            for (int i=0; i<_nx0; ++i) _second_der[i] = _feeder->getSecondDerivativeFeed(i);
-        }
-
-        if (_first_var_der){
-            for (int i=0; i<_nvp; ++i) _first_var_der[i] = _feeder->getVariationalFirstDerivativeFeed(i);
-        }
-
-        if (_cross_first_der){
-            for (int i=0; i<_nx0; ++i){
-                for (int j=0; j<_nvp; ++j) _cross_first_der[i][j] = _feeder->getCrossFirstDerivativeFeed(i, j);
-            }
-        }
-
-        if (_cross_second_der){
-            for (int i=0; i<_nx0; ++i){
-                for (int j=0; j<_nvp; ++j) _cross_second_der[i][j] = _feeder->getCrossSecondDerivativeFeed(i, j);
-            }
-        }
-    }
-}
-
-void NetworkUnit::computeActivation(){
+void NetworkUnit::computeOutput(){
     // Default implementation == identity
+    // a1d,a2d,a3d are the output (or activation) function derivatives with respect to pv
     _v = _pv;
     _a1d = 1.;
     _a2d = 0.;
     _a3d = 0.;
 }
 
-void NetworkUnit::computeDerivatives(){
-    if (_feeder) {
-        // first derivative
-        if (_v1d){
-            for (int i=0; i<_nx0; ++i)
-                {
-                    _v1d[i] = _a1d * _first_der[i];
-                }
-        }
-        // second derivative
-        if (_v2d){
-            for (int i=0; i<_nx0; ++i)
-                {
-                    _v2d[i] = _a1d * _second_der[i] + _a2d * _first_der[i] * _first_der[i];
-                }
-        }
-        // variational first derivative
-        if (_v1vd){
-            for (int i=0; i<_nvp; ++i)
-                {
-                    _v1vd[i] = _a1d * _first_var_der[i];
-                }
-        }
-        // cross first derivative
-        if (_v1d1vd){
-            for (int i=0; i<_nx0; ++i){
-                for (int j=0; j<_nvp; ++j){
-                    _v1d1vd[i][j] = 0.;
-                    if (_feeder->isBetaIndexUsedForThisRay(j)){
-                        _v1d1vd[i][j] += _a1d * _cross_first_der[i][j];
-                        _v1d1vd[i][j] += _a2d * _first_der[i] * _first_var_der[j];
-                    }
-                }
-            }
-        }
-        // cross second derivative
-        if (_v2d1vd){
-            for (int i=0; i<_nx0; ++i){
-                for (int j=0; j<_nvp; ++j){
-                    _v2d1vd[i][j] = 0.;
-                    if (_feeder->isBetaIndexUsedForThisRay(j)){
-                        _v2d1vd[i][j] += _a1d * _cross_second_der[i][j];
-                        _v2d1vd[i][j] += 2. * _a2d * _first_der[i] * _cross_first_der[i][j];
-                        _v2d1vd[i][j] += _a3d * _first_der[i] * _first_der[i] * _first_var_der[j];
-                        _v2d1vd[i][j] += _a2d * _second_der[i] * _first_var_der[j];
-                    }
-                }
-            }
-        }
-    }
-}
-
 void NetworkUnit::computeValues(){
     this->computeFeed();
-    this->computeActivation();
+    this->computeOutput();
     this->computeDerivatives();
 }
 
@@ -212,9 +129,7 @@ void NetworkUnit::setCrossSecondDerivativeSubstrate(const int &nx0, const int &n
 
 // --- Constructor
 
-NetworkUnit::NetworkUnit(NetworkUnitFeederInterface * feeder){
-    _feeder = feeder;
-
+NetworkUnit::NetworkUnit(){
     _nx0 = 0;
     _nvp = 0;
     _pv = 0.;
@@ -234,7 +149,6 @@ NetworkUnit::NetworkUnit(NetworkUnitFeederInterface * feeder){
 // --- Destructor
 
 NetworkUnit::~NetworkUnit(){
-    if (_feeder) delete _feeder; // actually this shouldn't be done here since feeder was passed from external
     if (_v1d) delete[] _v1d;
     if (_v2d) delete[] _v2d;
     if (_first_der) delete[] _first_der;
