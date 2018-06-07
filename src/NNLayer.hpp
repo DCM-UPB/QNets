@@ -1,7 +1,7 @@
 #ifndef NN_LAYER
 #define NN_LAYER
 
-#include "NetworkLayerInterface.hpp"
+#include "FedNetworkLayer.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
@@ -9,25 +9,22 @@
 #include <vector>
 
 
-class NNLayer: public NetworkLayerInterface<NNUnit>
+class NNLayer: public FedNetworkLayer
 {
 protected:
+    std::vector<NNUnit *> _U_nn; // stores pointers to all neural units
 
 public:
 
-    // --- Constructor
-    //template <typename NNUnitType>
-    NNLayer(const int &nunits, ActivationFunctionInterface * actf)
-    {
-        _U.push_back(new NNUnit(std_actf::provideActivationFunction("id_")));
-        _U[0]->setProtoValue(1.);
+    // --- Constructor / Destructor
 
-        for (int i=1; i<nunits; ++i)
-            {
-                _U.push_back(new NNUnit(actf));
-            }
-    }
+    NNLayer(const int &nunits, ActivationFunctionInterface * actf);
+    ~NNLayer(){_U_nn.clear();}
 
+    // --- Getters
+
+    int getNNNUnits() {return _U_nn.size();}
+    NNUnit * getNNUnit(const int &i) {return _U_nn[i];}
 
     // --- Modify structure
     void setSize(const int &nunits);

@@ -23,11 +23,11 @@ int FeedForwardNeuralNetwork::getNBeta()
     int nbeta=0;
     for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            for (int j=0; j<_L[i]->getNUnits(); ++j)
+            for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                 {
-                    if (_L[i]->getUnit(j)->getFeeder())
+                    if (_L[i]->getFedUnit(j)->getFeeder())
                         {
-                            nbeta += _L[i]->getUnit(j)->getFeeder()->getNBeta();
+                            nbeta += _L[i]->getFedUnit(j)->getFeeder()->getNBeta();
                         }
                 }
         }
@@ -48,13 +48,13 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
             int idx=0;
             for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
                 {
-                    for (int j=0; j<_L[i]->getNUnits(); ++j)
+                    for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                         {
-                            if (_L[i]->getUnit(j)->getFeeder())
+                            if (_L[i]->getFedUnit(j)->getFeeder())
                                 {
-                                    for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
+                                    for (int k=0; k<_L[i]->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
                                         {
-                                            if (idx==ib) return _L[i]->getUnit(j)->getFeeder()->getBeta(k);
+                                            if (idx==ib) return _L[i]->getFedUnit(j)->getFeeder()->getBeta(k);
                                             idx++;
                                         }
                                 }
@@ -72,13 +72,13 @@ void FeedForwardNeuralNetwork::getBeta(double * beta){
     int idx=0;
     for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            for (int j=0; j<_L[i]->getNUnits(); ++j)
+            for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                 {
-                    if (_L[i]->getUnit(j)->getFeeder())
+                    if (_L[i]->getFedUnit(j)->getFeeder())
                         {
-                            for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
+                            for (int k=0; k<_L[i]->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
                                 {
-                                    beta[idx] = _L[i]->getUnit(j)->getFeeder()->getBeta(k);
+                                    beta[idx] = _L[i]->getFedUnit(j)->getFeeder()->getBeta(k);
                                     idx++;
                                 }
                         }
@@ -100,13 +100,13 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
             int idx=0;
             for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
                 {
-                    for (int j=0; j<_L[i]->getNUnits(); ++j)
+                    for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                         {
-                            if (_L[i]->getUnit(j)->getFeeder())
+                            if (_L[i]->getFedUnit(j)->getFeeder())
                                 {
-                                    for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
+                                    for (int k=0; k<_L[i]->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
                                         {
-                                            if (idx==ib) _L[i]->getUnit(j)->getFeeder()->setBeta(k, beta);
+                                            if (idx==ib) _L[i]->getFedUnit(j)->getFeeder()->setBeta(k, beta);
                                             idx++;
                                         }
                                 }
@@ -123,13 +123,13 @@ void FeedForwardNeuralNetwork::setBeta(const double * beta)
     int idx=0;
     for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            for (int j=0; j<_L[i]->getNUnits(); ++j)
+            for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                 {
-                    if (_L[i]->getUnit(j)->getFeeder())
+                    if (_L[i]->getFedUnit(j)->getFeeder())
                         {
-                            for (int k=0; k<_L[i]->getUnit(j)->getFeeder()->getNBeta(); ++k)
+                            for (int k=0; k<_L[i]->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
                                 {
-                                    _L[i]->getUnit(j)->getFeeder()->setBeta(k, beta[idx]);
+                                    _L[i]->getFedUnit(j)->getFeeder()->setBeta(k, beta[idx]);
                                     idx++;
                                 }
                         }
@@ -152,11 +152,11 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 
     for (vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            for (int j=0; j<_L[i]->getNUnits(); ++j)
+            for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                 {
-                    if (_L[i]->getUnit(j)->getFeeder())
+                    if (_L[i]->getFedUnit(j)->getFeeder())
                         {
-                            nsource = _L[i]->getUnit(j)->getFeeder()->getNBeta();
+                            nsource = _L[i]->getFedUnit(j)->getFeeder()->getNBeta();
                             // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
                             // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
                             bah = 4 * pow(nsource, -0.5); // (b-a)/2
@@ -164,7 +164,7 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 
                             for (int k=0; k<nsource; ++k)
                                 {
-                                    _L[i]->getUnit(j)->getFeeder()->setBeta(k, rd(rgen));
+                                    _L[i]->getFedUnit(j)->getFeeder()->setBeta(k, rd(rgen));
                                 }
                         }
                 }
@@ -335,7 +335,7 @@ void FeedForwardNeuralNetwork::FFPropagate()
     int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 );
     if (nthreads>1) {
 #pragma omp parallel num_threads(nthreads)
-        for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
+        for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
             {
                 _L[i]->computeValues(); // actual omp for inside computeValues
 #pragma omp barrier // just to be sure
@@ -345,7 +345,7 @@ void FeedForwardNeuralNetwork::FFPropagate()
 
 #endif
 
-    for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
+    for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
         {
             _L[i]->computeValues();
         }
@@ -369,7 +369,7 @@ void FeedForwardNeuralNetwork::setInput(const double *in)
         {
             for (int i=1; i<_L[0]->getNUnits(); ++i)
                 {
-                    _L[0]->getUnit(i)->setFirstDerivativeValue(i-1, _L[0]->getUnit(i)->getActivationFunction()->f1d( _L[0]->getUnit(i)->getProtoValue() )   );
+                    _L[0]->getUnit(i)->setFirstDerivativeValue(i-1, 1.);
                 }
         }
 }
@@ -382,7 +382,7 @@ void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
     // set the first derivatives
     if (_flag_1d)
         {
-            _L[0]->getUnit(i+1)->setFirstDerivativeValue(i, _L[0]->getUnit(i+1)->getActivationFunction()->f1d( _L[0]->getUnit(i)->getProtoValue() ) );
+            _L[0]->getUnit(i+1)->setFirstDerivativeValue(i, 1.);
         }
 }
 
@@ -532,7 +532,7 @@ void FeedForwardNeuralNetwork::addFirstDerivativeSubstrate()
     _L[0]->addFirstDerivativeSubstrate(getNInput());
     for (int i=1; i<_L[0]->getNUnits(); ++i)
         {
-            _L[0]->getUnit(i)->setFirstDerivativeValue(   i-1, _L[0]->getUnit(i)->getActivationFunction()->f1d( _L[0]->getUnit(i)->getProtoValue() )   );
+            _L[0]->getUnit(i)->setFirstDerivativeValue( i-1, 1.);
         }
     // set all the other layers
     for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
@@ -620,11 +620,11 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
             int nbeta = 0;
             for (vector<NNLayer *>::size_type i=0; i<_L.size()-1; ++i)
                 {
-                    for (int j=0; j<_L[i]->getNUnits(); ++j)
+                    for (int j=0; j<_L[i]->getNFedUnits(); ++j)
                         {
-                            if (_L[i]->getUnit(j)->getFeeder())
+                            if (_L[i]->getFedUnit(j)->getFeeder())
                                 {
-                                    nbeta += _L[i]->getUnit(j)->getFeeder()->getNBeta();
+                                    nbeta += _L[i]->getFedUnit(j)->getFeeder()->getNBeta();
                                 }
                         }
                 }
@@ -655,14 +655,14 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
                     this->setBeta(i,0.);
                 }
             // set the identity activation function for some units of the new hidden layer
-            for (int i=1; i<_L[_L.size()-1]->getNUnits(); ++i)
-                {
-                    _L[_L.size()-2]->getUnit(i)->setActivationFunction(std_actf::provideActivationFunction("id_"));
-                }
+            //for (int i=0; i<_L[_L.size()-1]->getNNNUnits(); ++i)
+            //    {
+            //        _L[_L.size()-2]->getNNUnit(i)->setActivationFunction(std_actf::provideActivationFunction("id_"));
+            //    }
             // set some beta to 1 for the output layer
-            for (int i=1; i<_L[_L.size()-1]->getNUnits(); ++i)
+            for (int i=0; i<_L[_L.size()-1]->getNFedUnits(); ++i)
                 {
-                    _L[_L.size()-1]->getUnit(i)->getFeeder()->setBeta(i,1.);
+                    _L[_L.size()-1]->getFedUnit(i)->getFeeder()->setBeta(i,1.);
                 }
             // free memory
             delete[] old_beta;
@@ -700,9 +700,10 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
     // store the activaction function and size of each layer
     for (int i=0; i<getNLayers(); ++i)
         {
-            file << getLayer(i)->getNUnits() << " ";
-            for (int j=0; j<getLayer(i)->getNUnits(); ++j){
-                file << getLayer(i)->getUnit(j)->getActivationFunction()->getIdCode() << " ";
+            file << getLayer(i)->getNNNUnits() << " ";
+            file << "id_ ";
+            for (int j=0; j<getLayer(i)->getNNNUnits(); ++j){
+                file << getLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode() << " ";
             }
             file << endl;
         }
@@ -743,11 +744,11 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
     // set the activation functions
     ActivationFunctionInterface * af;
     for (unsigned int l=0; l<actf.size(); ++l){
-        for (unsigned int u=0; u<actf[l].size(); ++u){
+        for (unsigned int u=1; u<actf[l].size(); ++u){
             af = std_actf::provideActivationFunction(actf[l][u]);
 
             if (af != 0){
-                _L[l]->getUnit(u)->setActivationFunction(af);
+                _L[l]->getNNUnit(u-1)->setActivationFunction(af);
             } else{
                 cout << "ERROR FeedForwardNeuralNetwork(const int &nlayers, const int * layersize, const char ** actf) : given activation function " << actf[l][u] << " not known" << endl;
                 throw std::invalid_argument( "invalid activation function id code" );
@@ -777,9 +778,9 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
         {
             file >> nunits;
             nnl = new NNLayer(nunits, std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
-            for (int j=0; j<nunits; ++j){
+            for (int j=1; j<nunits; ++j){
                 file >> actf_id;
-                nnl->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction(actf_id));
+                nnl->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_id));
             }
             _L.push_back(nnl);
         }
@@ -820,8 +821,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     NNLayer * nnl;
     for (int i=0; i<ffnn->getNLayers(); ++i){
         nnl = new NNLayer(ffnn->getLayer(i)->getNUnits(), std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
-        for (int j=0; j<ffnn->getLayer(i)->getNUnits(); ++j){
-            nnl->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getLayer(i)->getUnit(j)->getActivationFunction()->getIdCode()));
+        for (int j=0; j<ffnn->getLayer(i)->getNNNUnits(); ++j){
+            nnl->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode()));
         }
         _L.push_back(nnl);
     }

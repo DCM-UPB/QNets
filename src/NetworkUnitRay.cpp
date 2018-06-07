@@ -1,10 +1,17 @@
 #include "NetworkUnitRay.hpp"
-#include "NetworkUnit.hpp"
+#include "FedNetworkUnit.hpp"
 
-#include <algorithm>
+#include <vector>
 
+// --- Betas
+
+int NetworkUnitRay::getNBeta(){return _intensity.size();}
+double NetworkUnitRay::getBeta(const int &i){return _intensity[i];}
+void NetworkUnitRay::setBeta(const int &i, const double &b){_intensity[i]=b;}
 
 // --- Variational Parameters
+
+int NetworkUnitRay::getNVariationalParameters(){return _intensity.size();}
 
 bool NetworkUnitRay::setVariationalParameterValue(const int &id, const double &value){
     if ( isBetaIndexUsedInThisRay(id) ){
@@ -29,29 +36,26 @@ bool NetworkUnitRay::getVariationalParameterValue(const int &id, double &value){
 }
 
 
-<<<<<<< HEAD:src/NNRay.cpp
-int NNRay::setVariationalParametersIndexes(const int &starting_index){
+int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index){
     // Here we assign external vp indexes to internal indexes.
     // Also, we create two betas_used sets which are explained in the header.
     // NOTE: The current method assumes, that no index larger than max_id,
     //       max_id = starting_index + source.size() - 1 ,
-    //       may be in use FOR (and trivially IN) this ray. 
+    //       may be in use FOR (and trivially IN) this ray.
     // NOTE2: betas_used sets are automatically sorted -> binary_search can be used later
-    
-    for (NNUnit * u: _source){
-        NNUnitFeederInterface * feeder = u->getFeeder();
-        if (feeder != 0){
-            for (int i=0; i<starting_index; ++i) {
-                if (feeder->isBetaIndexUsedForThisRay(i)){
-                    _betas_used_for_this_ray.insert(i);
+
+    for (NetworkUnit * u: _source){
+        if(FedNetworkUnit * fu = dynamic_cast<FedNetworkUnit *>(u)) {
+            NetworkUnitFeederInterface * feeder = fu->getFeeder();
+            if (feeder != 0){
+                for (int i=0; i<starting_index; ++i) {
+                    if (feeder->isBetaIndexUsedForThisRay(i)){
+                        _betas_used_for_this_ray.insert(i);
+                    }
                 }
             }
         }
     }
-=======
-int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index){
-    _intensity_id_shift=starting_index;
->>>>>>> Introduced NetworkLayerInterface, NNLayer is now derived. Name changes: NNUnitFeederInterface -> NetworkUnitFeederInterface, NNRay -> NetworkUnitRay. Doesn't work correctly yet.:src/NetworkUnitRay.cpp
 
     _intensity_id_shift=starting_index;
     int idx=starting_index;
@@ -70,6 +74,7 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index){
 
 // --- Computation
 
+
 double NetworkUnitRay::getFeed(){
     double feed = 0.;
     for (std::vector<NetworkUnit *>::size_type i=0; i<_source.size(); ++i){
@@ -84,6 +89,7 @@ double NetworkUnitRay::getFirstDerivativeFeed(const int &i1d){
     for (std::vector<NetworkUnit *>::size_type i=1; i<_source.size(); ++i){
         feed += _intensity[i]*_source[i]->getFirstDerivativeValue(i1d);
     }
+
     return feed;
 }
 
@@ -148,8 +154,7 @@ double NetworkUnitRay::getCrossSecondDerivativeFeed(const int &i2d, const int &i
 // --- Beta Index
 
 bool NetworkUnitRay::isBetaIndexUsedInThisRay(const int &id){
-    std::vector<int>::iterator it_beta = std::find(_intensity_id.begin(), _intensity_id.end(), id);
-    if ( it_beta != _intensity_id.end() ){
+    if ( _betas_used_in_this_ray.find(id) != _betas_used_in_this_ray.end()) {
         return true;
     }
     else {
@@ -158,26 +163,19 @@ bool NetworkUnitRay::isBetaIndexUsedInThisRay(const int &id){
 }
 
 
-
 bool NetworkUnitRay::isBetaIndexUsedForThisRay(const int &id){
-    if (isBetaIndexUsedInThisRay(id)){
+    if ( _betas_used_for_this_ray.find(id) != _betas_used_for_this_ray.end()) {
         return true;
     }
-
-    for (NetworkUnit * u: _source){
-        NetworkUnitFeederInterface * feeder = u->getFeeder();
-        if (feeder != 0){
-            if (feeder->isBetaIndexUsedForThisRay(id)){
-                return true;
-            }
-        }
+    else {
+        return false;
     }
 }
 
 
 // --- Constructor
 
-NetworkUnitRay::NetworkUnitRay(NetworkLayerInterface * nl){
+NetworkUnitRay::NetworkUnitRay(NetworkLayerInterface * nl) {
     // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
     // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
     const double bah = 4 * pow(nl->getNUnits(), -0.5); // (b-a)/2
@@ -192,7 +190,6 @@ NetworkUnitRay::NetworkUnitRay(NetworkLayerInterface * nl){
 
     _intensity_id.clear();
 }
-
 
 // --- Destructor
 
