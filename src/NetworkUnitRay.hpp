@@ -3,7 +3,7 @@
 
 #include "NetworkUnitFeederInterface.hpp"
 #include "NetworkUnit.hpp"
-#include "NetworkLayerInterface.hpp"
+#include "NetworkLayer.hpp"
 
 #include <vector>
 #include <set>
@@ -34,7 +34,7 @@ protected:
 
 public:
 
-    NetworkUnitRay(NetworkLayerInterface * nl);
+    NetworkUnitRay(NetworkLayer * nl);
     virtual ~NetworkUnitRay();
 
     // beta

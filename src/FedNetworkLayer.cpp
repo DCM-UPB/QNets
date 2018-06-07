@@ -72,7 +72,7 @@ int FedNetworkLayer::setVariationalParametersID(const int &id_vp)
 
 // --- Connection
 
-void FedNetworkLayer::connectOnTopOfLayer(NetworkLayerInterface * nl)
+void FedNetworkLayer::connectOnTopOfLayer(NetworkLayer * nl)
 {
     NetworkUnitFeederInterface * ray;
     for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)

@@ -1,13 +1,13 @@
 #ifndef INPUT_LAYER
 #define INPUT_LAYER
 
-#include "NetworkLayerInterface.hpp"
+#include "NetworkLayer.hpp"
 #include "InputUnit.hpp"
 
 #include <vector>
 
 
-class InputLayer: public NetworkLayerInterface
+class InputLayer: public NetworkLayer
 {
 protected:
     std::vector<InputUnit *> _U_in; // stores pointers to all input units

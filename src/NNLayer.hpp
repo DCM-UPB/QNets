@@ -2,7 +2,7 @@
 #define NN_LAYER
 
 #include "FedNetworkLayer.hpp"
-#include "NetworkLayerInterface.hpp"
+#include "NetworkLayer.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "NetworkUnitFeederInterface.hpp"
@@ -44,7 +44,7 @@ public:
 
     // --- Connection
 
-    NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayerInterface * nl, const int &i) {return new NetworkUnitRay(nl);}
+    NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) {return new NetworkUnitRay(nl);}
 };
 
 

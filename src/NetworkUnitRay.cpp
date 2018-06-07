@@ -175,7 +175,7 @@ bool NetworkUnitRay::isBetaIndexUsedForThisRay(const int &id){
 
 // --- Constructor
 
-NetworkUnitRay::NetworkUnitRay(NetworkLayerInterface * nl) {
+NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl) {
     // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
     // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
     const double bah = 4 * pow(nl->getNUnits(), -0.5); // (b-a)/2

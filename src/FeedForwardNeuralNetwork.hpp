@@ -3,7 +3,7 @@
 
 #include "ActivationFunctionInterface.hpp"
 #include "NNLayer.hpp"
-#include "NetworkLayerInterface.hpp"
+#include "NetworkLayer.hpp"
 #include "NetworkUnit.hpp"
 
 #include <vector>
@@ -16,7 +16,7 @@ private:
     void construct(const int &insize, const int &hidlaysize, const int &outsize);
 
 protected:
-    //std::vector<NetworkLayerInterface<NetworkUnit> *> _L;
+    //std::vector<NetworkLayer<NetworkUnit> *> _L;
     std::vector<NNLayer *> _L;
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not

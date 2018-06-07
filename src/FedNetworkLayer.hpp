@@ -6,7 +6,7 @@
 
 #include <vector>
 
-class FedNetworkLayer: public NetworkLayerInterface
+class FedNetworkLayer: public NetworkLayer
 {
 protected:
     std::vector<FedNetworkUnit *> _U_fed; // stores pointers to all units with feeder
@@ -19,7 +19,7 @@ public:
 
     virtual void deconstruct()
     {
-        NetworkLayerInterface::deconstruct();
+        NetworkLayer::deconstruct();
         _U_fed.clear();
     }
 
@@ -41,8 +41,8 @@ public:
 
     // --- Connection
 
-    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayerInterface * nl, const int &i) = 0; // should create and return the feeder for the given unit
-    void connectOnTopOfLayer(NetworkLayerInterface * nl);
+    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) = 0; // should create and return the feeder for the given unit
+    void connectOnTopOfLayer(NetworkLayer * nl);
     void disconnect();
 };
 
