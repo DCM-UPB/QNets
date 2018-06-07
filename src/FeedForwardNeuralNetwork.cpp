@@ -335,7 +335,7 @@ void FeedForwardNeuralNetwork::FFPropagate()
     int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 );
     if (nthreads>1) {
 #pragma omp parallel num_threads(nthreads)
-        for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
+        for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
             {
                 _L[i]->computeValues(); // actual omp for inside computeValues
 #pragma omp barrier // just to be sure
@@ -345,7 +345,7 @@ void FeedForwardNeuralNetwork::FFPropagate()
 
 #endif
 
-    for (std::vector<NNLayer *>::size_type i=1; i<_L.size(); ++i)
+    for (std::vector<NNLayer *>::size_type i=0; i<_L.size(); ++i)
         {
             _L[i]->computeValues();
         }
@@ -700,7 +700,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
     // store the activaction function and size of each layer
     for (int i=0; i<getNLayers(); ++i)
         {
-            file << getLayer(i)->getNNNUnits() << " ";
+            file << getLayer(i)->getNUnits() << " ";
             file << "id_ ";
             for (int j=0; j<getLayer(i)->getNNNUnits(); ++j){
                 file << getLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode() << " ";
@@ -778,6 +778,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
         {
             file >> nunits;
             nnl = new NNLayer(nunits, std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
+            file >> actf_id; // skip the offset
             for (int j=1; j<nunits; ++j){
                 file >> actf_id;
                 nnl->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_id));

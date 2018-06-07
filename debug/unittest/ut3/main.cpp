@@ -14,10 +14,10 @@ int main(){
     // make a check while the FFNN is not connected yet
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
     ffnn->pushHiddenLayer(4);
-    ffnn->getLayer(0)->getUnit(2)->setActivationFunction(std_actf::provideActivationFunction("lgs"));
-    ffnn->getLayer(1)->getUnit(3)->setActivationFunction(std_actf::provideActivationFunction("gss"));
-    ffnn->getLayer(2)->getUnit(1)->setActivationFunction(std_actf::provideActivationFunction("gss"));
-    ffnn->getLayer(3)->getUnit(2)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+    ffnn->getLayer(0)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("lgs"));
+    ffnn->getLayer(1)->getNNUnit(2)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+    ffnn->getLayer(2)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+    ffnn->getLayer(3)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("gss"));
 
     FeedForwardNeuralNetwork * ffnn2 = new FeedForwardNeuralNetwork(ffnn);
 
@@ -32,21 +32,17 @@ int main(){
     assert(!ffnn2->hasSecondDerivativeSubstrate());
     assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
 
-    assert(ffnn->getLayer(0)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(0)->getUnit(1)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(0)->getUnit(2)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(1)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(1)->getUnit(1)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(1)->getUnit(2)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(1)->getUnit(3)->getActivationFunction()->getIdCode() == "gss");
-    assert(ffnn->getLayer(1)->getUnit(4)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(2)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(2)->getUnit(1)->getActivationFunction()->getIdCode() == "gss");
-    assert(ffnn->getLayer(2)->getUnit(2)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(2)->getUnit(3)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(3)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(3)->getUnit(1)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(3)->getUnit(2)->getActivationFunction()->getIdCode() == "gss");
+    assert(ffnn->getLayer(0)->getNNUnit(0)->getActivationFunction()->getIdCode() == "id_");
+    assert(ffnn->getLayer(0)->getNNUnit(1)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(1)->getNNUnit(0)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(1)->getNNUnit(1)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(1)->getNNUnit(2)->getActivationFunction()->getIdCode() == "gss");
+    assert(ffnn->getLayer(1)->getNNUnit(3)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(2)->getNNUnit(0)->getActivationFunction()->getIdCode() == "gss");
+    assert(ffnn->getLayer(2)->getNNUnit(1)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(2)->getNNUnit(2)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(3)->getNNUnit(0)->getActivationFunction()->getIdCode() == "lgs");
+    assert(ffnn->getLayer(3)->getNNUnit(1)->getActivationFunction()->getIdCode() == "gss");
 
     delete ffnn2;
 
