@@ -2,9 +2,11 @@
 #define NN_LAYER
 
 #include "FedNetworkLayer.hpp"
+#include "NetworkLayerInterface.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
+#include "NetworkUnitFeederInterface.hpp"
+#include "NetworkUnitRay.hpp"
 
 #include <vector>
 
@@ -16,10 +18,20 @@ protected:
 
 public:
 
-    // --- Constructor / Destructor
+    // --- Constructor
 
     NNLayer(const int &nunits, ActivationFunctionInterface * actf);
+    void construct(const int &nunits);
+    void construct(const int &nunits, ActivationFunctionInterface * actf);
+
+    // --- Deconstructor
+
     ~NNLayer(){_U_nn.clear();}
+    void deconstruct()
+    {
+        FedNetworkLayer::deconstruct();
+        _U_nn.clear();
+    }
 
     // --- Getters
 
@@ -27,8 +39,12 @@ public:
     NNUnit * getNNUnit(const int &i) {return _U_nn[i];}
 
     // --- Modify structure
-    void setSize(const int &nunits);
+
     void setActivationFunction(ActivationFunctionInterface * actf);
+
+    // --- Connection
+
+    NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayerInterface * nl, const int &i) {return new NetworkUnitRay(nl);}
 };
 
 

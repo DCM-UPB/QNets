@@ -55,13 +55,13 @@ int main (void) {
         //Set ACTFs for hidden units
         for (int i=0; i<nhl; ++i) {
             for (int j=1; j<nhu[i]; ++j) {
-                ffnn->getLayer(i+1)->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction(actf_ids[iactf]));
+                ffnn->getLayer(i+1)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_ids[iactf]));
             }
         }
 
         //Set ID ACTFs for output units
         for (int j=1; j<yndim+1; ++j) {
-            ffnn->getLayer(nhl+1)->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction("id_"));
+            ffnn->getLayer(nhl+1)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction("id_"));
         }
 
         cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;

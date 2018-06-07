@@ -1,6 +1,5 @@
 #include "FedNetworkLayer.hpp"
 #include "NetworkUnitFeederInterface.hpp"
-#include "NetworkUnitRay.hpp"
 
 #include <vector>
 
@@ -78,8 +77,8 @@ void FedNetworkLayer::connectOnTopOfLayer(NetworkLayerInterface * nl)
     NetworkUnitFeederInterface * ray;
     for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
-            ray = new NetworkUnitRay(nl);
-            _U_fed[i]->setFeeder(ray);
+            ray = this->connectUnitOnTopOfLayer(nl, i);
+            if (ray) _U_fed[i]->setFeeder(ray);
         }
 }
 

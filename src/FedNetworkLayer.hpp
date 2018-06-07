@@ -17,14 +17,16 @@ public:
 
     virtual ~FedNetworkLayer() {_U_fed.clear();}
 
+    virtual void deconstruct()
+    {
+        NetworkLayerInterface::deconstruct();
+        _U_fed.clear();
+    }
+
     // --- Getters
 
     int getNFedUnits() {return _U_fed.size();}
     FedNetworkUnit * getFedUnit(const int &i) {return _U_fed[i];}
-
-    // --- Modify structure
-
-    virtual void setSize(const int &nunits) = 0;
 
 
     // --- Variational Parameters
@@ -39,7 +41,8 @@ public:
 
     // --- Connection
 
-    virtual void connectOnTopOfLayer(NetworkLayerInterface * nl);
+    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayerInterface * nl, const int &i) = 0; // should create and return the feeder for the given unit
+    void connectOnTopOfLayer(NetworkLayerInterface * nl);
     void disconnect();
 };
 

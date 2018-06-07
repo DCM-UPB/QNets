@@ -17,10 +17,14 @@ public:
 
     // --- Constructor
 
-    NetworkLayerInterface() {
+    NetworkLayerInterface()
+    {
         _U_off = new OffsetUnit();
         _U.push_back(_U_off);
     }
+
+    virtual void construct(const int &nunits) = 0; // should add non-offset units until a total of nunits units of any type are present
+
 
     // --- Destructor
 
@@ -32,6 +36,17 @@ public:
         _U.clear();
     }
 
+    virtual void deconstruct() // should remove the non-offset units
+    {
+        for (std::vector<NetworkUnit *>::size_type i=1; i<_U.size(); ++i)
+            {
+                delete _U[i];
+            }
+        _U.clear();
+        _U.push_back(_U_off);
+    }
+
+
     // --- Getters
 
     int getNUnits(){return _U.size();}
@@ -41,19 +56,23 @@ public:
 
     // --- Modify structure
 
-    virtual void setSize(const int &nunits) = 0;
+    void setSize(const int &nunits) // used deconstruct and then construct to resize the layer
+    {
+        this->deconstruct();
+        this->construct(nunits);
+    }
 
 
     // --- Variational Parameters
 
-    virtual bool setVariationalParameter(const int &id, const double &vp) = 0;
-    virtual bool getVariationalParameter(const int &id, double &vp) = 0;
-    virtual int getNVariationalParameters() = 0;
+    virtual bool setVariationalParameter(const int &id, const double &vp) {return false;}; 
+    virtual bool getVariationalParameter(const int &id, double &vp) {return false;}
+    virtual int getNVariationalParameters() {return 0;};
 
 
     // --- Values to compute
 
-    virtual int setVariationalParametersID(const int &id_vp) = 0;
+    virtual int setVariationalParametersID(const int &id_vp) { return -1;};
 
 
     void addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp)
