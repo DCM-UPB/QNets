@@ -93,5 +93,5 @@ void NetworkLayer::computeValues()
 #ifdef OPENMP
 #pragma omp for schedule(static, 1)
 #endif
-    for (NetworkUnit * u : _U) u->computeValues();
+    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
 }

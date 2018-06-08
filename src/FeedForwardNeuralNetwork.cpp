@@ -323,7 +323,7 @@ void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double 
 }
 
 #ifdef OPENMP
-bool compare_NUnits(NNLayer * A, NNLayer * B) { return A->getNUnits()<B->getNUnits(); }
+bool compare_NUnits(NetworkLayer * A, NetworkLayer * B) { return A->getNUnits()<B->getNUnits(); }
 #endif
 
 void FeedForwardNeuralNetwork::FFPropagate()
@@ -334,7 +334,7 @@ void FeedForwardNeuralNetwork::FFPropagate()
 #ifdef OPENMP
 // compile with -DOPENMP -fopenmp flags to use parallelization here
 
-    int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin(), _L.end(), compare_NUnits))->getNUnits() - 1 );
+    int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin()+1, _L.end(), compare_NUnits))->getNUnits() - 1 );
     if (nthreads>1) {
 #pragma omp parallel num_threads(nthreads)
         for (std::vector<NetworkLayer *>::size_type i=1; i<_L.size(); ++i)

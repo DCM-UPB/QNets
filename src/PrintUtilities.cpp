@@ -27,7 +27,7 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn)
                     if (ffnn->getLayerSize(c) > r)
                         {
                             if (r>0 && c>0) cout << ffnn->getNNLayer(c-1)->getNNUnit(r-1)->getActivationFunction()->getIdCode();
-                            else cout << "_id";
+                            else cout << "id_";
                         }
                     else
                         {
