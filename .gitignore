@@ -94,3 +94,6 @@ doc/*.fls
 doc/*.ilg
 doc/*.ind
 doc/auto
+doc/doxygen/*/*
+#!doc/doxygen/doxygen.conf
+#!doc/doxygen/doxygen.html
