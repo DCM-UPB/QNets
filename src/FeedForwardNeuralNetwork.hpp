@@ -2,8 +2,10 @@
 #define FEED_FORWARD_NEURAL_NETWORK
 
 #include "ActivationFunctionInterface.hpp"
-#include "NNLayer.hpp"
 #include "NetworkLayer.hpp"
+#include "InputLayer.hpp"
+#include "FedNetworkLayer.hpp"
+#include "NNLayer.hpp"
 #include "NetworkUnit.hpp"
 
 #include <vector>
@@ -16,8 +18,10 @@ private:
     void construct(const int &insize, const int &hidlaysize, const int &outsize);
 
 protected:
-    //std::vector<NetworkLayer<NetworkUnit> *> _L;
-    std::vector<NNLayer *> _L;
+    std::vector<NetworkLayer *> _L; // contains all kinds of layers
+    std::vector<FedNetworkLayer *> _L_fed; // contains layers with feeder
+    std::vector<NNLayer *> _L_nn; // contains neural layers
+    InputLayer * _L_in; // input layer
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
     bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d, _flag_c2d;  // flag that indicates if the substrates for the derivatives have been activated or not
@@ -32,14 +36,21 @@ public:
     ~FeedForwardNeuralNetwork();
 
 
-
     // --- Get information about the NN structure
-    int getNHiddenLayers(){return _L.size()-2;}
     int getNLayers(){return _L.size();}
-    int getNInput(){return _L.front()->getNUnits()-1;}
-    int getNOutput(){return _L.back()->getNUnits()-1;}
+    int getNFedLayers(){return _L_fed.size();}
+    int getNNeuralLayers(){return _L_nn.size();}
+    int getNHiddenLayers(){return _L_nn.size()-1;}
+
+    int getNInput(){return _L_in->getNInputUnits();}
+    int getNOutput(){return _L_nn.back()->getNNNUnits();}
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
-    NNLayer * getLayer(const int &li){return _L[li];}
+
+    InputLayer * getInputLayer(){return _L_in;}
+    NetworkLayer * getLayer(const int &li){return _L[li];}
+    FedNetworkLayer * getFedLayer(const int &li){return _L_fed[li];}
+    NNLayer * getNNLayer(const int &li){return _L_nn[li];}
+
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
@@ -51,7 +62,7 @@ public:
     // --- Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
     void setLayerSize(const int &li, const int &size);
-    void setLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
+    void setNNLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
 

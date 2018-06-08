@@ -26,7 +26,7 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn)
                 {
                     if (ffnn->getLayerSize(c) > r)
                         {
-                            if (r>0) cout << ffnn->getLayer(c)->getNNUnit(r-1)->getActivationFunction()->getIdCode();
+                            if (r>0 && c>0) cout << ffnn->getNNLayer(c-1)->getNNUnit(r-1)->getActivationFunction()->getIdCode();
                             else cout << "_id";
                         }
                     else
@@ -68,9 +68,9 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
     for (int u=0; u<maxNUnits; ++u){
         // max number of beta (i.e. variational parameters) for the units u over all layers
         maxNBeta = 0;
-        for (int l=0; l<ffnn->getNLayers(); ++l){
-            if (u < ffnn->getLayerSize(l) && u>0) {
-                feeder = ffnn->getLayer(l)->getFedUnit(u-1)->getFeeder();
+        for (int l=0; l<ffnn->getNFedLayers(); ++l){
+            if (u < ffnn->getFedLayer(l)->getNUnits() && u>0) {
+                feeder = ffnn->getFedLayer(l)->getFedUnit(u-1)->getFeeder();
                 if (feeder){
                     if (feeder->getNVariationalParameters() > maxNBeta){
                         maxNBeta = feeder->getNVariationalParameters();
@@ -95,10 +95,11 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 
         // here are considered all the other units, (typically) connected to the previus layers
         for (int b=0; b<maxNBeta; ++b){
-            for (int l=0; l<ffnn->getNLayers(); ++l){
-                if (u < ffnn->getLayerSize(l) && u>0){
-                    feeder = ffnn->getLayer(l)->getFedUnit(u-1)->getFeeder();
-                    if (u < ffnn->getLayer(l)->getNUnits() && feeder){
+            cout << emptySpaceForBeta << emptySpaceAfterBeta << emptySapceForActivationFunctionId << emptySpaceAfterActivationFunction; // for Input Layer
+            for (int l=0; l<ffnn->getNNeuralLayers(); ++l){
+                if (u < ffnn->getFedLayer(l)->getNUnits() && u>0){
+                    feeder = ffnn->getFedLayer(l)->getFedUnit(u-1)->getFeeder();
+                    if (feeder){
                         if (b < feeder->getNVariationalParameters()){
                             if (feeder->getBeta(b) >= 0.) cout << "+";
                             cout << feeder->getBeta(b);
@@ -107,7 +108,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
                         }
                         cout << emptySpaceAfterBeta;
                         if (b==0){
-                            cout << ffnn->getLayer(l)->getNNUnit(u-1)->getActivationFunction()->getIdCode();
+                            cout << ffnn->getNNLayer(l)->getNNUnit(u-1)->getActivationFunction()->getIdCode();
                         } else {
                             cout << emptySapceForActivationFunctionId;
                         }
@@ -115,7 +116,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
                     } else {
                         cout << emptySpaceForBeta << emptySpaceAfterBeta;
                         if (b==0) {
-                            cout << ffnn->getLayer(l)->getNNUnit(u-1)->getActivationFunction()->getIdCode();
+                            cout << ffnn->getNNLayer(l)->getNNUnit(u-1)->getActivationFunction()->getIdCode();
                         } else {
                             cout << emptySapceForActivationFunctionId;
                         }

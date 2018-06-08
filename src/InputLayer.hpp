@@ -17,15 +17,21 @@ public:
     // --- Constructor / Destructor
 
     InputLayer(const int &nunits);
+    void construct(const int &nunits);
+
+    // --- Destructor
+
     ~InputLayer(){_U_in.clear();}
+    void deconstruct()
+    {
+        NetworkLayer::deconstruct();
+        _U_in.clear();
+    }
 
     // --- Getters
 
     int getNInputUnits() {return _U_in.size();}
     InputUnit * getInputUnit(const int &i) {return _U_in[i];}
-
-    // --- Modify structure
-    void setSize(const int &nunits);
 };
 
 
