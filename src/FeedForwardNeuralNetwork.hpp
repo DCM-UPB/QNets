@@ -6,6 +6,7 @@
 #include "InputLayer.hpp"
 #include "FedNetworkLayer.hpp"
 #include "NNLayer.hpp"
+#include "OutputNNLayer.hpp"
 #include "NetworkUnit.hpp"
 
 #include <vector>
@@ -22,6 +23,7 @@ protected:
     std::vector<FedNetworkLayer *> _L_fed; // contains layers with feeder
     std::vector<NNLayer *> _L_nn; // contains neural layers
     InputLayer * _L_in; // input layer
+    OutputNNLayer * _L_out; // output layer
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
     bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d, _flag_c2d;  // flag that indicates if the substrates for the derivatives have been activated or not
@@ -43,13 +45,14 @@ public:
     int getNHiddenLayers(){return _L_nn.size()-1;}
 
     int getNInput(){return _L_in->getNInputUnits();}
-    int getNOutput(){return _L_nn.back()->getNNNUnits();}
+    int getNOutput(){return _L_out->getNNNUnits();}
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
 
-    InputLayer * getInputLayer(){return _L_in;}
     NetworkLayer * getLayer(const int &li){return _L[li];}
     FedNetworkLayer * getFedLayer(const int &li){return _L_fed[li];}
     NNLayer * getNNLayer(const int &li){return _L_nn[li];}
+    InputLayer * getInputLayer(){return _L_in;}
+    OutputNNLayer * getOutputLayer(){return _L_out;}
 
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
@@ -71,7 +74,6 @@ public:
     // --- Connect the neural network
     void connectFFNN();
     void disconnectFFNN();
-
 
 
     // --- Manage the betas, which exist only after that the FFNN has been connected

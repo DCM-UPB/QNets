@@ -177,7 +177,7 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 
 
 double FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d){
-    return _L.back()->getUnit(i+1)->getCrossSecondDerivativeValue(i1d, iv1d);
+    return _L_out->getUnit(i+1)->getCrossSecondDerivativeValue(i1d, iv1d);
 }
 
 
@@ -198,7 +198,7 @@ void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, double ** 
 
 
 double FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d){
-    return _L.back()->getUnit(i+1)->getCrossFirstDerivativeValue(i1d, iv1d);
+    return _L_out->getUnit(i+1)->getCrossFirstDerivativeValue(i1d, iv1d);
 }
 
 
@@ -221,7 +221,7 @@ void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d
 
 double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, const int &iv1d)
 {
-    return _L.back()->getUnit(i+1)->getVariationalFirstDerivativeValue(iv1d);
+    return _L_out->getUnit(i+1)->getVariationalFirstDerivativeValue(iv1d);
 }
 
 
@@ -245,7 +245,7 @@ void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
 
 double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2d)
 {
-    return ( _L.back()->getUnit(i+1)->getSecondDerivativeValue(i2d) );
+    return ( _L_out->getUnit(i+1)->getSecondDerivativeValue(i2d) );
 }
 
 
@@ -269,7 +269,7 @@ void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
 
 double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
 {
-    return ( _L.back()->getUnit(i+1)->getFirstDerivativeValue(i1d) );
+    return ( _L_out->getUnit(i+1)->getFirstDerivativeValue(i1d) );
 }
 
 
@@ -293,14 +293,14 @@ void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1)
 
 double FeedForwardNeuralNetwork::getOutput(const int &i)
 {
-    return _L.back()->getUnit(i+1)->getValue();
+    return _L_out->getUnit(i+1)->getValue();
 }
 
 
 void FeedForwardNeuralNetwork::getOutput(double * out)
 {
-    for (int i=1; i<_L.back()->getNUnits(); ++i){
-        out[i-1] = _L.back()->getUnit(i)->getValue();
+    for (int i=1; i<_L_out->getNUnits(); ++i){
+        out[i-1] = _L_out->getUnit(i)->getValue();
     }
 }
 
@@ -623,7 +623,7 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
                 }
 
             // disconnect last layer
-            _L_nn[_L_nn.size()-1]->disconnect();  // disconnect the last (output) layer
+            _L_out->disconnect();  // disconnect the last (output) layer
             // insert new layer
             _L.insert(it, newhidlay);
             _L_fed.insert(it_fed, newhidlay);
@@ -781,8 +781,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     _L.push_back(_L_in);
     for (int j=0; j<nunits; ++j) file >> actf_id; // skip
 
-    // Neural Layers
-    for (int i=1; i<nlayers; ++i)
+    // Hidden Layers
+    for (int i=1; i<nlayers-1; ++i)
         {
             file >> nunits;
             nnl = new NNLayer(nunits, std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
@@ -795,6 +795,19 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
             _L_fed.push_back(nnl);
             _L_nn.push_back(nnl);
         }
+
+    // Output Layer
+    file >> nunits;
+    _L_out = new OutputNNLayer(nunits, std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
+    file >> actf_id; // skip the offset
+    for (int j=1; j<nunits; ++j){
+        file >> actf_id;
+        _L_out->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_id));
+    }
+    _L.push_back(_L_out);
+    _L_fed.push_back(_L_out);
+    _L_nn.push_back(_L_out);
+
     // connect the NN, if it is the case
     _nvp = 0;
     bool connected;
@@ -828,11 +841,13 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn){
+    // read and set size of input layer
     _L_in = new InputLayer(ffnn->getInputLayer()->getNUnits());
     _L.push_back(_L_in);
-    // read and set the activation function and size of each layer
+
+    // read and set the activation function and size for each hidden layer
     NNLayer * nnl;
-    for (int i=0; i<ffnn->getNNeuralLayers(); ++i){
+    for (int i=0; i<ffnn->getNNeuralLayers()-1; ++i){ // exclude output layer
         nnl = new NNLayer(ffnn->getNNLayer(i)->getNUnits(), std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
         for (int j=0; j<ffnn->getNNLayer(i)->getNNNUnits(); ++j){
             nnl->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode(), ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getParams()));
@@ -841,7 +856,17 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
         _L_fed.push_back(nnl);
         _L_nn.push_back(nnl);
     }
-    // read and set the substrates
+
+    // read and set the activation function and size for output layer
+    _L_out = new OutputNNLayer(ffnn->getOutputLayer()->getNUnits(), std_actf::provideActivationFunction("id_"));
+    for (int j=0; j<ffnn->getOutputLayer()->getNNNUnits(); ++j){
+        _L_out->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getOutputLayer()->getNNUnit(j)->getActivationFunction()->getIdCode(), ffnn->getOutputLayer()->getNNUnit(j)->getActivationFunction()->getParams()));
+    }
+    _L.push_back(_L_out);
+    _L_fed.push_back(_L_out);
+    _L_nn.push_back(_L_out);
+
+     // read and set the substrates
     _nvp = 0;
     _flag_connected = false;
     if (ffnn->isConnected()){
@@ -869,15 +894,15 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int 
 void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysize, const int &outsize){
     _L_in = new InputLayer(insize);
     NNLayer * hidlay = new NNLayer(hidlaysize, std_actf::provideActivationFunction("lgs"));
-    NNLayer * out = new NNLayer(outsize, std_actf::provideActivationFunction("lgs"));
+    _L_out = new OutputNNLayer(outsize, std_actf::provideActivationFunction("lgs"));
 
     _L.push_back(_L_in);
     _L.push_back(hidlay);
     _L_fed.push_back(hidlay);
     _L_nn.push_back(hidlay);
-    _L.push_back(out);
-    _L_fed.push_back(out);
-    _L_nn.push_back(out);
+    _L.push_back(_L_out);
+    _L_fed.push_back(_L_out);
+    _L_nn.push_back(_L_out);
 
     _flag_connected = false;
     _flag_1d = false;
@@ -903,6 +928,7 @@ FeedForwardNeuralNetwork::~FeedForwardNeuralNetwork()
     _L_fed.clear();
     _L_nn.clear();
     _L_in = NULL;
+    _L_out = NULL;
 
     _flag_connected = false;
     _flag_1d = false;

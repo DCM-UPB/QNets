@@ -5,7 +5,7 @@
 #include "ActivationFunctionInterface.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 
-#include <cstddef>
+#include <stdexcept>
 
 // Unit of an Artificial Neural Network
 class NNUnit: public FedNetworkUnit
@@ -18,8 +18,8 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {_actf = actf;}
-    virtual ~NNUnit(){ if (_actf) delete _actf; _actf = NULL; }
+    NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {if (actf) _actf = actf; else throw std::invalid_argument("NNUnit(): the parameter 'actf' was not valid");}
+    virtual ~NNUnit(){ delete _actf; }
 
     // virtual string code gettes, to be extended by child
     virtual std::string getIdCode(){return "nnu";} // return identifier for unit type
@@ -28,7 +28,7 @@ public:
     virtual std::string getMemberFullCodes(){return FedNetworkUnit::getMemberFullCodes() + " " + _actf->getFullCode();} // append actf IdCodes + Params
 
     // Setters
-    void setActivationFunction(ActivationFunctionInterface * actf){if (_actf) delete _actf; _actf=actf;}
+    void setActivationFunction(ActivationFunctionInterface * actf){delete _actf; if (actf) _actf=actf; else throw std::invalid_argument("NNUnit::setActivationFunction(): the parameter 'actf' was not valid");}
 
     // Getters
     ActivationFunctionInterface * getActivationFunction(){return _actf;}
