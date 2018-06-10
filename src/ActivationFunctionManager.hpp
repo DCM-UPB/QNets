@@ -27,7 +27,7 @@ namespace std_actf{
 
     extern std::vector<ActivationFunctionInterface *> supported_actf;
 
-    ActivationFunctionInterface * provideActivationFunction(const std::string &idcode, const std::string &params = "");
+    ActivationFunctionInterface * provideActivationFunction(const std::string &idcode = "lgs", const std::string &params = ""); // currently defaults to logistic actf
 }
 
 

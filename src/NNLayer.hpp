@@ -5,6 +5,7 @@
 #include "NetworkLayer.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
+#include "ActivationFunctionManager.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 #include "NetworkUnitRay.hpp"
 
@@ -20,14 +21,14 @@ public:
 
     // --- Constructor
 
-    NNLayer(const int &nunits, ActivationFunctionInterface * actf);
-    void construct(const int &nunits);
-    void construct(const int &nunits, ActivationFunctionInterface * actf);
+    NNLayer(const int &nunits, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()){if (nunits>1) construct(nunits, actf);}
+    virtual void construct(const int &nunits);
+    virtual void construct(const int &nunits, ActivationFunctionInterface * actf);
 
     // --- Deconstructor
 
-    ~NNLayer(){_U_nn.clear();}
-    void deconstruct(){FedNetworkLayer::deconstruct(); _U_nn.clear();}
+    virtual ~NNLayer(){_U_nn.clear();}
+    virtual void deconstruct(){FedNetworkLayer::deconstruct(); _U_nn.clear();}
 
     // --- String Codes
 
@@ -44,7 +45,7 @@ public:
 
     // --- Connection
 
-    NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) {return new NetworkUnitRay(nl);}
+    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) {return new NetworkUnitRay(nl);}
 };
 
 

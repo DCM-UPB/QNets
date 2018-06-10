@@ -21,13 +21,14 @@ public:
     virtual std::string getIdCode() = 0; // return unique (at least within class) identifier for component type
     virtual std::string getClassIdCode() = 0; // Usually should be set only by the direct child of BaseComponent
     virtual std::string getParams(){return "";} // return parameter string
-    virtual std::string getMemberIdCodes(){return "";} // return IdCodes of added members
-    virtual std::string getMemberFullCodes(){return "";} // return member IdCodes + Params
+    virtual std::string getMemberTreeIdCode(){return "";} // return TreeIdCodes of added BaseComponent members
+    virtual std::string getMemberTreeFullCode(){return "";} // return TreeFullCodes of added BaseComponent members
+
 
     // string code composers
     std::string getFullCode(){return this->getIdCode() + " ( " + this->getParams() + " )";} //return id + params
-    std::string getTreeIdCodes(){return this->getIdCode() + " { " + this->getMemberIdCodes() + " }";} //return id + member ids
-    std::string getTreeFullCodes(){return this->getFullCode() + " { " + this->getMemberFullCodes() + " }";} // return id+params + member ids+params
+    std::string getTreeIdCode(){return this->getIdCode() + " { " + this->getMemberTreeIdCode() + " }";} //return id + member ids, recursively
+    std::string getTreeFullCode(){return this->getFullCode() + " { " + this->getMemberTreeFullCode() + " }";} // return id+params + member ids+params, recursively
 
     // set by string code
     virtual void setParams(const std::string &params){} // set params of this by params string

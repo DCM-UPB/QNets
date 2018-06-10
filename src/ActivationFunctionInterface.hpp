@@ -6,7 +6,7 @@
 #include <string>
 
 
-class ActivationFunctionInterface: virtual public BaseComponent
+class ActivationFunctionInterface: public BaseComponent
 {
 protected:
 

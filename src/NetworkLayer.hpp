@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-class NetworkLayer: virtual public BaseComponent
+class NetworkLayer: public BaseComponent
 {
 protected:
 
@@ -46,10 +46,10 @@ public:
 
     // --- Variational Parameters
 
-    virtual bool setVariationalParameter(const int &id, const double &vp) {return false;};
+    virtual bool setVariationalParameter(const int &id, const double &vp) {return false;}
     virtual bool getVariationalParameter(const int &id, double &vp) {return false;}
-    virtual int getNVariationalParameters() {return 0;};
-    virtual int setVariationalParametersID(const int &id_vp) { return id_vp;};
+    virtual int getNVariationalParameters() {return 0;}
+    virtual int setVariationalParametersID(const int &id_vp) { return id_vp;}
 
 
     // --- Values to compute

@@ -1,19 +1,14 @@
 #include "NNLayer.hpp"
 
 #include "ActivationFunctionInterface.hpp"
+#include "ActivationFunctionManager.hpp"
 #include "NNUnit.hpp"
 
 // --- Constructor
 
-NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
-{
-    this->construct(nunits, actf);
-}
-
 void NNLayer::construct(const int &nunits)
 {
-    ActivationFunctionInterface * actf = _U_nn[0]->getActivationFunction();
-    this->construct(nunits, actf);
+    this->construct(nunits, std_actf::provideActivationFunction());
 }
 
 void NNLayer::construct(const int &nunits, ActivationFunctionInterface * actf)

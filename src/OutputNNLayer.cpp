@@ -1,6 +1,7 @@
 #include "OutputNNLayer.hpp"
 
 #include "ActivationFunctionInterface.hpp"
+#include "ActivationFunctionManager.hpp"
 #include "OutputNNUnit.hpp"
 
 // --- Constructor

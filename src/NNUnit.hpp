@@ -3,6 +3,7 @@
 
 #include "FedNetworkUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
+#include "ActivationFunctionManager.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 
 #include <stdexcept>
@@ -18,14 +19,14 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {if (actf) _actf = actf; else throw std::invalid_argument("NNUnit(): the parameter 'actf' was not valid");}
+    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {if (actf) _actf = actf; else throw std::invalid_argument("NNUnit(): the parameter 'actf' was not valid");}
     virtual ~NNUnit(){ delete _actf; }
 
     // string code getters
     virtual std::string getIdCode(){return "nnu";} // return identifier for unit type
 
-    virtual std::string getMemberIdCodes(){return FedNetworkUnit::getMemberIdCodes() + " " + _actf->getIdCode();} // append actf IdCodes
-    virtual std::string getMemberFullCodes(){return FedNetworkUnit::getMemberFullCodes() + " " + _actf->getFullCode();} // append actf IdCodes + Params
+    virtual std::string getMemberTreeIdCode(){return FedNetworkUnit::getMemberTreeIdCode() + " " + _actf->getTreeIdCode();} // append actf TreeIdCode
+    virtual std::string getMemberTreeFullCode(){return FedNetworkUnit::getMemberTreeFullCode() + " " + _actf->getTreeFullCode();} // append actf TreeFullCode
 
     // Setters
     void setActivationFunction(ActivationFunctionInterface * actf){delete _actf; if (actf) _actf=actf; else throw std::invalid_argument("NNUnit::setActivationFunction(): the parameter 'actf' was not valid");}

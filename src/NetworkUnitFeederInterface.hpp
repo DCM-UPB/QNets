@@ -5,7 +5,7 @@
 
 #include <string>
 
-class NetworkUnitFeederInterface: virtual public BaseComponent
+class NetworkUnitFeederInterface: public BaseComponent
 {
 protected:
 

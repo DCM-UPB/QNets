@@ -28,8 +28,8 @@ public:
     // string code getters
     virtual std::string getIdCode(){return "fnwu";} // return identifier for unit type
 
-    virtual std::string getMemberIdCodes(){return _feeder ? _feeder->getIdCode() : "";} // return feeder IdCodes
-    virtual std::string getMemberFullCodes(){return _feeder ? _feeder->getFullCode() : "";} // return feeder IdCodes + Params
+    virtual std::string getMemberTreeIdCode(){return _feeder ? _feeder->getTreeIdCode() : "";} // return feeder's IdCodes Tree
+    virtual std::string getMemberTreeFullCode(){return _feeder ? _feeder->getTreeFullCode() : "";} // return feeder's IdCodes + Params Tree
 
     // Computation
     void computeFeed();

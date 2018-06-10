@@ -4,6 +4,7 @@
 #include "NNLayer.hpp"
 #include "OutputNNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
+#include "ActivationFunctionManager.hpp"
 
 #include <vector>
 #include <string>
@@ -17,13 +18,13 @@ public:
 
     // --- Constructor
 
-    OutputNNLayer(const int &nunits, ActivationFunctionInterface * actf): NNLayer(nunits, actf) {}
-    void construct(const int &nunits, ActivationFunctionInterface * actf);
+    OutputNNLayer(const int &nunits, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): NNLayer(0, actf) {if (nunits>1) construct(nunits, actf);}
+    virtual void construct(const int &nunits, ActivationFunctionInterface * actf);
 
     // --- Destructor
 
-    ~OutputNNLayer(){_U_out.clear();}
-    void deconstruct(){NNLayer::deconstruct(); _U_out.clear();}
+    virtual ~OutputNNLayer(){_U_out.clear();}
+    virtual void deconstruct(){NNLayer::deconstruct(); _U_out.clear();}
 
     // --- String Codes
 

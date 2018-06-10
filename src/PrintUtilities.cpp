@@ -26,23 +26,25 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode) // mo
             maxStringLength[l] = 0;
             for (int u = 0; u<ffnn->getLayerSize(l); ++u)
                 {
-                    if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCodes();
-                    else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCodes();
+                    if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCode();
+                    else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCode();
                     if (stringCode.length() > maxStringLength[l])
                         {
                             maxStringLength[l] = stringCode.length();
                         }
                 }
+            stringCode = ffnn->getLayer(l)->getIdCode(); // print layer identifiers
+            cout << stringCode << string(maxStringLength[l]-stringCode.length()+4, ' ');
         }
-
+    cout << endl;
     for (int u=0; u<maxLayerSize; ++u)
         {
             for (int l=0; l<ffnn->getNLayers(); ++l)
                 {
                     if (ffnn->getLayerSize(l) > u)
                         {
-                            if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCodes();
-                            else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCodes();
+                            if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCode();
+                            else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCode();
                             cout << stringCode;
                             cout << string(maxStringLength[l]-stringCode.length(), ' ');
                         }

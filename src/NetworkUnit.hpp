@@ -8,7 +8,7 @@
 #include <cstddef> // for NULL
 
 // Generalized Network Unit
-class NetworkUnit: virtual public BaseComponent
+class NetworkUnit: public BaseComponent
 {
 protected:
     // Unit core elements

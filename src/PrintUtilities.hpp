@@ -8,7 +8,7 @@
 #include <string>
 
 
-void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode = "id");
+void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode = "full");
 
 void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn);
 

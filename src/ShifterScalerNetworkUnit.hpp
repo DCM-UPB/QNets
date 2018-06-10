@@ -7,10 +7,7 @@
 // Unit with linear output function applied after activation
 class ShifterScalerNetworkUnit: virtual public NetworkUnit
 {
-protected:
-    double _shift; // _shift will be added to the activation value
-    double _scale; // and then _scale will be multiplied with the result to get the output value
-
+private:
     void _applyShiftScale() { // meant to be called in computeValues
         _v = (_v + _shift) * _scale;
         if (_v1d) for (int i=0; i<_nx0; ++i) _v1d[i] *= _scale;
@@ -19,6 +16,10 @@ protected:
         if (_v1d1vd) for (int i=0; i<_nx0; ++i) for (int j=0; j<_nvp; ++j) _v1d1vd[i][j] *=_scale;
         if (_v2d1vd) for (int i=0; i<_nx0; ++i) for (int j=0; j<_nvp; ++j) _v2d1vd[i][j] *=_scale;
     }
+
+protected:
+    double _shift; // _shift will be added to the activation value
+    double _scale; // and then _scale will be multiplied with the result to get the output value
 
 public:
     // Constructor
