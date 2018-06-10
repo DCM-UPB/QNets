@@ -10,6 +10,7 @@
 #include <random>
 #include <algorithm>
 
+#include <string>
 
 class NetworkUnitRay: public NetworkUnitFeederInterface {
 protected:
@@ -36,6 +37,9 @@ public:
 
     NetworkUnitRay(NetworkLayer * nl);
     virtual ~NetworkUnitRay();
+
+    // string code methods
+    virtual std::string getIdCode(){return "ray";}; // return an identification string
 
     // beta
     int getNBeta();

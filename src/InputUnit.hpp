@@ -12,6 +12,9 @@ protected:
 public:
     InputUnit(const int index): _index(index) {} // the index of the input unit, i.e. d/dx_index f(_pv) = 1
 
+    // string code methods
+    virtual std::string getIdCode(){return "inp";} // return identifier for unit type
+
     // Computation
     void computeFeed(){}
     void computeActivation(){}

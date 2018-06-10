@@ -1,6 +1,7 @@
 #ifndef NETWORK_UNIT_FEEDER_INTERFACE
 #define NETWORK_UNIT_FEEDER_INTERFACE
 
+#include <string>
 
 class NetworkUnitFeederInterface
 {
@@ -8,6 +9,11 @@ protected:
 
 public:
     virtual ~NetworkUnitFeederInterface(){}
+
+    // string code methods
+    virtual std::string getIdCode() = 0; // return an identification string
+    virtual std::string getParams() {return "";} // should contain param identifier and values separated by spaces, .e.g.  a 0.1 b 1.0
+    std::string getFullCode() {return this->getIdCode() + " ( " + this->getParams() + " )";}
 
     // get info on beta
     virtual int getNBeta() = 0;

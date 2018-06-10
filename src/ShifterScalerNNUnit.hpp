@@ -18,6 +18,8 @@ public:
     // Constructor
     ShifterScalerNNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerNetworkUnit(shift, scale) {};
 
+    // string code methods
+    virtual std::string getIdCode(){return "ssnnu";} // return identifier for unit type
 };
 
 #endif

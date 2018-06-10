@@ -19,11 +19,17 @@ public:
 
     // Constructor and destructor
     FedNetworkUnit(NetworkUnitFeederInterface * feeder = NULL){_feeder = feeder;}
-    virtual ~FedNetworkUnit(){ if (_feeder) delete _feeder; _feeder=NULL;}
+    virtual ~FedNetworkUnit(){if (_feeder) delete _feeder; _feeder=NULL;}
 
     // Setters and getters
     void setFeeder(NetworkUnitFeederInterface * feeder){if (_feeder) delete _feeder; _feeder = feeder;}
     NetworkUnitFeederInterface * getFeeder(){return _feeder;}
+
+    // virtual string code gettes, to be extended by child
+    virtual std::string getIdCode(){return "fnwu";} // return identifier for unit type
+
+    virtual std::string getMemberIdCodes(){return _feeder ? _feeder->getIdCode() : "";} // return feeder IdCodes
+    virtual std::string getMemberFullCodes(){return _feeder ? _feeder->getFullCode() : "";} // return feeder IdCodes + Params
 
     // Computation
     void computeFeed();

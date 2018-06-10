@@ -3,7 +3,6 @@
 
 
 #include <string>
-#include <sstream>
 
 
 class ActivationFunctionInterface
@@ -33,15 +32,8 @@ public:
     virtual std::string getIdCode() = 0;
     virtual std::string getParams() {return "";} // should contain param identifier and values separated by spaces, .e.g.  a 0.1 b 1.0
 
-    std::string getFullCode()
-    {
-        std::stringstream fullCode;
-        fullCode << this->getIdCode();
-        fullCode << "( ";
-        fullCode << this->getParams();
-        fullCode << " )";
-        return fullCode.str();
-    }
+    std::string getFullCode() {return this->getIdCode() + " ( " + this->getParams() + " )";}
+
 
     // set params from string
     virtual void setParams(const std::string &params){}

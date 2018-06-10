@@ -6,10 +6,10 @@
 
 std::string ReLUActivationFunction::getParams()
 {
-    std::stringstream ss;
-    ss << "alpha ";
-    ss << _alpha;
-    return ss.str();
+    std::ostringstream oss;
+    oss << "alpha ";
+    oss << _alpha;
+    return oss.str();
 }
 
 void ReLUActivationFunction::setParams(const std::string &params)

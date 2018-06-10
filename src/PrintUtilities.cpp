@@ -5,33 +5,50 @@
 #include <fstream>
 #include <stdexcept>
 #include <cmath>
+#include <string>
 
-
-void printFFNNStructure(FeedForwardNeuralNetwork * ffnn)
+void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode) // mode can be id or full
 {
     using namespace std;
 
     int maxLayerSize = 0;
+    size_t maxStringLength[ffnn->getNLayers()];
+
+    std::string stringCode = "";
+
     for (int l=0; l<ffnn->getNLayers(); ++l)
         {
             if (ffnn->getLayerSize(l) > maxLayerSize)
                 {
                     maxLayerSize = ffnn->getLayerSize(l);
                 }
+
+            maxStringLength[l] = 0;
+            for (int u = 0; u<ffnn->getLayerSize(l); ++u)
+                {
+                    if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCodes();
+                    else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCodes();
+                    if (stringCode.length() > maxStringLength[l])
+                        {
+                            maxStringLength[l] = stringCode.length();
+                        }
+                }
         }
 
-    for (int r=0; r<maxLayerSize; ++r)
+    for (int u=0; u<maxLayerSize; ++u)
         {
-            for (int c=0; c<ffnn->getNLayers(); ++c)
+            for (int l=0; l<ffnn->getNLayers(); ++l)
                 {
-                    if (ffnn->getLayerSize(c) > r)
+                    if (ffnn->getLayerSize(l) > u)
                         {
-                            if (r>0 && c>0) cout << ffnn->getNNLayer(c-1)->getNNUnit(r-1)->getActivationFunction()->getIdCode();
-                            else cout << "id_";
+                            if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCodes();
+                            else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCodes();
+                            cout << stringCode;
+                            cout << string(maxStringLength[l]-stringCode.length(), ' ');
                         }
                     else
                         {
-                            cout << "   ";
+                            cout << string(maxStringLength[l], ' ');
                         }
                     cout << "    ";
                 }

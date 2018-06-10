@@ -6,12 +6,12 @@
 
 std::string SELUActivationFunction::getParams()
 {
-    std::stringstream ss;
-    ss << "alpha ";
-    ss << _alpha;
-    ss << " lambda ";
-    ss << _lambda;
-    return ss.str();
+    std::ostringstream oss;
+    oss << "alpha ";
+    oss << _alpha;
+    oss << " lambda ";
+    oss << _lambda;
+    return oss.str();
 }
 
 void SELUActivationFunction::setParams(const std::string &params)
