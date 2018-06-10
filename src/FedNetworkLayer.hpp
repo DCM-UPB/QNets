@@ -17,11 +17,7 @@ public:
 
     virtual ~FedNetworkLayer() {_U_fed.clear();}
 
-    virtual void deconstruct()
-    {
-        NetworkLayer::deconstruct();
-        _U_fed.clear();
-    }
+    virtual void deconstruct(){NetworkLayer::deconstruct(); _U_fed.clear();}
 
     // --- Getters
 

@@ -27,11 +27,7 @@ public:
     // --- Deconstructor
 
     ~NNLayer(){_U_nn.clear();}
-    void deconstruct()
-    {
-        FedNetworkLayer::deconstruct();
-        _U_nn.clear();
-    }
+    void deconstruct(){FedNetworkLayer::deconstruct(); _U_nn.clear();}
 
     // --- Getters
 

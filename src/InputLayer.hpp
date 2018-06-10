@@ -22,11 +22,7 @@ public:
     // --- Destructor
 
     ~InputLayer(){_U_in.clear();}
-    void deconstruct()
-    {
-        NetworkLayer::deconstruct();
-        _U_in.clear();
-    }
+    void deconstruct(){NetworkLayer::deconstruct(); _U_in.clear();}
 
     // --- Getters
 

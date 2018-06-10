@@ -1,4 +1,4 @@
-#include "ReadUtilities.hpp"
+/*#include "ReadUtilities.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -61,3 +61,4 @@ void readFFNNStructure(const char * filename, std::vector<std::vector<std::strin
     }
 
 }
+*/

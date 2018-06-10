@@ -1,4 +1,4 @@
-#ifndef READ_UTILITIES
+/*#ifndef READ_UTILITIES
 #define READ_UTILITIES
 
 
@@ -10,3 +10,4 @@ void readFFNNStructure(const char * filename, std::vector<std::vector<std::strin
 
 
 #endif
+*/
