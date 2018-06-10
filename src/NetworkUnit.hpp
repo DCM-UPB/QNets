@@ -1,13 +1,14 @@
 #ifndef NETWORK_UNIT
 #define NETWORK_UNIT
 
+#include "BaseComponent.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 
 #include <string>
 #include <cstddef> // for NULL
 
 // Generalized Network Unit
-class NetworkUnit
+class NetworkUnit: virtual public BaseComponent
 {
 protected:
     // Unit core elements
@@ -49,16 +50,9 @@ public:
     double getValue(){return _v;}
     double getProtoValue(){return _pv;}
 
-    // virtual string code gettes, to be extended by child
+    // BaseComponent IdCodes
+    virtual std::string getClassIdCode(){return "unit";}
     virtual std::string getIdCode(){return "nwu";} // return identifier for unit type
-    virtual std::string getParams(){return "";} // return parameter string
-    virtual std::string getMemberIdCodes(){return "";} // return IdCodes of added members
-    virtual std::string getMemberFullCodes(){return "";} // return member IdCodes + Params
-
-    // string code composers
-    std::string getFullCode(){return this->getIdCode() + " ( " + this->getParams() + " )";} //return id + params
-    std::string getTreeIdCodes(){return this->getIdCode() + " { " + this->getMemberIdCodes() + " }";} //return id + member ids
-    std::string getTreeFullCodes(){return this->getFullCode() + " { " + this->getMemberFullCodes() + " }";} // return id+params + member ids+params
 
     // Coordinate derivatives
     void setFirstDerivativeSubstrate(const int &nx0);

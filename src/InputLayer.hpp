@@ -5,7 +5,7 @@
 #include "InputUnit.hpp"
 
 #include <vector>
-
+#include <string>
 
 class InputLayer: public NetworkLayer
 {
@@ -23,6 +23,10 @@ public:
 
     ~InputLayer(){_U_in.clear();}
     void deconstruct(){NetworkLayer::deconstruct(); _U_in.clear();}
+
+    // --- String Codes
+
+    virtual std::string getIdCode(){return "inl";}
 
     // --- Getters
 

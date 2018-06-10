@@ -1,11 +1,12 @@
 #ifndef ACTIVATION_FUNCTION_INTERFACE
 #define ACTIVATION_FUNCTION_INTERFACE
 
+#include "BaseComponent.hpp"
 
 #include <string>
 
 
-class ActivationFunctionInterface
+class ActivationFunctionInterface: virtual public BaseComponent
 {
 protected:
 
@@ -28,15 +29,8 @@ public:
     // allocate a new copy of this to *actf
     virtual ActivationFunctionInterface * getCopy() = 0;
 
-    // return an identification string
-    virtual std::string getIdCode() = 0;
-    virtual std::string getParams() {return "";} // should contain param identifier and values separated by spaces, .e.g.  a 0.1 b 1.0
-
-    std::string getFullCode() {return this->getIdCode() + " ( " + this->getParams() + " )";}
-
-
-    // set params from string
-    virtual void setParams(const std::string &params){}
+    // set class id code
+    std::string getClassIdCode(){return "actf";}
 
     // compute the activation function value
     virtual double f(const double &) = 0;

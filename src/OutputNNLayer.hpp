@@ -6,7 +6,7 @@
 #include "ActivationFunctionInterface.hpp"
 
 #include <vector>
-
+#include <string>
 
 class OutputNNLayer: public NNLayer
 {
@@ -24,6 +24,10 @@ public:
 
     ~OutputNNLayer(){_U_out.clear();}
     void deconstruct(){NNLayer::deconstruct(); _U_out.clear();}
+
+    // --- String Codes
+
+    virtual std::string getIdCode(){return "outl";}
 
     // --- Getters
 

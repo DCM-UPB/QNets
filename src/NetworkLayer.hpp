@@ -1,12 +1,14 @@
 #ifndef NETWORK_LAYER
 #define NETWORK_LAYER
 
+#include "BaseComponent.hpp"
 #include "NetworkUnit.hpp"
 #include "OffsetUnit.hpp"
 
 #include <vector>
+#include <string>
 
-class NetworkLayer
+class NetworkLayer: virtual public BaseComponent
 {
 protected:
 
@@ -26,6 +28,9 @@ public:
     virtual ~NetworkLayer();
     virtual void deconstruct(); // should remove the non-offset units
 
+    // --- Class IdCode
+
+    std::string getClassIdCode(){return "layer";}
 
     // --- Getters
 
@@ -41,7 +46,7 @@ public:
 
     // --- Variational Parameters
 
-    virtual bool setVariationalParameter(const int &id, const double &vp) {return false;}; 
+    virtual bool setVariationalParameter(const int &id, const double &vp) {return false;};
     virtual bool getVariationalParameter(const int &id, double &vp) {return false;}
     virtual int getNVariationalParameters() {return 0;};
     virtual int setVariationalParametersID(const int &id_vp) { return id_vp;};

@@ -9,7 +9,7 @@
 #include "NetworkUnitRay.hpp"
 
 #include <vector>
-
+#include <string>
 
 class NNLayer: public FedNetworkLayer
 {
@@ -28,6 +28,10 @@ public:
 
     ~NNLayer(){_U_nn.clear();}
     void deconstruct(){FedNetworkLayer::deconstruct(); _U_nn.clear();}
+
+    // --- String Codes
+
+    virtual std::string getIdCode(){return "nnl";}
 
     // --- Getters
 

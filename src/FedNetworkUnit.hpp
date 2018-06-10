@@ -25,7 +25,7 @@ public:
     void setFeeder(NetworkUnitFeederInterface * feeder){if (_feeder) delete _feeder; _feeder = feeder;}
     NetworkUnitFeederInterface * getFeeder(){return _feeder;}
 
-    // virtual string code gettes, to be extended by child
+    // string code getters
     virtual std::string getIdCode(){return "fnwu";} // return identifier for unit type
 
     virtual std::string getMemberIdCodes(){return _feeder ? _feeder->getIdCode() : "";} // return feeder IdCodes
