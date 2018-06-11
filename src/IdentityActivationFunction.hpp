@@ -10,10 +10,12 @@ class IdentityActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-    IdentityActivationFunction(){}
-    ~IdentityActivationFunction(){}
 
+    // getters
+    ActivationFunctionInterface * getCopy(){return new IdentityActivationFunction();}
     std::string getIdCode(){return "id_";}
+
+    // computation
     double f(const double &in){return in;}
     double f1d(const double &in){return 1.;}
     double f2d(const double &in){return 0.;}

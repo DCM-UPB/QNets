@@ -4,7 +4,8 @@
 #include "FedNetworkUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "NetworkUnitFeederInterface.hpp"
-
+#include "IdentityActivationFunction.hpp"
+#include <cstddef>
 
 // Unit of an Artificial Neural Network
 class NNUnit: public FedNetworkUnit
@@ -18,16 +19,16 @@ protected:
 public:
     // Constructor and destructor
     NNUnit(ActivationFunctionInterface * actf, NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {_actf = actf;}
+    virtual ~NNUnit(){ if (_actf) delete _actf; _actf = NULL; }
 
     // Setters
-    void setActivationFunction(ActivationFunctionInterface * actf){_actf=actf;}
+    void setActivationFunction(ActivationFunctionInterface * actf){if (_actf) delete _actf; _actf=actf;}
 
     // Getters
     ActivationFunctionInterface * getActivationFunction(){return _actf;}
 
-
     // Computation
-    void computeActivation();
+    void computeOutput();
 };
 
 

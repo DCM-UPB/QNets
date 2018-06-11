@@ -19,10 +19,10 @@ public:
 
     // Constructor and destructor
     FedNetworkUnit(NetworkUnitFeederInterface * feeder = NULL){_feeder = feeder;}
-    virtual ~FedNetworkUnit(){ if (_feeder) delete _feeder; } // actually this shouldn't be done here since feeder was passed from external
+    virtual ~FedNetworkUnit(){ if (_feeder) delete _feeder; _feeder=NULL;}
 
     // Setters and getters
-    void setFeeder(NetworkUnitFeederInterface * feeder){_feeder = feeder;}
+    void setFeeder(NetworkUnitFeederInterface * feeder){if (_feeder) delete _feeder; _feeder = feeder;}
     NetworkUnitFeederInterface * getFeeder(){return _feeder;}
 
     // Computation

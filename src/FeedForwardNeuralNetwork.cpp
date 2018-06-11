@@ -747,7 +747,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
         for (unsigned int u=1; u<actf[l].size(); ++u){
             af = std_actf::provideActivationFunction(actf[l][u]);
 
-            if (af != 0){
+            if (af){
                 if (l != 0) _L_nn[l-1]->getNNUnit(u-1)->setActivationFunction(af);
             } else{
                 cout << "ERROR FeedForwardNeuralNetwork(const int &nlayers, const int * layersize, const char ** actf) : given activation function " << actf[l][u] << " not known" << endl;
@@ -835,7 +835,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     for (int i=0; i<ffnn->getNNeuralLayers(); ++i){
         nnl = new NNLayer(ffnn->getNNLayer(i)->getNUnits(), std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
         for (int j=0; j<ffnn->getNNLayer(i)->getNNNUnits(); ++j){
-            nnl->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode()));
+            nnl->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode(), ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getParams()));
         }
         _L.push_back(nnl);
         _L_fed.push_back(nnl);

@@ -1,7 +1,27 @@
 #include "ReLUActivationFunction.hpp"
-
+#include <string>
+#include <sstream>
 
 // Activation Function Interface implementation
+
+std::string ReLUActivationFunction::getParams()
+{
+    std::stringstream ss;
+    ss << "alpha ";
+    ss << _alpha;
+    return ss.str();
+}
+
+void ReLUActivationFunction::setParams(const std::string &params)
+{
+    std::istringstream iss(params);
+    std::string word;
+    while( iss >> word ) {
+        if (word == "alpha") {
+            iss >> _alpha;
+        }
+    }
+}
 
 double ReLUActivationFunction::f(const double &in)
 {

@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <sstream>
 
 
 class ActivationFunctionInterface
@@ -11,8 +12,39 @@ protected:
 
 public:
 
-    //return a 3-characters identification string
+    // Constructors: every child with hyper parameters should implement 3 constructors:
+
+    // Construct from passed parameter values
+    //ActivationFunctionInterface(){}
+
+    // Construct from passed param string
+    //ActivationFunctionInterface(const std::string &params){}
+
+    // Construct from passed activation function
+    //ActivationFunctionInterface(ActivationFunctionInterface * const actf){}
+
+    // Destructor
+    virtual ~ActivationFunctionInterface(){}
+
+    // allocate a new copy of this to *actf
+    virtual ActivationFunctionInterface * getCopy() = 0;
+
+    // return an identification string
     virtual std::string getIdCode() = 0;
+    virtual std::string getParams() {return "";} // should contain param identifier and values separated by spaces, .e.g.  a 0.1 b 1.0
+
+    std::string getFullCode()
+    {
+        std::stringstream fullCode;
+        fullCode << this->getIdCode();
+        fullCode << "( ";
+        fullCode << this->getParams();
+        fullCode << " )";
+        return fullCode.str();
+    }
+
+    // set params from string
+    virtual void setParams(const std::string &params){}
 
     // compute the activation function value
     virtual double f(const double &) = 0;

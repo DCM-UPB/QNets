@@ -10,11 +10,12 @@ class SineActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-    SineActivationFunction(){}
-    ~SineActivationFunction(){}
 
+    // getters
+    ActivationFunctionInterface * getCopy(){return new SineActivationFunction();}
     std::string getIdCode(){return "sin";}
 
+    // computation
     double f(const double &in);
 
     double f1d(const double &in);

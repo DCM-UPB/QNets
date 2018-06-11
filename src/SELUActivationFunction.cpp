@@ -1,7 +1,32 @@
 #include "SELUActivationFunction.hpp"
 
 #include <math.h>
+#include <string>
+#include <sstream>
 
+std::string SELUActivationFunction::getParams()
+{
+    std::stringstream ss;
+    ss << "alpha ";
+    ss << _alpha;
+    ss << " lambda ";
+    ss << _lambda;
+    return ss.str();
+}
+
+void SELUActivationFunction::setParams(const std::string &params)
+{
+    std::istringstream iss(params);
+    std::string word;
+    while( iss >> word ) {
+        if (word == "alpha") {
+            iss >> _alpha;
+        }
+        else if (word == "lambda") {
+            iss >> _lambda;
+        }
+    }
+}
 
 // Activation Function Interface implementation
 

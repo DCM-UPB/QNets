@@ -1,6 +1,6 @@
 #include "ActivationFunctionManager.hpp"
 
-
+#include <cstddef>
 
 namespace std_actf{
 
@@ -22,15 +22,17 @@ namespace std_actf{
         &sin_actf
     };
 
-    ActivationFunctionInterface * provideActivationFunction(const std::string idcode){
+    ActivationFunctionInterface * provideActivationFunction(const std::string &idcode, const std::string &params){
 
         for (ActivationFunctionInterface * actf : supported_actf){
             if (idcode == actf->getIdCode()){
-                return actf;
+                ActivationFunctionInterface * new_actf = actf->getCopy();
+                new_actf->setParams(params);
+                return new_actf;
             }
         }
 
-        return 0;
+        return NULL;
     }
 
 }
