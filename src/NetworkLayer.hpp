@@ -1,14 +1,14 @@
 #ifndef NETWORK_LAYER
 #define NETWORK_LAYER
 
-#include "BaseComponent.hpp"
+#include "StringCodeComponent.hpp"
 #include "NetworkUnit.hpp"
 #include "OffsetUnit.hpp"
 
 #include <vector>
 #include <string>
 
-class NetworkLayer: public BaseComponent
+class NetworkLayer: public StringCodeComponent
 {
 protected:
 

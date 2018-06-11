@@ -1,12 +1,12 @@
 #ifndef ACTIVATION_FUNCTION_INTERFACE
 #define ACTIVATION_FUNCTION_INTERFACE
 
-#include "BaseComponent.hpp"
+#include "StringCodeComponent.hpp"
 
 #include <string>
 
 
-class ActivationFunctionInterface: public BaseComponent
+class ActivationFunctionInterface: public StringCodeComponent
 {
 protected:
 

@@ -1,11 +1,11 @@
 #ifndef NETWORK_UNIT_FEEDER_INTERFACE
 #define NETWORK_UNIT_FEEDER_INTERFACE
 
-#include "BaseComponent.hpp"
+#include "StringCodeComponent.hpp"
 
 #include <string>
 
-class NetworkUnitFeederInterface: public BaseComponent
+class NetworkUnitFeederInterface: public StringCodeComponent
 {
 protected:
 

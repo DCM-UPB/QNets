@@ -1,14 +1,14 @@
 #ifndef NETWORK_UNIT
 #define NETWORK_UNIT
 
-#include "BaseComponent.hpp"
+#include "StringCodeComponent.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 
 #include <string>
 #include <cstddef> // for NULL
 
 // Generalized Network Unit
-class NetworkUnit: public BaseComponent
+class NetworkUnit: public StringCodeComponent
 {
 protected:
     // Unit core elements

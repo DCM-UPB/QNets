@@ -12,7 +12,7 @@ protected:
 
 public:
     ReLUActivationFunction(const double alpha = 0.){_alpha = alpha;}
-    ReLUActivationFunction(std::string &params){this->setParams(params);}
+    ReLUActivationFunction(const std::string &params){this->setParams(params);}
     ReLUActivationFunction(ReLUActivationFunction * const selu_actf) {_alpha = selu_actf->getAlpha();}
 
     // get copy

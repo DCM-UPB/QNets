@@ -1,6 +1,16 @@
 #include "FedNetworkUnit.hpp"
+#include "StringCodeUtilities.hpp"
 
+#include <string>
 #include <cstddef> // for NULL
+
+// --- string codes
+
+void FedNetworkUnit::setMemberParams(const std::string &memberTreeFullCode)
+{
+    if (_feeder) _feeder->setTreeParams(readTreeFullCode(memberTreeFullCode, _feeder->getIdCode()));
+}
+
 
 // --- Computation
 

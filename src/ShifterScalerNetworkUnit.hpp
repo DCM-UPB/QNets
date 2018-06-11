@@ -2,6 +2,8 @@
 #define SHIFTER_SCALER_NETWORK_UNIT
 
 #include "NetworkUnit.hpp"
+#include "StringCodeUtilities.hpp"
+
 #include <string>
 
 // Unit with linear output function applied after activation
@@ -28,6 +30,8 @@ public:
     // string code methods
     virtual std::string getIdCode(){return "ssu";} // return identifier for unit type
     virtual std::string getParams(){return "shift " + std::to_string(_shift) + " scale " + std::to_string(_scale);} // return parameter string
+
+    virtual void setParams(const std::string &params){setParamValue(_shift, params, "shift"); setParamValue(_scale, params, "scale");};
 
     // Setters
     void setShift(const double shift){_shift=shift;}

@@ -1,4 +1,6 @@
 #include "ReLUActivationFunction.hpp"
+#include "StringCodeUtilities.hpp"
+
 #include <string>
 #include <sstream>
 
@@ -14,13 +16,7 @@ std::string ReLUActivationFunction::getParams()
 
 void ReLUActivationFunction::setParams(const std::string &params)
 {
-    std::istringstream iss(params);
-    std::string word;
-    while( iss >> word ) {
-        if (word == "alpha") {
-            iss >> _alpha;
-        }
-    }
+    setParamValue(_alpha, params, "alpha");
 }
 
 double ReLUActivationFunction::f(const double &in)

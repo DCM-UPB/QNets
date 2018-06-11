@@ -1,21 +1,20 @@
-#ifndef BASE_COMPONENT
-#define BASE_COMPONENT
+#ifndef STRING_CODE_COMPONENT
+#define STRING_CODE_COMPONENT
 
 #include "StringCodeUtilities.hpp" // for stringCode read/write methods
 
 #include <string>
 
-// Base class for all network components
-// Mainly used to manage the string code methods
-class BaseComponent
+// Base class for all network components which can be configured by string codes
+class StringCodeComponent
 {
 protected:
 
 public:
 
-    // Every BaseComponent with params and/or members should implement a constructor which uses a params and/or memberFullCodes string as one of the arguments
+    // If reasonable, every StringCodeComponent with params and/or members should implement a constructor which uses a string code as one of the arguments
 
-    virtual ~BaseComponent(){};
+    virtual ~StringCodeComponent(){};
 
     // virtual string code getters, to be extended by child
     // Compositions patterns for full/tree codes must be:

@@ -1,4 +1,15 @@
 #include "NNUnit.hpp"
+#include "StringCodeUtilities.hpp"
+
+#include <string>
+
+// --- String Code
+
+void NNUnit::setMemberParams(const std::string &memberTreeFullCode)
+{
+    FedNetworkUnit::setMemberParams(memberTreeFullCode);
+    _actf->setTreeParams(readTreeFullCode(memberTreeFullCode, _actf->getIdCode()));
+}
 
 // --- Computation
 

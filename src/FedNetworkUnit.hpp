@@ -4,6 +4,7 @@
 #include "NetworkUnit.hpp"
 #include "NetworkUnitFeederInterface.hpp"
 
+#include <string>
 #include <cstddef> // for NULL
 
 // Network Unit with Feeder
@@ -25,11 +26,13 @@ public:
     void setFeeder(NetworkUnitFeederInterface * feeder){if (_feeder) delete _feeder; _feeder = feeder;}
     NetworkUnitFeederInterface * getFeeder(){return _feeder;}
 
-    // string code getters
+    // string code getters / setter
     virtual std::string getIdCode(){return "fnwu";} // return identifier for unit type
 
     virtual std::string getMemberTreeIdCode(){return _feeder ? _feeder->getTreeIdCode() : "";} // return feeder's IdCodes Tree
     virtual std::string getMemberTreeFullCode(){return _feeder ? _feeder->getTreeFullCode() : "";} // return feeder's IdCodes + Params Tree
+
+    virtual void setMemberParams(const std::string &memberTreeFullCode);
 
     // Computation
     void computeFeed();

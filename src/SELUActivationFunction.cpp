@@ -1,4 +1,5 @@
 #include "SELUActivationFunction.hpp"
+#include "StringCodeUtilities.hpp"
 
 #include <math.h>
 #include <string>
@@ -16,16 +17,8 @@ std::string SELUActivationFunction::getParams()
 
 void SELUActivationFunction::setParams(const std::string &params)
 {
-    std::istringstream iss(params);
-    std::string word;
-    while( iss >> word ) {
-        if (word == "alpha") {
-            iss >> _alpha;
-        }
-        else if (word == "lambda") {
-            iss >> _lambda;
-        }
-    }
+    setParamValue(_alpha, params, "alpha");
+    setParamValue(_lambda, params, "lambda");
 }
 
 // Activation Function Interface implementation
