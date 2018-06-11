@@ -6,10 +6,8 @@
 #include "NetworkLayer.hpp"
 
 #include <vector>
-#include <set>
 #include <random>
-#include <algorithm>
-
+#include <set>
 #include <string>
 
 class NetworkUnitRay: public NetworkUnitFeederInterface {
