@@ -16,7 +16,7 @@ std::string ReLUActivationFunction::getParams()
 
 void ReLUActivationFunction::setParams(const std::string &params)
 {
-    setParamValue(_alpha, params, "alpha");
+    setParamValue(params, "alpha", _alpha);
 }
 
 double ReLUActivationFunction::f(const double &in)

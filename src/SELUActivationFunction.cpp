@@ -17,8 +17,8 @@ std::string SELUActivationFunction::getParams()
 
 void SELUActivationFunction::setParams(const std::string &params)
 {
-    setParamValue(_alpha, params, "alpha");
-    setParamValue(_lambda, params, "lambda");
+    setParamValue(params, "alpha", _alpha);
+    setParamValue(params, "lambda", _lambda);
 }
 
 // Activation Function Interface implementation

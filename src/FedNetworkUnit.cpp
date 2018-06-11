@@ -8,7 +8,7 @@
 
 void FedNetworkUnit::setMemberParams(const std::string &memberTreeFullCode)
 {
-    if (_feeder) _feeder->setTreeParams(readTreeFullCode(memberTreeFullCode, _feeder->getIdCode()));
+    if (_feeder) _feeder->setTreeParams(readTreeCode(memberTreeFullCode, _feeder->getIdCode()));
 }
 
 

@@ -1,5 +1,6 @@
 #include "StringCodeUtilities.hpp"
 
+#include <vector>
 #include <string>
 #include <sstream>
 
@@ -44,47 +45,49 @@ std::string readParamValue(const std::string &params, const std::string &paramId
 }
 
 
-std::string readMemberTreeFullCode(const std::string &treeFullCode)
+std::string readMemberTreeCode(const std::string &treeCode)
 {
-    std::istringstream iss(treeFullCode);
+    std::istringstream iss(treeCode);
     std::string word;
-    std::string memberTreeFullCode = "";
+    std::string memberTreeCode = "";
     int countOpenBrackets = 0; // count total open { brackets
 
     iss >> word; // skip id
-    iss >> word; // skip (
-    while (iss >> word) { // search for )
-        if (word == ")") break;
+    iss >> word; // skip ( or {
+    if (word == "(") { // if treeCode is treeFullCode we need to skip params bracket
+        while (iss >> word) { // search for )
+            if (word == ")") break;
+        }
+        iss >> word; // skip {
     }
-    iss >> word; // skip {
     countOpenBrackets += 1;
     while (iss >> word) { // read in membersTreeFullCode
         if (word == "{") countOpenBrackets += 1;
         if (word == "}") countOpenBrackets -= 1;
-        if (countOpenBrackets == 0) return memberTreeFullCode;
-        if (memberTreeFullCode != "") memberTreeFullCode += " "; // add spacing
-        memberTreeFullCode += word; // by placing it here the final } wont be added
+        if (countOpenBrackets == 0) return memberTreeCode;
+        if (memberTreeCode != "") memberTreeCode += " "; // add spacing
+        memberTreeCode += word; // by placing it here the final } wont be added
     }
     return "";
 }
 
 
-std::string readTreeFullCode(const std::string &memberTreeFullCode, const std::string &memberIdCode)
+std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode)
 {
-    std::istringstream iss(memberTreeFullCode);
+    std::istringstream iss(memberTreeCode);
     std::string word;
-    std::string treeFullCode = "";
+    std::string treeCode = "";
     int countLeftBrackets = 0; // count { brackets of member code
     int countRightBrackets = 0; // count } brackets of member code
 
     while (iss >> word) { // search for memberIdCode
         if (word == memberIdCode) {
-            treeFullCode = word; // read IdCode
+            treeCode = word; // read IdCode
             while (iss >> word) { // read rest
-                treeFullCode += " " + word;
+                treeCode += " " + word;
                 if (word == "{") countLeftBrackets += 1;
                 if (word == "}") countRightBrackets += 1;
-                if (countLeftBrackets > 0 && countLeftBrackets == countRightBrackets) return treeFullCode;
+                if (countLeftBrackets > 0 && countLeftBrackets == countRightBrackets) return treeCode;
             }
         }
     }
@@ -92,22 +95,24 @@ std::string readTreeFullCode(const std::string &memberTreeFullCode, const std::s
     return "";
 }
 
-// --- Writers
+// --- Composers
 
-// compose fullCode string from idCode and params
-std::string writeFullCode(const std::string &idCode, const std::string &params)
+std::string composeCodes(const std::vector<std::string> &codes)
+{
+    if (codes.size() < 1) return ""; // to be safe
+    std::string composedCode = codes[0]; // start with first code
+    for (std::vector<std::string>::size_type i=1; i<codes.size(); ++i) composedCode += " " + codes[i]; // append other codes with spacing
+    return composedCode;
+}
+
+
+std::string composeFullCode(const std::string &idCode, const std::string &params)
 {
     return idCode + " ( " + params + " )";
 }
 
-// compose treeIdCode string from idCode and memberTreeIdCode
-std::string writeTreeIdCode(const std::string &idCode, const std::string &memberTreeIdCode)
-{
-    return idCode + " { " + memberTreeIdCode + " }";
-}
 
-// compose treeFullCode string from fullCode and memberTreeFullCode
-std::string writeTreeFullCode(const std::string &fullCode, const std::string &memberTreeFullCode)
+std::string composeTreeCode(const std::string &code, const std::string &memberTreeCode)
 {
-    return fullCode + " { " + memberTreeFullCode + " }";
+    return code + " { " + memberTreeCode + " }";
 }

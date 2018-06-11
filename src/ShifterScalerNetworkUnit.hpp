@@ -31,7 +31,7 @@ public:
     virtual std::string getIdCode(){return "ssu";} // return identifier for unit type
     virtual std::string getParams(){return "shift " + std::to_string(_shift) + " scale " + std::to_string(_scale);} // return parameter string
 
-    virtual void setParams(const std::string &params){setParamValue(_shift, params, "shift"); setParamValue(_scale, params, "scale");};
+    virtual void setParams(const std::string &params){setParamValue(params, "shift", _shift); setParamValue(params, "scale", _scale);};
 
     // Setters
     void setShift(const double shift){_shift=shift;}

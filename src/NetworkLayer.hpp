@@ -28,9 +28,11 @@ public:
     virtual ~NetworkLayer();
     virtual void deconstruct(); // should remove the non-offset units
 
-    // --- Class IdCode
+    // --- Class String Code methods
 
     std::string getClassIdCode(){return "layer";}
+    virtual std::string getParams(){return "nunits " + std::to_string(_U.size());}
+    virtual void setParams(const std::string &params){int n; setParamValue(params, "nunits", n); this->setSize(n);}
 
     // --- Getters
 

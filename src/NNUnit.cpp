@@ -8,7 +8,7 @@
 void NNUnit::setMemberParams(const std::string &memberTreeFullCode)
 {
     FedNetworkUnit::setMemberParams(memberTreeFullCode);
-    _actf->setTreeParams(readTreeFullCode(memberTreeFullCode, _actf->getIdCode()));
+    _actf->setTreeParams(readTreeCode(memberTreeFullCode, _actf->getIdCode()));
 }
 
 // --- Computation
