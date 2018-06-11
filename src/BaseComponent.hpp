@@ -1,6 +1,8 @@
 #ifndef BASE_COMPONENT
 #define BASE_COMPONENT
 
+#include "StringCodeUtilities.hpp" // for stringCode read/write methods
+
 #include <string>
 
 // Base class for all network components
@@ -24,15 +26,16 @@ public:
     virtual std::string getMemberTreeIdCode(){return "";} // return TreeIdCodes of added BaseComponent members
     virtual std::string getMemberTreeFullCode(){return "";} // return TreeFullCodes of added BaseComponent members
 
-
-    // string code composers
-    std::string getFullCode(){return this->getIdCode() + " ( " + this->getParams() + " )";} //return id + params
-    std::string getTreeIdCode(){return this->getIdCode() + " { " + this->getMemberTreeIdCode() + " }";} //return id + member ids, recursively
-    std::string getTreeFullCode(){return this->getFullCode() + " { " + this->getMemberTreeFullCode() + " }";} // return id+params + member ids+params, recursively
+    // string code getter composers
+    std::string getFullCode(){return writeFullCode(this->getIdCode(), this->getParams());} //return id + params
+    std::string getTreeIdCode(){return writeTreeIdCode(this->getIdCode(), this->getMemberTreeIdCode());} //return id + member ids, recursively
+    std::string getTreeFullCode(){return writeTreeFullCode(this->getFullCode(), this->getMemberTreeFullCode());} // return id+params + member ids+params, recursively
 
     // set by string code
     virtual void setParams(const std::string &params){} // set params of this by params string
-    virtual void setMemberParams(const std::string &memberFullCodes){} // set params of all members by memberFullCodes string
+    virtual void setMemberParams(const std::string &memberTreeFullCode){} // recursively set params of all members by memberTreeFullCodes string
+
+    void setTreeParams(const std::string treeFullCode){this->setParams(readParams(treeFullCode)); this->setMemberParams(readMemberTreeFullCode(treeFullCode));} // set the params of the full tree
 };
 
 
