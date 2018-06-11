@@ -4,7 +4,7 @@ Doxygen is documentation generator and is able to generate visualization of the 
 
 ## Usage
 
-After installing doxygen, invoke the following on the command prompt (inside doxygen folder):
+First you need to install doxygen and the dot tool (graphviz), then invoke the following on the command prompt (inside doxygen folder):
 
 doxygen doxygen.conf
 
