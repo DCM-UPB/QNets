@@ -123,6 +123,7 @@ std::string readTreeCode(const std::string &memberTreeCode, const std::string &m
         if (word == memberIdCode) {
             treeCode = word; // read IdCode
             readTreeCode(iss, treeCode); // read the rest of the treeCode
+            return treeCode;
         }
     }
     return treeCode;
@@ -142,10 +143,10 @@ std::string readTreeCode(const std::string &memberTreeCode, const std::string &m
             if (countIndex == index) {
                 treeCode = word; // read IdCode
                 readTreeCode(iss, treeCode); // read the rest of the treeCode
+                return treeCode;
             }
         }
     }
-
     return treeCode;
 }
 
