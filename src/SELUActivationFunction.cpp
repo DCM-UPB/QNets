@@ -3,16 +3,14 @@
 
 #include <math.h>
 #include <string>
-#include <sstream>
+#include <vector>
 
 std::string SELUActivationFunction::getParams()
 {
-    std::ostringstream oss;
-    oss << "alpha ";
-    oss << _alpha;
-    oss << " lambda ";
-    oss << _lambda;
-    return oss.str();
+    std::vector<std::string> paramCodes;
+    paramCodes.push_back(composeParamCode("alpha", _alpha));
+    paramCodes.push_back(composeParamCode("lambda", _lambda));
+    return composeCodeList(paramCodes);
 }
 
 void SELUActivationFunction::setParams(const std::string &params)

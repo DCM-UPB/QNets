@@ -2,16 +2,13 @@
 #include "StringCodeUtilities.hpp"
 
 #include <string>
-#include <sstream>
+#include <vector>
 
 // Activation Function Interface implementation
 
 std::string ReLUActivationFunction::getParams()
 {
-    std::ostringstream oss;
-    oss << "alpha ";
-    oss << _alpha;
-    return oss.str();
+    return composeParamCode("alpha", _alpha);
 }
 
 void ReLUActivationFunction::setParams(const std::string &params)
