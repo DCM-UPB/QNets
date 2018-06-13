@@ -50,7 +50,10 @@ int main(){
     static const string testTreeIdCode_M_useless_brackets[ncodes] = {"", "", "M { MM { } }", "M { }"};
     static const string testTreeIdCode_M1_useless_brackets[ncodes] = {"", "", "M { }", ""};
 
-    std::string str;
+    static const int testCountNParams[ncodes] = {0, 2, 0, 1};
+    static const int testCountTreeNParams[ncodes] = {0, 2, 2, 1};
+    static const int testCountDirectNMembers[ncodes] = {0, 0, 3, 1};
+    static const int testCountTreeNMembers[ncodes] = {0, 0, 4, 1};
 
     // create input treecode vectors
     vector<const string *> testTreeFullCode_vec;
@@ -94,12 +97,18 @@ int main(){
     testTreeIdCode_M1_vec.push_back(&testTreeIdCode_M1[0]);
     testTreeIdCode_M1_vec.push_back(&testTreeIdCode_M1_useless_brackets[0]);
 
+
+    std::string str; // for storing strings
+    int counter; // for storing counters
+
     for (int i=0; i<ncodes; ++i) {
 
         // fullCodes
         //cout << "fullCodes:" << endl;
         int it = 0;
         for ( const string * testArray : testTreeFullCode_vec ) {
+
+            // --- READERS
 
             // readIdCode
             //cout << readIdCode(testArray[i]) << endl;
@@ -120,6 +129,7 @@ int main(){
             str = readMemberTreeCode(testArray[i]);
             //cout << str  << endl;
             //cout << testMemberTreeFullCode_vec[it][i]  << endl << endl;
+
             assert(str == testMemberTreeFullCode_vec[it][i]);
 
             //cout << readTreeCode(str, "M")  << endl;
@@ -131,6 +141,30 @@ int main(){
             assert(readTreeCode(str, "M", 1) == testTreeFullCode_M1_vec[it][i]);
 
 
+            // --- COUNTERS
+
+            // countNParams
+            counter = countNParams(readParams(testArray[i]));
+            //cout << counter << " <-> " << testCountNParams[i] << endl << endl;
+            assert(counter == testCountNParams[i]);
+
+            // countTreeNParams
+            counter = countTreeNParams(testArray[i]);
+            //cout << counter << " <-> " << testCountTreeNParams[i] << endl << endl;
+            assert(counter == testCountTreeNParams[i]);
+
+            // countNMembers (direct)
+            str = readMemberTreeCode(testArray[i]);
+            counter = countNMembers(str); // default is direct_only=true
+            //cout << counter << " <-> " << testCountDirectNMembers[i] << endl << endl;
+            assert(counter == testCountDirectNMembers[i]);
+
+            // countNMembers (tree)
+            counter = countNMembers(str, false); // count through tree
+            //cout << counter << " <-> " << testCountTreeNMembers[i] << endl << endl;
+            assert(counter == testCountTreeNMembers[i]);
+
+
             ++it;
         }
         //cout << endl;
@@ -140,7 +174,9 @@ int main(){
         it = 0;
         for ( const string * testArray : testTreeIdCode_vec ) {
 
-            //readIdCode
+            // --- READERS
+
+            // readIdCode
             assert(readIdCode(testArray[i]) == testIdCode[i]);
 
             // read(Member)TreeCode
@@ -156,6 +192,20 @@ int main(){
             //cout << readTreeCode(str, "M", 1) << endl;
             //cout << testTreeIdCode_M1_vec[it][i] << endl << endl;
             assert(readTreeCode(str, "M", 1) == testTreeIdCode_M1_vec[it][i]);
+
+
+            // --- COUNTERS
+
+            // countNMembers (direct)
+            str = readMemberTreeCode(testArray[i]);
+            counter = countNMembers(str); // default is direct_only=true
+            //cout << counter << " <-> " << testCountDirectNMembers[i] << endl << endl;
+            assert(counter == testCountDirectNMembers[i]);
+
+            // countNMembers (tree)
+            counter = countNMembers(str, false); // count through tree
+            //cout << counter << " <-> " << testCountTreeNMembers[i] << endl << endl;
+            assert(counter == testCountTreeNMembers[i]);
 
 
             ++it;

@@ -157,12 +157,15 @@ std::string readTreeCode(const std::string &memberTreeCode, const std::string &m
 
 void countNParams(std::istringstream &iss, int &counter) // internal helper
 {
+    bool foundSomething = false;
     std::string word;
 
     while(iss >> word) { // assuming a possible opening bracket ( is already skipped
-        if (word == ")") {++counter; return;} // last increment, return
-        if (word == ",") ++counter; // count every comma
+        if (word == ")") break; // actually allows passing arbitrary codes/iss with opened params bracket
+        else if (word == ",") ++counter; // count every comma
+        else foundSomething = true; // found something except bracket or comma
     }
+    if (foundSomething) {++counter;} // if there was something, we need to do the final increment
     return;
 }
 
@@ -181,13 +184,13 @@ int countNParams(const std::string &params) // public function, count number of 
 void countMemberNParams(std::istringstream &iss, int &counter) // internal helper
 {
     std::string word;
-    int countOpenBrackets = 1; // count total open { brackets, assuming the first one is already skipped
+    bool bracketClosed = false; // assuming the first { one is already skipped
 
-    while (iss >> word) { // go through membersTreeCodes
-        if (word == "{") ++countOpenBrackets;
-        if (word == "}") --countOpenBrackets;
-        if (countOpenBrackets == 0) return;
-        if (word == "(") countNParams(iss, counter);
+    while (iss >> word) { // go through memberTreeFullCode
+        if (word == "(") countNParams(iss, counter); // count params bracket
+        else if (word == "{") countMemberNParams(iss, counter); // recursive call
+        else if (word == "}") bracketClosed = true;
+        if (bracketClosed) return; // done
     }
     return;
 
@@ -205,7 +208,11 @@ int countTreeNParams(const std::string &treeCode) // public function, count tota
         countNParams(iss, counter); // count params bracket
         iss >> word;
     }
-    if (word == "{") countMemberNParams(iss, counter); // memberTreeCode counting
+    if (word == "{") {
+        while (iss >> word) {
+            countMemberNParams(iss, counter); // memberTreeCode counting
+        }
+    }
     return counter;
 }
 
@@ -215,13 +222,19 @@ int countTreeNParams(const std::string &treeCode) // public function, count tota
 void countMemberNMembers(std::istringstream &iss, int &counter) // internal helper
 {
     std::string word;
-    int countOpenBrackets = 1; // count total open { brackets, assuming the first one is already skipped
-    while (iss >> word) { // read in membersTreeFullCodes
-        if (word == "{") ++countOpenBrackets;
-        if (word == "}") --countOpenBrackets;
-        if (countOpenBrackets == 0) {++counter; return;}
-        if (word == ",") ++counter; // count commas
+    int dummy_counter = 0;
+    bool foundSomething = false;
+    bool bracketClosed = false; // assuming the first { one is already skipped/open
+
+    while (iss >> word) { // go through memberTreeFullCode
+        if (word == "(") countNParams(iss, dummy_counter); // skip params brackets
+        else if (word == "{") countMemberNMembers(iss, counter); // recursively count members
+        else if (word == "}") bracketClosed = true;
+        else if (word == ",") ++counter; // count commas
+        else foundSomething = true; // found something except bracket or comma
+        if (bracketClosed) break; // done
     }
+    if (foundSomething) ++counter; // if there was something, we need to do the final increment
     return;
 }
 
@@ -231,16 +244,16 @@ int countNMembers(const std::string &memberTreeCode, const bool direct_only) // 
     std::string word;
     int counter = 0, dummy_counter = 0;
 
-
     while (iss >> word) {
+        if (word == "(") countNParams(iss, dummy_counter); // skip params bracket
         if (word == "{") {
             if (direct_only) countMemberNMembers(iss, dummy_counter); // skip member content
             else countMemberNMembers(iss, counter); // count member content
         }
-        if (word == "}") return counter+1; // this is the outer right bracket
         if (word == ",") ++counter; // count commas
     }
-    return counter;
+    if (memberTreeCode != "") return counter+1; // we did only count commas, so we have to increment by 1
+    else return 0; // except if there was nothing
 }
 
 
