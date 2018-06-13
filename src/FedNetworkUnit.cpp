@@ -4,13 +4,6 @@
 #include <string>
 #include <cstddef> // for NULL
 
-// --- string codes
-
-void FedNetworkUnit::setMemberParams(const std::string &memberTreeFullCode)
-{
-    if (_feeder) _feeder->setTreeParams(readTreeCode(memberTreeFullCode, _feeder->getIdCode()));
-}
-
 
 // --- Computation
 

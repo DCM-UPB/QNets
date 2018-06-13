@@ -11,45 +11,50 @@
 
 Types of string codes:
 
-basic:
   idCode             -   a short identifier for object type, e.g. "nnu" for NeuralNetworkUnit.
   params             -   a space and comma separated list string of "name value" pairs, e.g. "i 10 , f 0.3 , b 1" for parameters of basic datatype.
-  fullCode           -   "idCode ( params )", where idCode and params are like above
+  fullCode           -   "idCode ( params )", where idCode and params are like above.
 
-memberTreeCode:
-  memberTreeIdCode   -   a list string of member ids, composed recursively. E.g. "a , b { c }", where a and b are members of the class and c is a member of b
-  memberTreeFullCode -   like memberTreeIdCode, but with params included, e.g. "a ( i 10 ) , b { c ( f 0.3 ) }" , where a and c have a parameter and b has none
+  memberTreeCode     -   a list string of member ids, composed recursively, e.g. "A ( i 10 ) , B { C ( f 0.3 ) }" ,
+                         where A and B are members of the class and C is a member of B and A. Here A and C have a parameter and B has none.
 
-treeCode:
-  treeIdCode         -   "idCode { memberTreeIdCode }"
-  treeFullCode       -   "fullCode { memberFullCode }"
+  treeCode           -   "fullCode { memberTreeCode }" e.g. "foo ( i 10 , f 0.3 , b 1 ) { A ( i 10 ) , B { C ( f 0.3 ) } }"
 
-NOTE 1: The idCode identifiers should be uniquely identify a certain type among all derived types of StringCodeComponent.
-NOTE 2: However you may have multiple codes of the same type / identifier in a list (then access via identifier will always yield the first appearance, so use index method version instead).
-NOTE 3: The parameter identifiers of a class and its' childs must be unique, so every params code list will have unique element identifiers.
+  paramIdCode, memberIdCore - These appear as arguments in functions below and mean the identifiers of parameters or members, respectively.
+
+NOTE 1: The idCode identifiers should uniquely identify a certain type among all derived types of StringCodeComponent.
+NOTE 2: However you may have multiple codes of the same type / identifier in a list (then access via identifier will always yield the first appearance, so use the function with extra index argument instead).
+NOTE 3: The parameter identifiers of a class and its' childs must be unique (just as the actual parameter names in code), so a params code list will always have unique element identifiers.
+NOTE 4: You do not have to drop empty brackets ( ) or { } like in the examples above. Passing empty brackets is completely legal (just as passing empty codes, which then always yields empty function results).
+NOTE 5: Unfortunately parameters of string type must not contain any spaces, commas, or brackets of type () or {}.
 */
 
 // --- Readers
 
-std::string readIdCode(const std::string &fullCode); // read idCode string from (tree)fullCode (i.e. passing a treeFullCode is also legit)
-std::string readParams(const std::string &fullCode); // read params string from (tree)fullCode
+std::string readIdCode(const std::string &fullCode); // read idCode string from fullCode or treeCode
+std::string readParams(const std::string &fullCode); // read params string from fullCode or treeCode
 std::string readParamValue(const std::string &params, const std::string &paramIdCode); // return the value string of certain paramId
-std::string readMemberTreeCode(const std::string &treeCode); // return a string composed of the tree(Id/Full)Codes of all members in tree(Id/Full)Code
-std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode); // return the tree(Id/Full)Code of the first member with matching memberIdCode identifier from memberTree(Id/Full)Code
-std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode, const int &index); // return the tree(Id/Full)Code of the '(index-1)'th member with matching memberIdCode identifier from memberTree(Id/Full)Code
+std::string readMemberTreeCode(const std::string &treeCode); // return a list string composed of the treeCodes of all members in treeCode
+std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode); // return the treeCode of the first member with matching memberIdCode identifier from memberTreeCode
+std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode, const int &index); // return the treeCode of the '(index-1)'th member with matching memberIdCode identifier from memberTreeCode
+
+// --- Drop
+
+std::string dropParams(const std::string &code); // returns the a copy of the same code with all params dropped (i.e. only idCodes)
+std::string dropMembers(const std::string &code, const int &drop_lvl = 1); // returns the a copy of the same code with all members after tree level lvl dropped (i.e. lvl==1 -> no members at all)
 
 // --- Counters
 
 int countNParams(const std::string &params); // count number of params in params string
 int countTreeNParams(const std::string &treeCode); // count total number of params in treeCode string
-int countNMembers(const std::string &memberTreeCode, const bool direct_only = true); // count number of direct (or total if direct_only == false) members in memberTreeCode string
+int countNMembers(const std::string &memberTreeCode, const bool &direct_only = true); // count number of direct (or total if direct_only == false) members in memberTreeCode string
 
 // --- Composers
 
 std::string composeCodes(const std::string &code1, const std::string &code2); // compose a string of the two codes separated by spaces and comma
 std::string composeCodeList(const std::vector<std::string> &codes); // compose a string of vector elements separated by spaces and comma
 std::string composeFullCode(const std::string &idCode, const std::string &params); // compose fullCode string from idCode and params
-std::string composeTreeCode(const std::string &code, const std::string &memberTreeCode); // compose tree(Id/Full)Code string from (id/full)Code and memberTree(Id/Full)Code
+std::string composeTreeCode(const std::string &fullcode, const std::string &memberTreeCode); // compose treeCode string from fullCode and memberTreeCode
 
 
 // --- Templates

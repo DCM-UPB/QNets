@@ -12,13 +12,10 @@ int main(){
 
     // These codes will be used as test input for string code methods
 
-    static const string testTreeFullCode[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C { M ( b 1 ) { MM } , N , M ( b 0 ) }", "D ( s name ) { M }"};
-    static const string testTreeFullCode_useless_brackets1[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( ) { M ( b 1 ) { MM ( ) } , N ( ) , M ( b 0 ) }", "D ( s name ) { M ( ) }"};
-    static const string testTreeFullCode_useless_brackets2[ncodes] = {"A { }" , "B ( f 0.1 , i 2 ) { }" , "C { M ( b 1 ) { MM { } } , N { } , M ( b 0 ) { } }", "D ( s name ) { M { } }"};
-    static const string testTreeFullCode_useless_brackets3[ncodes] = {"A ( ) { }" , "B ( f 0.1 , i 2 ) { }" , "C ( ) { M ( b 1 ) { MM ( ) { } } , N ( ) { } , M ( b 0 ) { } }", "D ( s name ) { M ( ) { } }"};
-
-    static const string testTreeIdCode[ncodes] = {"A", "B", "C { M { MM } , N , M }", "D { M }"};
-    static const string testTreeIdCode_useless_brackets[ncodes] = {"A { }", "B { }", "C { M { MM { } } , N { } , M { } }", "D { M { } }"};
+    static const string testTreeCode[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C { M ( b 1 ) { MM } , N , M ( b 0 ) }", "D ( s name ) { M }"};
+    static const string testTreeCode_empty_brackets1[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( ) { M ( b 1 ) { MM ( ) } , N ( ) , M ( b 0 ) }", "D ( s name ) { M ( ) }"};
+    static const string testTreeCode_empty_brackets2[ncodes] = {"A { }" , "B ( f 0.1 , i 2 ) { }" , "C { M ( b 1 ) { MM { } } , N { } , M ( b 0 ) { } }", "D ( s name ) { M { } }"};
+    static const string testTreeCode_empty_brackets3[ncodes] = {"A ( ) { }" , "B ( f 0.1 , i 2 ) { }" , "C ( ) { M ( b 1 ) { MM ( ) { } } , N ( ) { } , M ( b 0 ) { } }", "D ( s name ) { M ( ) { } }"};
 
     // these codes will be used as comparison (and in the end as input as well)
 
@@ -27,29 +24,32 @@ int main(){
     static const string testParamValue_i[ncodes] = {"", "2", "", ""};
     static const string testFullCode[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C", "D ( s name )"};
 
-    static const string testMemberTreeFullCode[ncodes] = {"", "", "M ( b 1 ) { MM } , N , M ( b 0 )", "M"};
-    static const string testTreeFullCode_M[ncodes] = {"", "", "M ( b 1 ) { MM }", "M"};
-    static const string testTreeFullCode_M1[ncodes] = {"", "", "M ( b 0 )", ""};
+    static const string testMemberTreeCode[ncodes] = {"", "", "M ( b 1 ) { MM } , N , M ( b 0 )", "M"};
+    static const string testTreeCode_M[ncodes] = {"", "", "M ( b 1 ) { MM }", "M"};
+    static const string testTreeCode_M1[ncodes] = {"", "", "M ( b 0 )", ""};
 
-    static const string testMemberTreeFullCode_useless_brackets1[ncodes] = {"", "", "M ( b 1 ) { MM ( ) } , N ( ) , M ( b 0 )", "M ( )"};
-    static const string testTreeFullCode_M_useless_brackets1[ncodes] = {"", "", "M ( b 1 ) { MM ( ) }", "M ( )"};
-    static const string testTreeFullCode_M1_useless_brackets1[ncodes] = {"", "", "M ( b 0 )", ""};
+    static const string testMemberTreeCode_empty_brackets1[ncodes] = {"", "", "M ( b 1 ) { MM ( ) } , N ( ) , M ( b 0 )", "M ( )"};
+    static const string testTreeCode_M_empty_brackets1[ncodes] = {"", "", "M ( b 1 ) { MM ( ) }", "M ( )"};
+    static const string testTreeCode_M1_empty_brackets1[ncodes] = {"", "", "M ( b 0 )", ""};
 
-    static const string testMemberTreeFullCode_useless_brackets2[ncodes] = {"", "", "M ( b 1 ) { MM { } } , N { } , M ( b 0 ) { }", "M { }"};
-    static const string testTreeFullCode_M_useless_brackets2[ncodes] = {"", "", "M ( b 1 ) { MM { } }", "M { }"};
-    static const string testTreeFullCode_M1_useless_brackets2[ncodes] = {"", "", "M ( b 0 ) { }", ""};
+    static const string testMemberTreeCode_empty_brackets2[ncodes] = {"", "", "M ( b 1 ) { MM { } } , N { } , M ( b 0 ) { }", "M { }"};
+    static const string testTreeCode_M_empty_brackets2[ncodes] = {"", "", "M ( b 1 ) { MM { } }", "M { }"};
+    static const string testTreeCode_M1_empty_brackets2[ncodes] = {"", "", "M ( b 0 ) { }", ""};
 
-    static const string testMemberTreeFullCode_useless_brackets3[ncodes] = {"", "", "M ( b 1 ) { MM ( ) { } } , N ( ) { } , M ( b 0 ) { }", "M ( ) { }"};
-    static const string testTreeFullCode_M_useless_brackets3[ncodes] = {"", "", "M ( b 1 ) { MM ( ) { } }", "M ( ) { }"};
-    static const string testTreeFullCode_M1_useless_brackets3[ncodes] = {"", "", "M ( b 0 ) { }", ""};
+    static const string testMemberTreeCode_empty_brackets3[ncodes] = {"", "", "M ( b 1 ) { MM ( ) { } } , N ( ) { } , M ( b 0 ) { }", "M ( ) { }"};
+    static const string testTreeCode_M_empty_brackets3[ncodes] = {"", "", "M ( b 1 ) { MM ( ) { } }", "M ( ) { }"};
+    static const string testTreeCode_M1_empty_brackets3[ncodes] = {"", "", "M ( b 0 ) { }", ""};
 
-    static const string testMemberTreeIdCode[ncodes] = {"", "", "M { MM } , N , M", "M"};
-    static const string testTreeIdCode_M[ncodes] = {"", "", "M { MM }", "M"};
-    static const string testTreeIdCode_M1[ncodes] = {"", "", "M", ""};
+    static const string testDropParams[ncodes] = {"A", "B", "C { M { MM } , N , M }", "D { M }"};
+    static const string testDropParams_empty_brackets[ncodes] = {"A { }", "B { }", "C { M { MM { } } , N { } , M { } }", "D { M { } }"};
 
-    static const string testMemberTreeIdCode_useless_brackets[ncodes] = {"", "", "M { MM { } } , N { } , M { }", "M { }"};
-    static const string testTreeIdCode_M_useless_brackets[ncodes] = {"", "", "M { MM { } }", "M { }"};
-    static const string testTreeIdCode_M1_useless_brackets[ncodes] = {"", "", "M { }", ""};
+    static const string testDropMembers[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C", "D ( s name )"};
+    static const string testDropMembers_empty_brackets[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( )", "D ( s name )"};
+
+    static const string testDropMembers_lvl2[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C { M ( b 1 ) , N , M ( b 0 ) }", "D ( s name ) { M }"};
+    static const string testDropMembers_lvl2_empty_brackets1[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( ) { M ( b 1 ) , N ( ) , M ( b 0 ) }", "D ( s name ) { M ( ) }"};
+    static const string testDropMembers_lvl2_empty_brackets2[ncodes] = {"A { }" , "B ( f 0.1 , i 2 ) { }" , "C { M ( b 1 ) , N , M ( b 0 ) }", "D ( s name ) { M }"};
+    static const string testDropMembers_lvl2_empty_brackets3[ncodes] = {"A ( ) { }" , "B ( f 0.1 , i 2 ) { }" , "C ( ) { M ( b 1 ) , N ( ) , M ( b 0 ) }", "D ( s name ) { M ( ) }"};
 
     static const int testCountNParams[ncodes] = {0, 2, 0, 1};
     static const int testCountTreeNParams[ncodes] = {0, 2, 2, 1};
@@ -58,46 +58,49 @@ int main(){
 
 
     // create input treecode vectors
-    vector<const string *> testTreeFullCode_vec;
-    testTreeFullCode_vec.push_back(&testTreeFullCode[0]);
-    testTreeFullCode_vec.push_back(&testTreeFullCode_useless_brackets1[0]);
-    testTreeFullCode_vec.push_back(&testTreeFullCode_useless_brackets2[0]);
-    testTreeFullCode_vec.push_back(&testTreeFullCode_useless_brackets3[0]);
+    vector<const string *> testTreeCode_vec;
+    testTreeCode_vec.push_back(&testTreeCode[0]);
+    testTreeCode_vec.push_back(&testTreeCode_empty_brackets1[0]);
+    testTreeCode_vec.push_back(&testTreeCode_empty_brackets2[0]);
+    testTreeCode_vec.push_back(&testTreeCode_empty_brackets3[0]);
 
-    vector<const string *> testTreeIdCode_vec;
-    testTreeIdCode_vec.push_back(&testTreeIdCode[0]);
-    testTreeIdCode_vec.push_back(&testTreeIdCode_useless_brackets[0]);
 
     // create comparison vectors
-    vector<const string *> testMemberTreeFullCode_vec;
-    testMemberTreeFullCode_vec.push_back(&testMemberTreeFullCode[0]);
-    testMemberTreeFullCode_vec.push_back(&testMemberTreeFullCode_useless_brackets1[0]);
-    testMemberTreeFullCode_vec.push_back(&testMemberTreeFullCode_useless_brackets2[0]);
-    testMemberTreeFullCode_vec.push_back(&testMemberTreeFullCode_useless_brackets3[0]);
+    vector<const string *> testMemberTreeCode_vec;
+    testMemberTreeCode_vec.push_back(&testMemberTreeCode[0]);
+    testMemberTreeCode_vec.push_back(&testMemberTreeCode_empty_brackets1[0]);
+    testMemberTreeCode_vec.push_back(&testMemberTreeCode_empty_brackets2[0]);
+    testMemberTreeCode_vec.push_back(&testMemberTreeCode_empty_brackets3[0]);
 
-    vector<const string *> testTreeFullCode_M_vec;
-    testTreeFullCode_M_vec.push_back(&testTreeFullCode_M[0]);
-    testTreeFullCode_M_vec.push_back(&testTreeFullCode_M_useless_brackets1[0]);
-    testTreeFullCode_M_vec.push_back(&testTreeFullCode_M_useless_brackets2[0]);
-    testTreeFullCode_M_vec.push_back(&testTreeFullCode_M_useless_brackets3[0]);
+    vector<const string *> testTreeCode_M_vec;
+    testTreeCode_M_vec.push_back(&testTreeCode_M[0]);
+    testTreeCode_M_vec.push_back(&testTreeCode_M_empty_brackets1[0]);
+    testTreeCode_M_vec.push_back(&testTreeCode_M_empty_brackets2[0]);
+    testTreeCode_M_vec.push_back(&testTreeCode_M_empty_brackets3[0]);
 
-    vector<const string *> testTreeFullCode_M1_vec;
-    testTreeFullCode_M1_vec.push_back(&testTreeFullCode_M1[0]);
-    testTreeFullCode_M1_vec.push_back(&testTreeFullCode_M1_useless_brackets1[0]);
-    testTreeFullCode_M1_vec.push_back(&testTreeFullCode_M1_useless_brackets2[0]);
-    testTreeFullCode_M1_vec.push_back(&testTreeFullCode_M1_useless_brackets3[0]);
+    vector<const string *> testTreeCode_M1_vec;
+    testTreeCode_M1_vec.push_back(&testTreeCode_M1[0]);
+    testTreeCode_M1_vec.push_back(&testTreeCode_M1_empty_brackets1[0]);
+    testTreeCode_M1_vec.push_back(&testTreeCode_M1_empty_brackets2[0]);
+    testTreeCode_M1_vec.push_back(&testTreeCode_M1_empty_brackets3[0]);
 
-    vector<const string *> testMemberTreeIdCode_vec;
-    testMemberTreeIdCode_vec.push_back(&testMemberTreeIdCode[0]);
-    testMemberTreeIdCode_vec.push_back(&testMemberTreeIdCode_useless_brackets[0]);
+    vector<const string *> testDropParams_vec;
+    testDropParams_vec.push_back(&testDropParams[0]);
+    testDropParams_vec.push_back(&testDropParams[0]);
+    testDropParams_vec.push_back(&testDropParams_empty_brackets[0]);
+    testDropParams_vec.push_back(&testDropParams_empty_brackets[0]);
 
-    vector<const string *> testTreeIdCode_M_vec;
-    testTreeIdCode_M_vec.push_back(&testTreeIdCode_M[0]);
-    testTreeIdCode_M_vec.push_back(&testTreeIdCode_M_useless_brackets[0]);
+    vector<const string *> testDropMembers_vec;
+    testDropMembers_vec.push_back(&testDropMembers[0]);
+    testDropMembers_vec.push_back(&testDropMembers_empty_brackets[0]);
+    testDropMembers_vec.push_back(&testDropMembers[0]);
+    testDropMembers_vec.push_back(&testDropMembers_empty_brackets[0]);
 
-    vector<const string *> testTreeIdCode_M1_vec;
-    testTreeIdCode_M1_vec.push_back(&testTreeIdCode_M1[0]);
-    testTreeIdCode_M1_vec.push_back(&testTreeIdCode_M1_useless_brackets[0]);
+    vector<const string *> testDropMembers_lvl2_vec;
+    testDropMembers_lvl2_vec.push_back(&testDropMembers_lvl2[0]);
+    testDropMembers_lvl2_vec.push_back(&testDropMembers_lvl2_empty_brackets1[0]);
+    testDropMembers_lvl2_vec.push_back(&testDropMembers_lvl2_empty_brackets2[0]);
+    testDropMembers_lvl2_vec.push_back(&testDropMembers_lvl2_empty_brackets3[0]);
 
 
     // empty, single, multi element test vectors
@@ -123,11 +126,9 @@ int main(){
     int counter; // for storing counters
 
     for (int j=0; j<ncodes; ++j) {
-
-        // fullCodes
-        //cout << "fullCodes:" << endl << endl;
+        // now go through different levels of useless brackets use
         int it = 0;
-        for ( const string * testArray : testTreeFullCode_vec ) {
+        for ( const string * testArray : testTreeCode_vec ) {
 
             // --- READERS
 
@@ -149,17 +150,34 @@ int main(){
             // read(Member)TreeCode
             str = readMemberTreeCode(testArray[j]);
             //cout << str  << endl;
-            //cout << testMemberTreeFullCode_vec[it][j]  << endl << endl;
+            //cout << testMemberTreeCode_vec[it][j]  << endl << endl;
 
-            assert(str == testMemberTreeFullCode_vec[it][j]);
+            assert(str == testMemberTreeCode_vec[it][j]);
 
             //cout << readTreeCode(str, "M")  << endl;
-            //cout << testTreeFullCode_M_vec[it][j]  << endl << endl;
-            assert(readTreeCode(str, "M") == testTreeFullCode_M_vec[it][j]);
+            //cout << testTreeCode_M_vec[it][j]  << endl << endl;
+            assert(readTreeCode(str, "M") == testTreeCode_M_vec[it][j]);
 
             //cout << readTreeCode(str, "M", 1)  << endl;
-            //cout << testTreeFullCode_M1_vec[it][j]  << endl << endl;
-            assert(readTreeCode(str, "M", 1) == testTreeFullCode_M1_vec[it][j]);
+            //cout << testTreeCode_M1_vec[it][j]  << endl << endl;
+            assert(readTreeCode(str, "M", 1) == testTreeCode_M1_vec[it][j]);
+
+
+            // --- DROP
+
+            // dropParams
+            //cout << dropParams(testArray[j])  << endl;
+            //cout << testDropParams_vec[it][j]  << endl << endl;
+            assert(dropParams(testArray[j]) == testDropParams_vec[it][j]);
+
+            // dropMembers
+            //cout << dropMembers(testArray[j])  << endl;
+            //cout << testDropMembers_vec[it][j]  << endl << endl;
+            assert(dropMembers(testArray[j]) == testDropMembers_vec[it][j]);
+
+            //cout << dropMembers(testArray[j], 2)  << endl;
+            //cout << testDropMembers_lvl2_vec[it][j]  << endl << endl;
+            assert(dropMembers(testArray[j], 2) == testDropMembers_lvl2_vec[it][j]);
 
 
             // --- COUNTERS
@@ -189,50 +207,6 @@ int main(){
 
             ++it;
         }
-        //cout << endl;
-
-        // idCodes
-        //cout << "idCodes:" << endl << endl;
-        it = 0;
-        for ( const string * testArray : testTreeIdCode_vec ) {
-
-            // --- READERS
-
-            // readIdCode
-            assert(readIdCode(testArray[j]) == testIdCode[j]);
-
-            // read(Member)TreeCode
-            str = readMemberTreeCode(testArray[j]);
-            //cout << str   << endl;
-            //cout << testMemberTreeIdCode_vec[it][j]  << endl << endl;
-            assert(str == testMemberTreeIdCode_vec[it][j]);
-
-            //cout << readTreeCode(str, "M") << endl;
-            //cout << testTreeIdCode_M_vec[it][j]  << endl << endl;
-            assert(readTreeCode(str, "M") == testTreeIdCode_M_vec[it][j]);
-
-            //cout << readTreeCode(str, "M", 1) << endl;
-            //cout << testTreeIdCode_M1_vec[it][j] << endl << endl;
-            assert(readTreeCode(str, "M", 1) == testTreeIdCode_M1_vec[it][j]);
-
-
-            // --- COUNTERS
-
-            // countNMembers (direct)
-            str = readMemberTreeCode(testArray[j]);
-            counter = countNMembers(str); // default is direct_only=true
-            //cout << counter << " <-> " << testCountDirectNMembers[j] << endl << endl;
-            assert(counter == testCountDirectNMembers[j]);
-
-            // countNMembers (tree)
-            counter = countNMembers(str, false); // count through tree
-            //cout << counter << " <-> " << testCountTreeNMembers[j] << endl << endl;
-            assert(counter == testCountTreeNMembers[j]);
-
-
-            ++it;
-        }
-
         //cout << "----------------------------------------------------" << endl << endl;
     }
 
@@ -287,13 +261,13 @@ int main(){
 
     // composeTreeCode
 
-    //cout << composeTreeCode(testIdCode[0], testMemberTreeIdCode[0]) << endl;
-    //cout << testTreeIdCode[0] << endl << endl;
-    assert(composeTreeCode(testIdCode[0], testMemberTreeIdCode[0]) == testTreeIdCode[0]); // empty members
+    //cout << composeTreeCode(testFullCode[0], testMemberTreeCode[0]) << endl;
+    //cout << testTreeCode[0] << endl << endl;
+    assert(composeTreeCode(testFullCode[0], testMemberTreeCode[0]) == testTreeCode[0]); // empty members
 
-    //cout << composeTreeCode(testIdCode[3], testMemberTreeIdCode[3]) << endl;
-    //cout << testTreeIdCode[3] << endl << endl;
-    assert(composeTreeCode(testIdCode[3], testMemberTreeIdCode[3]) == testTreeIdCode[3]); // with member
+    //cout << composeTreeCode(testFullCode[3], testMemberTreeCode[3]) << endl;
+    //cout << testTreeCode[3] << endl << endl;
+    assert(composeTreeCode(testFullCode[3], testMemberTreeCode[3]) == testTreeCode[3]); // with member
 
 
     // TEMPLATES

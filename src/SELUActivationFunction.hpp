@@ -17,7 +17,7 @@ public:
     // get copy
     ActivationFunctionInterface * getCopy(){return new SELUActivationFunction(_alpha, _lambda);}
 
-    // param getters
+    // param get/set
     double getAlpha(){return _alpha;}
     double getLambda(){return _lambda;}
     void setAlpha(const double alpha){_alpha = alpha;}

@@ -7,7 +7,7 @@
 #include <cmath>
 #include <string>
 
-void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode) // mode can be id or full
+void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params = true, const int &drop_member_lvl = 0) // will drop members from level drop_member_lvl onward (0 means drop is disabled)
 {
     using namespace std;
 
@@ -26,8 +26,10 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode) // mo
             maxStringLength[l] = 0;
             for (int u = 0; u<ffnn->getLayerSize(l); ++u)
                 {
-                    if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCode();
-                    else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCode();
+                    stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
+                    if (drop_member_lvl > 0) stringCode = dropMembers(stringCode, drop_member_lvl);
+                    if (drop_params) stringCode = dropParams(stringCode);
+
                     if (stringCode.length() > maxStringLength[l])
                         {
                             maxStringLength[l] = stringCode.length();
@@ -43,8 +45,10 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, std::string mode) // mo
                 {
                     if (ffnn->getLayerSize(l) > u)
                         {
-                            if (mode == "id") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeIdCode();
-                            else if (mode == "full") stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeFullCode();
+                            stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
+                            if (drop_member_lvl > 0) stringCode = dropMembers(stringCode, drop_member_lvl);
+                            if (drop_params) stringCode = dropParams(stringCode);
+
                             cout << stringCode;
                             cout << string(maxStringLength[l]-stringCode.length(), ' ');
                         }

@@ -26,11 +26,8 @@ public:
 
     // string code getters / setter
     virtual std::string getIdCode(){return "nnu";} // return identifier for unit type
-
-    virtual std::string getMemberTreeIdCode(){return FedNetworkUnit::getMemberTreeIdCode() + " , " + _actf->getTreeIdCode();} // append actf TreeIdCode
-    virtual std::string getMemberTreeFullCode(){return FedNetworkUnit::getMemberTreeFullCode() + " , " + _actf->getTreeFullCode();} // append actf TreeFullCode
-
-    virtual void setMemberParams(const std::string &memberTreeFullCode);
+    virtual std::string getMemberTreeCode(){return composeCodes(FedNetworkUnit::getMemberTreeCode(), _actf->getTreeCode());} // append actf treeCode
+    virtual void setMemberParams(const std::string &memberTreeCode);
 
     // Setters
     void setActivationFunction(ActivationFunctionInterface * actf){delete _actf; if (actf) _actf=actf; else throw std::invalid_argument("NNUnit::setActivationFunction(): the parameter 'actf' was not valid");}

@@ -5,10 +5,10 @@
 
 // --- String Code
 
-void NNUnit::setMemberParams(const std::string &memberTreeFullCode)
+void NNUnit::setMemberParams(const std::string &memberTreeCode)
 {
-    FedNetworkUnit::setMemberParams(memberTreeFullCode);
-    _actf->setTreeParams(readTreeCode(memberTreeFullCode, _actf->getIdCode()));
+    FedNetworkUnit::setMemberParams(memberTreeCode);
+    _actf->setTreeParams(readTreeCode(memberTreeCode, _actf->getIdCode()));
 }
 
 // --- Computation

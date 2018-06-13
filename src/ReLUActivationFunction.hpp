@@ -18,7 +18,7 @@ public:
     // get copy
     ActivationFunctionInterface * getCopy(){return new ReLUActivationFunction(_alpha);}
 
-    // param getters
+    // param get/set
     double getAlpha(){return _alpha;}
     void setAlpha(const double alpha){_alpha = alpha;}
 
