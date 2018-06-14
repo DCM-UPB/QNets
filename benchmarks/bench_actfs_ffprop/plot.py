@@ -32,7 +32,7 @@ class benchmark_actf_ffprop:
 
 def plot_compare_actfs(benchmark_list, **kwargs):
     nbm = len(benchmark_list)
-    xlabels = benchmark_list[0].data['lgs'].keys()
+    xlabels = benchmark_list[0].data['LGS'].keys()
 
     fig = figure()
     fig.suptitle('FFPropagate benchmark, comparing all activation functions',fontsize=14)
@@ -105,6 +105,6 @@ for benchmark_file in sys.argv[1:]:
 if len(benchmark_list)<1: print("Error: Not even one benchmark loaded!")
 else:
     fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
-    if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['tans', 'gss', 'relu'])
+    if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['TANS', 'GSS', 'RELU'])
 
 show()

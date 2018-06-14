@@ -36,7 +36,7 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
                         }
                 }
             stringCode = ffnn->getLayer(l)->getIdCode() + " " + readParamValue(ffnn->getLayer(l)->getParams(), "nunits") + "U"; // print layer identifiers
-            cout << stringCode << string(maxStringLength[l]-stringCode.length()+4, ' ');
+            cout << stringCode << string(maxStringLength[l]-stringCode.length()+8, ' ');
         }
     cout << endl << endl;
 
@@ -57,7 +57,7 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
                         {
                             cout << string(maxStringLength[l], ' ');
                         }
-                    cout << "    ";
+                    cout << "        ";
                 }
             cout << endl;
         }
@@ -108,7 +108,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
             for (int l=0; l<ffnn->getNLayers(); ++l){
                 cout << emptySpaceForBeta << emptySpaceAfterBeta;
                 if (u < ffnn->getLayerSize(l)){
-                    cout << "id_";
+                    cout << "off";
                 } else {
                     cout << emptySapceForActivationFunctionId;
                 }

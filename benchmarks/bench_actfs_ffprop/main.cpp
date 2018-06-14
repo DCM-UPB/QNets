@@ -28,7 +28,7 @@ int main (void) {
     const int nhu[nhl] = {9,5};
 
     const int nactfs = 7;
-    const string actf_ids[nactfs] = {"lgs", "gss", "id_", "tans", "sin", "relu", "selu"};
+    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU"};
 
     FeedForwardNeuralNetwork * ffnn;
 
@@ -61,7 +61,7 @@ int main (void) {
 
         //Set ID ACTFs for output units
         for (int j=1; j<yndim+1; ++j) {
-            ffnn->getNNLayer(nhl)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction("id_"));
+            ffnn->getNNLayer(nhl)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction("ID"));
         }
 
         cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
