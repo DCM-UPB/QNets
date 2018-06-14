@@ -2,6 +2,7 @@
 
 #include "NNUnit.hpp"
 #include "ActivationFunctionManager.hpp"
+#include "StringCodeUtilities.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -674,7 +675,7 @@ void FeedForwardNeuralNetwork::popHiddenLayer()
 
 // --- Store FFNN on a file
 
-void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
+void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool store_betas)
 {
     using namespace std;
 
@@ -685,7 +686,23 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
     file << getNLayers() << endl;
     // store the tree code of each layer
     for (int i=0; i<getNLayers(); ++i) {
-        file << getLayer(i)->getTreeCode() << endl;
+        string word, treeCode = getLayer(i)->getTreeCode();
+
+        if (!store_betas) { // cut out betas
+            bool skip = false;
+            istringstream iss(treeCode);
+            treeCode = ""; // reset
+            while(iss >> word){
+                if (!skip) {
+                    if (treeCode!="") treeCode += " ";
+                    treeCode += word;
+                }
+                if (word == "RAY") skip = true;
+                if (word == ")") skip = false;
+            }
+        }
+
+        file << treeCode << endl; // store treeCode
     }
     // store connected flag
     file << _flag_connected << endl;

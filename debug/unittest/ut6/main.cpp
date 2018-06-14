@@ -135,10 +135,11 @@ int main(){
     string str; // for storing strings
     int counter; // for storing counters
 
-    for (int j=0; j<ncodes; ++j) {
-        // now go through different levels of useless brackets use
-        int it = 0;
-        for ( const string * testArray : testTreeCode_vec ) {
+    // go through different levels of useless brackets use
+    int it = 0;
+    for ( const string * testArray : testTreeCode_vec ) {
+        // and through different codes
+        for (int j=0; j<ncodes; ++j) {
 
             // --- READERS
 
@@ -218,10 +219,9 @@ int main(){
             assert(counter == testCountTreeNMembers[j]);
 
 
-
-            ++it;
         }
         //cout << "----------------------------------------------------" << endl << endl;
+        ++it;
     }
 
     // --- COMPOSERS

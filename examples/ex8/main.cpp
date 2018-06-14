@@ -29,12 +29,19 @@ int main() {
     cout << "Done." << endl;
     cin.ignore();
 
+    cout << "We may also choose to store the FFNN without beta weights into 'nobetas_ffnn.txt'. " << endl;
+    //NON I/O CODE
+    ffnn->storeOnFile("nobetas_ffnn.txt", false);
+    //
+    cout << "Done." << endl;
+    cin.ignore();
+
     cout << "Finally we add 1st, 2nd and variational derivative substrates and store the ffn into a new file 'substrate_ffnn.txt'." << endl;
     //NON I/O CODE
     ffnn->addFirstDerivativeSubstrate();
     ffnn->addSecondDerivativeSubstrate();
     ffnn->addVariationalFirstDerivativeSubstrate();
-    ffnn->storeOnFile("substrate_ffnn.txt");
+    ffnn->storeOnFile("substrate_ffnn.txt", false);
     //
     cout << "Done." << endl;
     cin.ignore();
