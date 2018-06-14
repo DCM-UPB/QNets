@@ -108,7 +108,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
             for (int l=0; l<ffnn->getNLayers(); ++l){
                 cout << emptySpaceForBeta << emptySpaceAfterBeta;
                 if (u < ffnn->getLayerSize(l)){
-                    cout << "off";
+                    cout << "OFF";
                 } else {
                     cout << emptySapceForActivationFunctionId;
                 }
