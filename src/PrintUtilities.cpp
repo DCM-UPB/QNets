@@ -7,7 +7,7 @@
 #include <cmath>
 #include <string>
 
-void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params = true, const int &drop_member_lvl = 0) // will drop members from level drop_member_lvl onward (0 means drop is disabled)
+void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params, const int &drop_member_lvl)
 {
     using namespace std;
 
@@ -35,10 +35,11 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
                             maxStringLength[l] = stringCode.length();
                         }
                 }
-            stringCode = ffnn->getLayer(l)->getIdCode(); // print layer identifiers
+            stringCode = ffnn->getLayer(l)->getIdCode() + " " + readParamValue(ffnn->getLayer(l)->getParams(), "nunits") + "U"; // print layer identifiers
             cout << stringCode << string(maxStringLength[l]-stringCode.length()+4, ' ');
         }
-    cout << endl;
+    cout << endl << endl;
+
     for (int u=0; u<maxLayerSize; ++u)
         {
             for (int l=0; l<ffnn->getNLayers(); ++l)

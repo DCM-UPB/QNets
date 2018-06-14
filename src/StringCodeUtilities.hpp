@@ -7,7 +7,7 @@
 #include <vector>
 
 /*
---- Utilities for the string codes of StringCodeComponent ---
+--- String code system of StringCodeComponents ---
 
 Types of string codes:
 
@@ -22,11 +22,12 @@ Types of string codes:
 
   paramIdCode, memberIdCore - These appear as arguments in functions below and mean the identifiers of parameters or members, respectively.
 
-NOTE 1: The idCode identifiers should uniquely identify a certain type among all derived types of StringCodeComponent.
-NOTE 2: However you may have multiple codes of the same type / identifier in a list (then access via identifier will always yield the first appearance, so use the function with extra index argument instead).
-NOTE 3: The parameter identifiers of a class and its' childs must be unique (just as the actual parameter names in code), so a params code list will always have unique element identifiers.
-NOTE 4: You do not have to drop empty brackets ( ) or { } like in the examples above. Passing empty brackets is completely legal (just as passing empty codes, which then always yields empty function results).
-NOTE 5: Unfortunately parameters of string type must not contain any spaces, commas, or brackets of type () or {}.
+NOTE 1: You must not forget to put a space between everything! Extra spaces however don't hurt, will be dropped in results of string functions though.
+NOTE 2: The idCode identifiers should uniquely identify a certain type among all derived types of StringCodeComponent.
+NOTE 3: However you may have multiple codes of the same type / identifier in a list (then access via identifier will always yield the first appearance, so use the function with index argument instead).
+NOTE 4: The parameter identifiers of a class and its' derived types must be unique (just as the actual parameter names in code), so a params code list will always have unique element identifiers.
+NOTE 5: You do not have to leave out empty brackets ( ) or { } like in the examples above. Passing empty brackets is completely legal (just as passing empty codes, which then always yields empty function results).
+NOTE 6: Unfortunately parameters of string type must not contain any spaces, commas, or brackets of type () or {}.
 */
 
 // --- Readers
@@ -36,7 +37,7 @@ std::string readParams(const std::string &fullCode); // read params string from 
 std::string readParamValue(const std::string &params, const std::string &paramIdCode); // return the value string of certain paramId
 std::string readMemberTreeCode(const std::string &treeCode); // return a list string composed of the treeCodes of all members in treeCode
 std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode); // return the treeCode of the first member with matching memberIdCode identifier from memberTreeCode
-std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode, const int &index); // return the treeCode of the '(index-1)'th member with matching memberIdCode identifier from memberTreeCode
+std::string readTreeCode(const std::string &memberTreeCode, const int &index, const std::string &memberIdCode = ""); // return the treeCode of the '(index-1)'th member from memberTreeCode (if passed, only those with matching memberIdCode identifier)
 
 // --- Drop
 

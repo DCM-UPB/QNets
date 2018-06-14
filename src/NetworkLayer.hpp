@@ -2,6 +2,7 @@
 #define NETWORK_LAYER
 
 #include "StringCodeComponent.hpp"
+#include "StringCodeUtilities.hpp"
 #include "NetworkUnit.hpp"
 #include "OffsetUnit.hpp"
 
@@ -31,8 +32,11 @@ public:
     // --- Class String Code methods
 
     std::string getClassIdCode(){return "layer";}
-    virtual std::string getParams(){return "nunits " + std::to_string(_U.size());}
+    virtual std::string getParams(){return composeParamCode("nunits", _U.size());}
+    virtual std::string getMemberTreeCode();
+
     virtual void setParams(const std::string &params){int n; setParamValue(params, "nunits", n); this->setSize(n);}
+    virtual void setMemberParams(const std::string &memberTreeCode);
 
     // --- Getters
 

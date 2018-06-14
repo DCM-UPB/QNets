@@ -1,5 +1,6 @@
 #include "NNUnit.hpp"
 #include "StringCodeUtilities.hpp"
+#include "ActivationFunctionManager.hpp"
 
 #include <string>
 
@@ -8,7 +9,10 @@
 void NNUnit::setMemberParams(const std::string &memberTreeCode)
 {
     FedNetworkUnit::setMemberParams(memberTreeCode);
-    _actf->setTreeParams(readTreeCode(memberTreeCode, _actf->getIdCode()));
+    using namespace std;
+    std::string actfCode = readTreeCode(memberTreeCode, countNMembers(memberTreeCode)>1 ? 1 : 0); // atm using index
+    this->setActivationFunction(std_actf::provideActivationFunction(readIdCode(actfCode)));
+    _actf->setTreeParams(actfCode);
 }
 
 // --- Computation

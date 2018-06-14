@@ -849,9 +849,6 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
     NNLayer * nnl;
     for (int i=0; i<ffnn->getNNeuralLayers()-1; ++i){ // exclude output layer
         nnl = new NNLayer(ffnn->getNNLayer(i)->getNUnits(), std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
-        for (int j=0; j<ffnn->getNNLayer(i)->getNNNUnits(); ++j){
-            nnl->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode(), ffnn->getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getParams()));
-        }
         _L.push_back(nnl);
         _L_fed.push_back(nnl);
         _L_nn.push_back(nnl);
@@ -859,9 +856,6 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
 
     // read and set the activation function and size for output layer
     _L_out = new OutputNNLayer(ffnn->getOutputLayer()->getNUnits(), std_actf::provideActivationFunction("id_"));
-    for (int j=0; j<ffnn->getOutputLayer()->getNNNUnits(); ++j){
-        _L_out->getNNUnit(j)->setActivationFunction(std_actf::provideActivationFunction(ffnn->getOutputLayer()->getNNUnit(j)->getActivationFunction()->getIdCode(), ffnn->getOutputLayer()->getNNUnit(j)->getActivationFunction()->getParams()));
-    }
     _L.push_back(_L_out);
     _L_fed.push_back(_L_out);
     _L_nn.push_back(_L_out);
@@ -875,6 +869,11 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
         ffnn->getBeta(beta);
         setBeta(beta);
     }
+
+    for (int i=0; i<ffnn->getNLayers(); ++i) { // now copy the parameter tree for all layers
+        _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
+    }
+
     // read and set the substrates
     _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
     if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();

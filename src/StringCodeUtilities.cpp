@@ -103,12 +103,15 @@ std::string readMemberTreeCode(const std::string &treeCode) // public function
 void readTreeCode(std::istringstream &iss, std::string &treeCode) // internal helper
 {
     std::string word;
+    int countOpenRoundBrackets = 0;
     int countLeftBrackets = 0; // count { brackets of member code
     int countRightBrackets = 0; // count } brackets of member code
 
     // assuming the memberIdCode is already found and written into treeCode
     while (iss >> word) { // read rest
-        if (countLeftBrackets == 0 && word == ",") return; // there was no members list
+        if (countLeftBrackets == 0 && countOpenRoundBrackets == 0 && word == ",") return; // there was no members list
+        if (word == "(") ++countOpenRoundBrackets;
+        if (word == ")") --countOpenRoundBrackets;
         if (word == "{") ++countLeftBrackets;
         if (word == "}") ++countRightBrackets;
         treeCode += " " + word;
@@ -122,32 +125,56 @@ std::string readTreeCode(const std::string &memberTreeCode, const std::string &m
     std::istringstream iss(memberTreeCode);
     std::string word;
     std::string treeCode = "";
+    int countOpenBrackets1 = 0;
+    int countOpenBrackets2 = 0;
 
     while (iss >> word) { // search for memberIdCode
-        if (word == memberIdCode) {
-            treeCode = word; // read IdCode
-            readTreeCode(iss, treeCode); // read the rest of the treeCode
-            return treeCode;
+        if (word == "{") ++countOpenBrackets1;
+        if (word == "}") --countOpenBrackets1;
+        if (word == "(") ++countOpenBrackets2;
+        if (word == ")") --countOpenBrackets2;
+        if (countOpenBrackets1 == 0 && countOpenBrackets2 == 0) { // make sure we dont check ids inside brackets
+            if (word == memberIdCode) {
+                treeCode = word; // read IdCode
+                readTreeCode(iss, treeCode); // read the rest of the treeCode
+                return treeCode;
+            }
         }
     }
     return treeCode;
 }
 
 
-std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode, const int &index) // public function
+std::string readTreeCode(const std::string &memberTreeCode, const int &index, const std::string &memberIdCode) // public function
 {
     std::istringstream iss(memberTreeCode);
     std::string word;
     std::string treeCode = "";
-    int countIndex = -1;
+    int countIndex = 0;
+    int countOpenBrackets1 = 0;
+    int countOpenBrackets2 = 0;
 
     while (iss >> word) { // search for memberIdCode
-        if (word == memberIdCode) {
-            countIndex += 1; // count until correct index
-            if (countIndex == index) {
-                treeCode = word; // read IdCode
-                readTreeCode(iss, treeCode); // read the rest of the treeCode
-                return treeCode;
+        if (word == "{") ++countOpenBrackets1;
+        if (word == "}") --countOpenBrackets1;
+        if (word == "(") ++countOpenBrackets2;
+        if (word == ")") --countOpenBrackets2;
+        if (countOpenBrackets1 == 0 && countOpenBrackets2 == 0) { // make sure we count nothing inside brackets
+            if (memberIdCode == "") {
+                if (word == ",") {++countIndex; continue;} // count commas in this case
+                if (countIndex == index){
+                    treeCode = word; // read IdCode
+                    readTreeCode(iss, treeCode); // read the rest of the treeCode
+                    return treeCode;
+                }
+            }
+            else if (word == memberIdCode) {
+                if (countIndex < index) {++countIndex; continue;} // count id appearances in this case
+                else {
+                    treeCode = word; // read IdCode
+                    readTreeCode(iss, treeCode); // read the rest of the treeCode
+                    return treeCode;
+                }
             }
         }
     }

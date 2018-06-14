@@ -3,6 +3,7 @@
 #include "NetworkUnit.hpp"
 
 #include <vector>
+#include <string>
 
 // --- Constructor
 
@@ -31,6 +32,24 @@ void NetworkLayer::deconstruct()
         }
     _U.clear();
     _U.push_back(_U_off);
+}
+
+
+// --- String Code methods
+
+std::string NetworkLayer::getMemberTreeCode()
+{
+    std::vector<std::string> unitCodes;
+    for (NetworkUnit * u : _U) unitCodes.push_back(u->getTreeCode());
+    return composeCodeList(unitCodes);
+}
+
+
+void NetworkLayer::setMemberParams(const std::string &memberTreeCode)
+{
+    for (std::vector<NetworkUnit *>::size_type it=0; it<_U.size(); ++it) {
+        _U[it]->setTreeParams(readTreeCode(memberTreeCode, it));
+    }
 }
 
 
