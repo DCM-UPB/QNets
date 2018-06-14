@@ -8,7 +8,7 @@
 
 #include <stdexcept>
 #include <string>
-
+#include <iostream>
 // Unit of an Artificial Neural Network
 class NNUnit: public FedNetworkUnit
 {
@@ -20,7 +20,7 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {if (actf) _actf = actf; else throw std::invalid_argument("NNUnit(): the parameter 'actf' was not valid");}
+    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {if (actf) _actf = actf; else throw std::invalid_argument("NNUnit(): Passed pointer 'actf' was NULL.");}
     NNUnit(const std::string &actf_id, NetworkUnitFeederInterface * feeder = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), feeder) {}
     virtual ~NNUnit(){ delete _actf; }
 
@@ -30,8 +30,8 @@ public:
     virtual void setMemberParams(const std::string &memberTreeCode);
 
     // Setters
-    void setActivationFunction(ActivationFunctionInterface * actf){delete _actf; if (actf) _actf=actf; else throw std::invalid_argument("NNUnit::setActivationFunction(): the parameter 'actf' was not valid");}
-    void setActivationFunction(const std::string &actf_id){this->setActivationFunction(std_actf::provideActivationFunction(actf_id));}
+    void setActivationFunction(ActivationFunctionInterface * actf){delete _actf; if (actf) _actf=actf; else throw std::invalid_argument("NNUnit::setActivationFunction(): Passed pointer 'actf' was NULL.");}
+    void setActivationFunction(const std::string &actf_id, const std::string &params = ""){std::cout << "actf_id " << actf_id << std::endl; this->setActivationFunction(std_actf::provideActivationFunction(actf_id, params));}
 
     // Getters
     ActivationFunctionInterface * getActivationFunction(){return _actf;}

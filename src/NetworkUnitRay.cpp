@@ -50,6 +50,8 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index){
     _betas_used_in_this_ray.clear();
     _betas_used_for_this_ray.clear();
 
+    _intensity_id_shift=starting_index;
+
     for (NetworkUnit * u: _source){
         if(FedNetworkUnit * fu = dynamic_cast<FedNetworkUnit *>(u)) {
             NetworkUnitFeederInterface * feeder = fu->getFeeder();
@@ -63,7 +65,6 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index){
         }
     }
 
-    _intensity_id_shift=starting_index;
     int idx=starting_index;
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i){
         _intensity_id.push_back(idx);
@@ -99,7 +100,6 @@ void NetworkUnitRay::setParams(const std::string &params)
 {
     int starting_index;
     double beta;
-    std::cout << "HOLLO!" << std::endl;
     std::string str = readParamValue(params, "id_shift");
     std::cout << "id_shift " << str << std::endl;
     if (setParamValue(str, starting_index)) this->setVariationalParametersIndexes(starting_index);

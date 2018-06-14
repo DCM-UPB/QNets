@@ -739,8 +739,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     using namespace std;
 
     string line, id, size;
-    vector<string> layerCodes;
-
+    vector<string> layerMemberCodes;
     ifstream file;
     file.open(filename);
 
@@ -749,12 +748,16 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     file >> nlayers;
 
     NNLayer * nnl;
-    int nunits;
+    int nunits = 0;
     int il = 0;
-    while (std::getline(file, line) && il<nlayers) {
+    while (std::getline(file, line)) {
+        if (line == "") continue; // idk why I get an empty line here in the first iteration
         id = readIdCode(line);
+        cout << "HOLLO from layer construction from file!" << endl;
+        cout << "line: " << line << endl;
+        cout << "IdCode: " << id << endl;
         if (setParamValue(readParams(line), "nunits", nunits)) {
-            cout << "HOLLO from layer construction from file! Nunits: " << nunits << endl;
+            cout << "Nunits: " << nunits << endl;
             if (id == "inl") {
                 _L_in = new InputLayer(nunits);
                 _L.push_back(_L_in);
@@ -775,21 +778,26 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
                 cout << "Unknown layer identifier!" << endl;
                 throw std::invalid_argument("Read unknown layer identifier from file!");
             }
-            layerCodes.push_back(line);
+            layerMemberCodes.push_back(readMemberTreeCode(line));
         }
+        ++il;
+        if (il==nlayers) break;
     }
+    if (il!=nlayers) throw std::invalid_argument("Stored FFNN file declares to have more layers than it has layer codes.");
 
-    // connect the NN, if it is the case
+    // connect the NN, if connected is found true
     _nvp = 0;
     bool connected;
     file >> connected;
     _flag_connected = false;
-    if (connected){
-        connectFFNN();
-    }
+    if (connected) connectFFNN();
+
+    // set betas and all other params/actf
+    for (int i=0; i<getNLayers(); ++i) {cout << layerMemberCodes[i] << endl; getLayer(i)->setMemberParams(layerMemberCodes[i]);}
+
     // read and set the substrates
     _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
-    bool flag_1d, flag_2d, flag_v1d, flag_c1d, flag_c2d;
+    bool flag_1d = 0, flag_2d = 0, flag_v1d = 0, flag_c1d = 0, flag_c2d = 0;
     file >> flag_1d;
     if (flag_1d) addFirstDerivativeSubstrate();
     file >> flag_2d;
@@ -802,10 +810,6 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (flag_c2d) addCrossSecondDerivativeSubstrate();
 
     file.close();
-
-    // set betas and all other params/actf
-    for (int i=0; i<getNLayers(); ++i) getLayer(i)->setMemberParams(readMemberTreeCode(line));
-
 }
 
 

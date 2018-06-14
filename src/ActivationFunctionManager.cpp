@@ -1,7 +1,7 @@
 #include "ActivationFunctionManager.hpp"
 
 #include <cstddef>
-
+#include <iostream>
 namespace std_actf{
 
     IdentityActivationFunction id_actf = IdentityActivationFunction();
@@ -22,10 +22,10 @@ namespace std_actf{
         &sin_actf
     };
 
-    ActivationFunctionInterface * provideActivationFunction(const std::string &idcode, const std::string &params){
-
+    ActivationFunctionInterface * provideActivationFunction(const std::string &idCode, const std::string &params){
+        std::cout << "ACTF Manager - idCode: " << idCode << ", params: " << params << std::endl;
         for (ActivationFunctionInterface * actf : supported_actf){
-            if (idcode == actf->getIdCode()){
+            if (idCode == actf->getIdCode()){
                 ActivationFunctionInterface * new_actf = actf->getCopy();
                 new_actf->setParams(params);
                 return new_actf;
