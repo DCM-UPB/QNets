@@ -13,7 +13,7 @@ public:
 
     // getters
     ActivationFunctionInterface * getCopy(){return new SineActivationFunction();}
-    std::string getIdCode(){return "sin";}
+    std::string getIdCode(){return "SIN";}
 
     // computation
     double f(const double &in);

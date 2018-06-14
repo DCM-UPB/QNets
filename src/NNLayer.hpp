@@ -32,7 +32,7 @@ public:
 
     // --- String Codes
 
-    virtual std::string getIdCode(){return "nnl";}
+    virtual std::string getIdCode(){return "NNL";}
 
     // --- Getters
 

@@ -13,7 +13,7 @@ public:
 
     // getters
     ActivationFunctionInterface * getCopy(){return new TanSigmoidActivationFunction();}
-    std::string getIdCode(){return "tans";}
+    std::string getIdCode(){return "TANS";}
 
     // computation
     double f(const double &in);

@@ -26,7 +26,7 @@ public:
 
     // --- String Codes
 
-    virtual std::string getIdCode(){return "inl";}
+    virtual std::string getIdCode(){return "INL";}
 
     // --- Getters
 

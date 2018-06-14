@@ -24,7 +24,7 @@ public:
     void setLambda(const double lambda){_lambda = lambda;}
 
     // string methods
-    std::string getIdCode(){return "selu";}
+    std::string getIdCode(){return "SELU";}
     std::string getParams();
     void setParams(const std::string &params);
 

@@ -28,7 +28,7 @@ public:
 
     // --- String Codes
 
-    virtual std::string getIdCode(){return "outl";}
+    virtual std::string getIdCode(){return "OUTL";}
 
     // --- Getters
 

@@ -23,7 +23,7 @@ public:
     void setAlpha(const double alpha){_alpha = alpha;}
 
     // string methods
-    std::string getIdCode(){return "relu";}
+    std::string getIdCode(){return "RELU";}
     std::string getParams();
     void setParams(const std::string &params);
 

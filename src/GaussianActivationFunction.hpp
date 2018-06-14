@@ -13,7 +13,7 @@ public:
 
     // getters
     ActivationFunctionInterface * getCopy(){return new GaussianActivationFunction();}
-    std::string getIdCode(){return "gss";}
+    std::string getIdCode(){return "GSS";}
 
     // computation
     double f(const double &in);

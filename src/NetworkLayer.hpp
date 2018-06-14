@@ -31,7 +31,7 @@ public:
 
     // --- Class String Code methods
 
-    std::string getClassIdCode(){return "layer";}
+    std::string getClassIdCode(){return "LAYER";}
     virtual std::string getParams(){return composeParamCode("nunits", _U.size());}
     virtual std::string getMemberTreeCode();
 

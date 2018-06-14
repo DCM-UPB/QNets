@@ -12,7 +12,7 @@ public:
 
     // getters
     ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}
-    std::string getIdCode(){return "lgs";}
+    std::string getIdCode(){return "LGS";}
 
     // computation
     double f(const double &in);

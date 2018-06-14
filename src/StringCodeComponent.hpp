@@ -18,9 +18,9 @@ public:
 
     // virtual string code getters, to be extended by child
     // documentation on the code syntax is in StringCodeUtilities.hpp
-    virtual std::string getIdCode() = 0; // return unique (at least within class) identifier for component type
+    virtual std::string getIdCode() = 0; // return unique (at least within class) identifier for component type, should be upper case letters (same for classIdCode)
     virtual std::string getClassIdCode() = 0; // Usually should be set only by the direct child of StringCodeComponent. May serve to distinguish identifiers if necessary.
-    virtual std::string getParams(){return "";} // return parameter code
+    virtual std::string getParams(){return "";} // return parameter code with identifiers in lower case letters
     virtual std::string getMemberTreeCode(){return "";} // return treeCodes of added StringCodeComponent members
 
     // string code getter composers

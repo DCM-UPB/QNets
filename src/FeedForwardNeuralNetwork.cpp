@@ -753,29 +753,24 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     while (std::getline(file, line)) {
         if (line == "") continue; // idk why I get an empty line here in the first iteration
         id = readIdCode(line);
-        cout << "HOLLO from layer construction from file!" << endl;
-        cout << "line: " << line << endl;
-        cout << "IdCode: " << id << endl;
         if (setParamValue(readParams(line), "nunits", nunits)) {
-            cout << "Nunits: " << nunits << endl;
-            if (id == "inl") {
+            if (id == "INL") {
                 _L_in = new InputLayer(nunits);
                 _L.push_back(_L_in);
             }
-            else if (id == "nnl") {
+            else if (id == "NNL") {
                 nnl = new NNLayer(nunits);
                 _L.push_back(nnl);
                 _L_fed.push_back(nnl);
                 _L_nn.push_back(nnl);
             }
-            else if (id == "outl") {
+            else if (id == "OUTL") {
                 _L_out = new OutputNNLayer(nunits);
                 _L.push_back(_L_out);
                 _L_fed.push_back(_L_out);
                 _L_nn.push_back(_L_out);
             }
             else {
-                cout << "Unknown layer identifier!" << endl;
                 throw std::invalid_argument("Read unknown layer identifier from file!");
             }
             layerMemberCodes.push_back(readMemberTreeCode(line));
@@ -793,7 +788,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (connected) connectFFNN();
 
     // set betas and all other params/actf
-    for (int i=0; i<getNLayers(); ++i) {cout << layerMemberCodes[i] << endl; getLayer(i)->setMemberParams(layerMemberCodes[i]);}
+    for (int i=0; i<getNLayers(); ++i) getLayer(i)->setMemberParams(layerMemberCodes[i]);
 
     // read and set the substrates
     _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;

@@ -15,7 +15,7 @@ int main(){
     // lgs( b4 + b5*lgs( b0 + b1*x1 ) + b6*gss( b2 + b3*x2) )
     const double beta[7] = {-1.18, 0.37, -0.42, -0.86, 1.11, 2.018, -3.14};
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, 3, 2);
-    ffnn->getNNLayer(0)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+    ffnn->getNNLayer(0)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
     ffnn->connectFFNN();
     ffnn->setBeta(beta);
 

@@ -30,7 +30,7 @@ public:
     virtual ActivationFunctionInterface * getCopy() = 0;
 
     // set class id code
-    std::string getClassIdCode(){return "actf";}
+    std::string getClassIdCode(){return "ACTF";}
 
     // compute the activation function value
     virtual double f(const double &) = 0;

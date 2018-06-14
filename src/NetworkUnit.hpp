@@ -51,8 +51,8 @@ public:
     double getProtoValue(){return _pv;}
 
     // BaseComponent IdCodes
-    virtual std::string getClassIdCode(){return "unit";}
-    virtual std::string getIdCode(){return "nwu";} // return identifier for unit type
+    virtual std::string getClassIdCode(){return "UNIT";}
+    virtual std::string getIdCode(){return "NU";} // return identifier for unit type
 
     // Coordinate derivatives
     void setFirstDerivativeSubstrate(const int &nx0);

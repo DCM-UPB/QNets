@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+
 // --- Betas
 
 int NetworkUnitRay::getNBeta(){return _intensity.size();}
@@ -86,12 +86,9 @@ std::string NetworkUnitRay::getParams()
     std::vector<std::string> beta_strs;
 
     id_shift_str = composeParamCode("id_shift", _intensity_id_shift);
-    std::cout << "id_shift_str " << id_shift_str << std::endl;
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
         beta_strs.push_back(composeParamCode("b"+std::to_string(i), _intensity[i]));
-        std::cout << "beta_strs " << beta_strs[i] << std::endl;
     }
-    std::cout << "ray_params " << composeCodes(id_shift_str, composeCodeList(beta_strs)) << std::endl;
     return composeCodes(id_shift_str, composeCodeList(beta_strs));
 }
 
@@ -101,12 +98,11 @@ void NetworkUnitRay::setParams(const std::string &params)
     int starting_index;
     double beta;
     std::string str = readParamValue(params, "id_shift");
-    std::cout << "id_shift " << str << std::endl;
+
     if (setParamValue(str, starting_index)) this->setVariationalParametersIndexes(starting_index);
 
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
         str = readParamValue(params, "b"+std::to_string(i));
-        std::cout << "beta " << str << std::endl;
         if (setParamValue(str, beta)) this->setBeta(i, beta);
     }
 }

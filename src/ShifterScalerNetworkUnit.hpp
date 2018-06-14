@@ -28,7 +28,7 @@ public:
     ShifterScalerNetworkUnit(const double shift = 0., const double scale = 1.)  {_shift = shift; _scale = scale;}
 
     // string code methods
-    virtual std::string getIdCode(){return "ssu";} // return identifier for unit type
+    virtual std::string getIdCode(){return "SSNU";} // return identifier for unit type
     virtual std::string getParams(){return composeCodes(composeParamCode("shift", _shift), composeParamCode("scale", _scale));} // return parameter string
 
     virtual void setParams(const std::string &params){setParamValue(params, "shift", _shift); setParamValue(params, "scale", _scale);};
