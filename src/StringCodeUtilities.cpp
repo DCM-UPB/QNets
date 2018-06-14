@@ -36,7 +36,7 @@ std::string readParams(const std::string &fullCode) // public function (is in he
     std::istringstream iss(fullCode);
     std::string word;
     std::string params = "";
-
+ 
     iss >> word; // skip id
     iss >> word; // skip (
     if (word == "(") readParams(iss, params); // params bracket read
@@ -53,7 +53,8 @@ std::string readParamValue(const std::string &params, const std::string &paramId
     while (iss >> word) { // search for paramIdCode
         if (word == paramIdCode) {
             iss >> word; // read value
-            return word;
+            if (word!=",") return word; // in case paramValue was not empty
+            else break;
         }
     }
     return "";
@@ -118,30 +119,6 @@ void readTreeCode(std::istringstream &iss, std::string &treeCode) // internal he
         if (countLeftBrackets > 0 && countLeftBrackets == countRightBrackets) return; // done
     }
     return;
-}
-
-std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode) // public function
-{
-    std::istringstream iss(memberTreeCode);
-    std::string word;
-    std::string treeCode = "";
-    int countOpenBrackets1 = 0;
-    int countOpenBrackets2 = 0;
-
-    while (iss >> word) { // search for memberIdCode
-        if (word == "{") ++countOpenBrackets1;
-        if (word == "}") --countOpenBrackets1;
-        if (word == "(") ++countOpenBrackets2;
-        if (word == ")") --countOpenBrackets2;
-        if (countOpenBrackets1 == 0 && countOpenBrackets2 == 0) { // make sure we dont check ids inside brackets
-            if (word == memberIdCode) {
-                treeCode = word; // read IdCode
-                readTreeCode(iss, treeCode); // read the rest of the treeCode
-                return treeCode;
-            }
-        }
-    }
-    return treeCode;
 }
 
 
@@ -349,21 +326,23 @@ std::string composeCodes(const std::string &code1, const std::string &code2)
 std::string composeCodeList(const std::vector<std::string> &codes)
 {
     if (codes.size() == 0) return ""; // nothing to be done
-    std::string codeList = codes[0]; // start with first code
-    for (std::vector<std::string>::size_type i=1; i<codes.size(); ++i) codeList += " , " + codes[i]; // append other codes with spacing and comma
+    std::string codeList = "";
+    for (std::vector<std::string>::size_type i=0; i<codes.size(); ++i) {
+        codeList = composeCodes(codeList, codes[i]);
+    }
     return codeList;
 }
 
 
 std::string composeFullCode(const std::string &idCode, const std::string &params)
 {
-    if (params != "") return idCode + " ( " + params + " )";
+    if (idCode != "" && params != "") return idCode + " ( " + params + " )";
     return idCode;
 }
 
 
 std::string composeTreeCode(const std::string &fullCode, const std::string &memberTreeCode)
 {
-    if (memberTreeCode != "") return fullCode + " { " + memberTreeCode + " }";
+    if (fullCode != "" && memberTreeCode != "") return fullCode + " { " + memberTreeCode + " }";
     return fullCode;
 }

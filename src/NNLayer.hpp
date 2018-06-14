@@ -21,7 +21,7 @@ public:
 
     // --- Constructor
 
-    NNLayer(const int &nunits, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()){if (nunits>1) construct(nunits, actf);}
+    NNLayer(const int &nunits = 1, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()){if (nunits>1) construct(nunits, actf);}
     virtual void construct(const int &nunits);
     virtual void construct(const int &nunits, ActivationFunctionInterface * actf);
 

@@ -6,7 +6,7 @@
 
 #include <string>
 #include <cstddef> // for NULL
-
+#include <iostream>
 // Network Unit with Feeder
 class FedNetworkUnit: virtual public NetworkUnit
 {
@@ -29,7 +29,7 @@ public:
     // string code getters / setter
     virtual std::string getIdCode(){return "fnwu";} // return identifier for unit type
     virtual std::string getMemberTreeCode(){return _feeder ? _feeder->getTreeCode() : "";} // return feeder's IdCodes + Params Tree
-    virtual void setMemberParams(const std::string &memberTreeCode) {if (_feeder) _feeder->setTreeParams(readTreeCode(memberTreeCode, _feeder->getIdCode()));}
+    virtual void setMemberParams(const std::string &memberTreeCode) {if (_feeder) {std::cout << "HOLLO in Fed! " << readTreeCode(memberTreeCode, 0, _feeder->getIdCode()) << std::endl; _feeder->setTreeParams(readTreeCode(memberTreeCode, 0, _feeder->getIdCode()));}}
 
     // Computation
     void computeFeed();

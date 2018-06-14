@@ -593,7 +593,7 @@ void FeedForwardNeuralNetwork::setNNLayerActivationFunction(const int &li, Activ
 
 void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
 {
-    NNLayer * newhidlay = new NNLayer(size, std_actf::provideActivationFunction("lgs"));
+    NNLayer * newhidlay = new NNLayer(size, std_actf::provideActivationFunction());
 
     std::vector<NetworkLayer *>::iterator it = _L.end()-1;
     std::vector<FedNetworkLayer *>::iterator it_fed = _L_fed.end()-1;
@@ -642,12 +642,6 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
                 {
                     this->setBeta(i,0.);
                 }
-            // set the identity activation function for some units of the new hidden layer
-            //for (int i=0; i<_L[_L.size()-1]->getNNNUnits(); ++i)
-            //    {
-            //        _L[_L.size()-2]->getNNUnit(i)->setActivationFunction(std_actf::provideActivationFunction("id_"));
-            //    }
-            // set some beta to 1 for the output layer
             for (int i=0; i<_L_fed[_L_fed.size()-1]->getNFedUnits(); ++i)
                 {
                     _L_fed[_L_fed.size()-1]->getFedUnit(i)->getFeeder()->setBeta(i,1.);
@@ -687,36 +681,15 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
     // open file
     ofstream file;
     file.open(filename);
-    // set precision
-    typedef std::numeric_limits<double> dbl;
-    file.precision(dbl::max_digits10);
     // store the number of layers
     file << getNLayers() << endl;
-    // store the activaction function and size of each layer
-    file << getInputLayer()->getNUnits() << " ";
-    for (int j=0; j<getInputLayer()->getNUnits(); ++j){
-        file << "id_ ";
+    // store the tree code of each layer
+    for (int i=0; i<getNLayers(); ++i) {
+        file << getLayer(i)->getTreeCode() << endl;
     }
-    file << endl;
-    for (int i=0; i<getNNeuralLayers(); ++i)
-        {
-            file << getNNLayer(i)->getNUnits() << " ";
-            file << "id_ ";
-            for (int j=0; j<getNNLayer(i)->getNNNUnits(); ++j){
-                file << getNNLayer(i)->getNNUnit(j)->getActivationFunction()->getIdCode() << " ";
-            }
-            file << endl;
-        }
-    // store all the variational parameters, if the FFNN is already connected
+    // store connected flag
     file << _flag_connected << endl;
-    if (_flag_connected){
-        for (int i=0; i<getNBeta(); ++i)
-            {
-                file << getBeta(i) << " ";
-            }
-        file << endl;
-    }
-    // store the information about the substrates
+    // store the flags for the substrates
     file << _flag_1d << " " << _flag_2d << " " << _flag_v1d << " " << _flag_c1d << " " << _flag_c2d << endl;
     file.close();
 }
@@ -724,6 +697,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename)
 
 // --- Constructor
 
+/* is this still useful?
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf){
     using namespace std;
 
@@ -757,56 +731,53 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
     }
 
 }
-
+*/
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 {
     // open file
     using namespace std;
 
+    string line, id, size;
+    vector<string> layerCodes;
+
     ifstream file;
     file.open(filename);
-    string line;
+
     // read the number of layers
     int nlayers;
     file >> nlayers;
-    // read and set the activation function and size of each layer
-    string actf_id;
-    int nunits;
+
     NNLayer * nnl;
-
-    // Input Layer
-    file >> nunits;
-    _L_in = new InputLayer(nunits);
-    _L.push_back(_L_in);
-    for (int j=0; j<nunits; ++j) file >> actf_id; // skip
-
-    // Hidden Layers
-    for (int i=1; i<nlayers-1; ++i)
-        {
-            file >> nunits;
-            nnl = new NNLayer(nunits, std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
-            file >> actf_id; // skip the offset
-            for (int j=1; j<nunits; ++j){
-                file >> actf_id;
-                nnl->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_id));
+    int nunits;
+    int il = 0;
+    while (std::getline(file, line) && il<nlayers) {
+        id = readIdCode(line);
+        if (setParamValue(readParams(line), "nunits", nunits)) {
+            cout << "HOLLO from layer construction from file! Nunits: " << nunits << endl;
+            if (id == "inl") {
+                _L_in = new InputLayer(nunits);
+                _L.push_back(_L_in);
             }
-            _L.push_back(nnl);
-            _L_fed.push_back(nnl);
-            _L_nn.push_back(nnl);
+            else if (id == "nnl") {
+                nnl = new NNLayer(nunits);
+                _L.push_back(nnl);
+                _L_fed.push_back(nnl);
+                _L_nn.push_back(nnl);
+            }
+            else if (id == "outl") {
+                _L_out = new OutputNNLayer(nunits);
+                _L.push_back(_L_out);
+                _L_fed.push_back(_L_out);
+                _L_nn.push_back(_L_out);
+            }
+            else {
+                cout << "Unknown layer identifier!" << endl;
+                throw std::invalid_argument("Read unknown layer identifier from file!");
+            }
+            layerCodes.push_back(line);
         }
-
-    // Output Layer
-    file >> nunits;
-    _L_out = new OutputNNLayer(nunits, std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
-    file >> actf_id; // skip the offset
-    for (int j=1; j<nunits; ++j){
-        file >> actf_id;
-        _L_out->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_id));
     }
-    _L.push_back(_L_out);
-    _L_fed.push_back(_L_out);
-    _L_nn.push_back(_L_out);
 
     // connect the NN, if it is the case
     _nvp = 0;
@@ -815,12 +786,6 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     _flag_connected = false;
     if (connected){
         connectFFNN();
-        double beta;
-        for (int i=0; i<getNBeta(); ++i)
-            {
-                file >> beta;
-                setBeta(i,beta);
-            }
     }
     // read and set the substrates
     _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
@@ -837,25 +802,29 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (flag_c2d) addCrossSecondDerivativeSubstrate();
 
     file.close();
+
+    // set betas and all other params/actf
+    for (int i=0; i<getNLayers(); ++i) getLayer(i)->setMemberParams(readMemberTreeCode(line));
+
 }
 
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn){
-    // read and set size of input layer
+    // read size and create input layer
     _L_in = new InputLayer(ffnn->getInputLayer()->getNUnits());
     _L.push_back(_L_in);
 
-    // read and set the activation function and size for each hidden layer
+    // read size and create hidden layers
     NNLayer * nnl;
     for (int i=0; i<ffnn->getNNeuralLayers()-1; ++i){ // exclude output layer
-        nnl = new NNLayer(ffnn->getNNLayer(i)->getNUnits(), std_actf::provideActivationFunction("id_"));   // first set the activation function to the id, then change it for each unit
+        nnl = new NNLayer(ffnn->getNNLayer(i)->getNUnits());   // first create layers with default actf
         _L.push_back(nnl);
         _L_fed.push_back(nnl);
         _L_nn.push_back(nnl);
     }
 
-    // read and set the activation function and size for output layer
-    _L_out = new OutputNNLayer(ffnn->getOutputLayer()->getNUnits(), std_actf::provideActivationFunction("id_"));
+    // read size and create output layer
+    _L_out = new OutputNNLayer(ffnn->getOutputLayer()->getNUnits());
     _L.push_back(_L_out);
     _L_fed.push_back(_L_out);
     _L_nn.push_back(_L_out);
@@ -863,24 +832,19 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
      // read and set the substrates
     _nvp = 0;
     _flag_connected = false;
-    if (ffnn->isConnected()){
-        connectFFNN();
-        double beta[ffnn->getNBeta()];
-        ffnn->getBeta(beta);
-        setBeta(beta);
-    }
+    if (ffnn->isConnected()) connectFFNN();
 
-    for (int i=0; i<ffnn->getNLayers(); ++i) { // now copy the parameter tree for all layers
-        _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
-    }
-
-    // read and set the substrates
     _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
     if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();
     if (ffnn->hasSecondDerivativeSubstrate()) addSecondDerivativeSubstrate();
     if (ffnn->hasVariationalFirstDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
     if (ffnn->hasCrossFirstDerivativeSubstrate()) addCrossFirstDerivativeSubstrate();
     if (ffnn->hasCrossSecondDerivativeSubstrate()) addCrossSecondDerivativeSubstrate();
+
+    // now copy the parameter tree (incl. betas) for all layers
+    for (int i=0; i<ffnn->getNLayers(); ++i) {
+        _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
+    }
 }
 
 
@@ -892,8 +856,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int 
 
 void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysize, const int &outsize){
     _L_in = new InputLayer(insize);
-    NNLayer * hidlay = new NNLayer(hidlaysize, std_actf::provideActivationFunction("lgs"));
-    _L_out = new OutputNNLayer(outsize, std_actf::provideActivationFunction("lgs"));
+    NNLayer * hidlay = new NNLayer(hidlaysize, std_actf::provideActivationFunction());
+    _L_out = new OutputNNLayer(outsize, std_actf::provideActivationFunction());
 
     _L.push_back(_L_in);
     _L.push_back(hidlay);

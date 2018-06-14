@@ -16,7 +16,7 @@ public:
 
     // --- Constructor / Destructor
 
-    InputLayer(const int &nunits);
+    InputLayer(const int &nunits = 1);
     void construct(const int &nunits);
 
     // --- Destructor

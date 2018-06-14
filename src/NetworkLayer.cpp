@@ -47,8 +47,8 @@ std::string NetworkLayer::getMemberTreeCode()
 
 void NetworkLayer::setMemberParams(const std::string &memberTreeCode)
 {
-    for (std::vector<NetworkUnit *>::size_type it=0; it<_U.size(); ++it) {
-        _U[it]->setTreeParams(readTreeCode(memberTreeCode, it));
+    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) {
+        _U[i]->setTreeParams(readTreeCode(memberTreeCode, i));
     }
 }
 

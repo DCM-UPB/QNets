@@ -38,6 +38,8 @@ public:
 
     // string code methods
     virtual std::string getIdCode(){return "ray";}; // return an identification string
+    virtual std::string getParams();
+    virtual void setParams(const std::string &params);
 
     // beta
     int getNBeta();
