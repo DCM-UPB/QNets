@@ -27,7 +27,6 @@ public:
     NetworkUnitFeederInterface * getFeeder(){return _feeder;}
 
     // string code getters / setter
-    virtual std::string getIdCode(){return "FNU";} // return identifier for unit type
     virtual std::string getMemberTreeCode(){return _feeder ? _feeder->getTreeCode() : "";} // return feeder's IdCodes + Params Tree
     virtual void setMemberParams(const std::string &memberTreeCode) {if (_feeder) _feeder->setTreeParams(readTreeCode(memberTreeCode, 0, _feeder->getIdCode()));}
 

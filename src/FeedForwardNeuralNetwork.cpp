@@ -16,6 +16,7 @@
 #include <thread> //to detect the number of hardware threads on the system
 #endif
 
+
 // --- Variational Parameters
 
 int FeedForwardNeuralNetwork::getNBeta()
@@ -594,12 +595,6 @@ void FeedForwardNeuralNetwork::setNNLayerActivationFunction(const int &li, Activ
 
 void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
 {
-    NNLayer * newhidlay = new NNLayer(size, std_actf::provideActivationFunction());
-
-    std::vector<NetworkLayer *>::iterator it = _L.end()-1;
-    std::vector<FedNetworkLayer *>::iterator it_fed = _L_fed.end()-1;
-    std::vector<NNLayer *>::iterator it_nn = _L_nn.end()-1;
-
     if (_flag_connected)
         {
             using namespace std;
@@ -626,9 +621,7 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
             // disconnect last layer
             _L_out->disconnect();  // disconnect the last (output) layer
             // insert new layer
-            _L.insert(it, newhidlay);
-            _L_fed.insert(it_fed, newhidlay);
-            _L_nn.insert(it_nn, newhidlay);
+            _addNewLayer("NNL", size, 1);
             // reconnect the layers
             _L_nn[_L_nn.size()-2]->connectOnTopOfLayer(_L[_L.size()-3]);
             _L_nn[_L_nn.size()-1]->connectOnTopOfLayer(_L[_L.size()-2]);
@@ -652,9 +645,7 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
         }
     else
         {
-            _L.insert(it, newhidlay);
-            _L_fed.insert(it_fed, newhidlay);
-            _L_nn.insert(it_nn, newhidlay);
+            _addNewLayer("NNL", size, 1);
         }
 }
 
@@ -727,7 +718,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::
     }
 
     // declare the NN with the right geometry
-    this->construct(actf[0].size(), actf[1].size(), actf.back().size());
+    _construct(actf[0].size(), actf[1].size(), actf.back().size());
     for (unsigned int l=2; l<actf.size()-1; ++l){
         this->pushHiddenLayer(actf[l].size());
     }
@@ -755,7 +746,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     // open file
     using namespace std;
 
-    string line, id, size;
+    string line, id, params;
     vector<string> layerMemberCodes;
     ifstream file;
     file.open(filename);
@@ -764,34 +755,14 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     int nlayers;
     file >> nlayers;
 
-    NNLayer * nnl;
-    int nunits = 0;
     int il = 0;
     while (std::getline(file, line)) {
         if (line == "") continue; // idk why I get an empty line here in the first iteration
         id = readIdCode(line);
-        if (setParamValue(readParams(line), "nunits", nunits)) {
-            if (id == "INL") {
-                _L_in = new InputLayer(nunits);
-                _L.push_back(_L_in);
-            }
-            else if (id == "NNL") {
-                nnl = new NNLayer(nunits);
-                _L.push_back(nnl);
-                _L_fed.push_back(nnl);
-                _L_nn.push_back(nnl);
-            }
-            else if (id == "OUTL") {
-                _L_out = new OutputNNLayer(nunits);
-                _L.push_back(_L_out);
-                _L_fed.push_back(_L_out);
-                _L_nn.push_back(_L_out);
-            }
-            else {
-                throw std::invalid_argument("Read unknown layer identifier from file!");
-            }
-            layerMemberCodes.push_back(readMemberTreeCode(line));
-        }
+        params = readParams(line);
+        layerMemberCodes.push_back(readMemberTreeCode(line));
+        _addNewLayer(id, params);
+
         ++il;
         if (il==nlayers) break;
     }
@@ -826,24 +797,9 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn){
-    // read size and create input layer
-    _L_in = new InputLayer(ffnn->getInputLayer()->getNUnits());
-    _L.push_back(_L_in);
 
-    // read size and create hidden layers
-    NNLayer * nnl;
-    for (int i=0; i<ffnn->getNNeuralLayers()-1; ++i){ // exclude output layer
-        nnl = new NNLayer(ffnn->getNNLayer(i)->getNUnits());   // first create layers with default actf
-        _L.push_back(nnl);
-        _L_fed.push_back(nnl);
-        _L_nn.push_back(nnl);
-    }
-
-    // read size and create output layer
-    _L_out = new OutputNNLayer(ffnn->getOutputLayer()->getNUnits());
-    _L.push_back(_L_out);
-    _L_fed.push_back(_L_out);
-    _L_nn.push_back(_L_out);
+    // copy layer structure
+    for (int i=0; i<ffnn->getNLayers(); ++i) _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getNUnits());
 
      // read and set the substrates
     _nvp = 0;
@@ -866,22 +822,14 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
 
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize)
 {
-    construct(insize, hidlaysize, outsize);
+    _construct(insize, hidlaysize, outsize);
 }
 
 
-void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysize, const int &outsize){
-    _L_in = new InputLayer(insize);
-    NNLayer * hidlay = new NNLayer(hidlaysize, std_actf::provideActivationFunction());
-    _L_out = new OutputNNLayer(outsize, std_actf::provideActivationFunction());
-
-    _L.push_back(_L_in);
-    _L.push_back(hidlay);
-    _L_fed.push_back(hidlay);
-    _L_nn.push_back(hidlay);
-    _L.push_back(_L_out);
-    _L_fed.push_back(_L_out);
-    _L_nn.push_back(_L_out);
+void FeedForwardNeuralNetwork::_construct(const int &insize, const int &hidlaysize, const int &outsize){
+    _addNewLayer("INL", insize);
+    _addNewLayer("NNL", hidlaysize);
+    _addNewLayer("OUTL", outsize);
 
     _flag_connected = false;
     _flag_1d = false;
@@ -891,6 +839,61 @@ void FeedForwardNeuralNetwork::construct(const int &insize, const int &hidlaysiz
     _flag_c2d = false;
 
     _nvp=0;
+}
+
+
+// --- Register/Create Layer
+
+void FeedForwardNeuralNetwork::_registerLayer(NetworkLayer * newLayer, const int &indexFromBack)
+{
+    _L.insert(_L.end()-indexFromBack, newLayer);
+
+    if(FedNetworkLayer * fnl = dynamic_cast<FedNetworkLayer *>(newLayer)) {
+        _L_fed.insert(_L_fed.end()-indexFromBack, fnl);
+    }
+
+    if(NNLayer * nnl = dynamic_cast<NNLayer *>(newLayer)) {
+        _L_nn.insert(_L_nn.end()-indexFromBack, nnl);
+    }
+
+}
+
+
+void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack)
+{
+    if (idCode == "INL") {
+        if (_L_in) {
+            delete _L_in;
+            _L.erase(_L.begin());
+        }
+        _L_in = new InputLayer(nunits);
+        _registerLayer(_L_in, indexFromBack);
+    }
+    else if (idCode == "NNL") {
+        NNLayer * nnl = new NNLayer(nunits);
+        _registerLayer(nnl, indexFromBack);
+    }
+    else if (idCode == "OUTL") {
+        if (_L_out) {
+            delete _L_out;
+            _L.erase(_L.end()-1);
+            _L_fed.erase(_L_fed.end()-1);
+            _L_nn.erase(_L_nn.end()-1);;
+        }
+        _L_out = new OutputNNLayer(nunits);
+        _registerLayer(_L_out, indexFromBack);
+    }
+    else {
+        throw std::invalid_argument("FFNN::_addNewLayer: Unknown layer identifier '" + idCode + "' passed.");
+    }
+}
+
+
+void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const std::string &params, const int &indexFromBack)
+{
+    int nunits;
+    if (!setParamValue(params, "nunits", nunits)) nunits = 1; // if params has no information about nunits
+    _addNewLayer(idCode, nunits, indexFromBack);
 }
 
 

@@ -17,7 +17,7 @@ class NNLayer: public FedNetworkLayer
 protected:
     std::vector<NNUnit *> _U_nn; // stores pointers to all neural units
 
-    void _registerUnit(NetworkUnit * u); // check if NetworkUnit is a/derived from NNUnit and register
+    void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from NNUnit and register
 
 public:
 

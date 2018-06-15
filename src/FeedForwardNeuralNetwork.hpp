@@ -11,19 +11,22 @@
 
 #include <vector>
 #include <string>
-
+#include <cstddef>
 
 class FeedForwardNeuralNetwork
 {
 private:
-    void construct(const int &insize, const int &hidlaysize, const int &outsize);
+    void _construct(const int &insize, const int &hidlaysize, const int &outsize);
+    void _registerLayer(NetworkLayer * newLayer, const int &indexFromBack = 0); // register layers to correct vectors, position controlled by indexFromBack
+    void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0); // creates and registers a new layer according to idCode and nunits
+    void _addNewLayer(const std::string &idCode, const std::string &params="", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
 
 protected:
     std::vector<NetworkLayer *> _L; // contains all kinds of layers
     std::vector<FedNetworkLayer *> _L_fed; // contains layers with feeder
     std::vector<NNLayer *> _L_nn; // contains neural layers
-    InputLayer * _L_in; // input layer
-    OutputNNLayer * _L_out; // output layer
+    InputLayer * _L_in = NULL; // input layer
+    OutputNNLayer * _L_out = NULL; // output layer
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
     bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d, _flag_c2d;  // flag that indicates if the substrates for the derivatives have been activated or not

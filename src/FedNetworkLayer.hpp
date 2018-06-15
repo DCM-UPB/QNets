@@ -11,7 +11,7 @@ class FedNetworkLayer: public NetworkLayer
 protected:
     std::vector<FedNetworkUnit *> _U_fed; // stores pointers to all units with feeder
 
-    void _registerUnit(NetworkUnit * u); // check if NetworkUnit is a/derived from FedNetworkUnit and register
+    void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from FedNetworkUnit and register
 
 public:
 

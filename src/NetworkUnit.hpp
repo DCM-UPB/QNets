@@ -52,7 +52,6 @@ public:
 
     // BaseComponent IdCodes
     virtual std::string getClassIdCode(){return "UNIT";}
-    virtual std::string getIdCode(){return "NU";} // return identifier for unit type
 
     // Coordinate derivatives
     void setFirstDerivativeSubstrate(const int &nx0);

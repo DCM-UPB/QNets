@@ -7,10 +7,10 @@
 
 // --- Register Unit
 
-void OutputNNLayer::_registerUnit(NetworkUnit * u)
+void OutputNNLayer::_registerUnit(NetworkUnit * newUnit)
 {
-    NNLayer::_registerUnit(u);
-    if(OutputNNUnit * outu = dynamic_cast<OutputNNUnit *>(u)) {
+    NNLayer::_registerUnit(newUnit);
+    if(OutputNNUnit * outu = dynamic_cast<OutputNNUnit *>(newUnit)) {
         _U_out.push_back(outu);
     }
 }

@@ -67,7 +67,7 @@ int main (void) {
         cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
         cout << "=========================================================================================" << endl << endl;
         cout << "NN structure looks like:" << endl << endl;
-        printFFNNStructure(ffnn);
+        printFFNNStructure(ffnn, true, 0);
         cout << endl;
         cout << "Benchmark results (time per propagation):" << endl;
 

@@ -12,7 +12,7 @@ class InputLayer: public NetworkLayer
 protected:
     std::vector<InputUnit *> _U_in; // stores pointers to all input units
 
-    void _registerUnit(NetworkUnit * u); // check if NetworkUnit is a/derived from InputUnit and register
+    void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from InputUnit and register
 
 public:
 

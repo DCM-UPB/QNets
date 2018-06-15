@@ -7,10 +7,10 @@
 
 // --- Register Unit
 
-void FedNetworkLayer::_registerUnit(NetworkUnit * u)
+void FedNetworkLayer::_registerUnit(NetworkUnit * newUnit)
 {
-    NetworkLayer::_registerUnit(u);
-    if(FedNetworkUnit * fu = dynamic_cast<FedNetworkUnit *>(u)) {
+    NetworkLayer::_registerUnit(newUnit);
+    if(FedNetworkUnit * fu = dynamic_cast<FedNetworkUnit *>(newUnit)) {
         _U_fed.push_back(fu);
     }
 }

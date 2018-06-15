@@ -4,10 +4,10 @@
 
 // --- Register Unit
 
-void InputLayer::_registerUnit(NetworkUnit * u)
+void InputLayer::_registerUnit(NetworkUnit * newUnit)
 {
-    NetworkLayer::_registerUnit(u);
-    if(InputUnit * inu = dynamic_cast<InputUnit *>(u)) {
+    NetworkLayer::_registerUnit(newUnit);
+    if(InputUnit * inu = dynamic_cast<InputUnit *>(newUnit)) {
         _U_in.push_back(inu);
     }
 }

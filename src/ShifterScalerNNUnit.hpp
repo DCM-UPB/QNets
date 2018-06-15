@@ -20,7 +20,7 @@ public:
     ShifterScalerNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerNetworkUnit(shift, scale) {};
 
     // string code methods
-    virtual std::string getIdCode(){return "SSNNU";} // return identifier for unit type
+    virtual std::string getIdCode() = 0; // this class is meant to be abstract
 };
 
 #endif
