@@ -38,7 +38,7 @@ public:
 
     // --- Getters
 
-    int getNNNUnits() {return _U_nn.size();}
+    int getNNeuralUnits() {return _U_nn.size();}
     NNUnit * getNNUnit(const int &i) {return _U_nn[i];}
 
     // --- Modify structure

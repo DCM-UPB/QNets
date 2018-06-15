@@ -48,7 +48,7 @@ public:
     int getNHiddenLayers(){return _L_nn.size()-1;}
 
     int getNInput(){return _L_in->getNInputUnits();}
-    int getNOutput(){return _L_out->getNNNUnits();}
+    int getNOutput(){return _L_out->getNOutputNNUnits();}
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
 
     NetworkLayer * getLayer(const int &li){return _L[li];}
