@@ -5,14 +5,16 @@
 #include <sstream>
 #include <stdexcept>
 
+using namespace std;
+
 // --- Readers
 
 // readIdCode
 
-std::string readIdCode(const std::string &fullCode)
+string readIdCode(const string &fullCode)
 {
-    std::istringstream iss(fullCode);
-    std::string idCode = "";
+    istringstream iss(fullCode);
+    string idCode = "";
     iss >> idCode;
     return idCode;
 }
@@ -20,9 +22,9 @@ std::string readIdCode(const std::string &fullCode)
 
 // readParams
 
-void readParams(std::istringstream &iss, std::string &params) // internal helper
+void readParams(istringstream &iss, string &params) // internal helper
 {
-    std::string word;
+    string word;
     while (iss >> word) { // read params string, assuming opening bracket is already skipped
         if (word == ")") return; // don't add the ) and return
         if (params != "") params += " "; // add spacing
@@ -31,11 +33,11 @@ void readParams(std::istringstream &iss, std::string &params) // internal helper
     return; // no closing params bracket found / empty
 }
 
-std::string readParams(const std::string &fullCode) // public function (is in header)
+string readParams(const string &fullCode) // public function (is in header)
 {
-    std::istringstream iss(fullCode);
-    std::string word;
-    std::string params = "";
+    istringstream iss(fullCode);
+    string word;
+    string params = "";
  
     iss >> word; // skip id
     iss >> word; // skip (
@@ -46,10 +48,10 @@ std::string readParams(const std::string &fullCode) // public function (is in he
 
 // readParamValue
 
-std::string readParamValue(const std::string &params, const std::string &paramIdCode)
+string readParamValue(const string &params, const string &paramIdCode)
 {
-    std::istringstream iss(params);
-    std::string word;
+    istringstream iss(params);
+    string word;
     while (iss >> word) { // search for paramIdCode
         if (word == paramIdCode) {
             iss >> word; // read value
@@ -63,9 +65,9 @@ std::string readParamValue(const std::string &params, const std::string &paramId
 
 // readMemberTreeCode
 
-void readMemberTreeCode(std::istringstream &iss, std::string &memberTreeCode, const int &drop_lvl = 0) // internal helper
+void readMemberTreeCode(istringstream &iss, string &memberTreeCode, const int &drop_lvl = 0) // internal helper
 {
-    std::string word;
+    string word;
     int countOpenBrackets = 1; // count total open { brackets, assuming the first one is already skipped
 
     while (iss >> word) { // read in memberTreeCodes
@@ -82,11 +84,11 @@ void readMemberTreeCode(std::istringstream &iss, std::string &memberTreeCode, co
     return;
 }
 
-std::string readMemberTreeCode(const std::string &treeCode) // public function
+string readMemberTreeCode(const string &treeCode) // public function
 {
-    std::istringstream iss(treeCode);
-    std::string word;
-    std::string memberTreeCode = "";
+    istringstream iss(treeCode);
+    string word;
+    string memberTreeCode = "";
 
     iss >> word; // skip id
     iss >> word; // skip ( or {
@@ -101,9 +103,9 @@ std::string readMemberTreeCode(const std::string &treeCode) // public function
 
 // readTreeCode
 
-void readTreeCode(std::istringstream &iss, std::string &treeCode) // internal helper
+void readTreeCode(istringstream &iss, string &treeCode) // internal helper
 {
-    std::string word;
+    string word;
     int countOpenRoundBrackets = 0;
     int countLeftBrackets = 0; // count { brackets of member code
     int countRightBrackets = 0; // count } brackets of member code
@@ -122,11 +124,11 @@ void readTreeCode(std::istringstream &iss, std::string &treeCode) // internal he
 }
 
 
-std::string readTreeCode(const std::string &memberTreeCode, const int &index, const std::string &memberIdCode) // public function
+string readTreeCode(const string &memberTreeCode, const int &index, const string &memberIdCode) // public function
 {
-    std::istringstream iss(memberTreeCode);
-    std::string word;
-    std::string treeCode = "";
+    istringstream iss(memberTreeCode);
+    string word;
+    string treeCode = "";
     int countIndex = 0;
     int countOpenBrackets1 = 0;
     int countOpenBrackets2 = 0;
@@ -164,11 +166,11 @@ std::string readTreeCode(const std::string &memberTreeCode, const int &index, co
 
 // dropParams
 
-std::string dropParams(const std::string &code)
+string dropParams(const string &code)
 {
-    std::istringstream iss(code);
-    std::string word;
-    std::string newCode = "";
+    istringstream iss(code);
+    string word;
+    string newCode = "";
 
     while (iss >> word) {
         if (word == "(") {readParams(iss, word); continue;} // skip any params
@@ -181,11 +183,11 @@ std::string dropParams(const std::string &code)
 
 // dropMembers
 
-std::string dropMembers(const std::string &code, const int &drop_lvl)
+string dropMembers(const string &code, const int &drop_lvl)
 {
-    std::istringstream iss(code);
-    std::string word;
-    std::string newCode = "";
+    istringstream iss(code);
+    string word;
+    string newCode = "";
 
     while (iss >> word) {
         if (word == "{") {
@@ -211,10 +213,10 @@ std::string dropMembers(const std::string &code, const int &drop_lvl)
 
 // countNParams
 
-void countNParams(std::istringstream &iss, int &counter) // internal helper
+void countNParams(istringstream &iss, int &counter) // internal helper
 {
     bool foundSomething = false;
-    std::string word;
+    string word;
 
     while(iss >> word) { // assuming a possible opening bracket ( is already skipped
         if (word == ")") break; // actually allows passing arbitrary codes/iss with opened params bracket
@@ -225,10 +227,10 @@ void countNParams(std::istringstream &iss, int &counter) // internal helper
     return;
 }
 
-int countNParams(const std::string &params) // public function, count number of params in params code
+int countNParams(const string &params) // public function, count number of params in params code
 {
-    std::istringstream iss(params);
-    std::string word;
+    istringstream iss(params);
+    string word;
     int counter = 0;
     countNParams(iss, counter);
     return counter;
@@ -237,9 +239,9 @@ int countNParams(const std::string &params) // public function, count number of 
 
 // countTreeNParams
 
-void countMemberNParams(std::istringstream &iss, int &counter) // internal helper
+void countMemberNParams(istringstream &iss, int &counter) // internal helper
 {
-    std::string word;
+    string word;
     bool bracketClosed = false; // assuming the first { one is already skipped
 
     while (iss >> word) { // go through memberTreeCode
@@ -252,10 +254,10 @@ void countMemberNParams(std::istringstream &iss, int &counter) // internal helpe
 
 }
 
-int countTreeNParams(const std::string &treeCode) // public function, count total number of params in treeCode string
+int countTreeNParams(const string &treeCode) // public function, count total number of params in treeCode string
 {
-    std::istringstream iss(treeCode);
-    std::string word;
+    istringstream iss(treeCode);
+    string word;
     int counter = 0;
 
     iss >> word; // skip idCode
@@ -275,9 +277,9 @@ int countTreeNParams(const std::string &treeCode) // public function, count tota
 
 // countNMembers
 
-void countMemberNMembers(std::istringstream &iss, int &counter) // internal helper
+void countMemberNMembers(istringstream &iss, int &counter) // internal helper
 {
-    std::string word;
+    string word;
     int dummy_counter = 0;
     bool foundSomething = false;
     bool bracketClosed = false; // assuming the first { one is already skipped/open
@@ -294,10 +296,10 @@ void countMemberNMembers(std::istringstream &iss, int &counter) // internal help
     return;
 }
 
-int countNMembers(const std::string &memberTreeCode, const bool &direct_only) // public function, count number of direct (or total if direct_only==false) members in memberTreeCode string
+int countNMembers(const string &memberTreeCode, const bool &direct_only) // public function, count number of direct (or total if direct_only==false) members in memberTreeCode string
 {
-    std::istringstream iss(memberTreeCode);
-    std::string word;
+    istringstream iss(memberTreeCode);
+    string word;
     int counter = 0, dummy_counter = 0;
 
     while (iss >> word) {
@@ -315,7 +317,7 @@ int countNMembers(const std::string &memberTreeCode, const bool &direct_only) //
 
 // --- Composers
 
-std::string composeCodes(const std::string &code1, const std::string &code2)
+string composeCodes(const string &code1, const string &code2)
 {
     if (code1=="") return code2;
     if (code2=="") return code1;
@@ -323,25 +325,25 @@ std::string composeCodes(const std::string &code1, const std::string &code2)
 }
 
 
-std::string composeCodeList(const std::vector<std::string> &codes)
+string composeCodeList(const vector<string> &codes)
 {
     if (codes.size() == 0) return ""; // nothing to be done
-    std::string codeList = "";
-    for (std::vector<std::string>::size_type i=0; i<codes.size(); ++i) {
+    string codeList = "";
+    for (vector<string>::size_type i=0; i<codes.size(); ++i) {
         codeList = composeCodes(codeList, codes[i]);
     }
     return codeList;
 }
 
 
-std::string composeFullCode(const std::string &idCode, const std::string &params)
+string composeFullCode(const string &idCode, const string &params)
 {
     if (idCode != "" && params != "") return idCode + " ( " + params + " )";
     return idCode;
 }
 
 
-std::string composeTreeCode(const std::string &fullCode, const std::string &memberTreeCode)
+string composeTreeCode(const string &fullCode, const string &memberTreeCode)
 {
     if (fullCode != "" && memberTreeCode != "") return fullCode + " { " + memberTreeCode + " }";
     return fullCode;

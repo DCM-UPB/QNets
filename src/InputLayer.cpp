@@ -1,19 +1,25 @@
 #include "InputLayer.hpp"
 #include "InputUnit.hpp"
 
-// --- Constructor
 
-InputLayer::InputLayer(const int &nunits)
+// --- Register Unit
+
+void InputLayer::_registerUnit(NetworkUnit * u)
 {
-    this->construct(nunits);
+    NetworkLayer::_registerUnit(u);
+    if(InputUnit * inu = dynamic_cast<InputUnit *>(u)) {
+        _U_in.push_back(inu);
+    }
 }
+
+
+// --- Construct
 
 void InputLayer::construct(const int &nunits)
 {
     for (int i=1; i<nunits; ++i)
         {
             InputUnit * newUnit = new InputUnit(i-1);
-            _U.push_back(newUnit);
-            _U_in.push_back(newUnit);
+            _registerUnit(newUnit);
         }
 }

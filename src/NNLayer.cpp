@@ -4,11 +4,23 @@
 #include "ActivationFunctionManager.hpp"
 #include "NNUnit.hpp"
 
+
+// --- Register Unit
+
+void NNLayer::_registerUnit(NetworkUnit * u)
+{
+    FedNetworkLayer::_registerUnit(u);
+    if(NNUnit * nnu = dynamic_cast<NNUnit *>(u)) {
+        _U_nn.push_back(nnu);
+    }
+}
+
+
 // --- Constructor
 
 void NNLayer::construct(const int &nunits)
 {
-    this->construct(nunits, std_actf::provideActivationFunction());
+    construct(nunits, std_actf::provideActivationFunction());
 }
 
 void NNLayer::construct(const int &nunits, ActivationFunctionInterface * actf)
@@ -16,12 +28,11 @@ void NNLayer::construct(const int &nunits, ActivationFunctionInterface * actf)
     for (int i=1; i<nunits; ++i)
         {
             NNUnit * newUnit = new NNUnit(actf->getCopy());
-            _U.push_back(newUnit);
-            _U_fed.push_back(newUnit);
-            _U_nn.push_back(newUnit);
+            _registerUnit(newUnit);
         }
     delete actf;
 }
+
 
 // --- Modify structure
 

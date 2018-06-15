@@ -6,6 +6,8 @@
 #include <vector>
 #include <limits>
 
+using namespace std;
+
 /*
 --- String code system of StringCodeComponents ---
 
@@ -32,55 +34,54 @@ NOTE 6: Unfortunately parameters of string type must not contain any spaces, com
 
 // --- Readers
 
-std::string readIdCode(const std::string &fullCode); // read idCode string from fullCode or treeCode
-std::string readParams(const std::string &fullCode); // read params string from fullCode or treeCode
-std::string readParamValue(const std::string &params, const std::string &paramIdCode); // return the value string of certain paramId
-std::string readMemberTreeCode(const std::string &treeCode); // return a list string composed of the treeCodes of all members in treeCode
-std::string readTreeCode(const std::string &memberTreeCode, const int &index, const std::string &memberIdCode = ""); // return the treeCode of the '(index-1)'th member (first member per default) from memberTreeCode (if passed, only those with matching memberIdCode identifier)
-//std::string readTreeCode(const std::string &memberTreeCode, const std::string &memberIdCode){return readTreeCode(memberTreeCode, 0, memberIdCode);} // return the treeCode of the first member with matching memberIdCode identifier from memberTreeCode
-//std::string readTreeCode(const std::string &memberTreeCode, const int &index){return readTreeCode(memberTreeCode, index, "");}
+string readIdCode(const string &fullCode); // read idCode string from fullCode or treeCode
+string readParams(const string &fullCode); // read params string from fullCode or treeCode
+string readParamValue(const string &params, const string &paramIdCode); // return the value string of certain paramId
+string readMemberTreeCode(const string &treeCode); // return a list string composed of the treeCodes of all members in treeCode
+string readTreeCode(const string &memberTreeCode, const int &index, const string &memberIdCode = ""); // return the treeCode of the '(index-1)'th member (first member per default) from memberTreeCode (if passed, only those with matching memberIdCode identifier)
+
 // --- Drop
 
-std::string dropParams(const std::string &code); // returns the a copy of the same code with all params dropped (i.e. only idCodes)
-std::string dropMembers(const std::string &code, const int &drop_lvl = 1); // returns the a copy of the same code with all members after tree level lvl dropped (i.e. lvl==1 -> no members at all)
+string dropParams(const string &code); // returns the a copy of the same code with all params dropped (i.e. only idCodes)
+string dropMembers(const string &code, const int &drop_lvl = 1); // returns the a copy of the same code with all members after tree level lvl dropped (i.e. lvl==1 -> no members at all)
 
 // --- Counters
 
-int countNParams(const std::string &params); // count number of params in params string
-int countTreeNParams(const std::string &treeCode); // count total number of params in treeCode string
-int countNMembers(const std::string &memberTreeCode, const bool &direct_only = true); // count number of direct (or total if direct_only == false) members in memberTreeCode string
+int countNParams(const string &params); // count number of params in params string
+int countTreeNParams(const string &treeCode); // count total number of params in treeCode string
+int countNMembers(const string &memberTreeCode, const bool &direct_only = true); // count number of direct (or total if direct_only == false) members in memberTreeCode string
 
 // --- Composers
 
-std::string composeCodes(const std::string &code1, const std::string &code2); // compose a string of the two codes separated by spaces and comma
-std::string composeCodeList(const std::vector<std::string> &codes); // compose a string of vector elements separated by spaces and comma
-std::string composeFullCode(const std::string &idCode, const std::string &params); // compose fullCode string from idCode and params
-std::string composeTreeCode(const std::string &fullcode, const std::string &memberTreeCode); // compose treeCode string from fullCode and memberTreeCode
+string composeCodes(const string &code1, const string &code2); // compose a string of the two codes separated by spaces and comma
+string composeCodeList(const vector<string> &codes); // compose a string of vector elements separated by spaces and comma
+string composeFullCode(const string &idCode, const string &params); // compose fullCode string from idCode and params
+string composeTreeCode(const string &fullcode, const string &memberTreeCode); // compose treeCode string from fullCode and memberTreeCode
 
 
 // --- Templates
 
 // for applying parameter value string to actual parameter, from param value string
 template <typename T>
-bool setParamValue(const std::string &paramValue, T &var)
+bool setParamValue(const string &paramValue, T &var)
 {
-    if (paramValue != "") {std::istringstream iss(paramValue); return !(iss >> var).fail();}
+    if (paramValue != "") {istringstream iss(paramValue); return !(iss >> var).fail();}
     else return false;
 }
 
 // for applying parameter value string to actual parameter, from full params list
 template <typename T>
-bool setParamValue(const std::string &params, const std::string &paramIdCode, T &var)
+bool setParamValue(const string &params, const string &paramIdCode, T &var)
 {
     return setParamValue(readParamValue(params, paramIdCode), var);
 }
 
 // for creating parameter value string from actual parameter
 template <typename T>
-std::string composeParamValue(const T &var)
+string composeParamValue(const T &var)
 {
-    std::ostringstream oss;
-    int p = std::numeric_limits<T>::max_digits10;
+    ostringstream oss;
+    int p = numeric_limits<T>::max_digits10;
     oss.precision(p);
     if (!(oss << var).fail()) return oss.str();
     else return "";
@@ -88,9 +89,9 @@ std::string composeParamValue(const T &var)
 
 // for creating "name value" string from identifier and actual parameter
 template <typename T>
-std::string composeParamCode(const std::string &paramIdCode, const T &var)
+string composeParamCode(const string &paramIdCode, const T &var)
 {
-    std::string value = composeParamValue(var);
+    string value = composeParamValue(var);
     if (value != "") return paramIdCode + " " + value;
     else return "";
 }

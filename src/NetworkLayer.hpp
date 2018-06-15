@@ -16,6 +16,8 @@ protected:
     OffsetUnit * _U_off;
     std::vector<NetworkUnit *> _U; // this vector stores units of all derived types
 
+    void _registerUnit(NetworkUnit * u){_U.push_back(u);} // every derived type with extra unit vector should implement a registerUnit and call the registerUnit of its parent within
+
 public:
 
     // --- Constructor

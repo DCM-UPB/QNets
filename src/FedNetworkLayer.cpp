@@ -1,7 +1,20 @@
 #include "FedNetworkLayer.hpp"
 #include "NetworkUnitFeederInterface.hpp"
+#include "FedNetworkUnit.hpp"
 
 #include <vector>
+
+
+// --- Register Unit
+
+void FedNetworkLayer::_registerUnit(NetworkUnit * u)
+{
+    NetworkLayer::_registerUnit(u);
+    if(FedNetworkUnit * fu = dynamic_cast<FedNetworkUnit *>(u)) {
+        _U_fed.push_back(fu);
+    }
+}
+
 
 // --- Variational Parameters
 

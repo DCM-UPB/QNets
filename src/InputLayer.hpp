@@ -12,11 +12,13 @@ class InputLayer: public NetworkLayer
 protected:
     std::vector<InputUnit *> _U_in; // stores pointers to all input units
 
+    void _registerUnit(NetworkUnit * u); // check if NetworkUnit is a/derived from InputUnit and register
+
 public:
 
     // --- Constructor / Destructor
 
-    InputLayer(const int &nunits = 1);
+    InputLayer(const int &nunits = 1){if (nunits > 1) construct(nunits);};
     void construct(const int &nunits);
 
     // --- Destructor

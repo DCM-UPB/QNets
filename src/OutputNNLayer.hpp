@@ -14,6 +14,8 @@ class OutputNNLayer: public NNLayer
 protected:
     std::vector<OutputNNUnit *> _U_out; // stores pointers to all output units
 
+    void _registerUnit(NetworkUnit * u); // check if NetworkUnit is a/derived from OutputNNUnit and register
+    
 public:
 
     // --- Constructor

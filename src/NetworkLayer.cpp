@@ -10,7 +10,7 @@
 NetworkLayer::NetworkLayer()
 {
     _U_off = new OffsetUnit();
-    _U.push_back(_U_off);
+    _registerUnit(_U_off);
 }
 
 
@@ -31,7 +31,7 @@ void NetworkLayer::deconstruct()
             delete _U[i];
         }
     _U.clear();
-    _U.push_back(_U_off);
+    _registerUnit(_U_off);
 }
 
 
