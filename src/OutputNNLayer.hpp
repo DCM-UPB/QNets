@@ -17,7 +17,6 @@ protected:
     void _registerUnit(NetworkUnit * newUnit); // check if NetworkUnit is a/derived from OutputNNUnit and register
 
 public:
-
     // --- Constructor
 
     OutputNNLayer(const int &nunits = 1, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): NNLayer(0, actf) {if (nunits>1) construct(nunits, actf);}
@@ -37,6 +36,5 @@ public:
     int getNOutputNNUnits() {return _U_out.size();}
     OutputNNUnit * getOutputNNUnit(const int &i) {return _U_out[i];}
 };
-
 
 #endif

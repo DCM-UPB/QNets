@@ -12,10 +12,7 @@
 // ShiftScaled Neural Network Unit
 class ShifterScalerNNUnit: public NNUnit, public ShifterScalerNetworkUnit
 {
-protected:
-
 public:
-
     // Constructor
     ShifterScalerNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerNetworkUnit(shift, scale) {};
 

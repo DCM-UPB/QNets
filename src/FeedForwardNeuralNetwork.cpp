@@ -855,7 +855,6 @@ void FeedForwardNeuralNetwork::_registerLayer(NetworkLayer * newLayer, const int
     if(NNLayer * nnl = dynamic_cast<NNLayer *>(newLayer)) {
         _L_nn.insert(_L_nn.end()-indexFromBack, nnl);
     }
-
 }
 
 

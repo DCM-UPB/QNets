@@ -15,7 +15,6 @@ protected:
     void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from InputUnit and register
 
 public:
-
     // --- Constructor / Destructor
 
     InputLayer(const int &nunits = 1){if (nunits > 1) construct(nunits);};
@@ -35,6 +34,5 @@ public:
     int getNInputUnits() {return _U_in.size();}
     InputUnit * getInputUnit(const int &i) {return _U_in[i];}
 };
-
 
 #endif

@@ -10,7 +10,6 @@ class GaussianActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-
     // getters
     ActivationFunctionInterface * getCopy(){return new GaussianActivationFunction();}
     std::string getIdCode(){return "GSS";}

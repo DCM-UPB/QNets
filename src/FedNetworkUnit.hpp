@@ -11,13 +11,11 @@
 class FedNetworkUnit: virtual public NetworkUnit
 {
 protected:
-
     // Feeder of the unit
     // The feeder of a unit is a class that takes care of providing the input to the unit, when called via: _feeder->getFeed()
     NetworkUnitFeederInterface * _feeder;
 
 public:
-
     // Constructor and destructor
     FedNetworkUnit(NetworkUnitFeederInterface * feeder = NULL){_feeder = feeder;}
     virtual ~FedNetworkUnit(){if (_feeder) delete _feeder; _feeder=NULL;}
@@ -34,6 +32,5 @@ public:
     void computeFeed();
     void computeDerivatives();
 };
-
 
 #endif

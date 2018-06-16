@@ -7,8 +7,6 @@
 
 class NetworkUnitFeederInterface: public StringCodeComponent
 {
-protected:
-
 public:
     virtual ~NetworkUnitFeederInterface(){}
 
@@ -43,6 +41,5 @@ public:
     virtual bool isBetaIndexUsedInThisRay(const int &id) = 0;
     virtual bool isBetaIndexUsedForThisRay(const int &id) = 0;
 };
-
 
 #endif

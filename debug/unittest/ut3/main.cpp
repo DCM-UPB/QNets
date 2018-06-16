@@ -14,7 +14,7 @@ int main(){
     // make a check while the FFNN is not connected yet
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
     ffnn->pushHiddenLayer(4);
-  
+
     ffnn->getNNLayer(0)->getNNUnit(2)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
     ffnn->getNNLayer(1)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
     ffnn->getNNLayer(2)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
@@ -48,7 +48,6 @@ int main(){
 
 
 
-
     // connect the FFNN and make a check
     ffnn->connectFFNN();
 
@@ -70,7 +69,6 @@ int main(){
 
 
 
-
     // add first derivative substrate and make a check
     ffnn->addFirstDerivativeSubstrate();
 
@@ -84,7 +82,6 @@ int main(){
     assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     delete ffnn2;
-
 
 
 
@@ -174,11 +171,7 @@ int main(){
         }
     }
 
-
     delete ffnn2;
-
-
-
     delete ffnn;
 
     return 0;

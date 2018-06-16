@@ -12,24 +12,22 @@
 class NetworkLayer: public StringCodeComponent
 {
 protected:
-
     OffsetUnit * _U_off;
     std::vector<NetworkUnit *> _U; // this vector stores units of all derived types
 
     void _registerUnit(NetworkUnit * newUnit){_U.push_back(newUnit);} // every derived type with extra unit vector should implement a registerUnit and call the registerUnit of its parent within
 
 public:
-
     // --- Constructor
 
     NetworkLayer();
     virtual void construct(const int &nunits) = 0; // should add non-offset units until a total of nunits units of any type are present
 
-
     // --- Destructor
 
     virtual ~NetworkLayer();
     virtual void deconstruct(); // should remove the non-offset units
+
 
     // --- Class String Code methods
 
@@ -39,6 +37,7 @@ public:
 
     virtual void setParams(const std::string &params){int n; setParamValue(params, "nunits", n); this->setSize(n);}
     virtual void setMemberParams(const std::string &memberTreeCode);
+
 
     // --- Getters
 

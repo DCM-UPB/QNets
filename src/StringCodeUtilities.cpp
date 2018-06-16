@@ -38,7 +38,7 @@ string readParams(const string &fullCode) // public function (is in header)
     istringstream iss(fullCode);
     string word;
     string params = "";
- 
+
     iss >> word; // skip id
     iss >> word; // skip (
     if (word == "(") readParams(iss, params); // params bracket read
@@ -251,7 +251,6 @@ void countMemberNParams(istringstream &iss, int &counter) // internal helper
         if (bracketClosed) return; // done
     }
     return;
-
 }
 
 int countTreeNParams(const string &treeCode) // public function, count total number of params in treeCode string

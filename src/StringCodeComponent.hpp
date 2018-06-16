@@ -8,10 +8,7 @@
 // Base class for all network components which can be configured by string codes
 class StringCodeComponent
 {
-protected:
-
 public:
-
     // If possible, every StringCodeComponent with params and/or members should implement a constructor which uses a string code as one of the arguments
 
     virtual ~StringCodeComponent(){};
@@ -33,7 +30,5 @@ public:
 
     void setTreeParams(const std::string treeCode){this->setParams(readParams(treeCode)); this->setMemberParams(readMemberTreeCode(treeCode));} // set the params of the full tree
 };
-
-
 
 #endif

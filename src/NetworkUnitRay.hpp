@@ -32,7 +32,6 @@ protected:
     std::set<int> _betas_used_for_this_ray;
 
 public:
-
     NetworkUnitRay(NetworkLayer * nl);
     virtual ~NetworkUnitRay();
 
@@ -63,9 +62,6 @@ public:
     // Beta Index
     bool isBetaIndexUsedInThisRay(const int &id);   // beta is directly used?
     bool isBetaIndexUsedForThisRay(const int &id);   // beta is used directly or indirectly?
-
-
 };
-
 
 #endif

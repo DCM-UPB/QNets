@@ -49,7 +49,6 @@ int main(){
 
 
 
-
     // connect the FFNN and make a check
     ffnn->connectFFNN();
     ffnn->storeOnFile("ffnn_stage2.txt");
@@ -72,7 +71,6 @@ int main(){
 
 
 
-
     // add first derivative substrate and make a check
     ffnn->addFirstDerivativeSubstrate();
     ffnn->storeOnFile("ffnn_stage3.txt");
@@ -90,7 +88,6 @@ int main(){
 
 
 
-
     // add variational first derivative substrate and make a check
     ffnn->addVariationalFirstDerivativeSubstrate();
     ffnn->storeOnFile("ffnn_stage4.txt");
@@ -105,7 +102,6 @@ int main(){
     assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     delete ffnn2;
-
 
 
 
@@ -183,9 +179,7 @@ int main(){
         }
     }
 
-
     delete ffnn2;
-
     delete ffnn;
 
     return 0;

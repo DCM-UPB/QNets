@@ -217,8 +217,6 @@ int main(){
             counter = countNMembers(str, false); // count through tree
             //cout << counter << " <-> " << testCountTreeNMembers[j] << endl << endl;
             assert(counter == testCountTreeNMembers[j]);
-
-
         }
         //cout << "----------------------------------------------------" << endl << endl;
         ++it;

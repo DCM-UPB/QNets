@@ -13,7 +13,6 @@
 class NNUnit: public FedNetworkUnit
 {
 protected:
-
     // Activation Function of the unit
     // A function that calculates the output value from the input value (protovalue)
     ActivationFunctionInterface * _actf; // activation function

@@ -18,9 +18,7 @@ protected:
     std::vector<NNUnit *> _U_nn; // stores pointers to all neural units
 
     void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from NNUnit and register
-
 public:
-
     // --- Constructor
 
     NNLayer(const int &nunits = 1, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()){if (nunits>1) construct(nunits, actf);}

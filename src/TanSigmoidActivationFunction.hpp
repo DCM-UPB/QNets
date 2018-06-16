@@ -10,7 +10,6 @@ class TanSigmoidActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-
     // getters
     ActivationFunctionInterface * getCopy(){return new TanSigmoidActivationFunction();}
     std::string getIdCode(){return "TANS";}

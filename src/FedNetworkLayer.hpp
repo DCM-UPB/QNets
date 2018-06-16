@@ -14,7 +14,6 @@ protected:
     void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from FedNetworkUnit and register
 
 public:
-
     // --- Destructor
 
     virtual ~FedNetworkLayer() {_U_fed.clear();}
@@ -43,6 +42,5 @@ public:
     void connectOnTopOfLayer(NetworkLayer * nl);
     void disconnect();
 };
-
 
 #endif

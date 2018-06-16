@@ -8,10 +8,7 @@
 // Output Neural Network Unit
 class OutputNNUnit: public ShifterScalerNNUnit
 {
-protected:
-
 public:
-
     // Constructor
     OutputNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : ShifterScalerNNUnit(actf, feeder, shift, scale) {}
 

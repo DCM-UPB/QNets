@@ -6,8 +6,6 @@
 // Offset Unit
 class OffsetUnit: public NetworkUnit
 {
-protected:
-
 public:
     OffsetUnit(){_pv = 1.; _v = 1.;}
 
@@ -21,6 +19,5 @@ public:
 
     void computeValues() {_v = _pv;}
 };
-
 
 #endif

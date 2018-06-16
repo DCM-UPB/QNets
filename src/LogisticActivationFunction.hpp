@@ -9,7 +9,6 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-
     // getters
     ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}
     std::string getIdCode(){return "LGS";}
