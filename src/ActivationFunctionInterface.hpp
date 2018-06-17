@@ -1,12 +1,12 @@
 #ifndef ACTIVATION_FUNCTION_INTERFACE
 #define ACTIVATION_FUNCTION_INTERFACE
 
-#include "StringCodeComponent.hpp"
+#include "SerializableComponent.hpp"
 
 #include <string>
 
 
-class ActivationFunctionInterface: public StringCodeComponent
+class ActivationFunctionInterface: public SerializableComponent
 {
 protected:
 

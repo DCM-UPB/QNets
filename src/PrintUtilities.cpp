@@ -69,91 +69,106 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 {
     using namespace std;
 
+    // variables used inside the loops
+    const int nlayers = ffnn->getNLayers();
+    int maxNUnits, index;
+    int * maxNBeta;
+    size_t maxIdLength[ffnn->getNLayers()];
+    NetworkUnitFeederInterface * feeder;
+    NetworkUnitFeederInterface ** feeders;
+    string * ids;
+
+    string stringCode = "";
+    const string emptySpaceForBeta = "     ";
+    const string emptySpaceForActivationFunctionId = "   ";
+    const string emptySpaceAfterBeta = "  ";
+    const string emptySpaceAfterActivationFunction = "       ";
+
     cout.precision(2);
     cout << fixed;
-    string emptySpaceForBeta = "     ";
-    string emptySapceForActivationFunctionId = "   ";
-    string emptySpaceAfterBeta = "  ";
-    string emptySpaceAfterActivationFunction = "     ";
 
     // max number of units over all layers
-    int maxNUnits = 0;
-    for (int l=0; l<ffnn->getNLayers(); ++l){
+    maxNUnits = 0;
+    for (int l=0; l<nlayers; ++l){
         if (ffnn->getLayer(l)->getNUnits() > maxNUnits){
             maxNUnits = ffnn->getLayer(l)->getNUnits();
         }
+        maxIdLength[l] = 0;
     }
 
-    // variables used inside the loop
-    int maxNBeta;
-    NetworkUnitFeederInterface * feeder;
-
-
+    // max number of beta (i.e. variational parameters) for the units with index u over all layers
+    maxNBeta = new int[maxNUnits];
+    feeders = new NetworkUnitFeederInterface*[nlayers*maxNUnits];
+    ids = new string[nlayers*maxNUnits];
     for (int u=0; u<maxNUnits; ++u){
-        // max number of beta (i.e. variational parameters) for the units u over all layers
-        maxNBeta = 0;
-        for (int l=0; l<ffnn->getNFedLayers(); ++l){
-            if (u < ffnn->getFedLayer(l)->getNUnits() && u>0) {
-                feeder = ffnn->getFedLayer(l)->getFedUnit(u-1)->getFeeder();
-                if (feeder){
-                    if (feeder->getNVariationalParameters() > maxNBeta){
-                        maxNBeta = feeder->getNVariationalParameters();
+        maxNBeta[u] = 0;
+        for (int l=0; l<nlayers; ++l){
+            index = u*nlayers+l;
+            feeder = NULL;
+
+            if (u < ffnn->getLayer(l)->getNUnits()) {
+                if (FedNetworkUnit * fnu = dynamic_cast<FedNetworkUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                    feeder = fnu->getFeeder();
+                    if (feeder){
+                        if (feeder->getNVariationalParameters() > maxNBeta[u]){
+                            maxNBeta[u] = feeder->getNVariationalParameters();
+                        }
                     }
                 }
-            }
-        }
 
-        // here are considered the offest units, which are not connected to the previous layers
-        if (maxNBeta==0){
-            for (int l=0; l<ffnn->getNLayers(); ++l){
-                cout << emptySpaceForBeta << emptySpaceAfterBeta;
-                if (u < ffnn->getLayerSize(l)){
-                    cout << "OFF";
-                } else {
-                    cout << emptySapceForActivationFunctionId;
+                if (NNUnit * nnu = dynamic_cast<NNUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                    ids[index] = " " + nnu->getActivationFunction()->getIdCode() + " ";
+                }
+                else {
+                    ids[index] = "(" + ffnn->getLayer(l)->getUnit(u)->getIdCode() + ")"; // put placeholder unit identifiers in brackets
+                }
+
+                if (ids[index].length() > maxIdLength[l]){
+                    maxIdLength[l] = ids[index].length();
+                }
+            }
+            feeders[index] = feeder;
+        }
+    }
+
+    // now we are ready to print
+    for (int u=0; u<maxNUnits; ++u) {
+        for (int b=0; b<max(1, maxNBeta[u]); ++b) {
+            for (int l=0; l<nlayers; ++l) {
+                index = u*nlayers+l;
+
+                if (u < ffnn->getLayer(l)->getNUnits() && feeders[index]) {
+                    if (b < feeders[index]->getNBeta()) {
+                        if (feeders[index]->getBeta(b) >= 0.) cout << "+";
+                        cout << feeders[index]->getBeta(b);
+                    }
+                    else {
+                        cout << emptySpaceForBeta;
+                    }
+                    cout << emptySpaceAfterBeta;
+                }
+                else {
+                    cout << emptySpaceForBeta << emptySpaceAfterBeta;
+                }
+
+                if (b==0) {
+                    cout << ids[index];
+                    cout << string(maxIdLength[l]-ids[index].length(), ' ');
+                }
+                else {
+                    cout << string(maxIdLength[l], ' ');
                 }
                 cout << emptySpaceAfterActivationFunction;
             }
-            cout << endl;
-        }
 
-        // here are considered all the other units, (typically) connected to the previus layers
-        for (int b=0; b<maxNBeta; ++b){
-            cout << emptySpaceForBeta << emptySpaceAfterBeta << emptySapceForActivationFunctionId << emptySpaceAfterActivationFunction; // for Input Layer
-            for (int l=0; l<ffnn->getNNeuralLayers(); ++l){
-                if (u < ffnn->getFedLayer(l)->getNUnits() && u>0){
-                    feeder = ffnn->getFedLayer(l)->getFedUnit(u-1)->getFeeder();
-                    if (feeder){
-                        if (b < feeder->getNVariationalParameters()){
-                            if (feeder->getBeta(b) >= 0.) cout << "+";
-                            cout << feeder->getBeta(b);
-                        } else {
-                            cout << emptySpaceForBeta;
-                        }
-                        cout << emptySpaceAfterBeta;
-                        if (b==0){
-                            cout << ffnn->getNNLayer(l)->getNNUnit(u-1)->getActivationFunction()->getIdCode();
-                        } else {
-                            cout << emptySapceForActivationFunctionId;
-                        }
-                        cout << emptySpaceAfterActivationFunction;
-                    } else {
-                        cout << emptySpaceForBeta << emptySpaceAfterBeta;
-                        if (b==0) {
-                            cout << ffnn->getNNLayer(l)->getNNUnit(u-1)->getActivationFunction()->getIdCode();
-                        } else {
-                            cout << emptySapceForActivationFunctionId;
-                        }
-                        cout << emptySpaceAfterActivationFunction;
-                    }
-                } else {
-                    cout << emptySpaceForBeta << emptySpaceAfterBeta << emptySapceForActivationFunctionId << emptySpaceAfterActivationFunction;
-                }
-            }
-            cout << endl;
+            cout << endl << endl << endl;
         }
-        cout << endl;
     }
+
+
+    delete[] maxNBeta;
+    delete[] feeders;
+    delete[] ids;
 }
 
 

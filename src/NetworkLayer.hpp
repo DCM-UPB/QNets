@@ -1,7 +1,7 @@
 #ifndef NETWORK_LAYER
 #define NETWORK_LAYER
 
-#include "StringCodeComponent.hpp"
+#include "SerializableComponent.hpp"
 #include "StringCodeUtilities.hpp"
 #include "NetworkUnit.hpp"
 #include "OffsetUnit.hpp"
@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-class NetworkLayer: public StringCodeComponent
+class NetworkLayer: public SerializableComponent
 {
 protected:
     OffsetUnit * _U_off;

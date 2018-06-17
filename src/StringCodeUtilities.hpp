@@ -9,7 +9,7 @@
 using namespace std;
 
 /*
---- String code system of StringCodeComponents ---
+--- String code system of SerializableComponents ---
 
 Types of string codes:
 
@@ -25,7 +25,7 @@ Types of string codes:
   paramIdCode, memberIdCore - These appear as arguments in functions below and mean the identifiers of parameters or members, respectively.
 
 NOTE 1: You must not forget to put a space between everything! Extra spaces however don't hurt, will be dropped in results of string functions though.
-NOTE 2: The idCode identifiers should uniquely identify a certain type among all derived types of StringCodeComponent.
+NOTE 2: The idCode identifiers should uniquely identify a certain type among all derived types of SerializableComponent.
 NOTE 3: However you may have multiple codes of the same type / identifier in a list (so use the index argument to distinguish).
 NOTE 4: The parameter identifiers of a class and its' derived types must be unique (just as the actual parameter names in code), so a params code list will always have unique element identifiers.
 NOTE 5: You do not have to leave out empty brackets ( ) or { } like in the examples above. Passing empty brackets is completely legal (just as passing empty codes, which then always yields empty function results).

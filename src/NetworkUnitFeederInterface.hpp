@@ -1,11 +1,11 @@
 #ifndef NETWORK_UNIT_FEEDER_INTERFACE
 #define NETWORK_UNIT_FEEDER_INTERFACE
 
-#include "StringCodeComponent.hpp"
+#include "SerializableComponent.hpp"
 
 #include <string>
 
-class NetworkUnitFeederInterface: public StringCodeComponent
+class NetworkUnitFeederInterface: public SerializableComponent
 {
 public:
     virtual ~NetworkUnitFeederInterface(){}

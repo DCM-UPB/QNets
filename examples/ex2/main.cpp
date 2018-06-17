@@ -126,6 +126,7 @@ int main() {
 
     cout << endl << endl;
 
+    delete ffnn;
 
     return 0;
 }
