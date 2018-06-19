@@ -11,16 +11,21 @@ using namespace std;
 /*
 --- String code system of SerializableComponents ---
 
-Types of string codes:
+Currently we serialize the configuration of a SerializableComponent into a simple string with our string code system.
 
-  idCode             -   a short identifier for object type, e.g. "nnu" for NeuralNetworkUnit.
-  params             -   a space and comma separated list string of "name value" pairs, e.g. "i 10 , f 0.3 , b 1" for parameters of basic datatype.
-  fullCode           -   "idCode ( params )", where idCode and params are like above.
+The full string code (a.k.a treeCode) of a component looks like the follwing:
+"idCode ( params ) { memberTreeCode }" , where:
 
-  memberTreeCode     -   a list string of member ids, composed recursively, e.g. "A ( i 10 ) , B { C ( f 0.3 ) }" ,
-                         where A and B are members of the class and C is a member of B and A. Here A and C have a parameter and B has none.
+  idCode             -   a short identifier for object type, e.g. "fbc" for FooBarComponent.
+  params             -   a space and comma separated list string of "paramIdCode paramValue" pairs for object members of basic type, e.g. "foo 2 , bar 0.5"
+  memberTreeCode     -   a space and comma separated list string of treeCodes of serializable members, composed recursively, e.g. "A ( b 0 ) , B { C ( label foobar ) }" ,
+                         where A and B are members of the object and C is a member of B (A and C have no serializable members). A and C have a parameter and B has none.
 
-  treeCode           -   "fullCode { memberTreeCode }" e.g. "foo ( i 10 , f 0.3 , b 1 ) { A ( i 10 ) , B { C ( f 0.3 ) } }"
+So if we put idCode and params together we get the so called fullCode:
+  fullCode           -   "idCode ( params )", e.g. "fbc ( foo 2 , bar 0.5 )"
+
+If we also add the memberTreeCode, we obtain the so called treeCode:
+  treeCode           -   "fullCode { memberTreeCode }" e.g. "fbc ( foo 2 , bar 0.5 ) { A ( flag 0 ), B { C ( label foobar ) } }"
 
   paramIdCode, memberIdCore - These appear as arguments in functions below and mean the identifiers of parameters or members, respectively.
 

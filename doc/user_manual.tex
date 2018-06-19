@@ -225,6 +225,12 @@ class ActivationFunctionInterface
 {
    public:
 
+      // allocate a new copy of this to returned ptr
+      virtual ActivationFunctionInterface * getCopy() = 0;
+
+      // return an unique identifier code
+      virtual std::string getIdCode() = 0;
+
       // compute the activation function value
       virtual double f(const double &) = 0;
 
@@ -235,18 +241,26 @@ class ActivationFunctionInterface
       virtual double f2d(const double &) = 0;
 
       // third derivative of the activation function
-      virtual double f3d(const double &) = 0:
+      virtual double f3d(const double &) = 0;
+
+      // calculate all derivatives together to save redundant calculations
+      virtual void fad(const double &, const double &, const double &, const double &, const double &, const bool &, const bool &, const bool &);
 };
 \end{verbatim}
 
 The \verb+ActivationFunctionInterface+ is a pure virtual class, which can be used to generate customised activation functions to feed a FFNN.
-It is necessary to provide the methods \verb+f+, \verb+f1d+, \verb+f2d+ and \verb+f3d+.
+It is necessary to provide the methods \verb+getCopy+, \verb+getIdCode+, \verb+f+, \verb+f1d+, \verb+f2d+ ,
+\verb+f3d+ and highly recommended to provide \verb+fad+ (otherwise fad will use the other methods via virtual function calls -> slow).
 As example we report the class for the logistic function:
 
 \begin{verbatim}
 class LogisticActivationFunction: public ActivationFunctionInterface
 {
    public:
+
+      ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}
+      
+      std::string getIdCode(){return "LGS";}
 
       double f(const double &in)
       {
@@ -270,14 +284,48 @@ class LogisticActivationFunction: public ActivationFunctionInterface
          const double f = this->f(in);
          return f * (1. - f) * (1. - 6.*f + 6*f*f);
       }
+
+      void fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_d3 = false)
+      {
+         v = 1./(1.+exp(-in));
+
+         if (flag_d1) {
+            v1d = v * (1. - v);
+            v2d = flag_d2 ? v1d * (1. - 2.*v) : 0.;
+            v3d = flag_d3 ? v1d * (1. - 6.*v + 6.*v*v) : 0.;
+         }
+         else {
+            v1d = 0.;
+            v2d = flag_d2 ? v * (1. - v) * (1. - 2.*v) : 0.;
+            v3d = flag_d3 ? v * (1. - v) * (1. - 6.*v + 6.*v*v) : 0.;
+         }
+      }
 };
 
 \end{verbatim}
 
 % section activationfunctioninterface (end)
 
-
-
+\section{Serializable Components} % (fold)
+\label{sec:serializablecomponents}
+All classes deriving from SerializableComponent (i.e. all components of our
+network) support serialization of their restorable configuration (i.e. no
+pointers) into simple strings, by a code system. It is explained in detail in
+the StringCodeUtilities.hpp header file and the examples, but will quickly be
+illustrated here.
+\\Consider an output unit (type id \verb+OUT+) of our neural network. It has two simple parameters
+\verb+shift+ and \verb+scale+ and itself two \verb+SerializableComponent+ members, the
+feeder \verb+RAY+ and the activation function \verb+LGS+ (default). If we
+assume the ray has no beta parameters set yet, the full serialized object string (treeCode)
+looks like:
+\begin{verbatim}
+string treeCode = "OUT ( shift 0.0 , scale 1.0 ) { RAY , LGS }"
+\end{verbatim}
+If \verb+RAY+ and \verb+LGS+ had own parameters or members, they would be appended after their
+identifier, enclosed in () or \{\} brackets, respectively.
+\\\\NOTE: Because the system relies on the spacing between every token, the
+spaces must not be neglected. Also a parameter value of string type may not
+contain any spaces, commas or brackets of kind () or \{\}.
 
 
 \printindex

@@ -34,7 +34,7 @@ double LogisticActivationFunction::f3d(const double &in)
 
 void LogisticActivationFunction::fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1, const bool flag_d2, const bool flag_d3)
 {
-    v = this->f(in);
+    v = 1./(1.+exp(-in));
 
     if (flag_d1) {
         v1d = v * (1. - v);
