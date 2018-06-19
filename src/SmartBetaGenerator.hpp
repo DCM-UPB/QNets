@@ -1,10 +1,10 @@
 #ifndef SMART_BETA_GENERATOR
 #define SMART_BETA_GENERATOR
-
+/*
 #include "FeedForwardNeuralNetwork.hpp"
 #include "NNLayer.hpp"
-#include "NNUnit.hpp"
-#include "NNUnitFeederInterface.hpp"
+#include "NetworkUnit.hpp"
+#include "NetworkUnitFeederInterface.hpp"
 
 
 
@@ -31,7 +31,7 @@ namespace smart_beta{
     void _makeBetaOrthogonal(NNUnitFeederInterface * fixed_feeder, NNUnitFeederInterface * feeder);
 
 }
-
+*/
 
 
 #endif

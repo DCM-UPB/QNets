@@ -93,7 +93,8 @@ doc/*.fdb_latexmk
 doc/*.fls
 doc/*.ilg
 doc/*.ind
+doc/*.lb
 doc/auto
 doc/doxygen/*/*
-#!doc/doxygen/doxygen.conf
-#!doc/doxygen/doxygen.html
+!doc/doxygen/doxygen.conf
+!doc/doxygen/doxygen.html

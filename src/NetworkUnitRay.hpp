@@ -42,11 +42,7 @@ public:
 
     // sources
     int getNSources(){return _source.size();}
-    NNUnit * getSource(const int &i){return _source[i];}
-
-    // sources
-    int getNSources(){return _source.size();}
-    NNUnit * getSource(const int &i){return _source[i];}
+    NetworkUnit * getSource(const int &i){return _source[i];}
 
     // beta
     int getNBeta();

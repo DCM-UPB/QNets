@@ -1,4 +1,4 @@
-#include "SmartBetaGenerator.hpp"
+/*#include "SmartBetaGenerator.hpp"
 
 #include "NNUnitFeederInterface.hpp"
 #include "ActivationFunctionInterface.hpp"
@@ -92,9 +92,9 @@ namespace smart_beta{
 
 
     std::vector<int> _findIndexesOfUnitsWithFeeder(NNLayer * L){
-        /*
-        Given a NN layer, find the indexes of the units which have a feeder
-        */
+        //
+        // Given a NN layer, find the indexes of the units which have a feeder
+        //
         using namespace std;
 
         vector<int> idx;
@@ -109,11 +109,11 @@ namespace smart_beta{
 
 
     void _computeBetaMuAndSigma(NNUnit * U, double &mu, double &sigma){
-        /*
-        Use the formulas:
-            mu_beta = mu_actf_input / (sum_U_sources mu_actf_output)
-            sigma_beta = sigma_actf_input / (sum_U_sources mu_actf_output)
-        */
+        //
+        // Use the formulas:
+        //   mu_beta = mu_actf_input / (sum_U_sources mu_actf_output)
+        //   sigma_beta = sigma_actf_input / (sum_U_sources mu_actf_output)
+        //
         NNUnitFeederInterface * feeder = U->getFeeder();
         if ( feeder == 0 ){
             throw std::runtime_error( "Provided unit does not have a feeder, therefore it does not need beta" );
@@ -136,9 +136,9 @@ namespace smart_beta{
 
 
     void _setRandomBeta(NNUnitFeederInterface * feeder, const double &mu, const double &sigma){
-        /*
-        Sample the beta of a given feeder using a normal distribution with mean mu and standard deviation sigma.
-        */
+        //
+        // Sample the beta of a given feeder using a normal distribution with mean mu and standard deviation sigma.
+        //
         using namespace std;
 
         random_device rdev;
@@ -152,9 +152,9 @@ namespace smart_beta{
 
 
     void _makeBetaOrthogonal(NNUnitFeederInterface * fixed_feeder, NNUnitFeederInterface * feeder){
-        /*
-        Modify feeder in order to make it orthogonal to fixed_feeder, preserving the norm
-        */
+        //
+        // Modify feeder in order to make it orthogonal to fixed_feeder, preserving the norm
+        //
         using namespace std;
 
         // build vectors v and u, corresponding to the betas of the two feeders
@@ -189,3 +189,4 @@ namespace smart_beta{
     }
 
 }
+*/

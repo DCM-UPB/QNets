@@ -6,6 +6,8 @@
 
 #include <string>
 
+class NetworkUnit;  // forward declaration to solve circular dependency
+
 class NetworkUnitFeederInterface: public SerializableComponent
 {
 public:
