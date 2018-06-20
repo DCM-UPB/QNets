@@ -48,6 +48,7 @@ int main (void) {
 
     FeedForwardNeuralNetwork * ffnn;
     NNTrainingData * tdata;
+    NNTrainerConfig * tconfig;
     NNTrainerGSL * trainer;
 
     double lb = -10;
@@ -165,9 +166,10 @@ int main (void) {
     }
 
 
-    tdata = new NNTrainingData{ndata, 1, 1, xdata, ydata, d1data, d2data, weights, lambda_d1, lambda_d2, lambda_r, flag_d1, flag_d2, flag_r, ffnn};
+    tdata = new NNTrainingData{ndata, ndata, 1, 1, xdata, ydata, d1data, d2data, weights};
+    tconfig = new NNTrainerConfig{flag_d1, flag_d2, flag_r, lambda_r, lambda_d1, lambda_d2};
 
-    trainer = new NNTrainerGSL(tdata);
+    trainer = new NNTrainerGSL(tdata, tconfig, ffnn);
 
     trainer->bestFit(100, nfits, maxchi, 1);
 
