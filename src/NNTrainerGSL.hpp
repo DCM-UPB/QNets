@@ -16,7 +16,6 @@
 
 class NNTrainerGSL: public NNTrainer
 {
-
 public:
     NNTrainerGSL(NNTrainingData * const tdata, NNTrainerConfig * const tconfig, FeedForwardNeuralNetwork * const ffnn): NNTrainer(tdata, tconfig, ffnn){};
     void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const int verbose);
