@@ -5,17 +5,15 @@
 
 // holds the required information for cost function and gradient calculation
 struct NNTrainingData {
-    const int n; // number of data points
-    const int xdim; // input dimension
-    const int ydim; // output dimension
-    const double * const * const x; // input data
-    const double * const * const y; // output data
-    const double * const * const * const yd1; // derivative output data
-    const double * const * const * const yd2; // second derivative data
-    const double * const * const w; // sqrt of data weights, i.e. 1/e_i , where e_i is the error on ith data !!! NOT 1/e_i^2 !!!
-    const double lambda_d1, lambda_d2, lambda_r; // derivative and regularization weights
-    const bool flag_d1, flag_d2, flag_r; // use derivatives / regularization?
-    FeedForwardNeuralNetwork * const ffnn; // Storing a pointer to the to-be-trained FFNN
+    int ndata; // number of data points
+    int ntraining; // ntraining data points will be used for training, the rest for validation
+    int xndim; // input dimension
+    int yndim; // output dimension
+    double ** x; // input data
+    double ** y; // output data
+    double *** yd1; // derivative output data
+    double *** yd2; // second derivative data
+    double ** w; // sqrt of data weights, i.e. 1/e_i , where e_i is the error on ith data !!! NOT 1/e_i^2 !!!
 };
 
 #endif
