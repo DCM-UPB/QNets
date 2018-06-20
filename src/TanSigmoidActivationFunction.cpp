@@ -4,6 +4,7 @@
 
 // Activation Function Interface implementation
 
+
 double TanSigmoidActivationFunction::f(const double &in)
 {
     return 2.0 / (1.0 + exp(-2.0*in)) - 1.0;

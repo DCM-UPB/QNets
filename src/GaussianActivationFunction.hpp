@@ -18,9 +18,9 @@ public:
     double getIdealInputMu(){return 0.;}
     double getIdealInputSigma(){return 1.732050807568877;}
 
-    // output is in the range [0 : 1] -> mu=0.5   sigma=1/(2*sqrt(3))
-    double getOutputMu(){return 0.5;}
-    double getOutputSigma(){return 0.288675134594813;}
+    // full output is in the range [0 : 1] -> mu=0.5   sigma=1/sqrt(12)
+    double getOutputMu(const double &inputMu = 0., const double &inputSigma = 1.){return 0.5;}
+    double getOutputSigma(const double &inputMu = 0., const double &inputSigma = 1.){return 1./sqrt(12);}
 
     // computation
     double f(const double &in);

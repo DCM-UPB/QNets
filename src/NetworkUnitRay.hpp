@@ -33,12 +33,16 @@ protected:
 
 public:
     explicit NetworkUnitRay(NetworkLayer * nl);
-    virtual ~NetworkUnitRay();
+    ~NetworkUnitRay();
 
     // string code methods
-    virtual std::string getIdCode(){return "RAY";}; // return an identification string
-    virtual std::string getParams();
-    virtual void setParams(const std::string &params);
+    std::string getIdCode(){return "RAY";}; // return an identification string
+    std::string getParams();
+    void setParams(const std::string &params);
+
+    // return the feed mean value (mu) and standard deviation (sigma)
+    double getFeedMu();
+    double getFeedSigma();
 
     // sources
     int getNSources(){return _source.size();}

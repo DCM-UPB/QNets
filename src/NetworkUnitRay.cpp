@@ -4,6 +4,29 @@
 
 #include <vector>
 #include <string>
+#include <cmath>
+
+// --- Feed Mu and Sigma
+
+double NetworkUnitRay::getFeedMu()
+{
+    double mu = 0.;
+    for (std::vector<NetworkUnit *>::size_type i=0; i<_source.size(); ++i) {
+        mu += _intensity[i] * _source[i]->getOutputMu();
+    }
+    return mu;
+}
+
+
+double NetworkUnitRay::getFeedSigma()
+{
+    double var = 0.;
+    for (std::vector<NetworkUnit *>::size_type i=0; i<_source.size(); ++i) {
+        var += pow(_intensity[i] * _source[i]->getOutputSigma(), 2);
+    }
+    return sqrt(var);
+}
+
 
 // --- Betas
 

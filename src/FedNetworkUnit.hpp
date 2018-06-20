@@ -20,6 +20,11 @@ public:
     explicit FedNetworkUnit(NetworkUnitFeederInterface * feeder = NULL){_feeder = feeder;}
     virtual ~FedNetworkUnit(){if (_feeder) delete _feeder; _feeder=NULL;}
 
+    // return the output mean value (mu) and standard deviation (sigma)
+    // (pretending a flat distribution and without feeder assuming normalized pv input (i.e. m = 0, s = 1) )
+    virtual double getOutputMu(){return _feeder ? _feeder->getFeedMu() : 0;}
+    virtual double getOutputSigma(){return _feeder ? _feeder->getFeedSigma() : 1;}
+
     // Setters and getters
     void setFeeder(NetworkUnitFeederInterface * feeder){if (_feeder) delete _feeder; _feeder = feeder;}
     NetworkUnitFeederInterface * getFeeder(){return _feeder;}

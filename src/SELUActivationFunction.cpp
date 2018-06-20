@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+
 std::string SELUActivationFunction::getParams()
 {
     std::vector<std::string> paramCodes;

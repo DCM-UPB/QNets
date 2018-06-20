@@ -27,6 +27,11 @@ public:
     // Constructor
     ShifterScalerNetworkUnit(const double shift = 0., const double scale = 1.)  {_shift = shift; _scale = scale;}
 
+    // return the output mean value (mu) and standard deviation (sigma)
+    // (assuming flat normalized pv input (i.e. m = 0, s = 1) )
+    virtual double getOutputMu(){return _shift * _scale;}
+    virtual double getOutputSigma(){return _scale;}
+
     // string code methods
     virtual std::string getParams(){return composeCodes(composeParamCode("shift", _shift), composeParamCode("scale", _scale));} // return parameter string
 

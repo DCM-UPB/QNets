@@ -43,15 +43,20 @@ public:
     NetworkUnit();
     virtual ~NetworkUnit();
 
+    // return the output mean value (mu) and standard deviation (sigma)
+    // (pretending a flat distribution and input (pv) with mean 0 and sigma 1)
+    virtual double getOutputMu(){return 0;}
+    virtual double getOutputSigma(){return 1.;}
+
+    // BaseComponent IdCodes
+    virtual std::string getClassIdCode(){return "UNIT";}
+
     // Setters
     void setProtoValue(const double &pv){_pv=pv;}
 
     // Getters
     double getValue(){return _v;}
     double getProtoValue(){return _pv;}
-
-    // BaseComponent IdCodes
-    virtual std::string getClassIdCode(){return "UNIT";}
 
     // Coordinate derivatives
     void setFirstDerivativeSubstrate(const int &nx0);

@@ -16,6 +16,10 @@ public:
     // set class id code
     std::string getClassIdCode() {return "feeder";}
 
+    // return the feed mean value (mu) and standard deviation (sigma)
+    virtual double getFeedMu() = 0;
+    virtual double getFeedSigma() = 0;
+
     // sources, i.e. the units from which the values are taken from
     virtual int getNSources() = 0;
     virtual NetworkUnit * getSource(const int &i) = 0;

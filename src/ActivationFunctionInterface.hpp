@@ -4,7 +4,7 @@
 #include "SerializableComponent.hpp"
 
 #include <string>
-
+#include <cmath>
 
 class ActivationFunctionInterface: public SerializableComponent
 {
@@ -33,14 +33,22 @@ public:
     std::string getClassIdCode(){return "ACTF";}
 
     // return the ideal input mean value (mu) and standard deviation (sigma)
-    // (pretending a gaussian distribution)
     virtual double getIdealInputMu() = 0;
     virtual double getIdealInputSigma() = 0;
 
     // return the output mean value (mu) and standard deviation (sigma)
-    // (pretending a gaussian distribution)
-    virtual double getOutputMu() = 0;
-    virtual double getOutputSigma() = 0;
+    // (standard implementation pretending flat distribution, for monotonic actf)
+    virtual double getOutputMu(const double &inputMu = 0., const double &inputSigma = 1.)
+    {
+        double bah = 0.5 * inputSigma * sqrt(12);
+        return 0.5*(this->f(inputMu+bah) + this->f(inputMu-bah));
+    }
+
+    virtual double getOutputSigma(const double &inputMu = 0., const double &inputSigma = 1.)
+    {
+            double bah = 0.5 * inputSigma * sqrt(12);
+            return (this->f(inputMu+bah) - this->f(inputMu-bah)) / sqrt(12);
+    }
 
     // compute the activation function value
     virtual double f(const double &) = 0;

@@ -23,6 +23,10 @@ public:
     NNUnit(const std::string &actf_id, NetworkUnitFeederInterface * feeder = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), feeder) {}
     virtual ~NNUnit(){ delete _actf; }
 
+    // return the output mean value (mu) and standard deviation (sigma)
+    virtual double getOutputMu(){return _actf->getOutputMu(FedNetworkUnit::getOutputMu());}
+    virtual double getOutputSigma(){return _actf->getOutputSigma(FedNetworkUnit::getOutputSigma());}
+
     // string code getters / setter
     virtual std::string getIdCode(){return "NNU";} // return identifier for unit type
     virtual std::string getMemberTreeCode(){return composeCodes(FedNetworkUnit::getMemberTreeCode(), _actf->getTreeCode());} // append actf treeCode

@@ -19,8 +19,8 @@ public:
     double getIdealInputSigma(){return 0.577350269189626;}
 
     // output is identical to the input
-    double getOutputMu(){return 0.;}
-    double getOutputSigma(){return 0.577350269189626;}
+    double getOutputMu(const double &inputMu = 0., const double &inputSigma = 1.){return inputMu;}
+    double getOutputSigma(const double &inputMu = 0., const double &inputSigma = 1.){return inputSigma;}
 
     // computation
     double f(const double &in){return in;}
