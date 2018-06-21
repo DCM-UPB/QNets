@@ -8,6 +8,7 @@ echo "The Operating System is: "${OS_NAME}  # here we consider only Linux and Da
 source config.sh
 
 \rm -f *.so
+mkdir -p bin
 cd bin/
 \rm -f *.o *.so
 echo "$CC $FLAGS $MYFLAGS -fpic -I ../include/ -c ../src/*/*.cpp"
