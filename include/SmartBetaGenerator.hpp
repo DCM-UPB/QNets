@@ -1,0 +1,1 @@
+../src/feeder/SmartBetaGenerator.hpp

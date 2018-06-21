@@ -14,7 +14,7 @@ ROOT_FOLDER=$(dirname $(dirname $(dirname $(pwd))))
 
 
 ## Build the debugging main executable
-$CC $FLAGS $DEBUGFLAGS -Wall -I${ROOT_FOLDER}/src/ -c *.cpp
+$CC $FLAGS $DEBUGFLAGS -Wall -I${ROOT_FOLDER}/include/ -c *.cpp
 
 case ${OS_NAME} in
     "Linux")

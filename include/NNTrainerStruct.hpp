@@ -1,0 +1,1 @@
+../src/trainer/NNTrainerStruct.hpp

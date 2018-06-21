@@ -8,8 +8,6 @@ OS_NAME=$(uname)
 
 \rm -f exe
 \rm -f *.o
-\rm -f ../src/*.o
-\rm -f ../*.so
 
 #runtime dynamic library path
 RPATH="$(dirname $(pwd))"
@@ -22,15 +20,13 @@ echo "Rebuilt the library with the debugging flags"
 echo ""
 
 # Build the debugging main executable
-echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -c *.cpp"
-$CC $FLAGS $DEBUGFLAGS -Wall -I$(pwd)/../src/ -c *.cpp
+echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../include/ -c *.cpp"
+$CC $FLAGS $DEBUGFLAGS -Wall -I$(pwd)/../include/ -c *.cpp
 
 case ${OS_NAME} in
     "Darwin")
-        echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src -L$(pwd)/.. -L${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL"
-        $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -L$(pwd)/../ -L${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
-        # echo "install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe"
-        # install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
+        echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -L${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL"
+        $CC $FLAGS $DEBUGFLAGS -L$(pwd)/../ -L${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
         ;;
     "Linux")
         echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -Wl,-rpath=${RPATH} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL"
