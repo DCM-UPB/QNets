@@ -27,7 +27,7 @@ double calculateResidual(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedF
             }
         }
     }
-    return resi;
+    return sqrt(0.5*resi);
 }
 
 void NNTrainer::bestFit(const int &nsteps, const int &nfits, const double &resi_target, const int &verbose)

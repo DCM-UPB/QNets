@@ -26,9 +26,7 @@ int ffnn_f_pure(const gsl_vector * betas, void * const tstruct, gsl_vector * f) 
         for (int j=0; j<yndim; ++j) {
             resi = w[i][j] * (ffnn->getOutput(j) - y[i][j]);
             if (i<ntrain) gsl_vector_set(f, i*yndim + j, resi);
-            else {
-                gsl_vector_set(fvali, (i-ntrain)*yndim + j, resi);
-            }
+            else gsl_vector_set(fvali, (i-ntrain)*yndim + j, resi);
         }
     }
 
@@ -116,8 +114,8 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
         for (int j=0; j<yndim; ++j) {
             gsl_vector_set(fnow, ishift + j,  w[i][j] * (ffnn->getOutput(j) - y[i][j]));
             for (int k=0; k<xndim; ++k) {
-                gsl_vector_set(fnow, inshift + k*nshift + j, flag_d1? w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]) : 0.0);
-                gsl_vector_set(fnow, inshift2 + k*nshift + j, flag_d2? w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]) : 0.0);
+                gsl_vector_set(fnow, inshift + k*nshift + j, flag_d1 ? w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]) : 0.0);
+                gsl_vector_set(fnow, inshift2 + k*nshift + j, flag_d2 ? w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]) : 0.0);
             }
         }
     }
@@ -332,7 +330,7 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     fdf_pure.f = ffnn_f_pure;
     fdf_pure.df = ffnn_df_pure;
     fdf_pure.fvv = NULL;
-    fdf_pure.n = ntrain;
+    fdf_pure.n = ntrain * _tdata.yndim;
     fdf_pure.p = npar;
     fdf_pure.params = &_tstruct;
 
@@ -349,8 +347,8 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
         fdf_noreg.params = &_tstruct;
     }
     else {
-        ntrain_noreg = ntrain;
-        nvali_noreg = nvali;
+        ntrain_noreg = ntrain * _tdata.yndim;
+        nvali_noreg = nvali * _tdata.yndim;
         fdf_noreg = fdf_pure;
     };
 
