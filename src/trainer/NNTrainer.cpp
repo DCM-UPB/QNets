@@ -1,5 +1,35 @@
 #include "NNTrainer.hpp"
 
+double calculateResidual(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const double * const betas, const bool &flag_r = false, const bool &flag_d = false)
+{
+    const int offset = tdata.ntraining + tdata.nvalidation;
+    const int nbeta = ffnn->getNBeta();
+    const double lambda_r_red = tconfig.lambda_r / nbeta;
+
+    double resi = 0.;
+
+    //set NN betas
+    for (int i=0; i<nbeta; ++i){
+        ffnn->setBeta(i, betas[i]);
+        resi += (tconfig.flag_r && flag_r) ? lambda_r_red * betas[i] * betas[i] : 0.;
+    }
+
+    //get difference NN vs data
+    for (int i=offset; i<tdata.ndata; ++i) {
+        ffnn->setInput(tdata.x[i]);
+        ffnn->FFPropagate();
+        for (int j=0; j<tdata.yndim; ++j) {
+            resi += pow(tdata.w[i][j] * (ffnn->getOutput(j) - tdata.y[i][j]), 2);
+
+            for (int k=0; k<tdata.xndim; ++k) {
+                resi += (tconfig.flag_d1 && flag_d)? tconfig.lambda_d1 * pow(tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - tdata.yd1[i][j][k]), 2) : 0.;
+                resi += (tconfig.flag_d2 && flag_d)? tconfig.lambda_d2 * pow(tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - tdata.yd2[i][j][k]), 2) : 0.;
+            }
+        }
+    }
+    return resi;
+}
+
 void NNTrainer::bestFit(const int &nsteps, const int &nfits, const double &resi_target, const int &verbose)
 {
     int npar = _ffnn->getNBeta();
@@ -14,11 +44,10 @@ void NNTrainer::bestFit(const int &nsteps, const int &nfits, const double &resi_
             fit[i] = _ffnn->getBeta(i);
         }
 
-        findFit(fit, err, resi_full, resi_noreg, resi_pure, nsteps, verbose);
-
-        for (int i = 0; i<npar; ++i) {
-            fit[i] = _ffnn->getBeta(i);
-        }
+        findFit(fit, err, nsteps, verbose);
+        resi_full = calculateResidual(_tdata, _tconfig, _ffnn, &fit[0], true, true);
+        resi_noreg = calculateResidual(_tdata, _tconfig, _ffnn, &fit[0], false, true);
+        resi_pure = calculateResidual(_tdata, _tconfig, _ffnn, &fit[0], false, false);
 
         if(ifit < 1 || (resi_noreg>=0 && resi_noreg < bestresi_noreg)) {
             for(int i = 0; i<npar; ++i){
@@ -56,7 +85,7 @@ void NNTrainer::bestFit(const int &nsteps, const int &nfits, const double &resi_
 /*
     // compute fit distance for best betas
     double getFitDistance() {
-        double dist = 0.0;
+        double dist = 0.;
         for(int i=0; i<_ndata; ++i) {
             _ffnn->setInput(0, _xdata[i]);
             _ffnn->FFPropagate();
@@ -86,7 +115,7 @@ void NNTrainer::bestFit(const int &nsteps, const int &nfits, const double &resi_
 void NNTrainer::printFitOutput(const double &min, const double &max, const int &npoints, const double &xscale, const double &yscale, const double &xshift, const double &yshift, const bool &print_d1, const bool &print_d2)
 {
     using namespace std;
-    double base_input = 0.0;
+    double base_input = 0.;
 
     for (int i = 0; i<_tdata.xndim; ++i) {
         for (int j = 0; j<_tdata.yndim; ++j) {

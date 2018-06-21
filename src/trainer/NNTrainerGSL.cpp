@@ -26,7 +26,9 @@ int ffnn_f_pure(const gsl_vector * betas, void * const tstruct, gsl_vector * f) 
         for (int j=0; j<yndim; ++j) {
             resi = w[i][j] * (ffnn->getOutput(j) - y[i][j]);
             if (i<ntrain) gsl_vector_set(f, i*yndim + j, resi);
-            else gsl_vector_set(fvali, (i-ntrain)*yndim + j, resi);
+            else {
+                gsl_vector_set(fvali, (i-ntrain)*yndim + j, resi);
+            }
         }
     }
 
@@ -98,17 +100,20 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
     for (int i=0; i<n; ++i) {
         ffnn->setInput(x[i]);
         ffnn->FFPropagate();
-        for (int j=0; j<yndim; ++j) {
+
+        if (i < ntrain) ishift = i*yndim;
+        else {
             if (i == ntrain) {
                 fnow = fvali; // switch working pointer
                 nshift = nvali*yndim;
                 nshift2 = nshift + nvali*yndim*xndim;
             }
-            if (i < ntrain) ishift = i*yndim;
-            else ishift = (i-ntrain)*yndim;
-            inshift = ishift + nshift;
-            inshift2 = ishift + nshift2;
+            ishift = (i-ntrain)*yndim;
+        }
+        inshift = ishift + nshift;
+        inshift2 = ishift + nshift2;
 
+        for (int j=0; j<yndim; ++j) {
             gsl_vector_set(fnow, ishift + j,  w[i][j] * (ffnn->getOutput(j) - y[i][j]));
             for (int k=0; k<xndim; ++k) {
                 gsl_vector_set(fnow, inshift + k*nshift + j, flag_d1? w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]) : 0.0);
@@ -147,11 +152,12 @@ int ffnn_df_deriv(const gsl_vector * betas, void * const tstruct, gsl_matrix * J
         for (int i=0; i<ntrain; ++i) {
             ffnn->setInput(x[i]);
             ffnn->FFPropagate();
-            for (int j=0; j<yndim; ++j) {
-                ishift = i*yndim;
-                inshift = ishift + nshift;
-                inshift2 = ishift + nshift2;
 
+            ishift = i*yndim;
+            inshift = ishift + nshift;
+            inshift2 = ishift + nshift2;
+
+            for (int j=0; j<yndim; ++j) {
                 gsl_matrix_set(J, ishift + j, ibeta, w[i][j] * ffnn->getVariationalFirstDerivative(j, ibeta));
                 for (int k=0; k<xndim; ++k) {
                     gsl_matrix_set(J, inshift + k*nshift + j, ibeta, flag_d1? w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ibeta) : 0.0);
@@ -171,6 +177,7 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_vector *
     const double lambda_r = ((struct GSLFitStruct *)tstruct)->lambda_r;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_full;
+    gsl_vector * const fvali_pure = ((struct GSLFitStruct *)tstruct)->fvali_pure;
 
     const int nbeta = ffnn->getNBeta(), n_reg = ntrain + nbeta, nvali_reg = nvali + nbeta;
     const double lambda_r_red = sqrt(lambda_r / nbeta);
@@ -182,8 +189,9 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_vector *
         gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-ntrain));
     }
 
-    for (int i=nvali; i<nvali_reg; ++i) {
-         gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nvali));
+    for (int i=0; i<nvali_reg; ++i) {
+        if (i<nvali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_pure, i));
+        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nvali));
     }
 
     return GSL_SUCCESS;
@@ -220,6 +228,7 @@ int ffnn_f_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_vector 
     const double lambda_r = ((struct GSLFitStruct *)tstruct)->lambda_r;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_full;
+    gsl_vector * const fvali_noreg = ((struct GSLFitStruct *)tstruct)->fvali_noreg;
 
     const int nshift3 = ntrain*yndim + ntrain*yndim*xndim, nshift3_vali = nvali*yndim + nvali*yndim*xndim;
     const int nbeta = ffnn->getNBeta(), n_reg = nshift3 + nbeta, nvali_reg = nshift3_vali + nbeta;
@@ -232,8 +241,9 @@ int ffnn_f_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_vector 
         gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift3));
     }
 
-    for (int i=nshift3_vali; i<nvali_reg; ++i) {
-        gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift3_vali));
+    for (int i=0; i<nvali_reg; ++i) {
+        if (i<nvali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_noreg, i));
+        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift3_vali));
     }
 
     return GSL_SUCCESS;
@@ -279,7 +289,7 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
 };
 
 
-void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int &nsteps, const int &verbose) {
+void NNTrainerGSL::findFit(double * const fit, double * const err, const int &nsteps, const int &verbose) {
 
     //   Fit NN with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
@@ -304,9 +314,10 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
     gsl_matrix * covar = gsl_matrix_alloc (npar, npar);
 
     gsl_vector_view gx = gsl_vector_view_array (fit, npar);
-    double chisq, chisq0, chi0;
-    double chisq_noreg, chisq_pure;
-    double c;
+    double chisq, chi0, chi0_vali;
+    double resi_full, resi_noreg, resi_pure;
+    double resi_vali_full, resi_vali_noreg, resi_vali_pure;
+    double resih, c;
     const int dof = ntrain - npar;
     int ntrain_noreg, nvali_noreg, ntrain_full, nvali_full;
     int status, info;
@@ -351,20 +362,16 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
             // deriv with regularization
             fdf_full.f = ffnn_f_deriv_reg;
             fdf_full.df = ffnn_df_deriv_reg;
-            fdf_full.fvv = NULL;
-            fdf_full.n = ntrain_full;
-            fdf_full.p = npar;
-            fdf_full.params = &_tstruct;
         }
         else {
             // pure fdf with regularization
             fdf_full.f = ffnn_f_pure_reg;
             fdf_full.df = ffnn_df_pure_reg;
-            fdf_full.fvv = NULL;
-            fdf_full.n = ntrain_full;
-            fdf_full.p = npar;
-            fdf_full.params = &_tstruct;
         }
+        fdf_full.fvv = NULL;
+        fdf_full.n = ntrain_full;
+        fdf_full.p = npar;
+        fdf_full.params = &_tstruct;
     }
     else {
         ntrain_full = ntrain_noreg;
@@ -376,17 +383,19 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
     w_full = gsl_multifit_nlinear_alloc (T_full, &fdf_params, ntrain_full, npar);
     w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &fdf_params, ntrain_noreg, npar);
     w_pure = gsl_multifit_nlinear_alloc (T_pure, &fdf_params, ntrain, npar);
-    _tstruct.fvali_full = gsl_vector_alloc(nvali_full);
-    _tstruct.fvali_noreg = gsl_vector_alloc(nvali_noreg);
     _tstruct.fvali_pure = gsl_vector_alloc(nvali);
+    _tstruct.fvali_noreg = flag_d ? gsl_vector_alloc(nvali_noreg) : _tstruct.fvali_pure;
+    _tstruct.fvali_full = _tstruct.flag_r ? gsl_vector_alloc(nvali_full) : _tstruct.fvali_noreg;
 
     // initialize solver with starting point
     gsl_multifit_nlinear_init(&gx.vector, &fdf_full, w_full);
 
     // compute initial cost function
     f = gsl_multifit_nlinear_residual(w_full);
-    gsl_blas_ddot(f, f, &chisq0);
-    chi0 = sqrt(chisq0);
+    gsl_blas_ddot(f, f, &resih);
+    chi0 = sqrt(resih);
+    gsl_blas_ddot(_tstruct.fvali_full, _tstruct.fvali_full, &resih);
+    chi0_vali = sqrt(resih);
 
     // solve the system with a maximum of nsteps iterations
     if (verbose > 1) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w_full);
@@ -394,12 +403,15 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
 
     // compute covariance of best fit parameters
     J = gsl_multifit_nlinear_jac(w_full);
+    f = gsl_multifit_nlinear_residual(w_full);
     gsl_multifit_nlinear_covar(J, 0.0, covar);
 
     // compute final cost
     gsl_blas_ddot(f, f, &chisq);
     resi_full = sqrt(chisq);
-    c = GSL_MAX_DBL(1, sqrt(chisq / dof));
+    c = GSL_MAX_DBL(1, sqrt(resih / dof));
+    gsl_blas_ddot(_tstruct.fvali_full, _tstruct.fvali_full, &resih);
+    resi_vali_full = sqrt(resih);
 
     // unregularized cost calculation
     for (int i = 0; i<npar; ++i) {
@@ -408,14 +420,18 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
     }
     gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
     f = gsl_multifit_nlinear_residual(w_noreg);
-    gsl_blas_ddot(f, f, &chisq_noreg);
-    resi_noreg = sqrt(chisq_noreg);
+    gsl_blas_ddot(f, f, &resih);
+    resi_noreg = sqrt(resih);
+    gsl_blas_ddot(_tstruct.fvali_noreg, _tstruct.fvali_noreg, &resih);
+    resi_vali_noreg = sqrt(resih);
 
     // pure (no deriv, no reg) cost calculation
     gsl_multifit_nlinear_init(&gx.vector, &fdf_pure, w_pure);
     f = gsl_multifit_nlinear_residual(w_pure);
-    gsl_blas_ddot(f, f, &chisq_pure);
-    resi_pure = sqrt(chisq_pure);
+    gsl_blas_ddot(f, f, &resih);
+    resi_pure = sqrt(resih);
+    gsl_blas_ddot(_tstruct.fvali_pure, _tstruct.fvali_pure, &resih);
+    resi_vali_pure = sqrt(resih);
 
     if (verbose > 1) {
         fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w_full), gsl_multifit_nlinear_trs_name(w_full));
@@ -423,10 +439,10 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
         fprintf(stderr, "function evaluations: %zu\n", fdf_full.nevalf);
         fprintf(stderr, "Jacobian evaluations: %zu\n", fdf_full.nevaldf);
         fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
-        fprintf(stderr, "initial |f(x)| = %f (train), %f (vali)\n", chi0, chi0);
-        fprintf(stderr, "final   |f(x)| = %f (train), %f (vali)\n", resi_full, resi_full);
-        fprintf(stderr, "w/o reg |f(x)| = %f (train), %f (vali)\n", resi_noreg, resi_noreg);
-        fprintf(stderr, "pure    |f(x)| = %f (train), %f (vali)\n", resi_pure, resi_pure);
+        fprintf(stderr, "initial |f(x)| = %f (train), %f (vali)\n", chi0, chi0_vali);
+        fprintf(stderr, "final   |f(x)| = %f (train), %f (vali)\n", resi_full, resi_vali_full);
+        fprintf(stderr, "w/o reg |f(x)| = %f (train), %f (vali)\n", resi_noreg, resi_vali_noreg);
+        fprintf(stderr, "pure    |f(x)| = %f (train), %f (vali)\n", resi_pure, resi_vali_pure);
         fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
         for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, fit[i], err[i]);
@@ -437,9 +453,9 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, double &resi_
     gsl_multifit_nlinear_free(w_full);
     gsl_multifit_nlinear_free(w_noreg);
     gsl_multifit_nlinear_free(w_pure);
-    gsl_vector_free(_tstruct.fvali_full);
-    gsl_vector_free(_tstruct.fvali_noreg);
     gsl_vector_free(_tstruct.fvali_pure);
+    if (flag_d) gsl_vector_free(_tstruct.fvali_noreg);
+    if (_tstruct.flag_r) gsl_vector_free(_tstruct.fvali_full);
     gsl_matrix_free(covar);
 
 

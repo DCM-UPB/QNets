@@ -24,7 +24,7 @@ public:
 
     virtual ~NNTrainer(){}
 
-    virtual void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int &maxnsteps, const int &verbose) = 0; // to be implemented by child
+    virtual void findFit(double * const fit, double * const err, const int &maxnsteps, const int &verbose) = 0; // to be implemented by child
 
     // find best fit from a number of nfits fits
     void bestFit(const int &maxnsteps, const int &nfits, const double &resi_target, const int &verbose);
