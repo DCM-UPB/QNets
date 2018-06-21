@@ -47,13 +47,17 @@ int main (void) {
     using namespace std;
 
     FeedForwardNeuralNetwork * ffnn;
-    NNTrainingData * tdata;
-    NNTrainerConfig * tconfig;
+    NNTrainingData tdata;
+    NNTrainingConfig tconfig;
     NNTrainerGSL * trainer;
 
-    double lb = -10;
-    double ub = 10;
-    int ndata = 2001;
+    const double lb = -10;
+    const double ub = 10;
+    const int ntraining = 2000; // how many training data points
+    const int nvalidation = 1000; // how many validation data points
+    const int ntesting = 3000; // how many testing data points
+    const int ndata = ntraining + nvalidation + ntesting;
+
     double ** xdata;
     double ** ydata;
     double *** d1data;
@@ -62,7 +66,7 @@ int main (void) {
 
     int nl, nhl, nhu[2], nfits = 1;
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
-    bool verbose = false, flag_d1 = false, flag_d2 = false, flag_r = false;
+    bool verbose = true, flag_d1 = false, flag_d2 = false, flag_r = false;
 
     //manual allocation of data arrays for the data struct
     xdata = new double*[ndata];
@@ -128,10 +132,12 @@ int main (void) {
     if (lambda_d2 > 0) {ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
     if (lambda_r > 0) flag_r = true;
 
-    // this is the data to be fitted
-    double dx = (ub-lb) / (ndata-1);
+    // generating the data to be fitted
+    random_device rdev;
+    mt19937_64 rgen = std::mt19937_64(rdev());
+    uniform_real_distribution<double> rd(lb,ub);
     for (int i = 0; i < ndata; ++i) {
-        xdata[i][0] = lb + i*dx;
+        xdata[i][0] = rd(rgen);
         ydata[i][0] = gaussian(xdata[i][0], 1, 0);
         d1data[i][0][0] = gaussian_ddx(xdata[i][0], 1, 0);
         d2data[i][0][0] = gaussian_d2dx(xdata[i][0], 1, 0);
@@ -165,12 +171,12 @@ int main (void) {
     }
 
 
-    tdata = new NNTrainingData{ndata, ndata, 1, 1, xdata, ydata, d1data, d2data, weights};
-    tconfig = new NNTrainerConfig{flag_d1, flag_d2, flag_r, lambda_r, lambda_d1, lambda_d2};
+    tdata = {ndata, ndata/4, ndata/4, 1, 1, xdata, ydata, d1data, d2data, weights};
+    tconfig = {flag_d1, flag_d2, flag_r, lambda_r, lambda_d1, lambda_d2};
 
     trainer = new NNTrainerGSL(tdata, tconfig, ffnn);
 
-    trainer->bestFit(100, nfits, maxchi, 1);
+    trainer->bestFit(100, nfits, maxchi, verbose ? 2 : 1);
 
 
     cout << "Done." << endl;

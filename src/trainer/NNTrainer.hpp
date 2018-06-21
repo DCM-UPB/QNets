@@ -4,8 +4,7 @@
 #include "FeedForwardNeuralNetwork.hpp"
 #include "PrintUtilities.hpp"
 #include "NNTrainingData.hpp"
-#include "NNTrainerConfig.hpp"
-#include "NNTrainerStruct.hpp"
+#include "NNTrainingConfig.hpp"
 #include <sstream>
 #include <cstddef>
 
@@ -13,29 +12,28 @@
 class NNTrainer
 {
 protected:
-    NNTrainerStruct _tstruct;
+    NNTrainingData _tdata;
+    NNTrainingConfig _tconfig;
+    FeedForwardNeuralNetwork * _ffnn;
 public:
     // construct from individual structures / ffnn
-    NNTrainer(NNTrainingData * const tdata, NNTrainerConfig * const tconfig, FeedForwardNeuralNetwork * const ffnn = NULL)
+    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn = NULL)
     {
-        _tstruct.copyData(tdata); _tstruct.copyConfig(tconfig); _tstruct.ffnn = ffnn;
+        _tdata = tdata; _tconfig = tconfig; _ffnn = ffnn;
     }
-
-    // construct from full trainer struct
-    NNTrainer(NNTrainerStruct * const tstruct){_tstruct = *tstruct;}
 
     virtual ~NNTrainer(){}
 
+    virtual void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int &maxnsteps, const int &verbose) = 0; // to be implemented by child
+
     // find best fit from a number of nfits fits
-    void bestFit(const int nsteps, const int nfits, const double tolresi, const int verbose);
+    void bestFit(const int &maxnsteps, const int &nfits, const double &resi_target, const int &verbose);
 
     // print output of fitted NN to file
-    void printFitOutput(const double min, const double max, const int npoints, const double xscale, const double yscale, const double xshift, const double yshift, const bool print_d1 = false, const bool print_d2 = false);
+    void printFitOutput(const double &min, const double &max, const int &npoints, const double &xscale, const double &yscale, const double &xshift, const double &yshift, const bool &print_d1 = false, const bool &print_d2 = false);
 
     // store fitted NN in file
-    void printFitNN() {_tstruct.ffnn->storeOnFile("nn.txt");}
-
-    virtual void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const int verbose) = 0; // to be implemented by child
+    void printFitNN() {_ffnn->storeOnFile("nn.txt");}
 };
 
 

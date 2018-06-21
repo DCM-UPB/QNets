@@ -1,23 +1,23 @@
 #include "NNTrainer.hpp"
 
-void NNTrainer::bestFit(const int nsteps, const int nfits, const double tolresi, const int verbose)
+void NNTrainer::bestFit(const int &nsteps, const int &nfits, const double &resi_target, const int &verbose)
 {
-    int npar = _tstruct.ffnn->getNBeta();
+    int npar = _ffnn->getNBeta();
     double fit[npar], bestfit[npar], err[npar], bestfit_err[npar];
     double resi_pure = -1.0, resi_noreg = -1.0, resi_full = -1.0, bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
 
     int ifit = 0;
     while(true) {
         // initial parameters
-        _tstruct.ffnn->randomizeBetas();
+        _ffnn->randomizeBetas();
         for (int i = 0; i<npar; ++i) {
-            fit[i] = _tstruct.ffnn->getBeta(i);
+            fit[i] = _ffnn->getBeta(i);
         }
 
         findFit(fit, err, resi_full, resi_noreg, resi_pure, nsteps, verbose);
 
         for (int i = 0; i<npar; ++i) {
-            fit[i] = _tstruct.ffnn->getBeta(i);
+            fit[i] = _ffnn->getBeta(i);
         }
 
         if(ifit < 1 || (resi_noreg>=0 && resi_noreg < bestresi_noreg)) {
@@ -32,11 +32,11 @@ void NNTrainer::bestFit(const int nsteps, const int nfits, const double tolresi,
 
         ++ifit;
 
-        if (resi_noreg>=0 && resi_noreg <= tolresi) {
-            if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", resi_noreg, resi_full, resi_pure, tolresi);
+        if (resi_noreg>=0 && resi_noreg <= resi_target) {
+            if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", resi_noreg, resi_full, resi_pure, resi_target);
             break;
         } else {
-            if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, tolresi);
+            if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, resi_target);
             if (ifit >= nfits) {
                 if (verbose > 0) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized fit residual %f.\n\n", nfits, bestresi_noreg);
                 break;
@@ -58,9 +58,9 @@ void NNTrainer::bestFit(const int nsteps, const int nfits, const double tolresi,
     double getFitDistance() {
         double dist = 0.0;
         for(int i=0; i<_ndata; ++i) {
-            _tstruct.ffnn->setInput(0, _xdata[i]);
-            _tstruct.ffnn->FFPropagate();
-            dist += pow(_ydata[i]-_tstruct.ffnn->getOutput(0), 2);
+            _ffnn->setInput(0, _xdata[i]);
+            _ffnn->FFPropagate();
+            dist += pow(_ydata[i]-_ffnn->getOutput(0), 2);
         }
         return dist / _ndata / pow(_yscale, 2);
     }
@@ -73,9 +73,9 @@ void NNTrainer::bestFit(const int nsteps, const int nfits, const double tolresi,
 
         int j=i0;
         while(j<_ndata && j<=realie){
-            _tstruct.ffnn->setInput(0, _xdata[j]);
-            _tstruct.ffnn->FFPropagate();
-            cout << "x: " << _xdata[j] / _xscale - _xshift << " f(x): " << _ydata[j] / _yscale - _yshift << " nn(x): " << _tstruct.ffnn->getOutput(0) / _yscale - _yshift << endl;
+            _ffnn->setInput(0, _xdata[j]);
+            _ffnn->FFPropagate();
+            cout << "x: " << _xdata[j] / _xscale - _xshift << " f(x): " << _ydata[j] / _yscale - _yshift << " nn(x): " << _ffnn->getOutput(0) / _yscale - _yshift << endl;
             j+=di;
         }
         cout << endl;
@@ -83,18 +83,18 @@ void NNTrainer::bestFit(const int nsteps, const int nfits, const double tolresi,
     */
 
 // print output of fitted NN to file
-void NNTrainer::printFitOutput(const double min, const double max, const int npoints, const double xscale, const double yscale, const double xshift, const double yshift, const bool print_d1, const bool print_d2)
+void NNTrainer::printFitOutput(const double &min, const double &max, const int &npoints, const double &xscale, const double &yscale, const double &xshift, const double &yshift, const bool &print_d1, const bool &print_d2)
 {
     using namespace std;
     double base_input = 0.0;
 
-    for (int i = 0; i<_tstruct.xndim; ++i) {
-        for (int j = 0; j<_tstruct.yndim; ++j) {
+    for (int i = 0; i<_tdata.xndim; ++i) {
+        for (int j = 0; j<_tdata.yndim; ++j) {
             stringstream ss;
             ss << i << "_" << j << ".txt";
-            writePlotFile(_tstruct.ffnn, &base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str(), xscale, yscale, xshift, yshift);
-            if (print_d1) writePlotFile(_tstruct.ffnn, &base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str(), xscale, yscale, xshift, yshift);
-            if (print_d2) writePlotFile(_tstruct.ffnn, &base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str(), xscale, yscale, xshift, yshift);
+            writePlotFile(_ffnn, &base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str(), xscale, yscale, xshift, yshift);
+            if (print_d1) writePlotFile(_ffnn, &base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str(), xscale, yscale, xshift, yshift);
+            if (print_d2) writePlotFile(_ffnn, &base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str(), xscale, yscale, xshift, yshift);
         }
     }
 }

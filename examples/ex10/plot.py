@@ -3,7 +3,7 @@ from pylab import *
 gauss_a = 1.0
 gauss_b = 0
 
-fnames = ['v','d1','d2']
+fnames = ['v_0_0','d1_0_0','d2_0_0']
 
 files = {}
 for fname in fnames:

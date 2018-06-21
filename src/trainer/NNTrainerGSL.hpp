@@ -3,7 +3,8 @@
 
 #include "NNTrainer.hpp"
 #include "NNTrainingData.hpp"
-#include "NNTrainerConfig.hpp"
+#include "NNTrainingConfig.hpp"
+#include "GSLFitStruct.hpp"
 #include "FeedForwardNeuralNetwork.hpp"
 
 #include <gsl/gsl_rng.h>
@@ -16,9 +17,15 @@
 
 class NNTrainerGSL: public NNTrainer
 {
+protected:
+    GSLFitStruct _tstruct;
 public:
-    NNTrainerGSL(NNTrainingData * const tdata, NNTrainerConfig * const tconfig, FeedForwardNeuralNetwork * const ffnn): NNTrainer(tdata, tconfig, ffnn){};
-    void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int nsteps, const int verbose);
+    NNTrainerGSL(const NNTrainingData &tdata, const NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn = NULL): NNTrainer(tdata, tconfig, ffnn)
+    {
+        _tstruct.copyData(_tdata); _tstruct.copyConfig(_tconfig); _tstruct.ffnn = _ffnn;
+    };
+
+    void findFit(double * const fit, double * const err, double &resi_full, double &resi_noreg, double &resi_pure, const int &nsteps, const int &verbose);
 };
 
 

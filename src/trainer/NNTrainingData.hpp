@@ -6,7 +6,8 @@
 // holds the required information for cost function and gradient calculation
 struct NNTrainingData {
     int ndata; // number of data points
-    int ntraining; // ntraining data points will be used for training, the rest for validation
+    int ntraining; // ntraining data points will be used as training set, the rest for testing set
+    int nvalidation; // out of the ntraining training data, nvalidation points will be held back as validation set
     int xndim; // input dimension
     int yndim; // output dimension
     double ** x; // input data
