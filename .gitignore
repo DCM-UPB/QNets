@@ -20,7 +20,8 @@ Temporary Items
 *.pydevproject
 .metadata
 .gradle
-bin/
+bin/*
+!bin/.gitkeep
 tmp/
 *.tmp
 *.bak

@@ -62,7 +62,6 @@ int main (void) {
 
     int nl, nhl, nhu[2], nfits = 1;
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
-
     bool verbose = false, flag_d1 = false, flag_d2 = false, flag_r = false;
 
     //manual allocation of data arrays for the data struct
@@ -84,9 +83,9 @@ int main (void) {
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    cout << "How many units should the first hidden layer(s) have? ";
+    cout << "How many units should the first hidden layer have? ";
     cin >> nhu[0];
-    cout << "How many units should the second hidden layer(s) have? (<=1 for none) ";
+    cout << "How many units should the second hidden layer have? (<=1 for none) ";
     cin >> nhu[1];
     cout << endl;
 
