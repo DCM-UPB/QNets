@@ -1,6 +1,6 @@
 sudo: required
 language: c++
-services: 
+services:
   - docker
 
 matrix:
@@ -14,7 +14,7 @@ matrix:
 #            - g++-7
 #            - libgsl0-dev
 #            - valgrind
-#      env: 
+#      env:
 #        - MYCC="g++-7"
 #        - USE_DOCKER="FALSE"
 
@@ -29,7 +29,7 @@ matrix:
         - MYCC="g++"
         - USE_DOCKER="TRUE"
         - USE_OPENMP="TRUE"
-      
+
     - os: osx
       osx_image: xcode8
       env:
@@ -45,7 +45,7 @@ before_install:
     - if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;
 
 script:
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/ffnn nnvmc/base /bin/bash -c "cd /root/ffnn/debug && ./run.sh"; fi;
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/ffnn nnvmc/base /bin/bash -c "cd /root/ffnn/debug/unittest && ./run.sh"; fi;
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug && ./run.sh"; fi;
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug/unittest && ./run.sh"; fi;
     - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd debug && ./run.sh; fi;
     - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd unittest && ./run.sh; fi;
