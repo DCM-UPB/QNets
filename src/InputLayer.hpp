@@ -17,7 +17,7 @@ protected:
 public:
     // --- Constructor / Destructor
 
-    InputLayer(const int &nunits = 1){if (nunits > 1) construct(nunits);};
+    explicit InputLayer(const int &nunits = 1){if (nunits > 1) construct(nunits);};
     void construct(const int &nunits);
 
     // --- Destructor

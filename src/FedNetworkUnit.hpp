@@ -17,7 +17,7 @@ protected:
 
 public:
     // Constructor and destructor
-    FedNetworkUnit(NetworkUnitFeederInterface * feeder = NULL){_feeder = feeder;}
+    explicit FedNetworkUnit(NetworkUnitFeederInterface * feeder = NULL){_feeder = feeder;}
     virtual ~FedNetworkUnit(){if (_feeder) delete _feeder; _feeder=NULL;}
 
     // Setters and getters

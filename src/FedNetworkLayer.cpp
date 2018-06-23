@@ -21,15 +21,13 @@ void FedNetworkLayer::_registerUnit(NetworkUnit * newUnit)
 bool FedNetworkLayer::setVariationalParameter(const int &id, const double &vp)
 {
     std::vector<FedNetworkUnit *>::size_type i=0;
-    NetworkUnitFeederInterface * feeder;
     bool flag = false;
     while ( (!flag) && (i<_U_fed.size()) )
         {
-            feeder = _U_fed[i]->getFeeder();
-            if (feeder)
-                {
-                    flag = feeder->setVariationalParameterValue(id,vp);
-                }
+            NetworkUnitFeederInterface * feeder = _U_fed[i]->getFeeder();
+            if (feeder) {
+                flag = feeder->setVariationalParameterValue(id,vp);
+            }
             i++;
         }
     return flag;
@@ -39,15 +37,13 @@ bool FedNetworkLayer::setVariationalParameter(const int &id, const double &vp)
 bool FedNetworkLayer::getVariationalParameter(const int &id, double &vp)
 {
     std::vector<FedNetworkUnit *>::size_type i=0;
-    NetworkUnitFeederInterface * feeder;
     bool flag = false;
     while ( (!flag) && (i<_U_fed.size()) )
         {
-            feeder = _U_fed[i]->getFeeder();
-            if (feeder)
-                {
-                    flag = feeder->getVariationalParameterValue(id, vp);
-                }
+            NetworkUnitFeederInterface * feeder = _U_fed[i]->getFeeder();
+            if (feeder) {
+                flag = feeder->getVariationalParameterValue(id, vp);
+            }
             i++;
         }
     return flag;
@@ -57,14 +53,12 @@ bool FedNetworkLayer::getVariationalParameter(const int &id, double &vp)
 int FedNetworkLayer::getNVariationalParameters()
 {
     int nvp=0;
-    NetworkUnitFeederInterface * feeder;
     for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
-            feeder = _U_fed[i]->getFeeder();
-            if (feeder)
-                {
-                    nvp += feeder->getNVariationalParameters();
-                }
+            NetworkUnitFeederInterface * feeder = _U_fed[i]->getFeeder();
+            if (feeder) {
+                nvp += feeder->getNVariationalParameters();
+            }
         }
     return nvp;
 }
@@ -77,7 +71,10 @@ int FedNetworkLayer::setVariationalParametersID(const int &id_vp)
     int id = id_vp;
     for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
-            id = _U_fed[i]->getFeeder()->setVariationalParametersIndexes(id);
+            NetworkUnitFeederInterface * feeder = _U_fed[i]->getFeeder();
+            if (feeder) {
+                id = _U_fed[i]->getFeeder()->setVariationalParametersIndexes(id);
+            }
         }
     return id;
 }
@@ -87,21 +84,18 @@ int FedNetworkLayer::setVariationalParametersID(const int &id_vp)
 
 void FedNetworkLayer::connectOnTopOfLayer(NetworkLayer * nl)
 {
-    NetworkUnitFeederInterface * ray;
     for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
-            ray = this->connectUnitOnTopOfLayer(nl, i);
+            NetworkUnitFeederInterface * ray = this->connectUnitOnTopOfLayer(nl, i);
             if (ray) _U_fed[i]->setFeeder(ray);
         }
 }
 
 void FedNetworkLayer::disconnect()
 {
-    NetworkUnitFeederInterface * ray;
     for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
-            ray = _U_fed[i]->getFeeder();
-            delete ray;
+            delete _U_fed[i]->getFeeder();
             _U_fed[i]->setFeeder(NULL);
         }
 }

@@ -134,6 +134,9 @@ NetworkUnit::NetworkUnit(){
     _nvp = 0;
     _pv = 0.;
     _v = 0.;
+    _a1d = 0.;
+    _a2d = 0.;
+    _a3d = 0.;
     _v1d = NULL;
     _v2d = NULL;
     _first_der = NULL;

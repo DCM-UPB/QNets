@@ -11,9 +11,9 @@ protected:
     double _alpha;
 
 public:
-    ReLUActivationFunction(const double alpha = 0.){_alpha = alpha;}
-    ReLUActivationFunction(const std::string &params){this->setParams(params);}
-    ReLUActivationFunction(ReLUActivationFunction * const selu_actf) {_alpha = selu_actf->getAlpha();}
+    explicit ReLUActivationFunction(const double alpha = 0.){_alpha = alpha;}
+    explicit ReLUActivationFunction(const std::string &params){this->setParams(params);}
+    explicit ReLUActivationFunction(ReLUActivationFunction * const selu_actf) {_alpha = selu_actf->getAlpha();}
 
     // get copy
     ActivationFunctionInterface * getCopy(){return new ReLUActivationFunction(_alpha);}

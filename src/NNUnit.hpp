@@ -19,7 +19,7 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {if (actf) _actf = actf; else throw std::invalid_argument("NNUnit(): Passed pointer 'actf' was NULL.");}
+    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {_actf = actf; if (!_actf) throw std::invalid_argument("NNUnit(): Passed pointer 'actf' was NULL.");}
     NNUnit(const std::string &actf_id, NetworkUnitFeederInterface * feeder = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), feeder) {}
     virtual ~NNUnit(){ delete _actf; }
 

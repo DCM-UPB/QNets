@@ -10,7 +10,7 @@ protected:
     const int _index;
 
 public:
-    InputUnit(const int index): _index(index) {} // the index of the input unit, i.e. d/dx_index f(_pv) = 1
+    explicit InputUnit(const int index): _index(index) {} // the index of the input unit, i.e. d/dx_index f(_pv) = 1
 
     // string code methods
     virtual std::string getIdCode(){return "IN";} // return identifier for unit type

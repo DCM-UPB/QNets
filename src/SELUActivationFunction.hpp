@@ -11,8 +11,8 @@ protected:
 
 public:
     SELUActivationFunction(const double alpha = 1.6733, const double lambda = 1.0507){_alpha = alpha; _lambda = lambda;}
-    SELUActivationFunction(const std::string &params){this->setParams(params);}
-    SELUActivationFunction(SELUActivationFunction * const selu_actf) {_alpha = selu_actf->getAlpha(); _lambda = selu_actf->getLambda();}
+    explicit SELUActivationFunction(const std::string &params){this->setParams(params);}
+    explicit SELUActivationFunction(SELUActivationFunction * const selu_actf) {_alpha = selu_actf->getAlpha(); _lambda = selu_actf->getLambda();}
 
     // get copy
     ActivationFunctionInterface * getCopy(){return new SELUActivationFunction(_alpha, _lambda);}

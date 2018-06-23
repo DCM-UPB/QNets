@@ -28,7 +28,7 @@ public:
     virtual void setParams(const std::string &params){} // set params of this by params string
     virtual void setMemberParams(const std::string &memberTreeCode){} // recursively set params of all members by memberTreeCode string
 
-    void setTreeParams(const std::string treeCode){this->setParams(readParams(treeCode)); this->setMemberParams(readMemberTreeCode(treeCode));} // set the params of the full tree
+    void setTreeParams(const std::string &treeCode){this->setParams(readParams(treeCode)); this->setMemberParams(readMemberTreeCode(treeCode));} // set the params of the full tree
 };
 
 #endif

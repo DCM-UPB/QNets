@@ -32,7 +32,7 @@ protected:
     std::set<int> _betas_used_for_this_ray;
 
 public:
-    NetworkUnitRay(NetworkLayer * nl);
+    explicit NetworkUnitRay(NetworkLayer * nl);
     virtual ~NetworkUnitRay();
 
     // string code methods

@@ -78,9 +78,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
     NetworkUnitFeederInterface ** feeders;
     string * ids;
 
-    string stringCode = "";
     const string emptySpaceForBeta = "     ";
-    const string emptySpaceForActivationFunctionId = "   ";
     const string emptySpaceAfterBeta = "  ";
     const string emptySpaceAfterActivationFunction = "       ";
 
