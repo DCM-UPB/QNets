@@ -1,0 +1,29 @@
+language: c++
+
+os:
+  - linux
+  - osx
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - libgsl0-dev
+            - valgrind
+      env: 
+        - MYCC="g++-7"
+      
+    - os: osx
+      osx_image: xcode8
+      env:
+        - MYCC="g++"
+        - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
+
+before_install: eval "${MYCC} -v" && eval "${MATRIX_EVAL}" && cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
+
+script: ./build.sh
