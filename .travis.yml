@@ -1,30 +1,43 @@
+sudo: required
 language: c++
+services: 
+  - docker
 
 matrix:
   include:
+#    - os: linux
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - g++-7
+#            - libgsl0-dev
+#            - valgrind
+#      env: 
+#        - MYCC="g++-7"
+#        - USE_DOCKER="FALSE"
+
     - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-            - libgsl0-dev
-            - valgrind
-      env: 
-        - MYCC="g++-7"
+      env:
+        - MYCC="g++"
+        - USE_DOCKER="TRUE"
       
     - os: osx
       osx_image: xcode8
       env:
         - MYCC="g++"
         - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
+        - USE_DOCKER="FALSE"
 
 before_install:
-    - eval "${MATRIX_EVAL}"
-    - eval "${MYCC} -v"
-    - cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker pull nnvmc/base; fi;
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run nnvmc/base /bin/bash -c "cp config_template.sh config.sh && sed -i -e \"s/g++/${MYCC}/g\" config.sh"; fi;
+    - if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;
+    - if [[ "$USE_DOCKER" == "FALSE" ]]; then cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh; fi;
 
 script:
-    - cd debug && ./run.sh
-    - cd unittest && ./run.sh
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run nnvmc/base /bin/bash -c "cd debug && ./run.sh"; fi;
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run nnvmc/base /bin/bash -c "cd unittest && ./run.sh"; fi;
+    - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd debug && ./run.sh; fi;
+    - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd unittest && ./run.sh; fi;
