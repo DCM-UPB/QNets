@@ -5,7 +5,7 @@ services:
 
 matrix:
   include:
-#    - os: linux
+#    - os: linux // ubuntu trusty has too old GSL lib
 #      addons:
 #        apt:
 #          sources:
@@ -18,10 +18,17 @@ matrix:
 #        - MYCC="g++-7"
 #        - USE_DOCKER="FALSE"
 
-    - os: linux
+    - os: linux // arch linux docker
       env:
         - MYCC="g++"
         - USE_DOCKER="TRUE"
+        - USE_OPENMP="FALSE"
+
+    - os: linux // with enabled openmp
+      env:
+        - MYCC="g++"
+        - USE_DOCKER="TRUE"
+        - USE_OPENMP="TRUE"
       
     - os: osx
       osx_image: xcode8
@@ -29,15 +36,16 @@ matrix:
         - MYCC="g++"
         - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
         - USE_DOCKER="FALSE"
+        - USE_OPENMP="FALSE"
 
 before_install:
+    - cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
+    - if [[ "$USE_OPENMP" == "TRUE" ]]; then sed -i -e "s/FLAGS=\"/FLAGS=\"-fopenmp -DOPENMP /g" config.sh; fi;
     - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker pull nnvmc/base; fi;
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run nnvmc/base /bin/bash -c "cp config_template.sh config.sh && sed -i -e \"s/g++/${MYCC}/g\" config.sh"; fi;
     - if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;
-    - if [[ "$USE_DOCKER" == "FALSE" ]]; then cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh; fi;
 
 script:
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run nnvmc/base /bin/bash -c "cd debug && ./run.sh"; fi;
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run nnvmc/base /bin/bash -c "cd unittest && ./run.sh"; fi;
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/ffnn nnvmc/base /bin/bash -c "cd /root/ffnn/debug && ./run.sh"; fi;
+    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/ffnn nnvmc/base /bin/bash -c "cd /root/ffnn/debug/unittest && ./run.sh"; fi;
     - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd debug && ./run.sh; fi;
     - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd unittest && ./run.sh; fi;
