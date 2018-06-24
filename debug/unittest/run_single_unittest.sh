@@ -1,28 +1,21 @@
 #!/bin/bash
 
-# After using this script it is necessary to run again the build.sh script
-# for generating again the library with the optimization flags
+export ROOT_FOLDER=$(dirname $(dirname $(dirname $(pwd))))
+source "${ROOT_FOLDER}/config.sh"
 
-OS_NAME=$(uname)
-source ../../../config.sh
-DEBUGFLAGS="-g -O0"
-
-\rm -f exe
-\rm -f *.o
-
-ROOT_FOLDER=$(dirname $(dirname $(dirname $(pwd))))
-
+rm -f exe
+rm -f *.o
 
 ## Build the debugging main executable
-$CC $FLAGS $DEBUGFLAGS -Wall -I${ROOT_FOLDER}/include/ -c *.cpp
+$CC $FLAGS $DEBUGFLAGS -Wall ${FULL_I} -c *.cpp
 
 case ${OS_NAME} in
     "Linux")
-        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} -Wl,-rpath=${ROOT_FOLDER} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
+        $CC $FLAGS $DEBUGFLAGS ${FULL_L} -Wl,-rpath=${ROOT_FOLDER} -o exe *.o ${FULL_LIBS}
         ;;
     "Darwin")
-        $CC $FLAGS $DEBUGFLAGS -L${ROOT_FOLDER} $LGSL -o exe *.o -l${LIBNAME} $LIBGSL
-        install_name_tool -change lib${LIBNAME}.so ${ROOT_FOLDER}/lib${LIBNAME}.so exe
+        $CC $FLAGS $DEBUGFLAGS ${FULL_L} -o exe *.o ${FULL_LIBS}
+#        install_name_tool -change lib${LIBNAME}.so ${ROOT_FOLDER}/lib${LIBNAME}.so exe
         ;;
     *)
         echo "The detected operating system is not between the known ones (Linux and Darwin)"

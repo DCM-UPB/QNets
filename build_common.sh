@@ -2,31 +2,34 @@
 # This file contains shared code among the different build scripts.
 # The calling script needs to set MYFLAGS to the desired compilation flag configuration.
 
-OS_NAME=$(uname)
-echo "The Operating System is: "${OS_NAME}  # here we consider only Linux and Darwin (Mac Os X)
-
+export ROOT_FOLDER=$(pwd)
 source config.sh
 
-\rm -f *.so
+echo "The Operating System is: "${OS_NAME}  # here we consider only Linux and Darwin (Mac Os X)
+
+# clean
+rm -f *.so
 mkdir -p bin
 cd bin/
-\rm -f *.o *.so
-echo "$CC $FLAGS $MYFLAGS -fpic -I ../include/ -c ../src/*/*.cpp"
-$CC $FLAGS $MYFLAGS -fpic -I ../include/ -c ../src/*/*.cpp
+rm -f *.o *.so
+
+CPPFILES="${ROOT_FOLDER}/src/*/*.cpp"
+
+echo "$CC $FLAGS $MYFLAGS -fpic ${FULL_I} -c ${CPPFILES}"
+$CC $FLAGS $MYFLAGS -fpic ${FULL_I} -c ${CPPFILES}
 
 case ${OS_NAME} in
     "Darwin")
-        ROOT_FOLDER=$(dirname $(pwd))
-        echo "$CC $FLAGS $MYFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so -I ../include/ -o lib${LIBNAME}.so *.o"
-        $CC $FLAGS $MYFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so -I ../include/ -o lib${LIBNAME}.so *.o
+        echo "$CC $FLAGS $MYFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so -o lib${LIBNAME}.so ${EXT_L} *.o ${EXT_LIBS}"
+        $CC $FLAGS $MYFLAGS -shared -install_name ${ROOT_FOLDER}/lib${LIBNAME}.so -o lib${LIBNAME}.so ${EXT_L} *.o ${EXT_LIBS}
         ;;
     "Linux")
-        echo "$CC $FLAGS $MYFLAGS -shared -o lib${LIBNAME}.so -I ../include/ *.o"
-        $CC $FLAGS $MYFLAGS -shared -o lib${LIBNAME}.so -I ../include/ *.o
+        echo "$CC $FLAGS $MYFLAGS -shared -o lib${LIBNAME}.so ${EXT_L} *.o ${EXT_LIBS}"
+        $CC $FLAGS $MYFLAGS -shared -o lib${LIBNAME}.so ${EXT_L} *.o ${EXT_LIBS}
         ;;
 esac
 
-cp lib${LIBNAME}.so ../
+mv lib${LIBNAME}.so ../lib${LIBNAME}.so
 cd ..
 
 echo

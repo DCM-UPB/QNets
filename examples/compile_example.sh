@@ -1,31 +1,26 @@
 #!/bin/bash
 
-source ../../config.sh
+export ROOT_FOLDER=$(dirname $(dirname $(pwd)))
+source "${ROOT_FOLDER}/config.sh"
 
 FLAG_TO_USE="${OPTFLAGS}"
 
-\rm -f exe
-\rm -f *.o
-
-# project root directory
-ROOT_FOLDER=$(dirname $(dirname $(pwd)))
-
-#runtime dynamic library path
-RPATH="${ROOT_FOLDER}"
+rm -f exe
+rm -f *.o
 
 # Build the debugging main executable
-echo "$CC $FLAGS $FLAG_TO_USE -Wall -I${ROOT_FOLDER}/include/ -c *.cpp"
-$CC $FLAGS $FLAG_TO_USE -Wall -I${ROOT_FOLDER}/include/ -c *.cpp
+echo "$CC $FLAGS $FLAG_TO_USE -Wall ${FULL_I} -c *.cpp"
+$CC $FLAGS $FLAG_TO_USE -Wall ${FULL_I} -c *.cpp
 
 # For Mac OS, the install name is wrong and must be corrected
 case ${OS_NAME} in
     "Darwin")
-        echo "$CC $FLAGS $FLAG_TO_USE -L${ROOT_FOLDER} $LGSL -o exe *.o -l$LIBNAME $LIBGSL"
-        $CC $FLAGS $FLAG_TO_USE -L${ROOT_FOLDER} $LGSL -o exe *.o -l$LIBNAME $LIBGSL
+        echo "$CC $FLAGS $FLAG_TO_USE ${FULL_L} -o exe *.o ${FULL_LIBS}"
+        $CC $FLAGS $FLAG_TO_USE ${FULL_L} -o exe *.o ${FULL_LIBS}
         ;;
     "Linux")
-        echo "$CC $FLAGS $FLAG_TO_USE $LGSL -L${ROOT_FOLDER} -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}" $LIBGSL
-        $CC $FLAGS $FLAG_TO_USE $LGSL -L${ROOT_FOLDER} -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME} $LIBGSL
+        echo "$CC $FLAGS $FLAG_TO_USE ${FULL_L} -Wl,-rpath=${ROOT_FOLDER} -o exe *.o ${FULL_LIBS}"
+        $CC $FLAGS $FLAG_TO_USE ${FULL_L} -Wl,-rpath=${ROOT_FOLDER} -o exe *.o ${FULL_LIBS}
         ;;
 esac
 
