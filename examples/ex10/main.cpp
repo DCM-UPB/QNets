@@ -198,7 +198,26 @@ int main (void) {
     trainer->printFitNN();
     //
 
-    //! A LOT OF DELETES MISSING !
+    // Delete allocations
+    delete trainer;
+    delete ffnn;
+
+    for (int i = 0; i<ndata; ++i) {
+        delete [] xdata[i];
+        delete [] ydata[i];
+        delete [] weights[i];
+        for (int j = 0; j<1; ++j) {
+            delete [] d1data[i][j];
+            delete [] d2data[i][j];
+        }
+        delete [] d1data[i];
+        delete [] d2data[i];
+    }
+    delete [] xdata;
+    delete [] ydata;
+    delete [] weights;
+    delete [] d1data;
+    delete [] d2data;
 
     return 0;
 

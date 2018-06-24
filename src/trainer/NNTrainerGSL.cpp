@@ -1,5 +1,55 @@
 #include "NNTrainerGSL.hpp"
 
+// --- Helper functions
+
+// set new NN betas
+inline int setBetas(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * const betas)
+{
+    const int nbeta = ffnn->getNBeta();
+    for (int i=0; i<nbeta; ++i){
+        ffnn->setBeta(i, gsl_vector_get(betas, i));
+    }
+    return nbeta;
+}
+
+// counts total residual vector size
+// set nbeta or xndim to >0 to count regularization and derivative residual terms, respectively
+// set nderiv = 1 if only one of both deriv residuals should be counted
+inline int calcNData(const int &nbase, const int &yndim, const int &nbeta = 0, const int &xndim = 0, const int nderiv = 2)
+{
+    return nbase*yndim + nbeta + nderiv * nbase*xndim*yndim;
+}
+
+// calculate index offset pointing right behind the basic residual part
+inline void calcOffset(const int &nbase, const int &yndim, int &off)
+{
+    off = nbase*yndim;
+}
+
+// also calculate offset behind first derivative part
+inline void calcOffset(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2)
+{
+    calcOffset(nbase, yndim, offd1);
+    offd2 = offd1 + nbase*xndim*yndim;
+}
+
+// also calculate offset behind second derivative part
+inline void calcOffset(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2, int &offr)
+{
+    calcOffset(nbase, yndim, xndim, offd1, offd2);
+    offr = offd2 + nbase*xndim*yndim;
+}
+
+// store (root) square sum of residual vector f in chisq (chi)
+inline void calcRSS(const gsl_vector * const f, double &chisq, double &chi)
+{
+    gsl_blas_ddot(f, f, &chisq);
+    chi = sqrt(chisq);
+}
+
+
+// --- Cost functions
+
 // cost function without regularization and derivative terms
 int ffnn_f_pure(const gsl_vector * betas, void * const tstruct, gsl_vector * f) {
     const int ntrain = ((struct GSLFitStruct *)tstruct)->ntraining;
@@ -11,13 +61,9 @@ int ffnn_f_pure(const gsl_vector * betas, void * const tstruct, gsl_vector * f) 
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_pure;
 
-    const int nbeta = ffnn->getNBeta();
     double resi;
 
-    //set new NN betas
-    for (int i=0; i<nbeta; ++i){
-        ffnn->setBeta(i, gsl_vector_get(betas, i));
-    }
+    setBetas(ffnn, betas);
 
     //get difference NN vs data
     for (int i=0; i<n; ++i) {
@@ -41,12 +87,7 @@ int ffnn_df_pure(const gsl_vector * betas, void * const tstruct, gsl_matrix * J)
     const double * const * const w = ((struct GSLFitStruct *)tstruct)->w;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
 
-    const int nbeta = ffnn->getNBeta();
-
-    //set new NN betas
-    for (int i=0; i<nbeta; ++i){
-        ffnn->setBeta(i, gsl_vector_get(betas, i));
-    }
+    const int nbeta = setBetas(ffnn, betas);
 
     //calculate cost gradient
     for (int ibeta=0; ibeta<nbeta; ++ibeta) {
@@ -80,20 +121,15 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
     const bool flag_d2 = ((struct GSLFitStruct *)tstruct)->flag_d2;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_noreg;
-    gsl_vector * fnow;
 
-    const int nbeta = ffnn->getNBeta();
+    gsl_vector * fnow;
     int nshift, nshift2, ishift, inshift, inshift2;
     const double lambda_d1_red = sqrt(lambda_d1), lambda_d2_red = sqrt(lambda_d2);
 
-    //set new NN betas
-    for (int i=0; i<nbeta; ++i){
-        ffnn->setBeta(i, gsl_vector_get(betas, i));
-    }
+    setBetas(ffnn, betas);
 
     fnow = f;
-    nshift = ntrain*yndim;
-    nshift2 = nshift + ntrain*yndim*xndim;
+    calcOffset(ntrain, yndim, xndim, nshift, nshift2);
     //get difference NN vs data
     for (int i=0; i<n; ++i) {
         ffnn->setInput(x[i]);
@@ -103,8 +139,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
         else {
             if (i == ntrain) {
                 fnow = fvali; // switch working pointer
-                nshift = nvali*yndim;
-                nshift2 = nshift + nvali*yndim*xndim;
+                calcOffset(ntrain, yndim, xndim, nshift, nshift2);
             }
             ishift = (i-ntrain)*yndim;
         }
@@ -136,14 +171,11 @@ int ffnn_df_deriv(const gsl_vector * betas, void * const tstruct, gsl_matrix * J
     const bool flag_d2 = ((struct GSLFitStruct *)tstruct)->flag_d2;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
 
-    const int nbeta = ffnn->getNBeta(), nshift = ntrain*yndim, nshift2 = nshift + ntrain*yndim*xndim;
     const double lambda_d1_red = sqrt(lambda_d1), lambda_d2_red = sqrt(lambda_d2);
-    int ishift, inshift, inshift2;
+    int nshift, nshift2, ishift, inshift, inshift2;
 
-    //set new NN betas
-    for (int i=0; i<nbeta; ++i){
-        ffnn->setBeta(i, gsl_vector_get(betas, i));
-    }
+    const int nbeta = setBetas(ffnn, betas);
+    calcOffset(ntrain, yndim, xndim, nshift, nshift2);
 
     //calculate cost gradient
     for (int ibeta=0; ibeta<nbeta; ++ibeta) {
@@ -172,24 +204,28 @@ int ffnn_df_deriv(const gsl_vector * betas, void * const tstruct, gsl_matrix * J
 int ffnn_f_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_vector * f) {
     const int ntrain = ((struct GSLFitStruct *)tstruct)->ntraining;
     const int nvali =  ((struct GSLFitStruct *)tstruct)->nvalidation;
+    const int yndim = ((struct GSLFitStruct *)tstruct)->yndim;
     const double lambda_r = ((struct GSLFitStruct *)tstruct)->lambda_r;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_full;
     gsl_vector * const fvali_pure = ((struct GSLFitStruct *)tstruct)->fvali_pure;
 
-    const int nbeta = ffnn->getNBeta(), n_reg = ntrain + nbeta, nvali_reg = nvali + nbeta;
+    const int nbeta = ffnn->getNBeta(), n_reg = calcNData(ntrain, yndim, nbeta), nvali_reg = calcNData(nvali, yndim, nbeta);
     const double lambda_r_red = sqrt(lambda_r / nbeta);
+    int nshift;
 
     ffnn_f_pure(betas, tstruct, f);
 
     //append regularization
-    for (int i=ntrain; i<n_reg; ++i) {
-        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-ntrain));
+    calcOffset(ntrain, yndim, nshift);
+    for (int i=nshift; i<n_reg; ++i) {
+        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
     }
 
+    calcOffset(nvali, yndim, nshift);
     for (int i=0; i<nvali_reg; ++i) {
-        if (i<nvali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_pure, i));
-        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nvali));
+        if (i<nshift) gsl_vector_set(fvali, i, gsl_vector_get(fvali_pure, i));
+        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
     }
 
     return GSL_SUCCESS;
@@ -198,20 +234,23 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_vector *
 // gradient of cost function without derivatives but with regularization
 int ffnn_df_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_matrix * J) {
     const int ntrain = ((struct GSLFitStruct *)tstruct)->ntraining;
+    const int yndim = ((struct GSLFitStruct *)tstruct)->yndim;
     const double lambda_r = ((struct GSLFitStruct *)tstruct)->lambda_r;
     FeedForwardNeuralNetwork * ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
 
-    const int nbeta = ffnn->getNBeta(), n_reg = ntrain + nbeta;
+    const int nbeta = ffnn->getNBeta(), n_reg = calcNData(ntrain, yndim, nbeta);
     const double lambda_r_red = sqrt(lambda_r / nbeta);
+    int nshift;
 
     ffnn_df_pure(betas, tstruct, J);
 
     //append regularization gradient
-    for (int i=ntrain; i<n_reg; ++i) {
+    calcOffset(ntrain, yndim, nshift);
+    for (int i=nshift; i<n_reg; ++i) {
         for (int j=0; j<nbeta; ++j) {
             gsl_matrix_set(J, i, j, 0.0);
         }
-        gsl_matrix_set(J, i, i-ntrain, lambda_r_red);
+        gsl_matrix_set(J, i, i-nshift, lambda_r_red);
     }
 
     return GSL_SUCCESS;
@@ -228,20 +267,20 @@ int ffnn_f_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_vector 
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_full;
     gsl_vector * const fvali_noreg = ((struct GSLFitStruct *)tstruct)->fvali_noreg;
 
-    const int nshift3 = ntrain*yndim + ntrain*yndim*xndim, nshift3_vali = nvali*yndim + nvali*yndim*xndim;
-    const int nbeta = ffnn->getNBeta(), n_reg = nshift3 + nbeta, nvali_reg = nshift3_vali + nbeta;
+    const int nshift = calcNData(ntrain, yndim, 0, xndim), nshift_vali = calcNData(nvali, yndim, 0, xndim);
+    const int nbeta = ffnn->getNBeta(), n_reg = nshift + nbeta, nvali_reg = nshift_vali + nbeta;
     const double lambda_r_red = sqrt(lambda_r / nbeta);
 
     ffnn_f_deriv(betas, tstruct, f);
 
     //append regularization
-    for (int i=nshift3; i<n_reg; ++i) {
-        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift3));
+    for (int i=nshift; i<n_reg; ++i) {
+        gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
     }
 
     for (int i=0; i<nvali_reg; ++i) {
-        if (i<nvali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_noreg, i));
-        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift3_vali));
+        if (i<nshift_vali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_noreg, i));
+        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift_vali));
     }
 
     return GSL_SUCCESS;
@@ -255,17 +294,17 @@ int ffnn_df_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_matrix
     const double lambda_r = ((struct GSLFitStruct *)tstruct)->lambda_r;
     FeedForwardNeuralNetwork * ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
 
-    const int nbeta = ffnn->getNBeta(), nshift3 = ntrain*yndim + ntrain*yndim*xndim, n_reg = nshift3 + nbeta;
+    const int nbeta = ffnn->getNBeta(), nshift = calcNData(ntrain, yndim, 0, xndim), n_reg = nshift + nbeta;
     const double lambda_r_red = sqrt(lambda_r / nbeta);
 
     ffnn_df_deriv(betas, tstruct, J);
 
     //append regularization gradient
-    for (int i=nshift3; i<n_reg; ++i) {
+    for (int i=nshift; i<n_reg; ++i) {
         for (int j=0; j<nbeta; ++j) {
             gsl_matrix_set(J, i, j, 0.0);
         }
-        gsl_matrix_set(J, i, i-nshift3, lambda_r_red);
+        gsl_matrix_set(J, i, i-nshift, lambda_r_red);
     }
 
     return GSL_SUCCESS;
@@ -301,7 +340,7 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     //   verbose: print verbose output while fitting
 
 
-    int npar = _ffnn->getNBeta(), ntrain = _tdata.ntraining, nvali = _tdata.nvalidation;
+    int npar = _ffnn->getNBeta(), ntrain = _tstruct.ntraining, nvali = _tstruct.nvalidation;
     const gsl_multifit_nlinear_type *T_full = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
     gsl_multifit_nlinear_fdf fdf_full, fdf_noreg, fdf_pure;
     gsl_multifit_nlinear_workspace * w_full, * w_noreg, * w_pure;
@@ -324,19 +363,21 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     const double gtol = 0.0;
     const double ftol = 0.0;
 
-    const bool flag_d = _tconfig.flag_d1 || _tconfig.flag_d2;
+    const bool flag_d = _tstruct.flag_d1 || _tstruct.flag_d2;
+
+    // configure all three fdf objects
 
     // first the pure fdf
     fdf_pure.f = ffnn_f_pure;
     fdf_pure.df = ffnn_df_pure;
     fdf_pure.fvv = NULL;
-    fdf_pure.n = ntrain * _tdata.yndim;
+    fdf_pure.n = calcNData(ntrain, _tstruct.yndim);
     fdf_pure.p = npar;
     fdf_pure.params = &_tstruct;
 
     if (flag_d) {
-        ntrain_noreg = ntrain * _tdata.yndim + 2*(ntrain * _tdata.yndim * _tdata.xndim);
-        nvali_noreg = nvali * _tdata.yndim + 2*(nvali * _tdata.yndim * _tdata.xndim);
+        ntrain_noreg = calcNData(ntrain, _tstruct.yndim, 0, _tstruct.xndim);
+        nvali_noreg = calcNData(nvali, _tstruct.yndim, 0, _tstruct.xndim);
 
         // deriv fdf without regularization
         fdf_noreg.f = ffnn_f_deriv;
@@ -347,12 +388,12 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
         fdf_noreg.params = &_tstruct;
     }
     else {
-        ntrain_noreg = ntrain * _tdata.yndim;
-        nvali_noreg = nvali * _tdata.yndim;
+        ntrain_noreg = calcNData(ntrain, _tstruct.yndim);
+        nvali_noreg = calcNData(nvali, _tstruct.yndim);
         fdf_noreg = fdf_pure;
     };
 
-    if (_tconfig.flag_r) {
+    if (_tstruct.flag_r) {
         ntrain_full = ntrain_noreg + npar;
         nvali_full = nvali_noreg + npar;
 
@@ -455,14 +496,4 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     if (flag_d) gsl_vector_free(_tstruct.fvali_noreg);
     if (_tstruct.flag_r) gsl_vector_free(_tstruct.fvali_full);
     gsl_matrix_free(covar);
-
-
-
 };
-
-
-/*
-
-
-};
-*/
