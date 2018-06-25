@@ -16,7 +16,7 @@
   The fit is achieved by minimizing the mean square distance of NN to data (by Levenberg-Marquardt), where the distance and gradient are integrated on a unifrom grid.
   Hence, we have to create the NN and target data, define functions for distance and gradient, and pass all the information to the GSL lib.
 
-  For convenience, a NNFitter1D class is created, which handles the whole process in a user-friendly way, including normalization of the data.
+  For convenience, a NNTrainerGSL object is created, which handles the whole process in a user-friendly way, including normalization of the data.
 */
 
 double gaussian(const double x, const double a, const double b) {
@@ -34,14 +34,6 @@ double gaussian_d2dx(const double x, const double a, const double b) {
 };
 
 
-// hardcoded target values of logistic actf
-
-#define ACTF_X0 0.0 // target data mean
-#define ACTF_XS 1.0 // target data standard deviation
-#define ACTF_XD ACTF_XS*3.464101615 //uniform distribution [a,b]: (b-a) = sigma*sqrt(12)
-#define ACTF_Y0 0.5 // target output mean
-#define ACTF_YD 1.0 // target output interval size
-
 
 int main (void) {
     using namespace std;
@@ -51,18 +43,19 @@ int main (void) {
     NNTrainingConfig tconfig;
     NNTrainerGSL * trainer;
 
-    const double lb = -10;
-    const double ub = 10;
     const int ntraining = 2000; // how many training data points
     const int nvalidation = 1000; // how many validation data points
     const int ntesting = 3000; // how many testing data points
     const int ndata = ntraining + nvalidation + ntesting;
+    const int maxnsteps = 100; // maximum number of iterations for least squares solver
 
-    double ** xdata;
-    double ** ydata;
-    double *** d1data;
-    double *** d2data;
-    double ** weights;
+    const double lb = -10; // lower input boundary for data
+    const double ub = 10; // upper input boundary for data
+    double ** xdata; // input
+    double ** ydata; // output
+    double *** d1data; // first derivatives
+    double *** d2data; // second derivatives
+    double ** weights; // weights representing error on data (not used in the example)
 
     int nl, nhl, nhu[2], nfits = 1;
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
@@ -121,6 +114,7 @@ int main (void) {
 
     // NON I/O CODE
 
+    // create FFNN
     ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
     ffnn->connectFFNN();
@@ -132,7 +126,7 @@ int main (void) {
     if (lambda_d2 > 0) {ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
     if (lambda_r > 0) flag_r = true;
 
-    // generating the data to be fitted
+    // generate the data to be fitted
     random_device rdev;
     mt19937_64 rgen = std::mt19937_64(rdev());
     uniform_real_distribution<double> rd(lb,ub);
@@ -145,18 +139,11 @@ int main (void) {
         if (verbose) printf ("data: %i %g %g\n", i, xdata[i][0], ydata[i][0]);
     };
 
-    // calculate values for normalization
-    /*auto mimax = minmax_element(&xdata[0][0], &xdata[ndata-1][0]);
-    auto mimay = minmax_element(&ydata[0][0], &ydata[ndata-1][0]);
-    double x0 = 0.5*(*mimax.first + *mimax.second);
-    double y0 = 0.5*(*mimay.first + *mimay.second);
-    double xd = *mimax.second - *mimax.first;
-    double yd = *mimay.second - *mimay.first;*/
-
-    double xscale = 0.1;//ACTF_XD/xd;
-    double yscale = 1.0;//ACTF_YD/yd;
-    double xshift = 0.0;//ACTF_X0 - x0;
-    double yshift = 0.0;//ACTF_Y0 - y0;
+    // currently the normalization problem is solved here
+    double xscale = 0.1;
+    double yscale = 1.0;
+    double xshift = 0.0;
+    double yshift = 0.0;
 
     cout << "xscale: " << xscale << endl;
     cout << "yscale: " << yscale << endl;
@@ -170,33 +157,24 @@ int main (void) {
         d2data[i][0][0] = d2data[i][0][0] * yscale / pow(xscale, 2);
     }
 
-
-    tdata = {ndata, ndata/4, ndata/4, 1, 1, xdata, ydata, d1data, d2data, weights};
+    // create data and config structs
+    tdata = {ndata, ntraining, nvalidation, 1, 1, xdata, ydata, d1data, d2data, weights};
     tconfig = {flag_d1, flag_d2, flag_r, lambda_r, lambda_d1, lambda_d2};
 
-    trainer = new NNTrainerGSL(tdata, tconfig, ffnn);
+    // create trainer and find best fit
+    trainer = new NNTrainerGSL(tdata, tconfig);
+    trainer->bestFit(ffnn, maxnsteps, nfits, maxchi, verbose ? 2 : 1);
 
-    trainer->bestFit(100, nfits, maxchi, verbose ? 2 : 1);
-
+    //
 
     cout << "Done." << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    /*
-    cout << "Finally we compare the best fit NN to the target function:" << endl << endl;
-
-    // NON I/O CODE
-    fitter->compareFit(0, ndata, 100);
-    //
-
-    cout << endl;
-    */
     cout << "Now we print the output/NN to a file. The end." << endl;
 
     // NON I/O CODE
-    trainer->printFitOutput(-10, 10, 200, xscale, yscale, xshift, yshift, true, true);
-    trainer->printFitNN();
-    //
+    trainer->printFitOutput(ffnn, lb, ub, 200, xscale, yscale, xshift, yshift, true, true);
+    ffnn->storeOnFile("nn.txt");
 
     // Delete allocations
     delete trainer;
@@ -220,5 +198,5 @@ int main (void) {
     delete [] d2data;
 
     return 0;
-
+    //
 }

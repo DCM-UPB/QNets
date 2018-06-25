@@ -382,7 +382,7 @@ void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruc
     }
 }
 
-void NNTrainerGSL::findFit(double * const fit, double * const err, const int &maxnsteps, const int &verbose) {
+void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &maxnsteps, const int &verbose) {
 
     //   Fit NN with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
@@ -396,7 +396,7 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ma
     //   verbose: print verbose output while fitting
 
 
-    int npar = _ffnn->getNBeta(), ntrain = _tstruct.ntraining, nvali = _tstruct.nvalidation;
+    int npar = ffnn->getNBeta(), ntrain = _tstruct.ntraining, nvali = _tstruct.nvalidation;
     const gsl_multifit_nlinear_type *T_full = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
     gsl_multifit_nlinear_fdf fdf_full, fdf_noreg, fdf_pure;
     gsl_multifit_nlinear_workspace * w_full, * w_noreg, * w_pure;
@@ -411,6 +411,7 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ma
     double resi_full, resi_noreg, resi_pure;
     double resi_vali_full, resi_vali_noreg, resi_vali_pure;
 
+    _tstruct.ffnn = ffnn; // set the to-be-fitted FFNN
 
     // configure all three fdf objects
 

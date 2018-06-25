@@ -20,12 +20,12 @@ class NNTrainerGSL: public NNTrainer
 protected:
     GSLFitStruct _tstruct;
 public:
-    NNTrainerGSL(const NNTrainingData &tdata, const NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn = NULL): NNTrainer(tdata, tconfig, ffnn)
+    NNTrainerGSL(const NNTrainingData &tdata, const NNTrainingConfig &tconfig): NNTrainer(tdata, tconfig)
     {
-        _tstruct.copyData(_tdata); _tstruct.copyConfig(_tconfig); _tstruct.ffnn = _ffnn;
+        _tstruct.copyData(_tdata); _tstruct.copyConfig(_tconfig);
     };
 
-    void findFit(double * const fit, double * const err, const int &maxnsteps, const int &verbose);
+    void findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &maxnsteps, const int &verbose);
 };
 
 
