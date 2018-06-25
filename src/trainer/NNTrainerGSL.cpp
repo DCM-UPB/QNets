@@ -21,27 +21,27 @@ inline int calcNData(const int &nbase, const int &yndim, const int &nbeta = 0, c
 }
 
 // calculate index offset pointing right behind the basic residual part
-inline void calcOffset(const int &nbase, const int &yndim, int &off)
+inline void calcOffset1(const int &nbase, const int &yndim, int &off)
 {
     off = nbase*yndim;
 }
 
 // also calculate offset behind first derivative part
-inline void calcOffset(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2)
+inline void calcOffset12(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2)
 {
-    calcOffset(nbase, yndim, offd1);
+    calcOffset1(nbase, yndim, offd1);
     offd2 = offd1 + nbase*xndim*yndim;
 }
 
 // also calculate offset behind second derivative part
-inline void calcOffset(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2, int &offr)
+inline void calcOffset123(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2, int &offr)
 {
-    calcOffset(nbase, yndim, xndim, offd1, offd2);
+    calcOffset12(nbase, yndim, xndim, offd1, offd2);
     offr = offd2 + nbase*xndim*yndim;
 }
 
 // store (root) square sum of residual vector f in chisq (chi)
-inline void calcRSS(const gsl_vector * const f, double &chisq, double &chi)
+inline void calcRSS(const gsl_vector * const f, double &chi, double &chisq)
 {
     gsl_blas_ddot(f, f, &chisq);
     chi = sqrt(chisq);
@@ -129,7 +129,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
     setBetas(ffnn, betas);
 
     fnow = f;
-    calcOffset(ntrain, yndim, xndim, nshift, nshift2);
+    calcOffset12(ntrain, yndim, xndim, nshift, nshift2);
     //get difference NN vs data
     for (int i=0; i<n; ++i) {
         ffnn->setInput(x[i]);
@@ -139,7 +139,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
         else {
             if (i == ntrain) {
                 fnow = fvali; // switch working pointer
-                calcOffset(ntrain, yndim, xndim, nshift, nshift2);
+                calcOffset12(ntrain, yndim, xndim, nshift, nshift2);
             }
             ishift = (i-ntrain)*yndim;
         }
@@ -175,7 +175,7 @@ int ffnn_df_deriv(const gsl_vector * betas, void * const tstruct, gsl_matrix * J
     int nshift, nshift2, ishift, inshift, inshift2;
 
     const int nbeta = setBetas(ffnn, betas);
-    calcOffset(ntrain, yndim, xndim, nshift, nshift2);
+    calcOffset12(ntrain, yndim, xndim, nshift, nshift2);
 
     //calculate cost gradient
     for (int ibeta=0; ibeta<nbeta; ++ibeta) {
@@ -217,12 +217,12 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_vector *
     ffnn_f_pure(betas, tstruct, f);
 
     //append regularization
-    calcOffset(ntrain, yndim, nshift);
+    calcOffset1(ntrain, yndim, nshift);
     for (int i=nshift; i<n_reg; ++i) {
         gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
     }
 
-    calcOffset(nvali, yndim, nshift);
+    calcOffset1(nvali, yndim, nshift);
     for (int i=0; i<nvali_reg; ++i) {
         if (i<nshift) gsl_vector_set(fvali, i, gsl_vector_get(fvali_pure, i));
         else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
@@ -245,7 +245,7 @@ int ffnn_df_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_matrix 
     ffnn_df_pure(betas, tstruct, J);
 
     //append regularization gradient
-    calcOffset(ntrain, yndim, nshift);
+    calcOffset1(ntrain, yndim, nshift);
     for (int i=nshift; i<n_reg; ++i) {
         for (int j=0; j<nbeta; ++j) {
             gsl_matrix_set(J, i, j, 0.0);
@@ -431,10 +431,8 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
 
     // compute initial cost function
     f = gsl_multifit_nlinear_residual(w_full);
-    gsl_blas_ddot(f, f, &resih);
-    chi0 = sqrt(resih);
-    gsl_blas_ddot(_tstruct.fvali_full, _tstruct.fvali_full, &resih);
-    chi0_vali = sqrt(resih);
+    calcRSS(f, chi0, resih);
+    calcRSS(_tstruct.fvali_full, chi0_vali, resih);
 
     // solve the system with a maximum of nsteps iterations
     if (verbose > 1) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w_full);
@@ -446,31 +444,27 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     gsl_multifit_nlinear_covar(J, 0.0, covar);
 
     // compute final cost
-    gsl_blas_ddot(f, f, &chisq);
-    resi_full = sqrt(chisq);
-    c = GSL_MAX_DBL(1, sqrt(resih / dof));
-    gsl_blas_ddot(_tstruct.fvali_full, _tstruct.fvali_full, &resih);
-    resi_vali_full = sqrt(resih);
+    calcRSS(f, resi_full, chisq);
+    calcRSS(_tstruct.fvali_full, resi_vali_full, resih);
 
-    // unregularized cost calculation
+    // fill parameter fit and error arrays
+    c = GSL_MAX_DBL(1, sqrt(chisq / dof));
     for (int i = 0; i<npar; ++i) {
         fit[i] = gsl_vector_get(w_full->x, i);
         err[i] = c*sqrt(gsl_matrix_get(covar,i,i));
     }
+
+    // unregularized cost calculation
     gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
     f = gsl_multifit_nlinear_residual(w_noreg);
-    gsl_blas_ddot(f, f, &resih);
-    resi_noreg = sqrt(resih);
-    gsl_blas_ddot(_tstruct.fvali_noreg, _tstruct.fvali_noreg, &resih);
-    resi_vali_noreg = sqrt(resih);
+    calcRSS(f, resi_noreg, resih);
+    calcRSS(_tstruct.fvali_noreg, resi_vali_noreg, resih);
 
     // pure (no deriv, no reg) cost calculation
     gsl_multifit_nlinear_init(&gx.vector, &fdf_pure, w_pure);
     f = gsl_multifit_nlinear_residual(w_pure);
-    gsl_blas_ddot(f, f, &resih);
-    resi_pure = sqrt(resih);
-    gsl_blas_ddot(_tstruct.fvali_pure, _tstruct.fvali_pure, &resih);
-    resi_vali_pure = sqrt(resih);
+    calcRSS(f, resi_pure, resih);
+    calcRSS(_tstruct.fvali_pure, resi_vali_pure, resih);
 
     if (verbose > 1) {
         fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w_full), gsl_multifit_nlinear_trs_name(w_full));
