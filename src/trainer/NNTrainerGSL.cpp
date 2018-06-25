@@ -47,6 +47,34 @@ inline void calcRSS(const gsl_vector * const f, double &chi, double &chisq)
     chi = sqrt(chisq);
 }
 
+// calculate all costs from the two residual vectors
+inline void calcCosts(const gsl_vector * const f, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali)
+{
+    calcRSS(f, chi, chisq);
+    calcRSS(fvali, chi_vali, chisq_vali);
+}
+
+// calculate all costs (from workspace and vali vector)
+inline void calcCosts(gsl_multifit_nlinear_workspace * const w, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali)
+{
+    calcCosts(gsl_multifit_nlinear_residual(w), chi, chisq, fvali, chi_vali, chisq_vali);
+}
+
+// calculate fit and error arrays
+void calcFitErr(gsl_multifit_nlinear_workspace * const w, double * const fit, double * const err, const int &ndata, const int &npar, const double &chisq)
+{
+    const double c = GSL_MAX_DBL(1, sqrt(chisq / (ndata-npar)));
+    const gsl_matrix * const J = gsl_multifit_nlinear_jac(w);
+    gsl_matrix * const covar = gsl_matrix_alloc (npar, npar);
+
+    gsl_multifit_nlinear_covar(J, 0.0, covar);
+    for (int i = 0; i<npar; ++i) {
+        fit[i] = gsl_vector_get(w->x, i);
+        err[i] = c*sqrt(gsl_matrix_get(covar,i,i));
+    }
+    gsl_matrix_free(covar);
+}
+
 
 // --- Cost functions
 
@@ -121,6 +149,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
     const bool flag_d2 = ((struct GSLFitStruct *)tstruct)->flag_d2;
     FeedForwardNeuralNetwork * const ffnn = ((struct GSLFitStruct *)tstruct)->ffnn;
     gsl_vector * const fvali = ((struct GSLFitStruct *)tstruct)->fvali_noreg;
+    gsl_vector * const fvali_pure = ((struct GSLFitStruct *)tstruct)->fvali_pure;
 
     gsl_vector * fnow;
     int nshift, nshift2, ishift, inshift, inshift2;
@@ -148,6 +177,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
 
         for (int j=0; j<yndim; ++j) {
             gsl_vector_set(fnow, ishift + j,  w[i][j] * (ffnn->getOutput(j) - y[i][j]));
+            if (i >= ntrain) gsl_vector_set(fvali_pure, ishift + j, gsl_vector_get(fnow, ishift + j)); // we should also fill pure here
             for (int k=0; k<xndim; ++k) {
                 gsl_vector_set(fnow, inshift + k*nshift + j, flag_d1 ? w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]) : 0.0);
                 gsl_vector_set(fnow, inshift2 + k*nshift + j, flag_d2 ? w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]) : 0.0);
@@ -310,8 +340,10 @@ int ffnn_df_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_matrix
     return GSL_SUCCESS;
 };
 
-// gets called once for every fit iteration
-void callback(const size_t iter, void *params, const gsl_multifit_nlinear_workspace *w) {
+// Custom driver routines
+
+// if verbose, this is used to print info on every fit iteration
+void printStepInfo(const gsl_multifit_nlinear_workspace * const w, const GSLFitStruct * const tstruct, const int &status) {
     gsl_vector *f = gsl_multifit_nlinear_residual(w);
     gsl_vector *x = gsl_multifit_nlinear_position(w);
     double rcond = 0.0;
@@ -319,14 +351,38 @@ void callback(const size_t iter, void *params, const gsl_multifit_nlinear_worksp
     // compute reciprocal condition number of J(x)
     gsl_multifit_nlinear_rcond(&rcond, w);
 
-    fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.4f\n", iter, 1.0 / rcond, gsl_blas_dnrm2(f));
-
+    // print
+    fprintf(stderr, "status = %s\n", gsl_strerror(status));
+    fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.4f (train), %.4f (vali)\n", gsl_multifit_nlinear_niter(w), 1.0 / rcond, gsl_blas_dnrm2(f), gsl_blas_dnrm2(tstruct->fvali_full));
     for (size_t i=0; i<x->size; ++i) fprintf(stderr, "b%zu: %f, ", i,  gsl_vector_get(x, i));
     fprintf(stderr, "\n");
 };
 
+// solve the system with a maximum of maxnsteps iterations, stopping early when validation error doesn't decrease
+void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruct * const tstruct, const size_t &maxnsteps, const int &verbose, int &status, int &info)
+{
+    double resih, bestvali = -1.;
+    while (true) {
+        status = gsl_multifit_nlinear_iterate(w); // iterate workspace
 
-void NNTrainerGSL::findFit(double * const fit, double * const err, const int &nsteps, const int &verbose) {
+        if (verbose > 1) printStepInfo(w, tstruct, status);
+
+        resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down, else break
+        if (bestvali >= 0 && resih >= bestvali) {
+            fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous %.4f. Stopping early.", resih, bestvali);
+            info = 1;
+            break;
+        }
+        else bestvali = resih;
+
+        if (gsl_multifit_nlinear_niter(w) >= maxnsteps) {  // check if we reached maxnsteps
+            info = 0;
+            break;
+        }
+    }
+}
+
+void NNTrainerGSL::findFit(double * const fit, double * const err, const int &maxnsteps, const int &verbose) {
 
     //   Fit NN with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
@@ -345,25 +401,16 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     gsl_multifit_nlinear_fdf fdf_full, fdf_noreg, fdf_pure;
     gsl_multifit_nlinear_workspace * w_full, * w_noreg, * w_pure;
     gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
-
-    gsl_vector *f;
-    gsl_matrix *J;
-    gsl_matrix * covar = gsl_matrix_alloc (npar, npar);
-
     gsl_vector_view gx = gsl_vector_view_array (fit, npar);
-    double chisq, chi0, chi0_vali;
-    double resi_full, resi_noreg, resi_pure;
-    double resi_vali_full, resi_vali_noreg, resi_vali_pure;
-    double resih, c;
+
     const int dof = ntrain - npar;
+    const bool flag_d = _tstruct.flag_d1 || _tstruct.flag_d2;
     int ntrain_noreg, nvali_noreg, ntrain_full, nvali_full;
     int status, info;
+    double resih, chisq, chi0, chi0_vali;
+    double resi_full, resi_noreg, resi_pure;
+    double resi_vali_full, resi_vali_noreg, resi_vali_pure;
 
-    const double xtol = 0.0;
-    const double gtol = 0.0;
-    const double ftol = 0.0;
-
-    const bool flag_d = _tstruct.flag_d1 || _tstruct.flag_d2;
 
     // configure all three fdf objects
 
@@ -426,52 +473,33 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     _tstruct.fvali_noreg = flag_d ? gsl_vector_alloc(nvali_noreg) : _tstruct.fvali_pure;
     _tstruct.fvali_full = _tstruct.flag_r ? gsl_vector_alloc(nvali_full) : _tstruct.fvali_noreg;
 
-    // initialize solver with starting point
+    // initialize solver with starting point and calculate initial cost
     gsl_multifit_nlinear_init(&gx.vector, &fdf_full, w_full);
+    calcCosts(w_full, chi0, resih, _tstruct.fvali_full, chi0_vali, resih);
 
-    // compute initial cost function
-    f = gsl_multifit_nlinear_residual(w_full);
-    calcRSS(f, chi0, resih);
-    calcRSS(_tstruct.fvali_full, chi0_vali, resih);
+    // run driver to find fit
+    earlyStopDriver(w_full, &_tstruct, maxnsteps, verbose, status, info);
 
-    // solve the system with a maximum of nsteps iterations
-    if (verbose > 1) status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, callback, NULL, &info, w_full);
-    else status = gsl_multifit_nlinear_driver(nsteps, xtol, gtol, ftol, NULL, NULL, &info, w_full);
+    // compute again final full cost and error of best fit parameters
+    calcCosts(w_full, resi_full, chisq, _tstruct.fvali_full, resi_vali_full, resih);
+    calcFitErr(w_full, fit, err, ntrain, npar, chisq);
 
-    // compute covariance of best fit parameters
-    J = gsl_multifit_nlinear_jac(w_full);
-    f = gsl_multifit_nlinear_residual(w_full);
-    gsl_multifit_nlinear_covar(J, 0.0, covar);
-
-    // compute final cost
-    calcRSS(f, resi_full, chisq);
-    calcRSS(_tstruct.fvali_full, resi_vali_full, resih);
-
-    // fill parameter fit and error arrays
-    c = GSL_MAX_DBL(1, sqrt(chisq / dof));
-    for (int i = 0; i<npar; ++i) {
-        fit[i] = gsl_vector_get(w_full->x, i);
-        err[i] = c*sqrt(gsl_matrix_get(covar,i,i));
-    }
-
-    // unregularized cost calculation
+    // final unregularized cost calculation
     gsl_multifit_nlinear_init(&gx.vector, &fdf_noreg, w_noreg);
-    f = gsl_multifit_nlinear_residual(w_noreg);
-    calcRSS(f, resi_noreg, resih);
-    calcRSS(_tstruct.fvali_noreg, resi_vali_noreg, resih);
+    calcCosts(w_noreg, resi_noreg, resih, _tstruct.fvali_noreg, resi_vali_noreg, resih);
 
-    // pure (no deriv, no reg) cost calculation
+    // final pure (no deriv, no reg) cost calculation
     gsl_multifit_nlinear_init(&gx.vector, &fdf_pure, w_pure);
-    f = gsl_multifit_nlinear_residual(w_pure);
-    calcRSS(f, resi_pure, resih);
-    calcRSS(_tstruct.fvali_pure, resi_vali_pure, resih);
+    calcCosts(w_pure, resi_pure, resih, _tstruct.fvali_pure, resi_vali_pure, resih);
 
     if (verbose > 1) {
         fprintf(stderr, "summary from method '%s/%s'\n", gsl_multifit_nlinear_name(w_full), gsl_multifit_nlinear_trs_name(w_full));
         fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w_full));
         fprintf(stderr, "function evaluations: %zu\n", fdf_full.nevalf);
         fprintf(stderr, "Jacobian evaluations: %zu\n", fdf_full.nevaldf);
-        fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "small step size" : "small gradient");
+        fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "failed validation" : "max steps reached");
+        fprintf(stderr, "status = %s\n", gsl_strerror (status));
+
         fprintf(stderr, "initial |f(x)| = %f (train), %f (vali)\n", chi0, chi0_vali);
         fprintf(stderr, "final   |f(x)| = %f (train), %f (vali)\n", resi_full, resi_vali_full);
         fprintf(stderr, "w/o reg |f(x)| = %f (train), %f (vali)\n", resi_noreg, resi_vali_noreg);
@@ -479,8 +507,6 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
         fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
         for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, fit[i], err[i]);
-
-        fprintf(stderr, "status = %s\n", gsl_strerror (status));
     }
 
     gsl_multifit_nlinear_free(w_full);
@@ -489,5 +515,4 @@ void NNTrainerGSL::findFit(double * const fit, double * const err, const int &ns
     gsl_vector_free(_tstruct.fvali_pure);
     if (flag_d) gsl_vector_free(_tstruct.fvali_noreg);
     if (_tstruct.flag_r) gsl_vector_free(_tstruct.fvali_full);
-    gsl_matrix_free(covar);
 };
