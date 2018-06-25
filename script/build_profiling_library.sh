@@ -3,4 +3,4 @@
 
 source config.sh
 export MYFLAGS="${GPERFFLAGS}"
-source build_common.sh
+./script/build_common.sh

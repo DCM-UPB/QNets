@@ -13,7 +13,7 @@ echo "Building the library with optimization flags..."
 echo ""
 echo ""
 cd "${ROOT_FOLDER}"
-./build_profiling_library.sh
+./build.sh profiling
 cd "${MYPATH}"
 echo ""
 echo ""

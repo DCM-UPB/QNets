@@ -10,7 +10,7 @@ rm -f *.o
 export ROOT_FOLDER=$(dirname $(pwd))
 source ../config.sh
 cd ..
-./build_debug_library.sh
+./build.sh debug
 cd debug
 echo "Rebuilt the library with the debugging flags"
 echo ""

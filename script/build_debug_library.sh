@@ -3,4 +3,4 @@
 
 source config.sh
 export MYFLAGS="${DEBUGFLAGS}"
-source build_common.sh
+./script/build_common.sh

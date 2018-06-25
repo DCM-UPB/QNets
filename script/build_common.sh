@@ -4,16 +4,14 @@
 
 export ROOT_FOLDER=$(pwd)
 source config.sh
+CPPFILES="${ROOT_FOLDER}/src/*/*.cpp"
 
-echo "The Operating System is: "${OS_NAME}  # here we consider only Linux and Darwin (Mac Os X)
+./script/clean.sh
 
-# clean
-rm -f *.so
 mkdir -p bin
 cd bin/
-rm -f *.o *.so
 
-CPPFILES="${ROOT_FOLDER}/src/*/*.cpp"
+echo "The Operating System is: "${OS_NAME}  # here we consider only Linux and Darwin (Mac Os X)
 
 echo "$CC $FLAGS $MYFLAGS -fpic ${FULL_I} -c ${CPPFILES}"
 $CC $FLAGS $MYFLAGS -fpic ${FULL_I} -c ${CPPFILES}

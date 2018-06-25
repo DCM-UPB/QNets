@@ -12,7 +12,7 @@ echo "Building the library with optimization flags..."
 echo ""
 echo ""
 cd "${ROOT_FOLDER}"
-./build.sh
+./build.sh opt
 cd "${MYPATH}"
 echo ""
 echo ""
