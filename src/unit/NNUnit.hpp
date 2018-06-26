@@ -23,6 +23,11 @@ public:
     NNUnit(const std::string &actf_id, NetworkUnitFeederInterface * feeder = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), feeder) {}
     virtual ~NNUnit(){ delete _actf; }
 
+    // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
+    // (here the ideal values are determined by the actfs active range)
+    virtual double getIdealProtoMu(){return _actf->getIdealInputMu();}
+    virtual double getIdealProtoSigma(){return _actf->getIdealInputSigma();}
+
     // return the output mean value (mu) and standard deviation (sigma)
     virtual double getOutputMu(){return _actf->getOutputMu(FedNetworkUnit::getOutputMu());}
     virtual double getOutputSigma(){return _actf->getOutputSigma(FedNetworkUnit::getOutputSigma());}

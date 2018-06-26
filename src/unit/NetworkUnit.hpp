@@ -43,10 +43,15 @@ public:
     NetworkUnit();
     virtual ~NetworkUnit();
 
-    // return the output mean value (mu) and standard deviation (sigma)
-    // (pretending a flat distribution and input (pv) with mean 0 and sigma 1)
+    // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
+    // (if the derived unit applies e.g. an activation function to the pv, overwrite this accordingly)
+    virtual double getIdealProtoMu(){return 0;}
+    virtual double getIdealProtoSigma(){return 1.;}
+
+    // return the final output mu and sigma
+    // (here pretending a ideal pv distribution)
     virtual double getOutputMu(){return 0;}
-    virtual double getOutputSigma(){return 1.;}
+    virtual double getOutputSigma(){return 1;}
 
     // BaseComponent IdCodes
     virtual std::string getClassIdCode(){return "UNIT";}

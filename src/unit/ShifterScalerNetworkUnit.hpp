@@ -27,6 +27,11 @@ public:
     // Constructor
     ShifterScalerNetworkUnit(const double shift = 0., const double scale = 1.)  {_shift = shift; _scale = scale;}
 
+    // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
+    // (to reach m=0, s=1 normalized output)
+    virtual double getIdealProtoMu(){return -_shift;}
+    virtual double getIdealProtoSigma(){return 1./_scale;}
+
     // return the output mean value (mu) and standard deviation (sigma)
     // (assuming flat normalized pv input (i.e. m = 0, s = 1) )
     virtual double getOutputMu(){return _shift * _scale;}
