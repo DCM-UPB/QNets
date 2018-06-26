@@ -1,51 +1,62 @@
 sudo: required
 language: c++
 services:
-  - docker
+- docker
 
 matrix:
   include:
-#    - os: linux // ubuntu trusty has too old GSL lib
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#          packages:
-#            - g++-7
-#            - libgsl0-dev
-#            - valgrind
-#      env:
-#        - MYCC="g++-7"
-#        - USE_DOCKER="FALSE"
+#  - os: linux // ubuntu trusty has too old GSL lib
+#    addons:
+#      apt:
+#        sources:
+#          - ubuntu-toolchain-r-test
+#        packages:
+#          - g++-7
+#          - libgsl0-dev
+#          - valgrind
+#    env:
+#      - MYCC="g++-7"
+#      - USE_DOCKER="FALSE"
 
-    - os: linux // arch linux docker
-      env:
-        - MYCC="g++"
-        - USE_DOCKER="TRUE"
-        - USE_OPENMP="FALSE"
+  - os: linux // arch linux docker
+    env:
+    - MYCC="g++"
+    - USE_DOCKER="TRUE"
+    - USE_OPENMP="FALSE"
 
-    - os: linux // with enabled openmp
-      env:
-        - MYCC="g++"
-        - USE_DOCKER="TRUE"
-        - USE_OPENMP="TRUE"
+  - os: linux // with enabled openmp
+    env:
+    - MYCC="g++"
+    - USE_DOCKER="TRUE"
+    - USE_OPENMP="TRUE"
 
-    - os: osx
-      osx_image: xcode8
-      env:
-        - MYCC="g++"
-        - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
-        - USE_DOCKER="FALSE"
-        - USE_OPENMP="FALSE"
+  - os: osx
+    osx_image: xcode8
+    env:
+    - MYCC="g++"
+    - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
+    - USE_DOCKER="FALSE"
+    - USE_OPENMP="FALSE"
 
 before_install:
-    - cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
-    - if [[ "$USE_OPENMP" == "TRUE" ]]; then sed -i -e "s/FLAGS=\"/FLAGS=\"-fopenmp -DOPENMP /g" config.sh; fi;
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker pull nnvmc/base; fi;
-    - if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;
+- cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
+- if [[ "$USE_OPENMP" == "TRUE" ]]; then sed -i -e "s/FLAGS=\"/FLAGS=\"-fopenmp -DOPENMP /g" config.sh; fi;
+- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker pull nnvmc/base; fi;
+- if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;
 
 script:
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug && ./run.sh"; fi;
-    - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug/unittest && ./run.sh"; fi;
-    - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd debug && ./run.sh; fi;
-    - if [[ "$USE_DOCKER" == "FALSE" ]]; then cd unittest && ./run.sh; fi;
+- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug && ./run.sh"; fi;
+- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug/unittest && ./run.sh"; fi;
+- if [[ "$USE_DOCKER" == "FALSE" ]]; then cd debug && ./run.sh; fi;
+- if [[ "$USE_DOCKER" == "FALSE" ]]; then cd unittest && ./run.sh; fi;
+
+notifications:
+  slack:
+    on_success: always
+    on_failure: always
+    rooms:
+      secure: kGus3xRzJdyQE0xA6y7kXBXstHfKzdCRwgxAaFYYtkh33+W2Wh/o2TZp1eQmEjPyv6mSy7i5uSrTtD7LRlFsAlbysjwTK3gUweWcBW7uC73BE7k5CsqoQlL3XuSSAX0qRN+LHJM2i7Gmbv1Mt4rFOFFB2bqtMXm61X3/6RqkANtVXW9CUx6023njSFaS2uMhVICo+IFgQ6UNbHXkJ3H0WLmV6WMGcYYss6dwl0BOkwwiVku1F5zApYiZQKuYwJrV5kOdA13mHQTwIkKhHMn7nue+RkS9opx5X2PBsJOzDOIVRRwHjPuXLmTP1KaKkRiLR6EIOu1ZTW0+ozDlzkGZDK9x/EOWgpCfLNNPOdQEzuzJLykH4oj59n+dfFWIXVXIW3/6RJydWY/lBWRnX5Q+cDh1daU7xGyihJccarBaxbGfQ6/fQquZbE2ZfR6/RD0Rtx8hICNNeCXFtjLAiZSyYCt3NJW6D6qzeLIUGjGLdeW6JMh9LAu5IvytxVvyR0dupLnpxyR9zFHrhEU9PR3AMRau5GTD4VXv3uDdNMf69CKujitAtsQVSu7/2XrEET/snqnEfyWc84hmX5dDfqjh1Ysq9ng/NWIb7P2GXJu2wi9sKItpuiq+yugGul97hgvtDUvz8cIEs8G9trfcNWEFRLUkYb4u75d3pAYX4rsjOS0=
+
+  email:
+    on_success: change
+    on_failure: change
