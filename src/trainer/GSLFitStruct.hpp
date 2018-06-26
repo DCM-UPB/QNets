@@ -38,6 +38,8 @@ struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
         lambda_r = tconfig.lambda_r;
         lambda_d1 = tconfig.lambda_d1;
         lambda_d2 = tconfig.lambda_d2;
+        maxn_steps = tconfig.maxn_steps;
+        maxn_novali = tconfig.maxn_novali;
     }
 };
 

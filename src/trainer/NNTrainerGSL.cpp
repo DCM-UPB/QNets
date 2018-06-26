@@ -168,7 +168,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
         else {
             if (i == ntrain) {
                 fnow = fvali; // switch working pointer
-                calcOffset12(ntrain, yndim, xndim, nshift, nshift2);
+                calcOffset12(nvali, yndim, xndim, nshift, nshift2);
             }
             ishift = (i-ntrain)*yndim;
         }
@@ -177,7 +177,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
 
         for (int j=0; j<yndim; ++j) {
             gsl_vector_set(fnow, ishift + j,  w[i][j] * (ffnn->getOutput(j) - y[i][j]));
-            if (i >= ntrain) gsl_vector_set(fvali_pure, ishift + j, gsl_vector_get(fnow, ishift + j)); // we should also fill pure here
+            if (i >= ntrain) gsl_vector_set(fvali_pure, ishift + j, gsl_vector_get(fnow, ishift + j)); // let's also fill fvali_pure here
             for (int k=0; k<xndim; ++k) {
                 gsl_vector_set(fnow, inshift + k*nshift + j, flag_d1 ? w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - yd1[i][j][k]) : 0.0);
                 gsl_vector_set(fnow, inshift2 + k*nshift + j, flag_d2 ? w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - yd2[i][j][k]) : 0.0);
@@ -340,7 +340,8 @@ int ffnn_df_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_matrix
     return GSL_SUCCESS;
 };
 
-// Custom driver routines
+
+// --- Custom driver routines
 
 // if verbose, this is used to print info on every fit iteration
 void printStepInfo(const gsl_multifit_nlinear_workspace * const w, const GSLFitStruct * const tstruct, const int &status) {
@@ -358,31 +359,41 @@ void printStepInfo(const gsl_multifit_nlinear_workspace * const w, const GSLFitS
     fprintf(stderr, "\n");
 };
 
-// solve the system with a maximum of maxnsteps iterations, stopping early when validation error doesn't decrease
-void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruct * const tstruct, const size_t &maxnsteps, const int &verbose, int &status, int &info)
+// solve the system with a maximum of tstruct->max_nsteps iterations, stopping early when validation error doesn't decrease for too long
+void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruct * const tstruct, const int &verbose, int &status, int &info)
 {
     double resih, bestvali = -1.;
+    int count_novali = 0;
     while (true) {
         status = gsl_multifit_nlinear_iterate(w); // iterate workspace
-
         if (verbose > 1) printStepInfo(w, tstruct, status);
 
-        resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down, else break
-        if (bestvali >= 0 && resih >= bestvali) {
-            fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous %.4f. Stopping early.", resih, bestvali);
-            info = 1;
-            break;
-        }
-        else bestvali = resih;
-
-        if (gsl_multifit_nlinear_niter(w) >= maxnsteps) {  // check if we reached maxnsteps
+        if (((int)gsl_multifit_nlinear_niter(w)) >= tstruct->maxn_steps) {  // check if we reached maxnsteps
             info = 0;
             break;
+        }
+
+        resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down
+        if (bestvali >= 0 && resih >= bestvali) {
+            ++count_novali;
+            if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).", resih, bestvali, count_novali);
+
+            if (count_novali < tstruct->maxn_novali) continue;
+            else {
+                info = 1;
+                if (verbose>1) fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum.", count_novali);
+                break;
+            }
+        }
+        else { // new validation minimum found
+            count_novali = 0;
+            bestvali = resih;
         }
     }
 }
 
-void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &maxnsteps, const int &verbose) {
+
+void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &verbose) {
 
     //   Fit NN with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
@@ -400,7 +411,6 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     const gsl_multifit_nlinear_type *T_full = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
     gsl_multifit_nlinear_fdf fdf_full, fdf_noreg, fdf_pure;
     gsl_multifit_nlinear_workspace * w_full, * w_noreg, * w_pure;
-    gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
     gsl_vector_view gx = gsl_vector_view_array (fit, npar);
 
     const int dof = ntrain - npar;
@@ -467,9 +477,9 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     };
 
     // allocate workspace with default parameters, also allocate space for validation
-    w_full = gsl_multifit_nlinear_alloc (T_full, &fdf_params, ntrain_full, npar);
-    w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &fdf_params, ntrain_noreg, npar);
-    w_pure = gsl_multifit_nlinear_alloc (T_pure, &fdf_params, ntrain, npar);
+    w_full = gsl_multifit_nlinear_alloc (T_full, &_gsl_params, ntrain_full, npar);
+    w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &_gsl_params, ntrain_noreg, npar);
+    w_pure = gsl_multifit_nlinear_alloc (T_pure, &_gsl_params, ntrain, npar);
     _tstruct.fvali_pure = gsl_vector_alloc(nvali);
     _tstruct.fvali_noreg = flag_d ? gsl_vector_alloc(nvali_noreg) : _tstruct.fvali_pure;
     _tstruct.fvali_full = _tstruct.flag_r ? gsl_vector_alloc(nvali_full) : _tstruct.fvali_noreg;
@@ -479,7 +489,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     calcCosts(w_full, chi0, resih, _tstruct.fvali_full, chi0_vali, resih);
 
     // run driver to find fit
-    earlyStopDriver(w_full, &_tstruct, maxnsteps, verbose, status, info);
+    earlyStopDriver(w_full, &_tstruct, verbose, status, info);
 
     // compute again final full cost and error of best fit parameters
     calcCosts(w_full, resi_full, chisq, _tstruct.fvali_full, resi_vali_full, resih);

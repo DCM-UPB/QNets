@@ -47,7 +47,8 @@ int main (void) {
     const int nvalidation = 1000; // how many validation data points
     const int ntesting = 3000; // how many testing data points
     const int ndata = ntraining + nvalidation + ntesting;
-    const int maxnsteps = 100; // maximum number of iterations for least squares solver
+    const int maxn_steps = 100; // maximum number of iterations for least squares solver
+    const int maxn_novali = 5; // maximum number of iteration without decreasing validation residual (aka early stopping)
 
     const double lb = -10; // lower input boundary for data
     const double ub = 10; // upper input boundary for data
@@ -61,21 +62,6 @@ int main (void) {
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
     bool verbose = true, flag_d1 = false, flag_d2 = false, flag_r = false;
 
-    //manual allocation of data arrays for the data struct
-    xdata = new double*[ndata];
-    ydata = new double*[ndata];
-    d1data = new double**[ndata];
-    d2data = new double**[ndata];
-    weights = new double*[ndata];
-    for (int i = 0; i<ndata; ++i) {
-        xdata[i] = new double[1];
-        ydata[i] = new double[1];
-        d1data[i] = new double*[1];
-        d1data[i][0] = new double[1];
-        d2data[i] = new double*[1];
-        d2data[i][0] = new double[1];
-        weights[i] = new double[1];
-    }
 
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
@@ -126,6 +112,22 @@ int main (void) {
     if (lambda_d2 > 0) {ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
     if (lambda_r > 0) flag_r = true;
 
+    // allocate data arrays
+    xdata = new double*[ndata];
+    ydata = new double*[ndata];
+    d1data = new double**[ndata];
+    d2data = new double**[ndata];
+    weights = new double*[ndata];
+    for (int i = 0; i<ndata; ++i) {
+        xdata[i] = new double[1];
+        ydata[i] = new double[1];
+        d1data[i] = new double*[1];
+        d1data[i][0] = new double[1];
+        d2data[i] = new double*[1];
+        d2data[i][0] = new double[1];
+        weights[i] = new double[1];
+    }
+
     // generate the data to be fitted
     random_device rdev;
     mt19937_64 rgen = std::mt19937_64(rdev());
@@ -141,7 +143,7 @@ int main (void) {
 
     // currently the normalization problem is solved here
     double xscale = 0.1;
-    double yscale = 1.0;
+    double yscale = 0.95;
     double xshift = 0.0;
     double yshift = 0.0;
 
@@ -159,11 +161,11 @@ int main (void) {
 
     // create data and config structs
     tdata = {ndata, ntraining, nvalidation, 1, 1, xdata, ydata, d1data, d2data, weights};
-    tconfig = {flag_d1, flag_d2, flag_r, lambda_r, lambda_d1, lambda_d2};
+    tconfig = {flag_r, flag_d1, flag_d2, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // create trainer and find best fit
     trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxnsteps, nfits, maxchi, verbose ? 2 : 1);
+    trainer->bestFit(ffnn, nfits, maxchi, verbose ? 2 : 1);
 
     //
 

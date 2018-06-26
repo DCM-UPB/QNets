@@ -29,7 +29,7 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
     return sqrt(0.5*resi);
 }
 
-void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit, double * bestfit_err, const int &maxnsteps, const int &nfits, const double &resi_target, const int &verbose)
+void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit, double * bestfit_err, const int &nfits, const double &resi_target, const int &verbose)
 {
     int npar = ffnn->getNBeta();
     double fit[npar], err[npar];
@@ -43,7 +43,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
             fit[i] = ffnn->getBeta(i);
         }
 
-        findFit(ffnn, fit, err, maxnsteps, verbose); // try new fit
+        findFit(ffnn, fit, err, verbose); // try new fit
         ffnn->setBeta(fit); // make sure ffnn is set to fit betas
         resi_full = computeResidual(ffnn, true, true);
         resi_noreg = computeResidual(ffnn, false, true);
@@ -86,10 +86,10 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     ffnn->setBeta(bestfit);
 }
 
-void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &maxnsteps, const int &nfits, const double &resi_target, const int &verbose)
+void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits, const double &resi_target, const int &verbose)
 {
     double bestfit[ffnn->getNBeta()], bestfit_err[ffnn->getNBeta()];
-    bestFit(ffnn, bestfit, bestfit_err, maxnsteps, nfits, resi_target, verbose);
+    bestFit(ffnn, bestfit, bestfit_err, nfits, resi_target, verbose);
 }
 
 // print output of fitted NN to file
