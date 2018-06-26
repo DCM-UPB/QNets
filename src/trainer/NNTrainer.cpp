@@ -4,23 +4,33 @@
 
 // --- Helpers
 
-inline double computeMu(const double * const array, const int &len)
+inline double computeMu(const double * const * const array, const int &len, const int &index)
 {
     double mean = 0.;
-    for (int i=0; i<len; ++i) mean += array[i];
+    for (int i=0; i<len; ++i) mean += array[i][index];
     return mean/len;
 }
 
-inline double computeSigma(const double * const array, const int &len, const double &mean)
+inline double computeSigma(const double * const * const array, const int &len, const int &index, const double &mean)
 {
     double std = 0.;
-    for (int i=0; i<len; ++i) std += pow(array[i] - mean , 2);
+    for (int i=0; i<len; ++i) std += pow(array[i][index] - mean , 2);
     return sqrt(std/(len-1));
 }
 
-inline double computeSigma(const double * const array, const int &len)
+inline double computeSigma(const double * const * const array, const int &len, const int &index)
 {
-    return computeSigma(array, len, computeMu(array, len));
+    return computeSigma(array, len, index, computeMu(array, len, index));
+}
+
+inline void computeBounds(const double * const * const array, const int &len, const int &index, double &lbound, double &ubound)
+{
+    lbound = array[0][index];
+    ubound = array[0][index];
+    for (int i=1; i<len; ++i) {
+        if (array[i][index] < lbound) lbound = array[i][index];
+        else if (array[i][index] > ubound) ubound = array[i][index];
+    }
 }
 
 
@@ -28,15 +38,19 @@ inline double computeSigma(const double * const array, const int &len)
 
 void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
 {
+    using namespace std;
     // input side
     for (int i=0; i<_tdata.xndim; ++i) {
-        ffnn->getInputLayer()->getInputUnit(i)->setInputMu(computeMu(_tdata.x[i], _tdata.ndata));
-        ffnn->getInputLayer()->getInputUnit(i)->setInputSigma(computeSigma(_tdata.x[i], _tdata.ndata, ffnn->getInputLayer()->getInputUnit(i)->getInputMu()));
+        double mu = computeMu(_tdata.x, _tdata.ndata, i);
+        ffnn->getInputLayer()->getInputUnit(i)->setInputMu(mu);
+        ffnn->getInputLayer()->getInputUnit(i)->setInputSigma(computeSigma(_tdata.x, _tdata.ndata, i, mu));
     }
 
     // output side
     for (int i=0; i<_tdata.yndim; ++i) {
-        ffnn->getOutputLayer()->getOutputNNUnit(i)->setOutputBounds(*std::min_element(&_tdata.y[i][0], &_tdata.y[i][0]+_tdata.ndata), *std::max_element(&_tdata.y[i][0], &_tdata.y[i][0]+_tdata.ndata));
+        double lbound, ubound;
+        computeBounds(_tdata.y, _tdata.ndata, i, lbound, ubound);
+        ffnn->getOutputLayer()->getOutputNNUnit(i)->setOutputBounds(lbound, ubound);
     }
 }
 
@@ -104,12 +118,12 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
 
         // check break conditions
         if (bestresi_noreg <= resi_target) {
-            if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", bestresi_noreg, bestresi_full, bestresi_pure, resi_target);
+            if (verbose > 0) fprintf(stderr, "Unregularized testing residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", bestresi_noreg, bestresi_full, bestresi_pure, resi_target);
             break;
         } else {
-            if (verbose > 0) fprintf(stderr, "Unregularized fit residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, resi_target);
+            if (verbose > 0) fprintf(stderr, "Unregularized testing residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, resi_target);
             if (ifit >= nfits) {
-                if (verbose > 0) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized fit residual %f.\n\n", nfits, bestresi_noreg);
+                if (verbose > 0) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized testing residual %f.\n\n", nfits, bestresi_noreg);
                 break;
             }
             if (verbose > 0) fprintf(stderr, "Let's try again.\n");
@@ -119,7 +133,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     if (verbose > 0) { // print summary
         fprintf(stderr, "best fit summary:\n");
         for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, bestfit[i], bestfit_err[i]);
-        fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n \n", bestresi_full, bestresi_noreg, bestresi_pure);
+        fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n\n", bestresi_full, bestresi_noreg, bestresi_pure);
     }
 
     // set ffnn to bestfit betas

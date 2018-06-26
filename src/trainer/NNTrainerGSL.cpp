@@ -10,7 +10,7 @@ inline int setBetas(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * co
         ffnn->setBeta(i, gsl_vector_get(betas, i));
     }
     return nbeta;
-}
+};
 
 // counts total residual vector size
 // set nbeta or xndim to >0 to count regularization and derivative residual terms, respectively
@@ -18,47 +18,47 @@ inline int setBetas(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * co
 inline int calcNData(const int &nbase, const int &yndim, const int &nbeta = 0, const int &xndim = 0, const int nderiv = 2)
 {
     return nbase*yndim + nbeta + nderiv * nbase*xndim*yndim;
-}
+};
 
 // calculate index offset pointing right behind the basic residual part
 inline void calcOffset1(const int &nbase, const int &yndim, int &off)
 {
     off = nbase*yndim;
-}
+};
 
 // also calculate offset behind first derivative part
 inline void calcOffset12(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2)
 {
     calcOffset1(nbase, yndim, offd1);
     offd2 = offd1 + nbase*xndim*yndim;
-}
+};
 
 // also calculate offset behind second derivative part
 inline void calcOffset123(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2, int &offr)
 {
     calcOffset12(nbase, yndim, xndim, offd1, offd2);
     offr = offd2 + nbase*xndim*yndim;
-}
+};
 
 // store (root) square sum of residual vector f in chisq (chi)
 inline void calcRSS(const gsl_vector * const f, double &chi, double &chisq)
 {
     gsl_blas_ddot(f, f, &chisq);
     chi = sqrt(chisq);
-}
+};
 
 // calculate all costs from the two residual vectors
 inline void calcCosts(const gsl_vector * const f, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali)
 {
     calcRSS(f, chi, chisq);
     calcRSS(fvali, chi_vali, chisq_vali);
-}
+};
 
 // calculate all costs (from workspace and vali vector)
 inline void calcCosts(gsl_multifit_nlinear_workspace * const w, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali)
 {
     calcCosts(gsl_multifit_nlinear_residual(w), chi, chisq, fvali, chi_vali, chisq_vali);
-}
+};
 
 // calculate fit and error arrays
 void calcFitErr(gsl_multifit_nlinear_workspace * const w, double * const fit, double * const err, const int &ndata, const int &npar, const double &chisq)
@@ -73,7 +73,7 @@ void calcFitErr(gsl_multifit_nlinear_workspace * const w, double * const fit, do
         err[i] = c*sqrt(gsl_matrix_get(covar,i,i));
     }
     gsl_matrix_free(covar);
-}
+};
 
 
 // --- Cost functions
@@ -375,13 +375,13 @@ void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruc
 
         resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down
         if (bestvali >= 0 && resih >= bestvali) {
-            ++count_novali;
-            if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).", resih, bestvali, count_novali);
+            if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).\n\n", resih, bestvali, count_novali);
 
+            ++count_novali;
             if (count_novali < tstruct->maxn_novali) continue;
             else {
                 info = 1;
-                if (verbose>1) fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum.", count_novali);
+                if (verbose>1) fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum. Stopping early.\n\n", count_novali);
                 break;
             }
         }
@@ -389,23 +389,25 @@ void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruc
             count_novali = 0;
             bestvali = resih;
         }
-    }
-}
 
+        if (verbose>1) fprintf(stderr, "\n");
+    }
+};
+
+
+// --- Class method implementation
 
 void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &verbose) {
-
     //   Fit NN with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
     //   err: holds the corresponding fit error
-    //   resi_full: holds the full residual value, including all terms
-    //   resi_noreg: holds the residual value without regularization
-    //   resi_pure: holds the function-only residual value
     //
-    //   and with the following parameters:
-    //   nsteps : number of fitting iterations
+    //   and with the following parameter:
     //   verbose: print verbose output while fitting
-
+    //
+    //   Everything else is already configured via the
+    //   _tdata, _tconfig and optional _gsl_params
+    //   structs passed at creation to constructor
 
     int npar = ffnn->getNBeta(), ntrain = _tstruct.ntraining, nvali = _tstruct.nvalidation;
     const gsl_multifit_nlinear_type *T_full = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
@@ -518,6 +520,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
         for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, fit[i], err[i]);
+        fprintf(stderr, "\n");
     }
 
     gsl_multifit_nlinear_free(w_full);

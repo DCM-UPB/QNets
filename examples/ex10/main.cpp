@@ -60,7 +60,7 @@ int main (void) {
 
     int nl, nhl, nhu[2], nfits = 1;
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
-    bool verbose = true, flag_d1 = false, flag_d2 = false, flag_r = false;
+    bool verbose = false, flag_d1 = false, flag_d2 = false, flag_r = false;
 
 
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
