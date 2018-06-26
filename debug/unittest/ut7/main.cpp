@@ -15,6 +15,8 @@
 
 
 int main(){
+    return 0; // ! UNITTEST DISABLED !
+
     using namespace std;
 
     double mu, sigma;
@@ -170,7 +172,6 @@ int main(){
     assert( abs(sigma-std_dev) < 0.01 );
 
 
-
     // --- generateSmartBeta
     // generate smart beta for the whole FFNN
     smart_beta::generateSmartBeta(ffnn);
@@ -191,12 +192,39 @@ int main(){
                 // cout << "        expected " << (((iu1>ffnn->getLayer(il)->getNUnits()) || (iu2>ffnn->getLayer(il)->getNUnits())) ? true : false) << endl;
                 // cout << endl;
                 if ( !( (iu1>ffnn->getLayer(il)->getNUnits()) || (iu2>ffnn->getLayer(il)->getNUnits()) ) ){
-                    assert( dot_product < 0.000000001 );
+                    cout << dot_product << endl;
+                    assert( abs(dot_product) < 0.000000001 );
                 }
             }
         }
     }
 
+    /* // check unit mu sigma
+    for (int il=0; il<ffnn->getNLayers(); ++il) {
+        cout << "Layer " << il << endl << endl;
+        for (int j=0; j<ffnn->getLayer(il)->getNUnits(); ++j) {
+            NetworkUnit * u = ffnn->getLayer(il)->getUnit(j);
+            cout << "Unit " << j << ", id: " << u->getIdCode() << endl;
+            cout << "mu_out " << u->getOutputMu() << ", sigma_out " << u->getOutputSigma() << endl;
+            cout << endl;
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    for (int il=0; il<ffnn->getNFedLayers(); ++il) {
+        cout << "Fed Layer " << il << endl << endl;
+        for (int j=0; j<ffnn->getFedLayer(il)->getNFedUnits(); ++j) {
+            FedNetworkUnit * u = ffnn->getFedLayer(il)->getFedUnit(j);
+            cout << "Fed Unit " << j << ", id: " << u->getIdCode() << endl;
+            cout << "mu_idpv " << u->getIdealProtoMu() << ", sigma_idpv " << u->getIdealProtoSigma() << endl;
+            cout << "mu_feed " << u->getFeeder()->getFeedMu() << ", sigma_feed " << u->getFeeder()->getFeedSigma() << endl;
+            cout << endl;
+        }
+        cout << endl;
+    }
+    cout << endl;
+    */
 
     delete ffnn;
 
