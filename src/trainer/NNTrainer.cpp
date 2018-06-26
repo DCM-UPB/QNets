@@ -87,7 +87,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
 {
     int npar = ffnn->getNBeta();
     double fit[npar], err[npar];
-    double resi_pure = -1.0, resi_noreg = -1.0, resi_full = -1.0, bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
+    double bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
 
     int ifit = 0;
     while(true) {
@@ -99,9 +99,9 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
 
         findFit(ffnn, fit, err, verbose); // try new fit
         ffnn->setBeta(fit); // make sure ffnn is set to fit betas
-        resi_full = computeResidual(ffnn, true, true);
-        resi_noreg = computeResidual(ffnn, false, true);
-        resi_pure = computeResidual(ffnn, false, false);
+        double resi_full = computeResidual(ffnn, true, true);
+        double resi_noreg = computeResidual(ffnn, false, true);
+        double resi_pure = computeResidual(ffnn, false, false);
 
         // check for new best testing residual
         if(ifit < 1 || (resi_noreg < bestresi_noreg)) {

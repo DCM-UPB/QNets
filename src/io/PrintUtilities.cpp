@@ -206,7 +206,7 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
 
 
 
-void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, std::string what, std::string filename){
+void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, const std::string &what, const std::string &filename){
     using namespace std;
 
     const double delta = (max-min)/(npoints-1);
@@ -239,6 +239,9 @@ void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, c
         } else if (what == "getVariationalFirstDerivative"){
             v[i] = ffnn->getVariationalFirstDerivative(output_i, input_i);
         } else {
+            delete[] x;
+            delete[] v;
+            delete[] input;
             throw std::invalid_argument( "writePlotFile(): the parameter 'what' was not valid" );
         }
     }

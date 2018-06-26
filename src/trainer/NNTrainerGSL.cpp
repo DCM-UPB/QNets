@@ -152,7 +152,7 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
     gsl_vector * const fvali_pure = ((struct GSLFitStruct *)tstruct)->fvali_pure;
 
     gsl_vector * fnow;
-    int nshift, nshift2, ishift, inshift, inshift2;
+    int nshift, nshift2, ishift;
     const double lambda_d1_red = sqrt(lambda_d1), lambda_d2_red = sqrt(lambda_d2);
 
     setBetas(ffnn, betas);
@@ -172,8 +172,8 @@ int ffnn_f_deriv(const gsl_vector * betas, void * const tstruct, gsl_vector * f)
             }
             ishift = (i-ntrain)*yndim;
         }
-        inshift = ishift + nshift;
-        inshift2 = ishift + nshift2;
+        int inshift = ishift + nshift;
+        int inshift2 = ishift + nshift2;
 
         for (int j=0; j<yndim; ++j) {
             gsl_vector_set(fnow, ishift + j,  w[i][j] * (ffnn->getOutput(j) - y[i][j]));
@@ -362,8 +362,9 @@ void printStepInfo(const gsl_multifit_nlinear_workspace * const w, const GSLFitS
 // solve the system with a maximum of tstruct->max_nsteps iterations, stopping early when validation error doesn't decrease for too long
 void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruct * const tstruct, const int &verbose, int &status, int &info)
 {
-    double resih, bestvali = -1.;
+    double bestvali = -1.;
     int count_novali = 0;
+    
     while (true) {
         status = gsl_multifit_nlinear_iterate(w); // iterate workspace
         if (verbose > 1) printStepInfo(w, tstruct, status);
@@ -373,7 +374,7 @@ void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruc
             break;
         }
 
-        resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down
+        double resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down
         if (bestvali >= 0 && resih >= bestvali) {
             if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).\n\n", resih, bestvali, count_novali);
 
