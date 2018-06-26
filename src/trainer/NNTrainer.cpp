@@ -1,4 +1,44 @@
 #include "NNTrainer.hpp"
+#include <cmath>
+#include <algorithm>
+
+// --- Helpers
+
+inline double computeMu(const double * const array, const int &len)
+{
+    double mean = 0.;
+    for (int i=0; i<len; ++i) mean += array[i];
+    return mean/len;
+}
+
+inline double computeSigma(const double * const array, const int &len, const double &mean)
+{
+    double std = 0.;
+    for (int i=0; i<len; ++i) std += pow(array[i] - mean , 2);
+    return sqrt(std/(len-1));
+}
+
+inline double computeSigma(const double * const array, const int &len)
+{
+    return computeSigma(array, len, computeMu(array, len));
+}
+
+
+// -- Class methods
+
+void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
+{
+    // input side
+    for (int i=0; i<_tdata.xndim; ++i) {
+        ffnn->getInputLayer()->getInputUnit(i)->setInputMu(computeMu(_tdata.x[i], _tdata.ndata));
+        ffnn->getInputLayer()->getInputUnit(i)->setInputSigma(computeSigma(_tdata.x[i], _tdata.ndata, ffnn->getInputLayer()->getInputUnit(i)->getInputMu()));
+    }
+
+    // output side
+    for (int i=0; i<_tdata.yndim; ++i) {
+        ffnn->getOutputLayer()->getOutputNNUnit(i)->setOutputBounds(*std::min_element(&_tdata.y[i][0], &_tdata.y[i][0]+_tdata.ndata), *std::max_element(&_tdata.y[i][0], &_tdata.y[i][0]+_tdata.ndata));
+    }
+}
 
 double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r, const bool &flag_d)
 {
@@ -79,7 +119,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     if (verbose > 0) { // print summary
         fprintf(stderr, "best fit summary:\n");
         for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, bestfit[i], bestfit_err[i]);
-        fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n", bestresi_full, bestresi_noreg, bestresi_pure);
+        fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n \n", bestresi_full, bestresi_noreg, bestresi_pure);
     }
 
     // set ffnn to bestfit betas
@@ -93,7 +133,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits,
 }
 
 // print output of fitted NN to file
-void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const double &xscale, const double &yscale, const double &xshift, const double &yshift, const bool &print_d1, const bool &print_d2)
+void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const bool &print_d1, const bool &print_d2)
 {
     using namespace std;
     double base_input = 0.;
@@ -102,9 +142,9 @@ void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const doub
         for (int j = 0; j<_tdata.yndim; ++j) {
             stringstream ss;
             ss << i << "_" << j << ".txt";
-            writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str(), xscale, yscale, xshift, yshift);
-            if (print_d1) writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str(), xscale, yscale, xshift, yshift);
-            if (print_d2) writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str(), xscale, yscale, xshift, yshift);
+            writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str());
+            if (print_d1) writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str());
+            if (print_d2) writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str());
         }
     }
 }

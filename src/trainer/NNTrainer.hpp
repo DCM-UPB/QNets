@@ -12,13 +12,16 @@
 class NNTrainer
 {
 protected:
-    NNTrainingData _tdata;
-    NNTrainingConfig _tconfig;
+    const NNTrainingData _tdata;
+    const NNTrainingConfig _tconfig;
 public:
     // construct from individual structures / ffnn
-    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig){_tdata = tdata; _tconfig = tconfig;}
+    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig) : _tdata(tdata), _tconfig(tconfig) {}
 
     virtual ~NNTrainer(){}
+
+    // set shift/scale parameters of NN units, to achieve proper normalization with respect to tdata
+    void setNormalization(FeedForwardNeuralNetwork * const ffnn);
 
     // compute residual of ffnn vs data in _tdata
     double computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r = false, const bool &flag_d = false);
@@ -31,7 +34,7 @@ public:
     void bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits, const double &resi_target = 0., const int &verbose = 0); // fits NN and uses internal bestfit(_err) arrays
 
     // print output of fitted NN to file
-    void printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const double &xscale, const double &yscale, const double &xshift, const double &yshift, const bool &print_d1 = false, const bool &print_d2 = false);
+    void printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const bool &print_d1 = false, const bool &print_d2 = false);
 };
 
 

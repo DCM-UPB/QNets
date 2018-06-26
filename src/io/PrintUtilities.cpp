@@ -206,7 +206,7 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
 
 
 
-void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, std::string what, std::string filename, const double &xscale, const double &yscale, const double &xshift, const double &yshift){
+void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, std::string what, std::string filename){
     using namespace std;
 
     const double delta = (max-min)/(npoints-1);
@@ -224,20 +224,20 @@ void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, c
     // compute the values
     const int ninput = ffnn->getNInput();
     double * input = new double[ninput];
-    for (int i=0; i<ninput; ++i) input[i] = (base_input[i] + xshift) * xscale;
+    for (int i=0; i<ninput; ++i) input[i] = base_input[i];
     for (int i=0; i<npoints; ++i){
-        input[input_i] = (x[i] + xshift) * xscale;
+        input[input_i] = x[i];
         ffnn->setInput(input);
         ffnn->FFPropagate();
 
         if (what == "getOutput"){
-            v[i] = ffnn->getOutput(output_i) / yscale - yshift;
+            v[i] = ffnn->getOutput(output_i);
         } else if (what == "getFirstDerivative"){
-            v[i] = ffnn->getFirstDerivative(output_i, input_i) / yscale * xscale;
+            v[i] = ffnn->getFirstDerivative(output_i, input_i);
         } else if (what == "getSecondDerivative"){
-            v[i] = ffnn->getSecondDerivative(output_i, input_i) / pow(yscale, 2) * pow(xscale, 2);
+            v[i] = ffnn->getSecondDerivative(output_i, input_i);
         } else if (what == "getVariationalFirstDerivative"){
-            v[i] = ffnn->getVariationalFirstDerivative(output_i, input_i) / yscale;
+            v[i] = ffnn->getVariationalFirstDerivative(output_i, input_i);
         } else {
             throw std::invalid_argument( "writePlotFile(): the parameter 'what' was not valid" );
         }

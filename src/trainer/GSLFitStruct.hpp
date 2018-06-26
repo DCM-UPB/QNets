@@ -16,7 +16,7 @@ struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
     gsl_vector * fvali_noreg;
     gsl_vector * fvali_pure;
 
-    void copyData(NNTrainingData &tdata)
+    void copyData(const NNTrainingData &tdata)
     {
         ndata = tdata.ndata;
         ntraining = tdata.ntraining;
@@ -30,7 +30,7 @@ struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
         w = tdata.w;
     }
 
-    void copyConfig(NNTrainingConfig &tconfig)
+    void copyConfig(const NNTrainingConfig &tconfig)
     {
         flag_r = tconfig.flag_r;
         flag_d1 = tconfig.flag_d1;
@@ -40,6 +40,12 @@ struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
         lambda_d2 = tconfig.lambda_d2;
         maxn_steps = tconfig.maxn_steps;
         maxn_novali = tconfig.maxn_novali;
+    }
+
+    void copyDatConf(const NNTrainingData &tdata, const NNTrainingConfig &tconfig)
+    {
+        copyData(tdata);
+        copyConfig(tconfig);
     }
 };
 

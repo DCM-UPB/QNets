@@ -20,13 +20,10 @@ class NNTrainerGSL: public NNTrainer
 {
 protected:
     GSLFitStruct _tstruct;
-    gsl_multifit_nlinear_parameters _gsl_params;
+    const gsl_multifit_nlinear_parameters _gsl_params;
 public:
-    NNTrainerGSL(const NNTrainingData &tdata, const NNTrainingConfig &tconfig, const gsl_multifit_nlinear_parameters &gsl_params = gsl_multifit_nlinear_default_parameters()): NNTrainer(tdata, tconfig)
-    {
-        _tstruct.copyData(_tdata); _tstruct.copyConfig(_tconfig); _gsl_params = gsl_params;
-    }
-
+    NNTrainerGSL(const NNTrainingData &tdata, const NNTrainingConfig &tconfig, const gsl_multifit_nlinear_parameters &gsl_params = gsl_multifit_nlinear_default_parameters()): NNTrainer(tdata, tconfig), _gsl_params(gsl_params) {_tstruct.copyDatConf(_tdata, _tconfig);}
+    
     void findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &verbose = 0);
 };
 

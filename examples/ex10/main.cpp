@@ -141,31 +141,14 @@ int main (void) {
         if (verbose) printf ("data: %i %g %g\n", i, xdata[i][0], ydata[i][0]);
     };
 
-    // currently the normalization problem is solved here
-    double xscale = 0.1;
-    double yscale = 0.95;
-    double xshift = 0.0;
-    double yshift = 0.0;
-
-    cout << "xscale: " << xscale << endl;
-    cout << "yscale: " << yscale << endl;
-    cout << "xshift: " << xshift << endl;
-    cout << "yshift: " << yshift << endl;
-
-    for (int i = 0; i < ndata; ++i) {
-        xdata[i][0] = (xdata[i][0] + xshift) * xscale;
-        ydata[i][0] = (ydata[i][0] + yshift) * yscale;
-        d1data[i][0][0] = d1data[i][0][0] * yscale / xscale;
-        d2data[i][0][0] = d2data[i][0][0] * yscale / pow(xscale, 2);
-    }
-
     // create data and config structs
     tdata = {ndata, ntraining, nvalidation, 1, 1, xdata, ydata, d1data, d2data, weights};
     tconfig = {flag_r, flag_d1, flag_d2, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // create trainer and find best fit
     trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, nfits, maxchi, verbose ? 2 : 1);
+    trainer->setNormalization(ffnn); // setup proper normalization before fitting
+    trainer->bestFit(ffnn, nfits, maxchi, verbose ? 2 : 1); // find a fit out of nfits with minimal testing residual
 
     //
 
@@ -175,7 +158,7 @@ int main (void) {
     cout << "Now we print the output/NN to a file. The end." << endl;
 
     // NON I/O CODE
-    trainer->printFitOutput(ffnn, lb, ub, 200, xscale, yscale, xshift, yshift, true, true);
+    trainer->printFitOutput(ffnn, lb, ub, 200, true, true);
     ffnn->storeOnFile("nn.txt");
 
     // Delete allocations

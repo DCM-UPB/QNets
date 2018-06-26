@@ -14,6 +14,9 @@ public:
 
     // string code methods
     virtual std::string getIdCode(){return "OUT";} // return identifier for unit type
+
+    // set output data boundaries and shift/scale accordingly
+    void setOutputBounds(const double &lbound, const double &ubound);
 };
 
 #endif
