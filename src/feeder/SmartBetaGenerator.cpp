@@ -20,8 +20,9 @@ namespace smart_beta{
     {
         // --- Internal methods in local anonymous namespace
 
-        const double MIN_BETA_NORM = 0.001;
-        const int N_TRY_BEST_LD_BETA = 20;
+        const double MIN_BETA_NORM = 0.001; // minimal allowed beta vector norm
+        const int N_TRY_BEST_LD_BETA = 20; // how many tries to find best ld beta
+        const int BETA_INDEX_OFFSET = 0; // leave out beta before index (experimental, don't use)
 
         std::vector<int> _findIndexesOfUnitsWithFeeder(FedNetworkLayer * L){
             //
@@ -51,17 +52,18 @@ namespace smart_beta{
                 throw std::runtime_error( "Provided unit does not have a feeder, therefore it does not need beta" );
             }
 
-            // first compute the denominators
+            // first compute the source mu / sigma
             double mu_source = 0;
             double sigma_source = 0;
-            for (int i=0; i<feeder->getNSources(); ++i){
+
+            for (int i=BETA_INDEX_OFFSET; i<feeder->getNSources(); ++i){ // leave out offset sources here, assuming first source is always offset!
                 mu_source += feeder->getSource(i)->getOutputMu();
                 sigma_source += feeder->getSource(i)->getOutputSigma();
             }
 
             // assign the correct values
-            mu = U->getIdealProtoMu() / mu_source;
-            sigma = U->getIdealProtoSigma() / sigma_source;
+            mu = (mu_source != 0) ? U->getIdealProtoMu() / mu_source : 0.;
+            sigma = (sigma_source != 0) ? U->getIdealProtoSigma() / sigma_source : 1.;
         }
 
 
@@ -75,7 +77,7 @@ namespace smart_beta{
             mt19937_64 rgen = mt19937_64(rdev());
             normal_distribution<double> norm(mu, sigma);
 
-            for (int i=0; i<feeder->getNBeta(); ++i){
+            for (int i=BETA_INDEX_OFFSET; i<feeder->getNBeta(); ++i){
                 feeder->setBeta(i, norm(rgen));
             }
         }
@@ -89,11 +91,11 @@ namespace smart_beta{
 
             // build vectors v and u, corresponding to the betas of the two feeders
             vector<double> v;
-            for (int i=0; i<fixed_feeder->getNBeta(); ++i){
+            for (int i=BETA_INDEX_OFFSET; i<fixed_feeder->getNBeta(); ++i){
                 v.push_back(fixed_feeder->getBeta(i));
             }
             vector<double> u;
-            for (int i=0; i<feeder->getNBeta(); ++i){
+            for (int i=BETA_INDEX_OFFSET; i<feeder->getNBeta(); ++i){
                 u.push_back(feeder->getBeta(i));
             }
 
@@ -113,8 +115,8 @@ namespace smart_beta{
             }
 
             // set the values of u to the feeder
-            for (int i=0; i<feeder->getNBeta(); ++i){
-                feeder->setBeta(i, u[i]*sqrt(u_u/new_u_u));
+            for (int i=BETA_INDEX_OFFSET; i<feeder->getNBeta(); ++i){
+                feeder->setBeta(i, u[i-BETA_INDEX_OFFSET]*sqrt(u_u/new_u_u));
             }
         }
     }
@@ -142,7 +144,7 @@ namespace smart_beta{
             _setRandomBeta(u0->getFeeder(), mu, sigma);
 
             // set the other unit beta until a complete basis set is formed
-            const int n_li_units = ( signed(idx.size()) <= u0->getFeeder()->getNBeta() ) ? signed(idx.size()) : u0->getFeeder()->getNBeta();
+            const int n_li_units = ( signed(idx.size()) <= u0->getFeeder()->getNBeta()-BETA_INDEX_OFFSET ) ? signed(idx.size()) : u0->getFeeder()->getNBeta()-BETA_INDEX_OFFSET;
             for (int i=1; i<n_li_units; ++i){
                 FedNetworkUnit * u = L->getFedUnit(idx[i]);
                 double mu, sigma;
@@ -163,22 +165,22 @@ namespace smart_beta{
                 }
             }
 
-            // set all the remaninig unit beta, which will be redondant
+            // set all the remaninig unit beta, which will be redundant / linear dependent
             for (int i=n_li_units; i<signed(idx.size()) ; ++i){
                 FedNetworkUnit * u = L->getFedUnit(idx[i]);
                 double mu, sigma;
                 _computeBetaMuAndSigma(u, mu, sigma);
                 double best_dot_product = -1.;
                 vector<double> best_beta;
-                for (int ib=0; ib<u->getFeeder()->getNBeta(); ++ib) best_beta.push_back(0.);
-                for (int itry=0; itry<10; ++itry){
+                for (int ib=BETA_INDEX_OFFSET; ib<u->getFeeder()->getNBeta(); ++ib) best_beta.push_back(0.);
+                for (int itry=0; itry<N_TRY_BEST_LD_BETA; ++itry){
                     _setRandomBeta(u->getFeeder(), mu, sigma);
                     vector<double> beta_u;
-                    for (int ib=0; ib<u->getFeeder()->getNBeta(); ++ib) beta_u.push_back(u->getFeeder()->getBeta(ib));
+                    for (int ib=BETA_INDEX_OFFSET; ib<u->getFeeder()->getNBeta(); ++ib) beta_u.push_back(u->getFeeder()->getBeta(ib));
                     double min_dot_product = -1.;
                     for (int j=0; j<i; ++j){
                         vector<double> beta_v;
-                        for (int ib=0; ib<L->getFedUnit(idx[j])->getFeeder()->getNBeta(); ++ib) beta_v.push_back(L->getFedUnit(idx[j])->getFeeder()->getBeta(ib));
+                        for (int ib=BETA_INDEX_OFFSET; ib<L->getFedUnit(idx[j])->getFeeder()->getNBeta(); ++ib) beta_v.push_back(L->getFedUnit(idx[j])->getFeeder()->getBeta(ib));
                         const double dot_product = abs(inner_product(begin(beta_u), end(beta_u), begin(beta_v), 0.0))/inner_product(begin(beta_u), end(beta_u), begin(beta_u), 0.0);
                         if (min_dot_product < 0.) min_dot_product = dot_product;
                         if (dot_product < min_dot_product) min_dot_product = dot_product;
@@ -186,10 +188,10 @@ namespace smart_beta{
                     if (best_dot_product < 0.) best_dot_product = min_dot_product;
                     if (min_dot_product < best_dot_product){
                         best_dot_product = min_dot_product;
-                        for (int ib=0; ib<u->getFeeder()->getNBeta(); ++ib) best_beta[ib] = beta_u[ib];
+                        for (int ib=BETA_INDEX_OFFSET; ib<u->getFeeder()->getNBeta(); ++ib) best_beta[ib-BETA_INDEX_OFFSET] = beta_u[ib-BETA_INDEX_OFFSET];
                     }
                 }
-                for (int ib=0; ib<u->getFeeder()->getNBeta(); ++ib) u->getFeeder()->setBeta(ib, best_beta[ib]);
+                for (int ib=BETA_INDEX_OFFSET; ib<u->getFeeder()->getNBeta(); ++ib) u->getFeeder()->setBeta(ib, best_beta[ib-BETA_INDEX_OFFSET]);
             }
         }
     }
