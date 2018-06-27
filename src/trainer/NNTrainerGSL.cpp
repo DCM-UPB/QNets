@@ -1,5 +1,12 @@
 #include "NNTrainerGSL.hpp"
 
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_multifit_nlinear.h>
+
+#include <cstddef> // NULL
+
 // --- Helper functions
 
 // set new NN betas
@@ -51,7 +58,7 @@ inline void calcRSS(const gsl_vector * const f, double &chi, double &chisq)
 inline void calcCosts(const gsl_vector * const f, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali)
 {
     calcRSS(f, chi, chisq);
-    calcRSS(fvali, chi_vali, chisq_vali);
+    if (fvali) calcRSS(fvali, chi_vali, chisq_vali);
 };
 
 // calculate all costs (from workspace and vali vector)
@@ -364,7 +371,7 @@ void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruc
 {
     double bestvali = -1.;
     int count_novali = 0;
-    
+
     while (true) {
         status = gsl_multifit_nlinear_iterate(w); // iterate workspace
         if (verbose > 1) printStepInfo(w, tstruct, status);
@@ -420,9 +427,9 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     const bool flag_d = _tstruct.flag_d1 || _tstruct.flag_d2;
     int ntrain_noreg, nvali_noreg, ntrain_full, nvali_full;
     int status, info;
-    double resih, chisq, chi0, chi0_vali;
+    double resih, chisq, chi0, chi0_vali = 0.;
     double resi_full, resi_noreg, resi_pure;
-    double resi_vali_full, resi_vali_noreg, resi_vali_pure;
+    double resi_vali_full = 0., resi_vali_noreg = 0., resi_vali_pure = 0.;
 
     _tstruct.ffnn = ffnn; // set the to-be-fitted FFNN
 
@@ -483,9 +490,17 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     w_full = gsl_multifit_nlinear_alloc (T_full, &_gsl_params, ntrain_full, npar);
     w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &_gsl_params, ntrain_noreg, npar);
     w_pure = gsl_multifit_nlinear_alloc (T_pure, &_gsl_params, ntrain, npar);
-    _tstruct.fvali_pure = gsl_vector_alloc(nvali);
-    _tstruct.fvali_noreg = flag_d ? gsl_vector_alloc(nvali_noreg) : _tstruct.fvali_pure;
-    _tstruct.fvali_full = _tstruct.flag_r ? gsl_vector_alloc(nvali_full) : _tstruct.fvali_noreg;
+    if (_flag_vali) {
+        _tstruct.fvali_pure = gsl_vector_alloc(nvali);
+        _tstruct.fvali_noreg = flag_d ? gsl_vector_alloc(nvali_noreg) : _tstruct.fvali_pure;
+        _tstruct.fvali_full = _tstruct.flag_r ? gsl_vector_alloc(nvali_full) : _tstruct.fvali_noreg;
+    }
+    else {
+        _tstruct.fvali_pure = NULL;
+        _tstruct.fvali_noreg = NULL;
+        _tstruct.fvali_full = NULL;
+        if (verbose > 1) fprintf(stderr, "[NNTrainerGSL] Warning: Validation residual calculation disabled, i.e. no early stopping.\n");
+    }
 
     // initialize solver with starting point and calculate initial cost
     gsl_multifit_nlinear_init(&gx.vector, &fdf_full, w_full);
@@ -527,7 +542,9 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     gsl_multifit_nlinear_free(w_full);
     gsl_multifit_nlinear_free(w_noreg);
     gsl_multifit_nlinear_free(w_pure);
-    gsl_vector_free(_tstruct.fvali_pure);
-    if (flag_d) gsl_vector_free(_tstruct.fvali_noreg);
-    if (_tstruct.flag_r) gsl_vector_free(_tstruct.fvali_full);
+    if (_flag_vali) {
+        gsl_vector_free(_tstruct.fvali_pure);
+        if (flag_d) gsl_vector_free(_tstruct.fvali_noreg);
+        if (_tstruct.flag_r) gsl_vector_free(_tstruct.fvali_full);
+    }
 };

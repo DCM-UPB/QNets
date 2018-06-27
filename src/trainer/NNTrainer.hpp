@@ -12,11 +12,13 @@
 class NNTrainer
 {
 protected:
-    const NNTrainingData _tdata;
-    const NNTrainingConfig _tconfig;
+    const NNTrainingData _tdata; // holds all the input data, their counts and weights
+    const NNTrainingConfig _tconfig; // holds training parameters and flags, mainly to configure the residual
+    const bool _flag_vali; // do we have validation data?
+    const bool _flag_test; // do we have testing data?
 public:
     // construct from individual structures / ffnn
-    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig) : _tdata(tdata), _tconfig(tconfig) {}
+    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig) : _tdata(tdata), _tconfig(tconfig), _flag_vali(_tdata.nvalidation > 0), _flag_test(_tdata.ntraining + _tdata.nvalidation == _tdata.ndata) {}
 
     virtual ~NNTrainer(){}
 

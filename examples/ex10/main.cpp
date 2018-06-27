@@ -1,11 +1,8 @@
-
 #include <iostream>
 #include <cmath>
-#include <numeric>
-#include <algorithm>
+#include <random>
 
 #include "NNTrainerGSL.hpp"
-#include "PrintUtilities.hpp"
 
 
 /*

@@ -4,7 +4,9 @@
 #include "NNTrainingData.hpp"
 #include "NNTrainingConfig.hpp"
 #include "FeedForwardNeuralNetwork.hpp"
+
 #include <gsl/gsl_vector.h>
+#include <cstddef> // NULL
 
 // full struct for training, to be passed to NNTrainer and subsequently to e.g. GSL methods
 struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
@@ -12,9 +14,9 @@ struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
     FeedForwardNeuralNetwork * ffnn; // Storing a pointer to the to-be-trained FFNN
 
     // validation residuals
-    gsl_vector * fvali_full;
-    gsl_vector * fvali_noreg;
-    gsl_vector * fvali_pure;
+    gsl_vector * fvali_full = NULL;
+    gsl_vector * fvali_noreg = NULL;
+    gsl_vector * fvali_pure = NULL;
 
     void copyData(const NNTrainingData &tdata)
     {

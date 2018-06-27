@@ -56,9 +56,9 @@ void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
 
 double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r, const bool &flag_d)
 {
-    const int offset = _tdata.ntraining + _tdata.nvalidation;
     const int nbeta = ffnn->getNBeta();
     const double lambda_r_red = _tconfig.lambda_r / nbeta;
+    const int offset = _flag_test ? _tdata.ntraining + _tdata.nvalidation : 0; // if no testing data, we fall back to the full training + vali set
 
     double resi = 0.;
 
@@ -88,6 +88,8 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     int npar = ffnn->getNBeta();
     double fit[npar], err[npar];
     double bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
+
+    if (verbose > 0 && !_flag_test) fprintf(stderr, "[NNTrainer] Warning: Testing residual calculation disabled, i.e. testing is based on training+validation data.\n");
 
     int ifit = 0;
     while(true) {
