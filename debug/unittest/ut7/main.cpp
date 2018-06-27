@@ -97,7 +97,7 @@ int main(){
     // compute mu and beta
     smart_beta::_computeBetaMuAndSigma(u, mu, sigma);
     // sample N times the beta
-    const int N = 40000;
+    const int N = 10000;
     vector<double> betas;
     for (int i=0; i<N; ++i){
         smart_beta::_setRandomBeta(feeder, mu, sigma);
@@ -118,8 +118,8 @@ int main(){
     }
     std_dev = sqrt(std_dev/(N*(feeder->getNBeta()-BETA_INDEX_OFFSET)-1));
     // assertions
-    assert( abs(mu-mean) < 0.05 );
-    assert( abs(sigma-std_dev) < 0.01 );
+    assert( abs(mu-mean) < 0.1 );
+    assert( abs(sigma-std_dev) < 0.05 );
 
 
     // --- _makeBetaOrthogonal

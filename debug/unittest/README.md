@@ -41,3 +41,9 @@
 ## Unit Test 7
 
 `ut7/`: check the SmartBetaGenerator functions
+
+
+
+## Unit Test 8
+
+`ut8/`: check that the trainer finds a perfect fit for a target function resembling a NN

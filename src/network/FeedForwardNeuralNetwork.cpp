@@ -160,7 +160,7 @@ void FeedForwardNeuralNetwork::randomizeBetas()
                         {
                             nsource = _L_fed[i]->getFedUnit(j)->getFeeder()->getNBeta();
                             // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
-                            // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
+                            // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * n^(1/2) , where n is nsource
                             bah = 4 * pow(nsource, -0.5); // (b-a)/2
                             rd = uniform_real_distribution<double>(-bah,bah);
 
