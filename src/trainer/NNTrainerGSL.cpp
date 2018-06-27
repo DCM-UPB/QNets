@@ -24,7 +24,7 @@ inline int setBetas(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * co
 // set nderiv = 1 if only one of both deriv residuals should be counted
 inline int calcNData(const int &nbase, const int &yndim, const int &nbeta = 0, const int &xndim = 0, const int nderiv = 2)
 {
-    return nbase*yndim + nbeta + nderiv * nbase*xndim*yndim;
+    return (nbase > 0) ? nbase*yndim + nbeta + nderiv * nbase*xndim*yndim : 0;
 };
 
 // calculate index offset pointing right behind the basic residual part
@@ -259,10 +259,12 @@ int ffnn_f_pure_reg(const gsl_vector * betas, void * const tstruct, gsl_vector *
         gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
     }
 
-    calcOffset1(nvali, yndim, nshift);
-    for (int i=0; i<nvali_reg; ++i) {
-        if (i<nshift) gsl_vector_set(fvali, i, gsl_vector_get(fvali_pure, i));
-        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
+    if (nvali > 0) {
+        calcOffset1(nvali, yndim, nshift);
+        for (int i=0; i<nvali_reg; ++i) {
+            if (i<nshift) gsl_vector_set(fvali, i, gsl_vector_get(fvali_pure, i));
+            else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
+        }
     }
 
     return GSL_SUCCESS;
@@ -315,9 +317,11 @@ int ffnn_f_deriv_reg(const gsl_vector * betas, void * const tstruct, gsl_vector 
         gsl_vector_set(f, i, lambda_r_red * gsl_vector_get(betas, i-nshift));
     }
 
-    for (int i=0; i<nvali_reg; ++i) {
-        if (i<nshift_vali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_noreg, i));
-        else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift_vali));
+    if (nvali > 0) {
+        for (int i=0; i<nvali_reg; ++i) {
+            if (i<nshift_vali) gsl_vector_set(fvali, i, gsl_vector_get(fvali_noreg, i));
+            else gsl_vector_set(fvali, i, lambda_r_red * gsl_vector_get(betas, i-nshift_vali));
+        }
     }
 
     return GSL_SUCCESS;
@@ -361,7 +365,7 @@ void printStepInfo(const gsl_multifit_nlinear_workspace * const w, const GSLFitS
 
     // print
     fprintf(stderr, "status = %s\n", gsl_strerror(status));
-    fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.4f (train), %.4f (vali)\n", gsl_multifit_nlinear_niter(w), 1.0 / rcond, gsl_blas_dnrm2(f), gsl_blas_dnrm2(tstruct->fvali_full));
+    fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.8f (train), %.8f (vali)\n", gsl_multifit_nlinear_niter(w), 1.0 / rcond, gsl_blas_dnrm2(f), (tstruct->fvali_full) ? gsl_blas_dnrm2(tstruct->fvali_full) : 0.);
     for (size_t i=0; i<x->size; ++i) fprintf(stderr, "b%zu: %f, ", i,  gsl_vector_get(x, i));
     fprintf(stderr, "\n");
 };
@@ -381,21 +385,30 @@ void earlyStopDriver(gsl_multifit_nlinear_workspace * const w, const GSLFitStruc
             break;
         }
 
-        double resih = gsl_blas_dnrm2(tstruct->fvali_noreg); // check if validation residual went down
-        if (bestvali >= 0 && resih >= bestvali) {
-            if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).\n\n", resih, bestvali, count_novali);
+        if (tstruct->nvalidation > 0) { // then check if validation residual went down
+            double resih = gsl_blas_dnrm2(tstruct->fvali_noreg);
 
-            ++count_novali;
-            if (count_novali < tstruct->maxn_novali) continue;
-            else {
-                info = 1;
-                if (verbose>1) fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum. Stopping early.\n\n", count_novali);
+            if (resih == 0 || std::isnan(resih)) { // if it is 0 or nan, stop
+                info = 0;
+                if (verbose>1) fprintf(stderr, "Unregularized validation residual reached 0 (or NaN). Stopping early.\n\n");
                 break;
             }
-        }
-        else { // new validation minimum found
-            count_novali = 0;
-            bestvali = resih;
+
+            if (bestvali >= 0. && resih >= bestvali) { // count how long it didn't go down
+                if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).\n\n", resih, bestvali, count_novali);
+
+                ++count_novali;
+                if (count_novali < tstruct->maxn_novali) continue;
+                else { // if too long, break
+                    info = 1;
+                    if (verbose>1) fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum. Stopping early.\n\n", count_novali);
+                    break;
+                }
+            }
+            else { // new validation minimum found
+                count_novali = 0;
+                bestvali = resih;
+            }
         }
 
         if (verbose>1) fprintf(stderr, "\n");
@@ -425,7 +438,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
 
     const int dof = ntrain - npar;
     const bool flag_d = _tstruct.flag_d1 || _tstruct.flag_d2;
-    int ntrain_noreg, nvali_noreg, ntrain_full, nvali_full;
+    int ntrain_pure, ntrain_noreg, nvali_pure, nvali_noreg, ntrain_full, nvali_full;
     int status, info;
     double resih, chisq, chi0, chi0_vali = 0.;
     double resi_full, resi_noreg, resi_pure;
@@ -435,11 +448,14 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
 
     // configure all three fdf objects
 
+    ntrain_pure = calcNData(ntrain, _tstruct.yndim);
+    nvali_pure = calcNData(nvali, _tstruct.yndim);
+
     // first the pure fdf
     fdf_pure.f = ffnn_f_pure;
     fdf_pure.df = ffnn_df_pure;
     fdf_pure.fvv = NULL;
-    fdf_pure.n = calcNData(ntrain, _tstruct.yndim);
+    fdf_pure.n = ntrain_pure;
     fdf_pure.p = npar;
     fdf_pure.params = &_tstruct;
 
@@ -489,9 +505,9 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     // allocate workspace with default parameters, also allocate space for validation
     w_full = gsl_multifit_nlinear_alloc (T_full, &_gsl_params, ntrain_full, npar);
     w_noreg = gsl_multifit_nlinear_alloc (T_noreg, &_gsl_params, ntrain_noreg, npar);
-    w_pure = gsl_multifit_nlinear_alloc (T_pure, &_gsl_params, ntrain, npar);
+    w_pure = gsl_multifit_nlinear_alloc (T_pure, &_gsl_params, ntrain_pure, npar);
     if (_flag_vali) {
-        _tstruct.fvali_pure = gsl_vector_alloc(nvali);
+        _tstruct.fvali_pure = gsl_vector_alloc(nvali_pure);
         _tstruct.fvali_noreg = flag_d ? gsl_vector_alloc(nvali_noreg) : _tstruct.fvali_pure;
         _tstruct.fvali_full = _tstruct.flag_r ? gsl_vector_alloc(nvali_full) : _tstruct.fvali_noreg;
     }
@@ -526,7 +542,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         fprintf(stderr, "number of iterations: %zu\n", gsl_multifit_nlinear_niter(w_full));
         fprintf(stderr, "function evaluations: %zu\n", fdf_full.nevalf);
         fprintf(stderr, "Jacobian evaluations: %zu\n", fdf_full.nevaldf);
-        fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "failed validation" : "max steps reached");
+        fprintf(stderr, "reason for stopping: %s\n", (info == 1) ? "failed validation" : "max steps || 0 residual");
         fprintf(stderr, "status = %s\n", gsl_strerror (status));
 
         fprintf(stderr, "initial |f(x)| = %f (train), %f (vali)\n", chi0, chi0_vali);

@@ -18,7 +18,7 @@ protected:
     const bool _flag_test; // do we have testing data?
 public:
     // construct from individual structures / ffnn
-    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig) : _tdata(tdata), _tconfig(tconfig), _flag_vali(_tdata.nvalidation > 0), _flag_test(_tdata.ntraining + _tdata.nvalidation == _tdata.ndata) {}
+    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig) : _tdata(tdata), _tconfig(tconfig), _flag_vali(tdata.nvalidation > 0), _flag_test((tdata.ntraining + tdata.nvalidation) != tdata.ndata) {}
 
     virtual ~NNTrainer(){}
 

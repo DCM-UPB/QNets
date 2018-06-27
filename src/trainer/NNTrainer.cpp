@@ -89,7 +89,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     double fit[npar], err[npar];
     double bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
 
-    if (verbose > 0 && !_flag_test) fprintf(stderr, "[NNTrainer] Warning: Testing residual calculation disabled, i.e. testing is based on training+validation data.\n");
+    if (!_flag_test && verbose > 0) fprintf(stderr, "[NNTrainer] Warning: Testing residual calculation disabled, i.e. testing is based on training+validation data.\n");
 
     int ifit = 0;
     while(true) {
