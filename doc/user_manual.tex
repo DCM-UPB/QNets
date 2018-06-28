@@ -57,18 +57,25 @@
 \maketitle
 
 FFNN (Feed Forward Neural Network) is a C++ library which allows the implementation of a feed forward neural network with few simple calls.
-By itself it does not allow for training, but it can be easily combined with the NoisyFunMin library (https://github.com/francesco086/NoisyFunMin) to do so.
-The library currently support the evaluation of the NN value, its first and second derivatives in respect to the input, and the first derivative in respect to the variational parameters within the FFNN.
+The library includes a training method, which currently utilizes GSL nonlinear
+multifit routines (trust region based Levenberg-Marquardt) to achieve least
+square fitting against target data. A data split into training, validation and
+testing is supported and enables early stopping. The library features inherent data
+normalization, completely hidden from the user.
+In terms of derivatives of the NN value, the library currently supports its
+first and second derivatives with respect to the NN input, the first derivative with
+respect to the variational weights within the FFNN and first/second order cross
+derivatives, with respect to both input (first / second order) and variational
+parameters (only first order).
 
 The code has been developed using the standard C++11.
 
-In the following we will present the classes made available by the library.
-At the beginning we will report the necessary \verb+#include+ call and the prototype of the class.
-The comment \verb+TO DO+ indicates that the method needs to be implemented (as in the case of a pure virtual class).
-
+In the following we will present some classes made available by the library.
+At the beginning we will report the necessary \verb+#include+ call and the
+prototype of the class (not necessarily equal to actual code).
 
 \section{FeedForwardNeuralNetwork}
-\label{sec:NoisyFunction}
+\label{sec:feedforwardneuralnetwork}
 
 \begin{lstlisting}
 // #include "FeedForwardNeuralNetwork.hpp"
@@ -139,8 +146,6 @@ class FeedForwardNeuralNetwork
 };
 \end{lstlisting}
 
-A \verb+NoisyFunction+ implements a function $f:\mathbb{R}^{n} \rightarrow \mathbb{R} \times \mathbb{R}$ which takes a multidimensional vector as input, and returns a scalar value with an associated error bar.
-
 Fig. \ref{fig:FFNN} illustrates the structure of a Feed Forward Neural Network (FFNN).
 A FFNN has always at least one \emph{hidden layer}, an \emph{input layer}, and an \emph{output layer}.
 Each layer is made of at least one \emph{unit} (in the figure, the empty circles containing a label) plus an \emph{offset unit} (in the figure, the filled circles).
@@ -192,7 +197,7 @@ The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and be
 The Scaled Exponential Units (with two fixed hyper-parameters $\alpha$ and $\lambda$) solve some problems of ReLUs and can provide a self-normalizing network. But still they are not differentiable at x=0. 
 
 \end{enumerate}
-
+$\\$
 The use of the FFNN library should be organised in four major steps:
 \begin{enumerate}
 \item generate the geometry of the FFNN;
@@ -237,8 +242,6 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
 \item \verb+getCrossSecondDerivative+: Get the second cross derivative of the unit value $u^{H+1}_{\verb+i+}$ in respect to $u^0_{\verb+i1d+}$ and $\beta$ with $\verb+ib+ = \verb+iv1d+$;
 \item \verb+storeOnFile+: Store the FFNNon a file, making possible to retrieve it later on. If the activation functions have been customised, this procedure will not succeed.
 \end{itemize}
-
-
 
 
 \section{ActivationFunctionInterface} % (fold)
@@ -347,11 +350,87 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 
 % section activationfunctioninterface (end)
 
+\section{Training} % (fold)
+\label{sec:training}
 
-\section{Smart Beta}
+The library contains trainer classes with virtual base trainer class
+\verb+NNTrainer+, which already provides the \verb+bestFit+ method to find the
+best NN fit among several fits to target data.
+Currently the only trainer implementation is the one using GSL nlinear
+multifit, namely \verb+NNTrainerGSL+. This class provides the actual routine for
+an individual fit, \verb+findFit+.
+\\\\How a complete code for NN training looks, you can see in the example 10.
+Leaving out the FFNN and data setup however, it comes down to the following:
+\begin{lstlisting}
+  #include "NNTrainerGSL.hpp"
+
+  // create data and config structs
+  // (for reference see respective header files)
+  NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, xdata, ydata, d1data, d2data, weights};
+  NNTrainingConfig tconfig = {flag_r, flag_d1, flag_d2, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
+
+  // create trainer and find best fit
+  NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
+
+  // (optional) setup ffnn's internal normalization before fitting
+  trainer->setNormalization(ffnn);
+
+  // find a fit out of nfits with minimal testing residual
+  trainer->bestFit(ffnn, nfits);
+
+  // (optional) print output files along all axis
+  trainer->printFitOutput(ffnn, lower_bound, upper_bound, npoints, flag_d1, flag_d2);
+\end{lstlisting}
+Afterwards, the \verb+ffnn+ will be in best fit configuration.
+\\Make sure that your \verb+ffnn+ has the necessary derivatives set before
+training (to be safe, always set \verb+d1+,\verb+d2+,\verb+vd1+ and \verb+d1vd1+ (+ \verb+d2vd1+) depending on \verb+flag_d1+/\verb+flag_d2+).
+\\\\Also, it is important to understand the meaning of \verb+training+, \verb+validation+ and \verb+testing+
+here:
+\begin{itemize}
+\item \verb+training+: The data that will be used by the least square solver itself.
+  Especially the residual gradients will only be calculated from \verb+training+ data.
+\item \verb+validation+: Every time the least square solver finds a new \verb+training+
+  residual minimum, the residual of the \verb+validation+ data set will be calculated. If
+  it didn't decrease (for too long, controlled by \verb+maxn_novali+), the
+  fitting stops early.
+\item \verb+testing+: When the individual fitting routine terminates (because
+  \\\verb+maxn_steps+ reached or early stop), for the resulting fit the residual with
+  respect to the \verb+testing+ data is calculated. Out of all fits, the fit with best
+  \verb+testing+ residual is returned.
+\end{itemize}
+Note that \verb+validation+ can be disabled by setting \verb+nvalidation+ in the
+\\\verb+NNTrainingData+ struct to 0 (this disables early stopping). \verb+testing+ however is disabled, if
+\verb+ndata+ is equal to \verb+ntraining+ plus \verb+nvalidation+ (in this case
+the training data set is used as replacement).
+\\\\It is also possible to fine tune the GSL nlinear multifit algorithm by passing a
+\verb+gsl_multifit_nlinear_parameters+ (see GSL docs) struct at trainer
+creation:
+
+\begin{lstlisting}
+  gsl_multifit_nlinear_parameters your_gsl_parameters = gsl_multifit_nlinear_default_parameters();
+  ... // tweak your gsl parameters
+  NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig, your_gsl_parameters);
+\end{lstlisting}
+Finally, you can pass more arguments to \verb+bestFit+ to tweak the behavior:
+
+\begin{lstlisting}
+  trainer->bestFit(ffnn, nfits, resi_target, verbose, flag_smart_beta);
+\end{lstlisting}
+This will terminate the whole \verb+bestFit+ routine, if a \verb+testing+
+residual below \verb+resi_target+ is found. Depending on int \verb+verbose+ (0,
+1 or 2), it will print different levels of information. And if
+\verb+flag_smart_beta+ is \verb+true+, it will use smart beta generation to
+randomize betas before fitting. More about that in the next section. 
+
+% section training (end)
+
+
+\section{Smart Beta} % (fold)
 \label{sec:smart_beta}
 
-To understand this section, first read the pdf \verb+smart_initial_beta.pdf+ in this folder.
+To understand this section, first read the pdf \verb+smart_initial_beta.pdf+ in
+this folder. It should be noted that this feature is a bit experimental, so
+double check that it actually works well for you.
 
 It is possible to initialise the beta of a FFNN by doing the following:
 \begin{lstlisting}
@@ -369,7 +448,7 @@ We sampled the first unit beta, a vector that we will now label as $v$. Then we 
    u \quad \rightarrow \quad u - \frac{\langle u, v \rangle}{\langle v, v \rangle} v     \label{eq:orthogonality}
 \end{equation}
 where $\langle u, v \rangle$ denotes the scalar product between $u$ and $v$.
-This modification enforce the orthogonality.
+This modification enforces the orthogonality.
 We then multiply it by a scalar to make $u$ have the same norm as before the modification in Eq. \ref{eq:orthogonality}.
 In case we sampled $u$ such that after the modification its norm is very small, we then sample it again.
 We proceed in this way as long as possible. When we have enough beta to form a complete basis set, we stop applying the orthogonality procedure and we sample them randomly again.

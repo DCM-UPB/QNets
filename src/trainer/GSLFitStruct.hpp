@@ -11,7 +11,7 @@
 // full struct for training, to be passed to NNTrainer and subsequently to e.g. GSL methods
 struct GSLFitStruct: public NNTrainingData, public NNTrainingConfig
 {
-    FeedForwardNeuralNetwork * ffnn; // Storing a pointer to the to-be-trained FFNN
+    FeedForwardNeuralNetwork * ffnn = NULL; // Storing a pointer to the to-be-trained FFNN
 
     // validation residuals
     gsl_vector * fvali_full = NULL;

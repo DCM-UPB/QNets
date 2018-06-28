@@ -21,7 +21,7 @@ double gaussian_d2dx(const double x) {
     return (4.*x*x - 2.) * exp(-x*x);
 };
 
-void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const beta, const double &TINY)
+void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const beta, const double &TINY = 0.000001)
 {
     const bool case1 = abs(ffnn->getBeta(0) - beta[0]) < TINY && abs(ffnn->getBeta(1) - beta[1]) < TINY && abs(ffnn->getBeta(2) - beta[2]) < TINY;
     const bool case2 = abs(ffnn->getBeta(0) + beta[0]) < TINY && abs(ffnn->getBeta(1) + beta[1]) < TINY && abs(ffnn->getBeta(2) + beta[2]) < TINY;
@@ -29,6 +29,14 @@ void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const b
     for (int i=3; i<ffnn->getNBeta(); ++i) assert(abs(ffnn->getBeta(i) - beta[i]) < TINY);
 }
 
+void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const double &TINY = 0.000001, const int &verbose = false)
+{
+    NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig); // NOTE: we do not normalize, to keep known beta targets
+    trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
+    double resi = trainer->computeResidual(ffnn, false, flag_d);
+    assert(resi <= TINY);
+    delete trainer;
+}
 
 int main (void) {
     using namespace std;
@@ -126,44 +134,26 @@ int main (void) {
     const double lambda_r = 0.000000001, lambda_d1 = 0.5, lambda_d2 = 0.5;
     NNTrainingData tdata = {ntraining, ntraining, 0, xndim, yndim, xdata, ydata, d1data, d2data, weights};
     NNTrainingConfig tconfig = {false, false, false, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
-    NNTrainerGSL * trainer;
-
 
     // find fit without derivs or regularization, using only training data
-    trainer = new NNTrainerGSL(tdata, tconfig); // NOTE: we do not normalize, to keep known beta targets
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
-    assert(trainer->computeResidual(ffnn, false, false) <= TINY);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
-    delete trainer;
-
 
     // find fit without derivs or regularization, using only training + validation data
     tdata.ndata += nvalidation;
     tdata.nvalidation = nvalidation;
-    trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
-    assert(trainer->computeResidual(ffnn, false, false) <= TINY);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
-    delete trainer;
-
 
     // find fit without derivs or regularization, using training + validation + testing data (kept like that in the following)
     tdata.ndata += ntesting;
-    trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
-    assert(trainer->computeResidual(ffnn, false, false) <= TINY);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
-    delete trainer;
-
 
     // find fit without derivs but with regularization
     tconfig.flag_r = true;
-    trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
-    assert(trainer->computeResidual(ffnn, false, false) <= TINY); // we check the unregularized residual against TINY
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
-    delete trainer;
-
 
     // find fit with derivs but without regularization
     ffnn->addCrossFirstDerivativeSubstrate();
@@ -171,20 +161,13 @@ int main (void) {
     tconfig.flag_r = false;
     tconfig.flag_d1 = true;
     tconfig.flag_d2 = true;
-    trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
-    assert(trainer->computeResidual(ffnn, false, true) <= TINY);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, true, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
-    delete trainer;
-
 
     // find fit with derivs and regularization
     tconfig.flag_r = true;
-    trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
-    assert(trainer->computeResidual(ffnn, false, true) <= TINY);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
-    delete trainer;
 
 
     // Delete allocations

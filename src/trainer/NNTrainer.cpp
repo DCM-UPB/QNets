@@ -1,4 +1,6 @@
 #include "NNTrainer.hpp"
+#include "SmartBetaGenerator.hpp"
+
 #include <cmath>
 #include <algorithm>
 
@@ -83,7 +85,7 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
     return sqrt(0.5*resi);
 }
 
-void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit, double * bestfit_err, const int &nfits, const double &resi_target, const int &verbose)
+void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit, double * bestfit_err, const int &nfits, const double &resi_target, const int &verbose, const bool &flag_smart_beta)
 {
     int npar = ffnn->getNBeta();
     double fit[npar], err[npar];
@@ -94,7 +96,8 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     int ifit = 0;
     while(true) {
         // initial parameters
-        ffnn->randomizeBetas();
+        if (flag_smart_beta) smart_beta::generateSmartBeta(ffnn);
+        else ffnn->randomizeBetas();
         for (int i = 0; i<npar; ++i) {
             fit[i] = ffnn->getBeta(i);
         }
@@ -142,10 +145,10 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     ffnn->setBeta(bestfit);
 }
 
-void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits, const double &resi_target, const int &verbose)
+void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits, const double &resi_target, const int &verbose, const bool &flag_smart_beta)
 {
     double bestfit[ffnn->getNBeta()], bestfit_err[ffnn->getNBeta()];
-    bestFit(ffnn, bestfit, bestfit_err, nfits, resi_target, verbose);
+    bestFit(ffnn, bestfit, bestfit_err, nfits, resi_target, verbose, flag_smart_beta);
 }
 
 // print output of fitted NN to file
