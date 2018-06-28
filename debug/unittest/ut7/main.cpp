@@ -167,8 +167,8 @@ int main(){
     }
     std_dev = sqrt(std_dev/(N*(feeder->getNBeta()-BETA_INDEX_OFFSET)-1));
     // assertions
-    assert( abs(mu-mean) < 0.05 );
-    assert( abs(sigma-std_dev) < 0.01 );
+    assert( abs(mu-mean) < 0.1 );
+    assert( abs(sigma-std_dev) < 0.05 );
 
 
     // --- generateSmartBeta

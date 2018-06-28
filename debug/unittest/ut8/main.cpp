@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include "NNTrainerGSL.hpp"
-
+#include "../../../src/trainer/NNTrainerGSL.cpp" // to access "local" functions
 
 double gaussian(const double x, const double a = 1., const double b = 0.) {
     return exp(-a*pow(x-b, 2));
@@ -19,22 +19,23 @@ double gaussian_d2dx(const double x, const double a = 1., const double b = 0.) {
     return (pow(2.0*a*(b-x), 2) - 2.0*a) * exp(-a*pow(x-b, 2));
 };
 
+void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const beta, const double &TINY)
+{
+    assert((abs(ffnn->getBeta(0) - beta[0]) < TINY && abs(ffnn->getBeta(1) - beta[1]) < TINY && abs(ffnn->getBeta(2) - beta[2]) < TINY) || (abs(ffnn->getBeta(0) + beta[0]) < TINY && abs(ffnn->getBeta(1) + beta[1]) < TINY && abs(ffnn->getBeta(2) + beta[2]) < TINY)); // symmetric gaussian allows both combinations
+    for (int i=3; i<ffnn->getNBeta(); ++i) assert(abs(ffnn->getBeta(i) - beta[i]) < TINY);
+}
+
 
 int main (void) {
     using namespace std;
 
-    const bool verbose = false;
-    const double TINY=0.000001;
+    const int verbose = 0;
+    const double TINY = 0.000001;
 
     const int ndim = 2;
     const int xndim = ndim;
-    const int nhid = 3;
+    const int nhid = 2;
     const int yndim = ndim;
-
-    // set variational parameters in our model (which should be equal to betas after fitting)
-    const double nbeta = (nhid-1) * (xndim+1) + yndim * nhid;
-    const double betas[12] = {0.5, 0.5, -1., 0.2, -0.6, 0.4, 0., 0.5, -0.5, -1., 0.6, 0.4};
-    assert(nbeta == 12);
 
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhid, yndim+1);
@@ -43,18 +44,25 @@ int main (void) {
     ffnn->addFirstDerivativeSubstrate();
     ffnn->addSecondDerivativeSubstrate();
 
+    // set gaussian activation function on the single hidden neuron, id activation on output
     ffnn->getNNLayer(0)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
-    ffnn->getNNLayer(0)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
-
     ffnn->getNNLayer(1)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("ID"));
     ffnn->getNNLayer(1)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("ID"));
 
+    // the variational parameters of our model (ffnn beta should be equal to beta array after fitting)
+    const double nbeta = (nhid-1) * (xndim+1) + yndim * nhid;
+    const double beta[7] = {0.2, -1.1, 0.9, 1., -1., 0., 0.5};
+
+    // check basic things
+    assert(ffnn->getLayer(0)->getNUnits() == xndim+1);
+    assert(ffnn->getLayer(1)->getNUnits() == nhid);
+    assert(ffnn->getLayer(2)->getNUnits() == yndim+1);
     assert(ffnn->getNBeta() == nbeta);
 
     // allocate data arrays
-    const int ntraining = 15;
-    const int nvalidation = 15;
-    const int ntesting = 15;
+    const int ntraining = 20;
+    const int nvalidation = 20;
+    const int ntesting = 20;
     const int ndata = ntraining + nvalidation + ntesting;
     double ** xdata = new double*[ndata];
     double ** ydata = new double*[ndata];
@@ -73,7 +81,7 @@ int main (void) {
         }
     }
 
-    // generate the data to be fitted
+    // generate the data to be fitted (the output of a "gaussian" NN, same shape as ffnn)
     const double lb = -2;
     const double ub = 2;
     random_device rdev;
@@ -83,26 +91,23 @@ int main (void) {
         for (int j=0; j<xndim; ++j) {
             xdata[i][j] = rd(rgen);
         }
-        const double feed1 = betas[0] + betas[1] * xdata[i][0] + betas[2] * xdata[i][1];
-        const double feed2 = betas[3] + betas[4] * xdata[i][0] + betas[5] * xdata[i][1];
-        const double hn1 = gaussian(feed1);
-        const double hn2 = gaussian(feed2);
-        ydata[i][0] = betas[6] + betas[7] * hn1 + betas[8] * hn2;
-        ydata[i][1] = betas[9] + betas[10] * hn1 + betas[11] * hn2;
+        const double feed = beta[0] + beta[1] * xdata[i][0] + beta[2] * xdata[i][1];
+        const double hnv = gaussian(feed);
+        ydata[i][0] = beta[3] + beta[4] * hnv;
+        ydata[i][1] = beta[5] + beta[6] * hnv;
 
-        const double d1feed1 = gaussian_ddx(feed1);
-        const double d1feed2 = gaussian_ddx(feed2);
-        const double d2feed1 = gaussian_d2dx(feed1);
-        const double d2feed2 = gaussian_d2dx(feed2);
-        d1data[i][0][0] = (betas[7] * d1feed1 * betas[1]) + (betas[8] * d1feed2 * betas[4]);
-        d1data[i][0][1] = (betas[7] * d1feed1 * betas[2]) + (betas[8] * d1feed2 * betas[5]);
-        d1data[i][1][0] = (betas[10] * d1feed1 * betas[1]) + (betas[11] * d1feed2 * betas[4]);
-        d1data[i][1][1] = (betas[10] * d1feed1 * betas[2]) + (betas[11] * d1feed2 * betas[5]);
+        const double d1feed = gaussian_ddx(feed);
+        const double d2feed = gaussian_d2dx(feed);
 
-        d2data[i][0][0] = (betas[7] * d2feed1 * pow(betas[1], 2)) + (betas[8] * d2feed2 * pow(betas[4], 2));
-        d2data[i][0][1] = (betas[7] * d2feed1 * pow(betas[2], 2)) + (betas[8] * d2feed2 * pow(betas[5], 2));
-        d2data[i][1][0] = (betas[10] * d2feed1 * pow(betas[1], 2)) + (betas[11] * d2feed2 * pow(betas[4], 2));
-        d2data[i][1][1] = (betas[10] * d2feed1 * pow(betas[2], 2)) + (betas[11] * d2feed2 * pow(betas[5], 2));
+        d1data[i][0][0] = (beta[4] * d1feed * beta[1]);
+        d1data[i][0][1] = (beta[4] * d1feed * beta[2]);
+        d1data[i][1][0] = (beta[6] * d1feed * beta[1]);
+        d1data[i][1][1] = (beta[6] * d1feed * beta[2]);
+
+        d2data[i][0][0] = (beta[4] * d2feed * pow(beta[1], 2));
+        d2data[i][0][1] = (beta[4] * d2feed * pow(beta[2], 2));
+        d2data[i][1][0] = (beta[6] * d2feed * pow(beta[1], 2));
+        d2data[i][1][1] = (beta[6] * d2feed * pow(beta[2], 2));
 
         weights[i][0] = 1.0;
         weights[i][1] = 1.0;
@@ -111,27 +116,51 @@ int main (void) {
     // create data/config structs
     const int maxn_steps = 50;
     const int maxn_novali = 5;
-    const int maxn_fits = 100;
+    const int maxn_fits = 50;
     const double lambda_r = 0.000000001, lambda_d1 = 0.01, lambda_d2 = 0.01;
     NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, xdata, ydata, d1data, d2data, weights};
-    NNTrainingConfig tconfig = {true, false, false, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
+    NNTrainingConfig tconfig = {false, false, false, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
     NNTrainerGSL * trainer;
 
-    // find fit without derivs
+
+    // find fit without derivs or regularization
     trainer = new NNTrainerGSL(tdata, tconfig); // NOTE: we do not normalize, to keep known beta targets
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose ? 2 : 0); // fit until residual<TINY or maxn_fits reached
-    assert(trainer->computeResidual(ffnn, false, true) <= TINY);
+    trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
+    assert(trainer->computeResidual(ffnn, false, false) <= TINY);
+    validate_beta(ffnn, beta, TINY);
     delete trainer;
 
-    // find fit with derivs
+
+    // find fit without derivs but with regularization
+    tconfig.flag_r = true;
+    trainer = new NNTrainerGSL(tdata, tconfig);
+    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
+    assert(trainer->computeResidual(ffnn, false, false) <= TINY); // we check the unregularized residual against TINY
+    validate_beta(ffnn, beta, TINY);
+    delete trainer;
+
+
+    // find fit with derivs but without regularization
     ffnn->addCrossFirstDerivativeSubstrate();
     ffnn->addCrossSecondDerivativeSubstrate();
+    tconfig.flag_r = false;
     tconfig.flag_d1 = true;
     tconfig.flag_d2 = true;
     trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->bestFit(ffnn, maxn_fits, TINY, verbose ? 2 : 0);
+    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
     assert(trainer->computeResidual(ffnn, false, true) <= TINY);
+    validate_beta(ffnn, beta, TINY);
     delete trainer;
+
+
+    // find fit with derivs and regularization
+    tconfig.flag_r = true;
+    trainer = new NNTrainerGSL(tdata, tconfig);
+    trainer->bestFit(ffnn, maxn_fits, TINY, verbose);
+    assert(trainer->computeResidual(ffnn, false, true) <= TINY);
+    validate_beta(ffnn, beta, TINY);
+    delete trainer;
+
 
     //ffnn->storeOnFile("nn.txt");
 
