@@ -24,6 +24,9 @@ export GPERFFLAGS="${OPTFLAGS} -DWITHGPERFTOOLS -lprofiler"
 # Debugging flags
 export DEBUGFLAGS="-g -O0"
 
+# Coverage flags
+export GCOVFLAGS="${DEBUGFLAGS} -fprofile-arcs -ftest-coverage"
+
 # GSL (GNU Scientific Library)
 IGSL="-I/usr/include"
 LGSL="-L/usr/local/lib"

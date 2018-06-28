@@ -9,6 +9,9 @@ elif [ "$1" == "debug" ]
 elif [ "$1" == "profiling" ]
   then
     ./script/build_profiling_library.sh
+elif [ "$1" == "coverage" ]
+  then
+    ./script/build_coverage_library.sh
 else
   echo "Error: Invalid build mode argument!"
 fi;
