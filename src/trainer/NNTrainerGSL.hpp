@@ -16,6 +16,7 @@ protected:
     const gsl_multifit_nlinear_parameters _gsl_params;
 public:
     NNTrainerGSL(const NNTrainingData &tdata, const NNTrainingConfig &tconfig, const gsl_multifit_nlinear_parameters &gsl_params = gsl_multifit_nlinear_default_parameters()): NNTrainer(tdata, tconfig), _gsl_params(gsl_params) {_tstruct.copyDatConf(_tdata, _tconfig);}
+    ~NNTrainerGSL(){}
 
     void findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &verbose = 0);
 };

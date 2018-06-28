@@ -29,9 +29,10 @@ void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const b
     for (int i=3; i<ffnn->getNBeta(); ++i) assert(abs(ffnn->getBeta(i) - beta[i]) < TINY);
 }
 
-void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const double &TINY = 0.000001, const int &verbose = false)
+void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = false)
 {
-    NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig); // NOTE: we do not normalize, to keep known beta targets
+    NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
+    if (flag_norm) trainer->setNormalization(ffnn);// NOTE: in most cases here we do not normalize, to keep known beta targets
     trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
     double resi = trainer->computeResidual(ffnn, false, flag_d);
     assert(resi <= TINY);
@@ -136,23 +137,23 @@ int main (void) {
     NNTrainingConfig tconfig = {false, false, false, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // find fit without derivs or regularization, using only training data
-    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
 
     // find fit without derivs or regularization, using only training + validation data
     tdata.ndata += nvalidation;
     tdata.nvalidation = nvalidation;
-    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
 
     // find fit without derivs or regularization, using training + validation + testing data (kept like that in the following)
     tdata.ndata += ntesting;
-    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
 
     // find fit without derivs but with regularization
     tconfig.flag_r = true;
-    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
 
     // find fit with derivs but without regularization
@@ -161,13 +162,18 @@ int main (void) {
     tconfig.flag_r = false;
     tconfig.flag_d1 = true;
     tconfig.flag_d2 = true;
-    validate_fit(tdata, tconfig, ffnn, maxn_fits, true, TINY, verbose);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, true, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
 
     // find fit with derivs and regularization
     tconfig.flag_r = true;
-    validate_fit(tdata, tconfig, ffnn, maxn_fits, false, TINY, verbose);
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, true, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
+
+    // find fit with derivs and regularization and enabled normalization
+    tconfig.flag_r = true;
+    validate_fit(tdata, tconfig, ffnn, maxn_fits, true, true, TINY, verbose);
+    // no beta validation possible
 
 
     // Delete allocations
