@@ -16,14 +16,8 @@
 
 namespace smart_beta{
 
-    namespace
+    namespace details
     {
-        // --- Internal methods in local anonymous namespace
-
-        const double MIN_BETA_NORM = 0.001; // minimal allowed beta vector norm
-        const int N_TRY_BEST_LD_BETA = 20; // how many tries to find best ld beta
-        const int BETA_INDEX_OFFSET = 0; // leave out beta before index (experimental, don't use)
-
         std::vector<int> _findIndexesOfUnitsWithFeeder(FedNetworkLayer * L){
             //
             // Given a NN layer, find the indexes of the units which have a feeder
@@ -132,6 +126,7 @@ namespace smart_beta{
 
     void generateSmartBeta(FedNetworkLayer * L){
         using namespace std;
+        using namespace details;
 
         // get the indexes of the units we are interested in
         vector<int> idx = _findIndexesOfUnitsWithFeeder(L);

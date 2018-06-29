@@ -1,7 +1,6 @@
 #include "FeedForwardNeuralNetwork.hpp"
 #include "GSLFitStruct.hpp"
 #include "NNTrainerGSL.hpp"
-#include "../../../src/trainer/NNTrainerGSL.cpp" // to access residual functions
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -14,6 +13,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace nn_trainer_gsl_details;
 
 void validateJacobian(GSLFitStruct &tstruct, const double &TINY = 0.00001, const bool &verbose = false)
 {

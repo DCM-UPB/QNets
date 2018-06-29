@@ -5,7 +5,9 @@
 #include "FeedForwardNeuralNetwork.hpp"
 #include "GSLFitStruct.hpp"
 #include "NNTrainerGSL.hpp"
-#include "../../../src/trainer/NNTrainerGSL.cpp" // to access "local" functions
+
+using namespace std;
+using namespace nn_trainer_gsl_details; // to access hidden NNTrainerGSL methods
 
 double gaussian(const double x) {
     return exp(-x*x);
@@ -40,7 +42,6 @@ void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardN
 }
 
 int main (void) {
-    using namespace std;
 
     const int verbose = 0;
     const double TINY = 0.000001;

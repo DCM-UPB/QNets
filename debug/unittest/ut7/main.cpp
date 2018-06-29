@@ -7,7 +7,6 @@
 
 #include "FeedForwardNeuralNetwork.hpp"
 #include "SmartBetaGenerator.hpp"
-#include "../../../src/feeder/SmartBetaGenerator.cpp" // to use the hidden methods
 #include "ActivationFunctionManager.hpp"
 #include "FedNetworkUnit.hpp"
 #include "NetworkUnitFeederInterface.hpp"
@@ -19,13 +18,13 @@ int main(){
 
     double mu, sigma;
     bool throw_exception;
-    int BETA_INDEX_OFFSET = smart_beta::BETA_INDEX_OFFSET;
+    int BETA_INDEX_OFFSET = smart_beta::details::BETA_INDEX_OFFSET;
 
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
 
     // --- try without feeders
     try {
-        smart_beta::_computeBetaMuAndSigma(ffnn->getFedLayer(0)->getFedUnit(0), mu, sigma);
+        smart_beta::details::_computeBetaMuAndSigma(ffnn->getFedLayer(0)->getFedUnit(0), mu, sigma);
         throw_exception = false;
     } catch (exception &e) {
         throw_exception = true;
@@ -41,13 +40,13 @@ int main(){
 
     // --- _findIndexesOfUnitsWithFeeder
     vector<int> idx;
-    idx = smart_beta::_findIndexesOfUnitsWithFeeder(ffnn->getFedLayer(0));
+    idx = smart_beta::details::_findIndexesOfUnitsWithFeeder(ffnn->getFedLayer(0));
     assert( idx.size() == 4);
     assert( idx[0] == 0 );
     assert( idx[1] == 1 );
     assert( idx[2] == 2 );
     assert( idx[3] == 3 );
-    idx = smart_beta::_findIndexesOfUnitsWithFeeder(ffnn->getFedLayer(1));
+    idx = smart_beta::details::_findIndexesOfUnitsWithFeeder(ffnn->getFedLayer(1));
     assert( idx.size() == 2);
     assert( idx[0] == 0 );
     assert( idx[1] == 1 );
@@ -57,7 +56,7 @@ int main(){
 
     // 4 units
     for (int il=0; il<ffnn->getFedLayer(0)->getNFedUnits(); ++il){
-        smart_beta::_computeBetaMuAndSigma(ffnn->getFedLayer(0)->getFedUnit(il), mu, sigma);
+        smart_beta::details::_computeBetaMuAndSigma(ffnn->getFedLayer(0)->getFedUnit(il), mu, sigma);
         double mu_source = 0.;
         for (int j=BETA_INDEX_OFFSET; j<ffnn->getLayer(0)->getNUnits(); ++j){
             mu_source += ffnn->getLayer(0)->getUnit(j)->getOutputMu();
@@ -75,7 +74,7 @@ int main(){
     // output layer
     // 2 output units
     for (int il=0; il<ffnn->getFedLayer(1)->getNFedUnits(); ++il){
-        smart_beta::_computeBetaMuAndSigma(ffnn->getFedLayer(1)->getFedUnit(il), mu, sigma);
+        smart_beta::details::_computeBetaMuAndSigma(ffnn->getFedLayer(1)->getFedUnit(il), mu, sigma);
         double mu_source = 0.;
         for (int j=BETA_INDEX_OFFSET; j<ffnn->getLayer(1)->getNUnits(); ++j){
             mu_source += ffnn->getLayer(1)->getUnit(j)->getOutputMu();
@@ -95,12 +94,12 @@ int main(){
     FedNetworkUnit * u = ffnn->getFedLayer(0)->getFedUnit(0);
     NetworkUnitFeederInterface * feeder = u->getFeeder();
     // compute mu and beta
-    smart_beta::_computeBetaMuAndSigma(u, mu, sigma);
+    smart_beta::details::_computeBetaMuAndSigma(u, mu, sigma);
     // sample N times the beta
     const int N = 10000;
     vector<double> betas;
     for (int i=0; i<N; ++i){
-        smart_beta::_setRandomBeta(feeder, mu, sigma);
+        smart_beta::details::_setRandomBeta(feeder, mu, sigma);
         for (int ib=BETA_INDEX_OFFSET; ib<feeder->getNBeta(); ++ib){
             betas.push_back(feeder->getBeta(ib));
         }
@@ -126,13 +125,13 @@ int main(){
     // set random beta for a unit that will stay fixed
     FedNetworkUnit * fixed_u = ffnn->getFedLayer(0)->getFedUnit(1);
     NetworkUnitFeederInterface * fixed_feeder = fixed_u->getFeeder();
-    smart_beta::_computeBetaMuAndSigma(fixed_u, mu, sigma);
-    smart_beta::_setRandomBeta(fixed_feeder, mu, sigma);
+    smart_beta::details::_computeBetaMuAndSigma(fixed_u, mu, sigma);
+    smart_beta::details::_setRandomBeta(fixed_feeder, mu, sigma);
     // set random beta for a unit that will be made orthogonal to the previously defined unit
-    smart_beta::_computeBetaMuAndSigma(u, mu, sigma);
-    smart_beta::_setRandomBeta(feeder, mu, sigma);
+    smart_beta::details::_computeBetaMuAndSigma(u, mu, sigma);
+    smart_beta::details::_setRandomBeta(feeder, mu, sigma);
     // apply the orthogonaliy procedure
-    smart_beta::_makeBetaOrthogonal(fixed_feeder, feeder);
+    smart_beta::details::_makeBetaOrthogonal(fixed_feeder, feeder);
     // compute the dot product and check that it is almost zero
     double dot_product = 0.;
     for (int i=BETA_INDEX_OFFSET; i<feeder->getNBeta(); ++i){
@@ -144,12 +143,12 @@ int main(){
     // now check that the norm is preserved by applying the orthogonality procedure
 
     // compute mu and beta
-    smart_beta::_computeBetaMuAndSigma(u, mu, sigma);
+    smart_beta::details::_computeBetaMuAndSigma(u, mu, sigma);
     // sample N times the beta
     betas.clear();
     for (int i=0; i<N; ++i){
-        smart_beta::_setRandomBeta(feeder, mu, sigma);
-        smart_beta::_makeBetaOrthogonal(fixed_feeder, feeder);
+        smart_beta::details::_setRandomBeta(feeder, mu, sigma);
+        smart_beta::details::_makeBetaOrthogonal(fixed_feeder, feeder);
         for (int ib=BETA_INDEX_OFFSET; ib<feeder->getNBeta(); ++ib){
             betas.push_back(feeder->getBeta(ib));
         }
