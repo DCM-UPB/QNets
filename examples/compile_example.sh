@@ -4,6 +4,7 @@ export ROOT_FOLDER=$(dirname $(dirname $(pwd)))
 source "${ROOT_FOLDER}/config.sh"
 
 FLAG_TO_USE="${OPTFLAGS}"
+#FLAG_TO_USE="${DEBUGFLAGS}"
 
 rm -f exe
 rm -f *.o

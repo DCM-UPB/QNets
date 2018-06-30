@@ -386,6 +386,8 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate(
 {
     using namespace std;
 
+    if (_flag_c2d) return; // nothing to do
+
     // cross second derivatives require first, second, and variational first derivatives
     if (!_flag_1d || !_flag_v1d || !_flag_c1d || !_flag_2d){
         throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, CrossFirstDerivative and SecondDerivative" );
@@ -404,6 +406,8 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate(
 void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
 {
     using namespace std;
+
+    if (_flag_c2d) return; // nothing to do
 
     // cross second derivatives require first, second, and variational first derivatives
     if (!_flag_1d || !_flag_v1d || !_flag_c1d || !_flag_2d){
@@ -424,6 +428,8 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
 {
     using namespace std;
 
+    if (_flag_c1d) return; // nothing to do
+
     // cross first derivatives require first and variational first derivatives
     if (!_flag_1d || !_flag_v1d){
         throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
@@ -442,6 +448,8 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 {
     using namespace std;
 
+    if (_flag_c1d) return; // nothing to do
+
     // cross first derivatives require first and variational first derivatives
     if (!_flag_1d || !_flag_v1d){
         throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
@@ -459,6 +467,8 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::addLastHiddenLayerVariationalFirstDerivativeSubstrate()
 {
+    if (_flag_v1d) return; // nothing to do
+
     // count the total number of variational parameters
     _nvp=0;
     for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
@@ -483,6 +493,8 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerVariationalFirstDerivativeSubst
 
 void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 {
+    if (_flag_v1d) return; // nothing to do
+
     // count the total number of variational parameters
     _nvp=0;
     for (std::vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
@@ -507,6 +519,8 @@ void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::addSecondDerivativeSubstrate()
 {
+    if (_flag_2d) return; // nothing to do
+
     // add the second derivative substrate to all the layers
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
@@ -519,6 +533,8 @@ void FeedForwardNeuralNetwork::addSecondDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::addFirstDerivativeSubstrate()
 {
+    if (_flag_1d) return; // nothing to do
+
     // add the first derivative substrate to all the layers
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {

@@ -353,37 +353,63 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 \section{Training} % (fold)
 \label{sec:training}
 
-The library contains trainer classes with virtual base trainer class
-\verb+NNTrainer+, which already provides the \verb+bestFit+ method to find the
+The library contains trainer classes for training a FFNN to match target data,
+by the means of least squares fitting. All trainers derive from the virtual base class
+\verb+NNTrainer+, which already contains the \verb+bestFit+ method to find the
 best NN fit among several fits to target data.
-Currently the only trainer implementation is the one using GSL nlinear
+Currently the only actual trainer implementation is the one using GSL nlinear
 multifit, namely \verb+NNTrainerGSL+. This class provides the actual routine for
 an individual fit, \verb+findFit+.
+\\All trainers support adding a L2 beta regularization residual term, controlled via
+\verb+lambda_r+, and first/second derivative residual terms, controlled via
+\verb+lambda_d1+ and \verb+lambda_d2+. In the latter case, the user has to
+provide the first and second derivatives with respect to all input variables for
+every data point.
 \\\\How a complete code for NN training looks, you can see in the example 10.
-Leaving out the FFNN and data setup however, it comes down to the following:
+If we leave out generating the data though, it comes down to the following:
 \begin{lstlisting}
   #include "NNTrainerGSL.hpp"
 
-  // create data and config structs
-  // (for reference see respective header files)
-  NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, xdata, ydata, d1data, d2data, weights};
-  NNTrainingConfig tconfig = {flag_r, flag_d1, flag_d2, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
+  FeedFowardNeuralNetwork * ffnn =
+      new FeedFowardNeuralNetwork(xndim+1, nhunits, yndim+1);
 
-  // create trainer and find best fit
+  // create config and data structs
+  // (for reference see respective header files)
+  NNTrainingConfig tconfig =
+      {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
+  NNTrainingData tdata =
+      {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL};
+  // instead of NULL you may pass existing allocations, but then don't use tdata.(de)allocate!  
+
+  // allocate data arrays
+  tdata.allocate(lambda_d1>0, lambda_d2>0)
+  // if you provide deriv data in any case, just pass true
+
+  // ... //
+  // ... // fill tdata . x,y,w (and yd1/yd2 if you use derivs)
+  // ... //
+
+  // create trainer
   NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
 
-  // (optional) setup ffnn's internal normalization before fitting
-  trainer->setNormalization(ffnn);
+  // connect FFNN and add the correct substrates
+  trainer->configureFFNN(ffnn, flag_norm);
+  // flag_norm: setup ffnn's internal data normalization
 
   // find a fit out of nfits with minimal testing residual
   trainer->bestFit(ffnn, nfits);
 
   // (optional) print output files along all axis
   trainer->printFitOutput(ffnn, lower_bound, upper_bound, npoints, flag_d1, flag_d2);
+
+  tdata.deallocate();
+  delete trainer;
+  delete ffnn;
+
 \end{lstlisting}
 Afterwards, the \verb+ffnn+ will be in best fit configuration.
-\\Make sure that your \verb+ffnn+ has the necessary derivatives set before
-training (to be safe, always set \verb+d1+,\verb+d2+,\verb+vd1+ and \verb+d1vd1+ (+ \verb+d2vd1+) depending on \verb+flag_d1+/\verb+flag_d2+).
+\\Make sure that you provide the necessary derivative data if you set
+\verb+lambda_d1+ or \verb+lambda_d2+ greater than 0.
 \\\\Also, it is important to understand the meaning of \verb+training+, \verb+validation+ and \verb+testing+
 here:
 \begin{itemize}
@@ -407,7 +433,8 @@ the training data set is used as replacement).
 creation:
 
 \begin{lstlisting}
-  gsl_multifit_nlinear_parameters your_gsl_parameters = gsl_multifit_nlinear_default_parameters();
+  gsl_multifit_nlinear_parameters your_gsl_parameters =
+      gsl_multifit_nlinear_default_parameters();
   ... // tweak your gsl parameters
   NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig, your_gsl_parameters);
 \end{lstlisting}
@@ -436,7 +463,8 @@ It is possible to initialise the beta of a FFNN by doing the following:
 \begin{lstlisting}
 #include "SmartBetaGenerator.hpp"
 
-FeedFowardNeuralNetwork * ffnn = new FeedFowardNeuralNetwork(4, 10, 2);
+FeedFowardNeuralNetwork * ffnn =
+    new FeedFowardNeuralNetwork(4, 10, 2);
 smart_beta::generateSmartBeta(ffnn);
 \end{lstlisting}
 
@@ -459,8 +487,9 @@ We proceed in this way as long as possible. When we have enough beta to form a c
 \section{Serializable Components} % (fold)
 \label{sec:serializablecomponents}
 All classes deriving from SerializableComponent (i.e. all components of our
-network) support serialization of their restorable configuration (i.e. no
-pointers) into simple strings, by a code system. It is explained in detail in
+network) support serialization of their restorable configuration (e.g. pointers
+to other runtime objects usually can't be restored) into simple strings, by a
+code system. It is explained in detail in
 the StringCodeUtilities.hpp header file and the examples, but will quickly be
 illustrated here.
 \\Consider an output unit (type id \verb+OUT+) of our neural network. It has two simple parameters

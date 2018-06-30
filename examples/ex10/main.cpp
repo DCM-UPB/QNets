@@ -35,58 +35,37 @@ double gaussian_d2dx(const double x, const double a, const double b) {
 int main (void) {
     using namespace std;
 
-    FeedForwardNeuralNetwork * ffnn;
-    NNTrainingData tdata;
-    NNTrainingConfig tconfig;
-    NNTrainerGSL * trainer;
-
-    const int ntraining = 2000; // how many training data points
-    const int nvalidation = 1000; // how many validation data points
-    const int ntesting = 3000; // how many testing data points
-    const int ndata = ntraining + nvalidation + ntesting;
-    const int maxn_steps = 100; // maximum number of iterations for least squares solver
-    const int maxn_novali = 5; // maximum number of iteration without decreasing validation residual (aka early stopping)
-
-    const double lb = -10; // lower input boundary for data
-    const double ub = 10; // upper input boundary for data
-    double ** xdata; // input
-    double ** ydata; // output
-    double *** d1data; // first derivatives
-    double *** d2data; // second derivatives
-    double ** weights; // weights representing error on data (not used in the example)
-
-    int nl, nhl, nhu[2], nfits = 1;
+    int nhl, nfits = 1;
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
     bool verbose = false;
-
 
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    cout << "How many hidden units should the first hidden layer have? ";
-    cin >> nhu[0];
-    cout << "How many units should the second hidden layer have? (<=1 for none) ";
-    cin >> nhu[1];
+    cout << "How many hidden layers should the FFNN have? (must be >0) ";
+    cin >> nhl;
+
+    int nhu[nhl];
+    for (int i=0; i<nhl; ++i) {
+        cout << "How many units should hidden layer " << i+1 << " have? (<=1 for none) ";
+        cin >> nhu[i];
+    }
     cout << endl;
 
-    // NON I/O CODE
-    nl = (nhu[1]>1)? 4:3;
-    nhl = nl-2;
-    //
-
-    cout << "We generate a FFANN with " << nl << " layers and 2, " << nhu[0];
-    if (nhu[1]>0) { cout << ", " << nhu[1];}
-    cout << ", 2 units respectively" << endl;
+    int nl = nhl + 2;
+    cout << "We generate a FFANN with " << nl << " layers and 2, ";
+    for (int i=0; i<nhl; ++i) cout << nhu[i] << ", ";
+    cout << "2 units respectively" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
     cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance+regularization of NN vs. target function, i.e. find optimal betas." << endl;
     cout << endl;
+    cout << "Please enter the regularization lambda. ";
+    cin >> lambda_r;
     cout << "Please enter the first derivative lambda. ";
     cin >> lambda_d1;
     cout << "Please enter the second derivative lambda. ";
     cin >> lambda_d2;
-    cout << "Please enter the regularization lambda. ";
-    cin >> lambda_r;
     cout << "Please enter the the maximum tolerable fit residual. ";
     cin >> maxchi;
     cout << "Please enter the maximum number of fitting runs. ";
@@ -94,48 +73,50 @@ int main (void) {
     cout << endl << endl;
     cout << "Now we find the best fit ... " << endl;
 
-
     // NON I/O CODE
 
     // create FFNN
-    ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
+    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
+    // NOTE: No manual substrate setting/connection has to be done, if trainer->configureFFNN is used later
+
+
+    // create data and config structs
+    const int ntraining = 2000; // how many training data points
+    const int nvalidation = 1000; // how many validation data points
+    const int ntesting = 3000; // how many testing data points
+    const int ndata = ntraining + nvalidation + ntesting;
+    const int maxn_steps = 100; // maximum number of iterations for least squares solver
+    const int maxn_novali = 5; // maximum number of iteration without decreasing validation residual (aka early stopping)
+    const int xndim = 1;
+    const int yndim = 1;
+
+    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL}; // we pass NULLs here, since we use tdata.allocate to allocate the data arrays. Alternatively, allocate manually and pass pointers here
+    NNTrainingConfig tconfig = {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // allocate data arrays
-    xdata = new double*[ndata];
-    ydata = new double*[ndata];
-    d1data = new double**[ndata];
-    d2data = new double**[ndata];
-    weights = new double*[ndata];
-    for (int i = 0; i<ndata; ++i) {
-        xdata[i] = new double[1];
-        ydata[i] = new double[1];
-        d1data[i] = new double*[1];
-        d1data[i][0] = new double[1];
-        d2data[i] = new double*[1];
-        d2data[i][0] = new double[1];
-        weights[i] = new double[1];
-    }
+    const bool flag_d1 = lambda_d1>0;
+    const bool flag_d2 = lambda_d2>0;
+    tdata.allocate(flag_d1, flag_d2);
 
     // generate the data to be fitted
+    const double lb = -10; // lower input boundary for data
+    const double ub = 10; // upper input boundary for data
     random_device rdev;
     mt19937_64 rgen = std::mt19937_64(rdev());
     uniform_real_distribution<double> rd(lb,ub);
     for (int i = 0; i < ndata; ++i) {
-        xdata[i][0] = rd(rgen);
-        ydata[i][0] = gaussian(xdata[i][0], 1, 0);
-        d1data[i][0][0] = gaussian_ddx(xdata[i][0], 1, 0);
-        d2data[i][0][0] = gaussian_d2dx(xdata[i][0], 1, 0);
-        weights[i][0] = 1.0; // our data have no error, so set all weights to 1
-        if (verbose) printf ("data: %i %g %g\n", i, xdata[i][0], ydata[i][0]);
-    };
+        tdata.x[i][0] = rd(rgen);
+        tdata.y[i][0] = gaussian(tdata.x[i][0], 1, 0);
+        if (flag_d1) tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0], 1, 0);
+        if (flag_d2) tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0], 1, 0);
+        tdata.w[i][0] = 1.0; // our data have no error, so set all weights to 1
+        if (verbose) printf ("data: %i %g %g\n", i, tdata.x[i][0], tdata.y[i][0]);
+    }
 
-    // create data and config structs
-    tdata = {ndata, ntraining, nvalidation, 1, 1, xdata, ydata, d1data, d2data, weights};
-    tconfig = {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // create trainer and find best fit
-    trainer = new NNTrainerGSL(tdata, tconfig);
+    NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
     trainer->configureFFNN(ffnn, true); // configure FFNN substrates and setup proper normalization before fitting
     trainer->bestFit(ffnn, nfits, maxchi, verbose ? 2 : 1); // find a fit out of nfits with minimal testing residual
 
@@ -150,26 +131,11 @@ int main (void) {
     trainer->printFitOutput(ffnn, lb, ub, 200, true, true);
     ffnn->storeOnFile("nn.txt");
 
+
     // Delete allocations
     delete trainer;
+    tdata.deallocate();
     delete ffnn;
-
-    for (int i = 0; i<ndata; ++i) {
-        delete [] xdata[i];
-        delete [] ydata[i];
-        delete [] weights[i];
-        for (int j = 0; j<1; ++j) {
-            delete [] d1data[i][j];
-            delete [] d2data[i][j];
-        }
-        delete [] d1data[i];
-        delete [] d2data[i];
-    }
-    delete [] xdata;
-    delete [] ydata;
-    delete [] weights;
-    delete [] d1data;
-    delete [] d2data;
 
     return 0;
     //

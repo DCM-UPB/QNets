@@ -71,27 +71,20 @@ int main (void) {
     assert(ffnn->getNBeta() == nbeta);
 
 
-    // allocate data arrays
+    // create data/config structs
     const int ntraining = 20;
     const int nvalidation = 20;
     const int ntesting = 20;
     const int ndata = ntraining + nvalidation + ntesting;
-    double ** xdata = new double*[ndata];
-    double ** ydata = new double*[ndata];
-    double *** d1data = new double**[ndata];
-    double *** d2data = new double**[ndata];
-    double ** weights = new double*[ndata];
-    for (int i = 0; i<ndata; ++i) {
-        xdata[i] = new double[xndim];
-        ydata[i] = new double[yndim];
-        weights[i] = new double[yndim];
-        d1data[i] = new double*[yndim];
-        d2data[i] = new double*[yndim];
-        for (int j = 0; j<yndim; ++j) {
-            d1data[i][j] = new double[xndim];
-            d2data[i][j] = new double[xndim];
-        }
-    }
+    const int maxn_steps = 50;
+    const int maxn_novali = 5;
+    const int maxn_fits = 50;
+    const double lambda_r = 0.000000001, lambda_d1 = 0.5, lambda_d2 = 0.5;
+    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL}; // we use tdata.allocate, so pass NULL for arrays
+    NNTrainingConfig tconfig = {0., 0., 0., maxn_steps, maxn_novali}; // initially set all lambdas to 0, i.e. no regularization and derivative residuals
+
+    // allocate data arrays
+    tdata.allocate(true, true);
 
     // generate the data to be fitted (the output of a "gaussian" NN, same shape as ffnn)
     const double lb = -2;
@@ -101,39 +94,33 @@ int main (void) {
     uniform_real_distribution<double> rd(lb,ub);
     for (int i=0; i<ndata; ++i) {
         for (int j=0; j<xndim; ++j) {
-            xdata[i][j] = rd(rgen);
+            tdata.x[i][j] = rd(rgen);
         }
-        const double feed = beta[0] + beta[1] * xdata[i][0] + beta[2] * xdata[i][1];
+        const double feed = beta[0] + beta[1] * tdata.x[i][0] + beta[2] * tdata.x[i][1];
         const double hnv = gaussian(feed);
-        ydata[i][0] = beta[3] + beta[4] * hnv;
-        ydata[i][1] = beta[5] + beta[6] * hnv;
+        tdata.y[i][0] = beta[3] + beta[4] * hnv;
+        tdata.y[i][1] = beta[5] + beta[6] * hnv;
 
         const double d1feed = gaussian_ddx(feed);
         const double d2feed = gaussian_d2dx(feed);
 
-        d1data[i][0][0] = (beta[4] * d1feed * beta[1]);
-        d1data[i][0][1] = (beta[4] * d1feed * beta[2]);
-        d1data[i][1][0] = (beta[6] * d1feed * beta[1]);
-        d1data[i][1][1] = (beta[6] * d1feed * beta[2]);
+        tdata.yd1[i][0][0] = (beta[4] * d1feed * beta[1]);
+        tdata.yd1[i][0][1] = (beta[4] * d1feed * beta[2]);
+        tdata.yd1[i][1][0] = (beta[6] * d1feed * beta[1]);
+        tdata.yd1[i][1][1] = (beta[6] * d1feed * beta[2]);
 
-        d2data[i][0][0] = (beta[4] * d2feed * pow(beta[1], 2));
-        d2data[i][0][1] = (beta[4] * d2feed * pow(beta[2], 2));
-        d2data[i][1][0] = (beta[6] * d2feed * pow(beta[1], 2));
-        d2data[i][1][1] = (beta[6] * d2feed * pow(beta[2], 2));
+        tdata.yd2[i][0][0] = (beta[4] * d2feed * pow(beta[1], 2));
+        tdata.yd2[i][0][1] = (beta[4] * d2feed * pow(beta[2], 2));
+        tdata.yd2[i][1][0] = (beta[6] * d2feed * pow(beta[1], 2));
+        tdata.yd2[i][1][1] = (beta[6] * d2feed * pow(beta[2], 2));
 
-        weights[i][0] = 1.0;
-        weights[i][1] = 1.0;
+        tdata.w[i][0] = 1.0;
+        tdata.w[i][1] = 1.0;
     };
 
-    // create data/config structs
-    const int maxn_steps = 50;
-    const int maxn_novali = 5;
-    const int maxn_fits = 50;
-    const double lambda_r = 0.000000001, lambda_d1 = 0.5, lambda_d2 = 0.5;
-    NNTrainingData tdata = {ntraining, ntraining, 0, xndim, yndim, xdata, ydata, d1data, d2data, weights};
-    NNTrainingConfig tconfig = {0., 0., 0., maxn_steps, maxn_novali}; // initially set all lambdas to 0, i.e. no regularization and derivative residuals
-
     // find fit without derivs or regularization, using only training data
+    tdata.ndata = ntraining;
+    tdata.nvalidation = 0;
     validate_fit(tdata, tconfig, ffnn, maxn_fits, false, false, TINY, verbose);
     validate_beta(ffnn, beta, TINY);
 
@@ -171,24 +158,8 @@ int main (void) {
 
 
     // Delete allocations
+    tdata.deallocate();
     delete ffnn;
-
-    for (int i = 0; i<ndata; ++i) {
-        delete [] xdata[i];
-        delete [] ydata[i];
-        delete [] weights[i];
-        for (int j = 0; j<yndim; ++j) {
-            delete [] d1data[i][j];
-            delete [] d2data[i][j];
-        }
-        delete [] d1data[i];
-        delete [] d2data[i];
-    }
-    delete [] xdata;
-    delete [] ydata;
-    delete [] weights;
-    delete [] d1data;
-    delete [] d2data;
 
     return 0;
     //

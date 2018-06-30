@@ -178,4 +178,27 @@ int main(){
 
     tws.lambda_r = lambda_r;
     validateJacobian(tws, TINY, verbose); // deriv_reg
+
+
+    // delete
+    for (int i = 0; i<ndata; ++i) {
+        delete [] xdata[i];
+        delete [] ydata[i];
+        delete [] weights[i];
+        for (int j = 0; j<yndim; ++j) {
+            delete [] d1data[i][j];
+            delete [] d2data[i][j];
+        }
+        delete [] d1data[i];
+        delete [] d2data[i];
+    }
+    delete [] xdata;
+    delete [] ydata;
+    delete [] weights;
+    delete [] d1data;
+    delete [] d2data;
+
+    delete ffnn;
+
+    return 0;
 };

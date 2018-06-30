@@ -62,6 +62,7 @@ DerivedData
 lib*
 config.sh
 *exe*
+vgcore* 
 
 src/*.o
 src/*.dSYM
