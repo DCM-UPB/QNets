@@ -73,7 +73,6 @@ public:
     void popHiddenLayer();
 
 
-
     // --- Connect the neural network
     void connectFFNN();
     void disconnectFFNN();
@@ -86,7 +85,6 @@ public:
     void setBeta(const int &ib, const double &beta);
     void setBeta(const double * beta);
     void randomizeBetas();
-
 
 
     // --- Substrates for the calculations of derivatives
@@ -104,14 +102,14 @@ public:
     void addCrossSecondDerivativeSubstrate();  // cross second derivatives
     void addLastHiddenLayerCrossSecondDerivativeSubstrate();
 
-    // shortcut for connecting and adding substrates
-    void connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false, bool flag_c1d = false, bool flag_c2d = false);
+    // shortcut for (connecting and) adding substrates
+    void addSubstrates(const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_vd1 = false, const bool flag_c1d = false, const bool flag_c2d = false);
+    void connectAndAddSubstrates(const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_vd1 = false, const bool flag_c1d = false, const bool flag_c2d = false);
+
 
     // Set initial parameters
     void setInput(const double * in);
     void setInput(const int &i, const double &in);
-
-
 
     // --- Computation
     void FFPropagate();
@@ -119,7 +117,6 @@ public:
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
     // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
     void evaluate(const double * in, double * out = NULL, double ** d1 = NULL, double ** d2 = NULL, double ** vd1 = NULL);
-
 
 
     // --- Get outputs
@@ -145,7 +142,6 @@ public:
     void getCrossSecondDerivative(double *** d1vd1);
     void getCrossSecondDerivative(const int &i, double ** d1vd1);  // i is the output index
     double getCrossSecondDerivative(const int &i, const int &i2d, const int &iv1d);  // i is the index of the output element, i2d, of the input element, iv1d the index of the beta element
-
 
 
     // --- Store FFNN on file

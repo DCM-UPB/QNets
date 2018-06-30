@@ -16,16 +16,24 @@ protected:
     const NNTrainingConfig _tconfig; // holds training parameters and flags, mainly to configure the residual
     const bool _flag_vali; // do we have validation data?
     const bool _flag_test; // do we have testing data?
+    const bool _flag_r; // lambda_r > 0 ?
+    const bool _flag_d1; // lambda_d1 > 0 ?
+    const bool _flag_d2; // lambda_d2 > 0 ?
 public:
     // construct from individual structures / ffnn
-    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig) : _tdata(tdata), _tconfig(tconfig), _flag_vali(tdata.nvalidation > 0), _flag_test((tdata.ntraining + tdata.nvalidation) != tdata.ndata) {}
+    NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig)
+        : _tdata(tdata), _tconfig(tconfig), _flag_vali(tdata.nvalidation > 0), _flag_test((tdata.ntraining + tdata.nvalidation) < tdata.ndata),
+          _flag_r(tconfig.lambda_r > 0), _flag_d1(tconfig.lambda_d1 > 0), _flag_d2(tconfig.lambda_d2 > 0) {}
 
     virtual ~NNTrainer(){}
 
     // set shift/scale parameters of NN units, to achieve proper normalization with respect to tdata
     void setNormalization(FeedForwardNeuralNetwork * const ffnn);
 
-    // compute residual of ffnn vs data in _tdata
+    // connect and add necessary substrates to ffnn, also set normalization if flag_norm
+    void configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_norm = false);
+
+    // compute testing residual of ffnn vs testing data in _tdata (vs training+validation if no testing present)
     double computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r = false, const bool &flag_d = false);
 
     // find individual fit, to be implemented by child

@@ -387,8 +387,8 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate(
     using namespace std;
 
     // cross second derivatives require first, second, and variational first derivatives
-    if (!_flag_1d || !_flag_v1d || !_flag_2d){
-        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
+    if (!_flag_1d || !_flag_v1d || !_flag_c1d || !_flag_2d){
+        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, CrossFirstDerivative and SecondDerivative" );
     }
 
     // set the substrate in the units
@@ -406,8 +406,8 @@ void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
     using namespace std;
 
     // cross second derivatives require first, second, and variational first derivatives
-    if (!_flag_1d || !_flag_v1d || !_flag_2d){
-        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, and SecondDerivative" );
+    if (!_flag_1d || !_flag_v1d || !_flag_c1d || !_flag_2d){
+        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, CrossFirstDerivative and SecondDerivative" );
     }
 
     // set the substrate in the units
@@ -528,6 +528,14 @@ void FeedForwardNeuralNetwork::addFirstDerivativeSubstrate()
     _flag_1d = true;
 }
 
+void FeedForwardNeuralNetwork::addSubstrates(const bool flag_d1, const bool flag_d2, const bool flag_vd1, const bool flag_c1d, const bool flag_c2d)
+{
+    if (flag_d1) addFirstDerivativeSubstrate();
+    if (flag_d2) addSecondDerivativeSubstrate();
+    if (flag_vd1) addVariationalFirstDerivativeSubstrate();
+    if (flag_c1d) addCrossFirstDerivativeSubstrate();
+    if (flag_c2d) addCrossSecondDerivativeSubstrate();
+}
 
 // --- Connect the neural network
 
@@ -544,13 +552,9 @@ void FeedForwardNeuralNetwork::connectFFNN()
 }
 
 
-void FeedForwardNeuralNetwork::connectAndAddSubstrates(bool flag_d1, bool flag_d2, bool flag_vd1, bool flag_c1d, bool flag_c2d){
+void FeedForwardNeuralNetwork::connectAndAddSubstrates(const bool flag_d1, const bool flag_d2, const bool flag_vd1, const bool flag_c1d, const bool flag_c2d){
     connectFFNN();
-    if (flag_d1) addFirstDerivativeSubstrate();
-    if (flag_d2) addSecondDerivativeSubstrate();
-    if (flag_vd1) addVariationalFirstDerivativeSubstrate();
-    if (flag_c1d) addCrossFirstDerivativeSubstrate();
-    if (flag_c2d) addCrossSecondDerivativeSubstrate();
+    addSubstrates(flag_d1, flag_d2, flag_vd1, flag_c1d, flag_c2d);
 }
 
 

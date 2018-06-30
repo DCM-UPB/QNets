@@ -57,13 +57,13 @@ int main (void) {
 
     int nl, nhl, nhu[2], nfits = 1;
     double maxchi = 0.0, lambda_r = 0.0, lambda_d1 = 0.0, lambda_d2 = 0.0;
-    bool verbose = false, flag_d1 = false, flag_d2 = false, flag_r = false;
+    bool verbose = false;
 
 
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    cout << "How many units should the first hidden layer have? ";
+    cout << "How many hidden units should the first hidden layer have? ";
     cin >> nhu[0];
     cout << "How many units should the second hidden layer have? (<=1 for none) ";
     cin >> nhu[1];
@@ -100,14 +100,6 @@ int main (void) {
     // create FFNN
     ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
-    ffnn->connectFFNN();
-    ffnn->addVariationalFirstDerivativeSubstrate();
-    ffnn->addFirstDerivativeSubstrate(); // we always want those derivatives for printout
-    ffnn->addSecondDerivativeSubstrate();
-    if (lambda_d1 > 0 || lambda_d2 > 0) {ffnn->addCrossFirstDerivativeSubstrate();};// first deriv also required for second cross deriv
-    if (lambda_d1 > 0) flag_d1 = true;
-    if (lambda_d2 > 0) {ffnn->addCrossSecondDerivativeSubstrate(); flag_d2 = true;};
-    if (lambda_r > 0) flag_r = true;
 
     // allocate data arrays
     xdata = new double*[ndata];
@@ -140,11 +132,11 @@ int main (void) {
 
     // create data and config structs
     tdata = {ndata, ntraining, nvalidation, 1, 1, xdata, ydata, d1data, d2data, weights};
-    tconfig = {flag_r, flag_d1, flag_d2, lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
+    tconfig = {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // create trainer and find best fit
     trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->setNormalization(ffnn); // setup proper normalization before fitting
+    trainer->configureFFNN(ffnn, true); // configure FFNN substrates and setup proper normalization before fitting
     trainer->bestFit(ffnn, nfits, maxchi, verbose ? 2 : 1); // find a fit out of nfits with minimal testing residual
 
     //

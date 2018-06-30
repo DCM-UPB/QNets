@@ -56,6 +56,15 @@ void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
     }
 }
 
+void NNTrainer::configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_norm) // takes a FFNN and adds the proper substrates + normalization, if flag_norm
+{
+    if (!ffnn->isConnected()) ffnn->connectFFNN();
+    const bool flag_cd1 = _flag_d1 || _flag_d2; // second cross derivative also needs first one
+    ffnn->addSubstrates(flag_cd1, _flag_d2, true, flag_cd1, _flag_d2);
+
+    if (flag_norm) setNormalization(ffnn);
+}
+
 double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r, const bool &flag_d)
 {
     const int nbeta = ffnn->getNBeta();
@@ -66,7 +75,7 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
 
     // add regularization residual from NN betas
     for (int i=0; i<nbeta; ++i){
-        resi += (_tconfig.flag_r && flag_r) ? lambda_r_red * pow(ffnn->getBeta(i), 2) : 0.;
+        resi += (_flag_r && flag_r) ? lambda_r_red * pow(ffnn->getBeta(i), 2) : 0.;
     }
 
     //get difference NN vs data
@@ -77,8 +86,8 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
             resi += pow(_tdata.w[i][j] * (ffnn->getOutput(j) - _tdata.y[i][j]), 2);
 
             for (int k=0; k<_tdata.xndim; ++k) {
-                resi += (_tconfig.flag_d1 && flag_d) ? _tconfig.lambda_d1 * pow(_tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - _tdata.yd1[i][j][k]), 2) : 0.;
-                resi += (_tconfig.flag_d2 && flag_d) ? _tconfig.lambda_d2 * pow(_tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - _tdata.yd2[i][j][k]), 2) : 0.;
+                resi += (_flag_d1 && flag_d) ? _tconfig.lambda_d1 * pow(_tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - _tdata.yd1[i][j][k]), 2) : 0.;
+                resi += (_flag_d2 && flag_d) ? _tconfig.lambda_d2 * pow(_tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - _tdata.yd2[i][j][k]), 2) : 0.;
             }
         }
     }
@@ -156,6 +165,10 @@ void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const doub
 {
     using namespace std;
     double base_input = 0.;
+
+    // add required substrates if necessary
+    if ((print_d1 || print_d2) && !ffnn->hasFirstDerivativeSubstrate()) ffnn->addFirstDerivativeSubstrate();
+    if (print_d2 && !ffnn->hasSecondDerivativeSubstrate()) ffnn->addSecondDerivativeSubstrate();
 
     for (int i = 0; i<_tdata.xndim; ++i) {
         for (int j = 0; j<_tdata.yndim; ++j) {

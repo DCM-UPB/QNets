@@ -46,9 +46,10 @@
 
 ## Unit Test 8
 
-`ut8/`: check that the trainers find perfect fits for a target function resembling a NN
+`ut8/`: check that the GSL residual jacobians are correct
+
 
 
 ## Unit Test 9
 
-`ut9/`: check that the GSL residual jacobians are correct
+`ut9/`: check that the trainers find perfect fits for a target function resembling a NN
