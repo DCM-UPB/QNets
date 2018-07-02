@@ -38,7 +38,8 @@ public:
 
     // variational parameters
     virtual int getNVariationalParameters() = 0;  // return the number of variational parameters involved
-    virtual int setVariationalParametersIndexes(const int &starting_index) = 0;  // set the identification index of each variational parameter starting from the given input value
+    virtual int getMaxVariationalParameterIndex() = 0; // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
+    virtual int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_betas = true) = 0;  // set the identification index of each variational parameter starting from the given input value
     // return the index that the next feeder might take as input
     virtual bool getVariationalParameterValue(const int &id, double &value) = 0; // get the variational parameter with identification index id and store it in value
     // return true if the parameters has been found, false otherwise
@@ -49,8 +50,8 @@ public:
     virtual double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d) = 0;  // e.g. get   d^2/dxdb sum_j( b_j x_j ), where i1d is the index for x, and iv1d is the index for b
     virtual double getCrossSecondDerivativeFeed(const int &i2d, const int &iv1d) = 0; // e.g. get    d^3/dx^2db sum_j( b_j x_j ), where i1d is the index for x, and iv1d is the index for b
 
-    virtual bool isBetaIndexUsedInThisRay(const int &id) = 0;
-    virtual bool isBetaIndexUsedForThisRay(const int &id) = 0;
+    virtual bool isVPIndexUsedInThisRay(const int &id) = 0;
+    virtual bool isVPIndexUsedForThisRay(const int &id) = 0;
 };
 
 #endif

@@ -55,7 +55,8 @@ public:
 
     // Variational Parameters
     int getNVariationalParameters();
-    int setVariationalParametersIndexes(const int &starting_index);
+    int getMaxVariationalParameterIndex();
+    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_betas = true);
     bool getVariationalParameterValue(const int &id, double &value);
     bool setVariationalParameterValue(const int &id, const double &value);
 
@@ -68,8 +69,8 @@ public:
     double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d);
 
     // Beta Index
-    bool isBetaIndexUsedInThisRay(const int &id);   // beta is directly used?
-    bool isBetaIndexUsedForThisRay(const int &id);   // beta is used directly or indirectly?
+    bool isVPIndexUsedInThisRay(const int &id);   // variational parameter is directly used?
+    bool isVPIndexUsedForThisRay(const int &id);   // variational parameter is used directly or indirectly?
 };
 
 #endif

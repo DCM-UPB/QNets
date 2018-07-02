@@ -31,6 +31,7 @@ public:
     bool setVariationalParameter(const int &id, const double &vp);
     bool getVariationalParameter(const int &id, double &vp);
     int getNVariationalParameters();
+    int getMaxVariationalParameterIndex();
 
     // --- Values to compute
 

@@ -469,22 +469,24 @@ void FeedForwardNeuralNetwork::addLastHiddenLayerVariationalFirstDerivativeSubst
 {
     if (_flag_v1d) return; // nothing to do
 
+    // set the id of the variational parameters for all the feeders
+    int id_vp=0;
+    for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
+        {
+            id_vp = _L_nn[i]->setVariationalParametersID(id_vp);
+        }
+
     // count the total number of variational parameters
     _nvp=0;
     for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
         {
             _nvp += _L_nn[i]->getNVariationalParameters();
         }
+
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
             _L[i]->addVariationalFirstDerivativeSubstrate(_nvp);
-        }
-    // set the id of the variational parameters for all the feeders
-    int id_vp=0;
-    for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
-        {
-            id_vp = _L_nn[i]->setVariationalParametersID(id_vp);
         }
 
     _flag_v1d = true;
@@ -495,22 +497,24 @@ void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 {
     if (_flag_v1d) return; // nothing to do
 
+    // set the id of the variational parameters for all the feeders
+    int id_vp=0;
+    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
+        {
+            id_vp = _L[i]->setVariationalParametersID(id_vp);
+        }
+
     // count the total number of variational parameters
     _nvp=0;
-    for (std::vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            _nvp += _L_fed[i]->getNVariationalParameters();
+            _nvp += _L[i]->getNVariationalParameters();
         }
+
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
             _L[i]->addVariationalFirstDerivativeSubstrate(_nvp);
-        }
-    // set the id of the variational parameters for all the feeders
-    int id_vp=0;
-    for (std::vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
-        {
-            id_vp = _L_fed[i]->setVariationalParametersID(id_vp);
         }
 
     _flag_v1d = true;

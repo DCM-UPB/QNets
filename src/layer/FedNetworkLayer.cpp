@@ -63,6 +63,20 @@ int FedNetworkLayer::getNVariationalParameters()
     return nvp;
 }
 
+int FedNetworkLayer::getMaxVariationalParameterIndex()
+{
+    int max_index = -1;
+    for (std::vector<FedNetworkUnit *>::size_type i=0; i<_U_fed.size(); ++i)
+        {
+            NetworkUnitFeederInterface * feeder = _U_fed[i]->getFeeder();
+            if (feeder) {
+                int index = feeder->getMaxVariationalParameterIndex();
+                if (index > max_index) max_index = index;
+            }
+        }
+    return max_index;
+}
+
 
 // --- Values to compute
 

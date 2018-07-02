@@ -24,7 +24,7 @@ void FedNetworkUnit::computeFeed(){
 
         if ( _cross_first_der || _cross_second_der ){
             for (int j=0; j<_nvp; ++j){
-                if (_feeder->isBetaIndexUsedForThisRay(j)) {
+                if (_feeder->isVPIndexUsedForThisRay(j)) {
                     if (_first_var_der) _first_var_der[j] = _feeder->getVariationalFirstDerivativeFeed(j);
                     if (_cross_first_der) for (int i=0; i<_nx0; ++i) _cross_first_der[i][j] = _feeder->getCrossFirstDerivativeFeed(i, j);
                     if (_cross_second_der) for (int i=0; i<_nx0; ++i) _cross_second_der[i][j] = _feeder->getCrossSecondDerivativeFeed(i, j);

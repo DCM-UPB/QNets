@@ -36,12 +36,13 @@ int main() {
     cout << "Done." << endl;
     cin.ignore();
 
-    cout << "Finally we add 1st, 2nd and variational derivative substrates and store the ffn into a new file 'substrate_ffnn.txt'." << endl;
+    cout << "Finally we add 1st, 2nd and variational derivative substrates and store the ffnn without betas into a new file 'substrate_ffnn.txt' and with betas into 'substrate_ffnn_wbetas.txt'." << endl;
     //NON I/O CODE
     ffnn->addFirstDerivativeSubstrate();
     ffnn->addSecondDerivativeSubstrate();
     ffnn->addVariationalFirstDerivativeSubstrate();
     ffnn->storeOnFile("substrate_ffnn.txt", false);
+    ffnn->storeOnFile("substrate_ffnn_wbetas.txt", true);
     //
     cout << "Done." << endl;
     cin.ignore();

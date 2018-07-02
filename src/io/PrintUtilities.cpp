@@ -94,7 +94,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
         maxIdLength[l] = 0;
     }
 
-    // max number of beta (i.e. variational parameters) for the units with index u over all layers
+    // max number of beta for the units with index u over all layers
     maxNBeta = new int[maxNUnits];
     feeders = new NetworkUnitFeederInterface*[nlayers*maxNUnits];
     ids = new string[nlayers*maxNUnits];
@@ -108,8 +108,8 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
                 if (FedNetworkUnit * fnu = dynamic_cast<FedNetworkUnit *>(ffnn->getLayer(l)->getUnit(u))) {
                     feeder = fnu->getFeeder();
                     if (feeder){
-                        if (feeder->getNVariationalParameters() > maxNBeta[u]){
-                            maxNBeta[u] = feeder->getNVariationalParameters();
+                        if (feeder->getNBeta() > maxNBeta[u]){
+                            maxNBeta[u] = feeder->getNBeta();
                         }
                     }
                 }
