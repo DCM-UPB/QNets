@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <random>
-#include <set>
+#include <map>
 #include <string>
 
 class NetworkUnitRay: public NetworkUnitFeederInterface {
@@ -23,14 +23,8 @@ protected:
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
     int _intensity_id_shift;  // shift of the previous vector
 
-    // store information about which beta are used in or for this ray
-    // NB: 'in' this ray means that the beta is part of the ray
-    //     'for' this ray means that the beta is either used in this ray or in another
-    //           ray that genreates an output that is directly or indirectly used
-    //           in this ray (sources)
-    std::set<int> _betas_used_in_this_ray;
-    std::set<int> _betas_used_for_this_ray;
-
+    // store indices of relevant sources for each variational parameter (in sources)
+    std::vector<std::vector<int>> _map_index_to_sources;
 public:
     explicit NetworkUnitRay(NetworkLayer * nl);
     ~NetworkUnitRay();
@@ -69,8 +63,9 @@ public:
     double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d);
 
     // Beta Index
-    bool isVPIndexUsedInThisRay(const int &id);   // variational parameter is directly used?
-    bool isVPIndexUsedForThisRay(const int &id);   // variational parameter is used directly or indirectly?
+    bool isVPIndexUsedInFeeder(const int &id);
+    bool isVPIndexUsedInSources(const int &id);
+    bool isVPIndexUsedForFeeder(const int &id);
 };
 
 #endif

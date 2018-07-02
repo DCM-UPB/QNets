@@ -50,8 +50,9 @@ public:
     virtual double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d) = 0;  // e.g. get   d^2/dxdb sum_j( b_j x_j ), where i1d is the index for x, and iv1d is the index for b
     virtual double getCrossSecondDerivativeFeed(const int &i2d, const int &iv1d) = 0; // e.g. get    d^3/dx^2db sum_j( b_j x_j ), where i1d is the index for x, and iv1d is the index for b
 
-    virtual bool isVPIndexUsedInThisRay(const int &id) = 0;
-    virtual bool isVPIndexUsedForThisRay(const int &id) = 0;
+    virtual bool isVPIndexUsedInFeeder(const int &id) = 0;  // variational parameter is directly used?
+    virtual bool isVPIndexUsedInSources(const int &id) = 0; // variational parameter is indirectly used?
+    virtual bool isVPIndexUsedForFeeder(const int &id) = 0; // variational parameter is used directly or indirectly?
 };
 
 #endif

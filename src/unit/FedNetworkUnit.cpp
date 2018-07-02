@@ -21,23 +21,20 @@ void FedNetworkUnit::computeFeed(){
             for (int i=0; i<_nx0; ++i) _second_der[i] = _feeder->getSecondDerivativeFeed(i);
         }
 
+        if (_first_var_der) {
+            for (int j=0; j<_nvp; ++j) _first_var_der[j] = _feeder->getVariationalFirstDerivativeFeed(j);
+        }
 
-        if ( _cross_first_der || _cross_second_der ){
-            for (int j=0; j<_nvp; ++j){
-                if (_feeder->isVPIndexUsedForThisRay(j)) {
-                    if (_first_var_der) _first_var_der[j] = _feeder->getVariationalFirstDerivativeFeed(j);
-                    if (_cross_first_der) for (int i=0; i<_nx0; ++i) _cross_first_der[i][j] = _feeder->getCrossFirstDerivativeFeed(i, j);
-                    if (_cross_second_der) for (int i=0; i<_nx0; ++i) _cross_second_der[i][j] = _feeder->getCrossSecondDerivativeFeed(i, j);
-                }
-                else{ // to be sure
-                    if (_first_var_der) _first_var_der[j] = 0.;
-                    if (_cross_first_der) for (int i=0; i<_nx0; ++i) _cross_first_der[i][j] = 0.;
-                    if (_cross_second_der) for (int i=0; i<_nx0; ++i) _cross_second_der[i][j] = 0.;
-                }
+        if (_cross_first_der) {
+            for (int j=0; j<_nvp; ++j) {
+                for (int i=0; i<_nx0; ++i) _cross_first_der[i][j] = _feeder->getCrossFirstDerivativeFeed(i, j);
             }
         }
-        else { // runs faster in this case
-            if (_first_var_der) for (int i=0; i<_nvp; ++i) _first_var_der[i] = _feeder->getVariationalFirstDerivativeFeed(i);
+
+        if (_cross_second_der) {
+            for (int j=0; j<_nvp; ++j) {
+                for (int i=0; i<_nx0; ++i) _cross_second_der[i][j] = _feeder->getCrossSecondDerivativeFeed(i, j);
+            }
         }
     }
 }
