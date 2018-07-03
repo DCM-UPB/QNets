@@ -17,7 +17,7 @@
 #endif
 
 
-// --- Variational Parameters
+// --- Beta
 
 int FeedForwardNeuralNetwork::getNBeta()
 {
@@ -43,7 +43,7 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
     if ( ib<0 || ib >= getNBeta() )
         {
             cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index out of boundaries" << endl;
-            cout << ib << " against the maximum allowed " << this->getNBeta() << endl << endl;
+            cout << ib << " against the maximum allowed " << this->getNBeta()-1 << endl << endl;
         }
     else
         {
@@ -63,8 +63,7 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
                         }
                 }
         }
-    cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index not found" << endl;
-    cout << ib << " against the maximum allowed " << this->getNBeta() << endl << endl;
+    cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index " << ib << " not found" << endl << endl;
     return -666.;
 }
 
@@ -92,10 +91,10 @@ void FeedForwardNeuralNetwork::getBeta(double * beta){
 void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
 {
     using namespace std;
-    if ( ib >= this->getNBeta() )
+    if ( ib<0 || ib >= this->getNBeta() )
         {
-            cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index out of boundaries" << endl;
-            cout << ib << " against the maximum allowed " << this->getNBeta() << endl << endl;
+            cout << endl << "ERROR FeedForwardNeuralNetwork::setBeta : index out of boundaries" << endl;
+            cout << ib << " against the maximum allowed " << this->getNBeta()-1 << endl << endl;
         }
     else
         {
@@ -108,7 +107,10 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
                                 {
                                     for (int k=0; k<_L_fed[i]->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
                                         {
-                                            if (idx==ib) _L_fed[i]->getFedUnit(j)->getFeeder()->setBeta(k, beta);
+                                            if (idx==ib) {
+                                                _L_fed[i]->getFedUnit(j)->getFeeder()->setBeta(k, beta);
+                                                return;
+                                            }
                                             idx++;
                                         }
                                 }
@@ -174,6 +176,83 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 }
 
 
+// --- Variational Parameters
+
+double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp)
+{
+    using namespace std;
+
+    if (ivp<0 || ivp >= getNVariationalParameters()) {
+        cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index out of boundaries" << endl;
+        cout << ivp << " against the maximum allowed " << this->getNVariationalParameters()-1 << endl << endl;
+    }
+    for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
+        if (ivp<=_L[i]->getMaxVariationalParameterIndex()) {
+            double result;
+            bool status = _L[i]->getVariationalParameter(ivp, result);
+            if (status) return result;
+            else break;
+        }
+    }
+    cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found" << endl << endl;
+    return -666.;
+
+}
+
+
+void FeedForwardNeuralNetwork::getVariationalParameter(double * vp)
+{
+    using namespace std;
+
+    int ivp = 0;
+    for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
+        int idmax = _L[i]->getMaxVariationalParameterIndex();
+        if (ivp<=idmax) {
+            for ( ; ivp<idmax; ++ivp) {
+                bool status = _L[i]->getVariationalParameter(ivp, vp[ivp]);
+                if (!status) {
+                    cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
+                }
+            }
+        }
+    }
+}
+
+
+void FeedForwardNeuralNetwork::setVariationalParameter(const int &ivp, const double &vp)
+{
+    if (ivp<0 || ivp >= getNVariationalParameters()) {
+        cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index out of boundaries" << endl << endl;
+        cout << ivp << " against the maximum allowed " << this->getNVariationalParameters()-1 << endl << endl;
+    }
+    for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
+        if (ivp<=_L[i]->getMaxVariationalParameterIndex()) {
+            _L[i]->setVariationalParameter(ivp, vp);
+            return;
+        }
+    }
+    cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found" << endl << endl;
+}
+
+
+void FeedForwardNeuralNetwork::setVariationalParameter(const double * vp)
+{
+    using namespace std;
+
+    int ivp = 0;
+    for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
+        int idmax = _L[i]->getMaxVariationalParameterIndex();
+        if (ivp<=idmax) {
+            for ( ; ivp<idmax; ++ivp) {
+                bool status = _L[i]->setVariationalParameter(ivp, vp[ivp]);
+                if (!status) {
+                    cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
+                }
+            }
+        }
+    }
+}
+
 
 // --- Computation
 
@@ -192,7 +271,7 @@ void FeedForwardNeuralNetwork::getCrossSecondDerivative(double *** d1vd1){
 
 void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, double ** d1vd1){
     for (int i1d=0; i1d<getNInput(); ++i1d){
-        for (int iv1d=0; iv1d<getNBeta(); ++iv1d){
+        for (int iv1d=0; iv1d<getNVariationalParameters(); ++iv1d){
             d1vd1[i1d][iv1d] = getCrossSecondDerivative(i, i1d, iv1d);
         }
     }

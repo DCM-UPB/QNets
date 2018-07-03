@@ -21,7 +21,7 @@ protected:
     std::vector<NetworkUnit *> _source;   // units from which the ray takes the values from
     std::vector<double> _intensity;   // intensity of each sorgent unit, i.e. its weight
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
-    int _intensity_id_shift;  // shift of the previous vector
+    int _intensity_id_shift = -1;  // shift of the previous vector (-1 means we don't add our betas to variational parameters)
 
     // store indices of relevant sources for each variational parameter (in sources)
     std::vector<std::vector<int>> _map_index_to_sources;

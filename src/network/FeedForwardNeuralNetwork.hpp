@@ -84,7 +84,14 @@ public:
     void getBeta(double * beta);
     void setBeta(const int &ib, const double &beta);
     void setBeta(const double * beta);
-    void randomizeBetas();
+    void randomizeBetas(); // has to be changed maybe if we add beta that are not "normal" weights
+
+    // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters), which exist only after that the variational substrate has been set
+    int getNVariationalParameters(){return _nvp;}
+    double getVariationalParameter(const int &ivp);
+    void getVariationalParameter(double * vp);
+    void setVariationalParameter(const int &ivp, const double &vp);
+    void setVariationalParameter(const double * vp);
 
 
     // --- Substrates for the calculations of derivatives
