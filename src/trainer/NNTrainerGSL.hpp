@@ -17,9 +17,7 @@ namespace nn_trainer_gsl_details {
         FeedForwardNeuralNetwork * ffnn_vderiv = NULL; // Storing a pointer to the to-be-trained FFNN with vderivs
 
         // validation residuals
-        gsl_vector * fvali_full = NULL;
-        gsl_vector * fvali_noreg = NULL;
-        gsl_vector * fvali_pure = NULL;
+        gsl_vector * fvali = NULL;
 
         // residual flags
         bool flag_r;
@@ -34,15 +32,16 @@ namespace nn_trainer_gsl_details {
     // helpers
     int setBetas(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * const betas);
     int calcNData(const int &nbase, const int &yndim, const int &nbeta = 0, const int &xndim = 0, const int &nderiv = 2);
-    void calcOffset1(const int &nbase, const int &yndim, int &off);
-    void calcOffset12(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2);
-    void calcOffset123(const int &nbase, const int &yndim, const int &xndim, int &offd1, int &offd2, int &offr);
     void calcRSS(const gsl_vector * const f, double &chi, double &chisq);
     void calcCosts(const gsl_vector * const f, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali);
     void calcCosts(gsl_multifit_nlinear_workspace * const w, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali);
     void calcFitErr(gsl_multifit_nlinear_workspace * const w, double * const fit, double * const err, const int &ndata, const int &npar, const double &chisq);
 
-    // residuals
+    // common residual functions
+    int ffnn_f(const gsl_vector * betas, training_workspace * const tws, gsl_vector * f, const bool flag_r, const bool flag_d);
+    int ffnn_df(const gsl_vector * betas, training_workspace * const tws, gsl_matrix * J, const bool flag_r, const bool flag_d);
+
+    // the residual functions passed to GSL
     int ffnn_f_pure(const gsl_vector * betas, void * const tws, gsl_vector * f);
     int ffnn_df_pure(const gsl_vector * betas, void * const tws, gsl_matrix * J);
     int ffnn_f_deriv(const gsl_vector * betas, void * const tws, gsl_vector * f);

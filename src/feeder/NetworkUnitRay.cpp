@@ -278,6 +278,7 @@ NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl) {
         _intensity.push_back(_rd(_rgen));
     }
 
+    _intensity_id_shift = -1; // pro forma
     setVariationalParametersIndexes(nl->getMaxVariationalParameterIndex(), false); // per default we don't add betas as variational parameters
 }
 
