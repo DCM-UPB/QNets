@@ -101,11 +101,8 @@ int main(){
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhid, yndim+1);
     ffnn->connectFFNN();
-    ffnn->addVariationalFirstDerivativeSubstrate();
     ffnn->addFirstDerivativeSubstrate();
     ffnn->addSecondDerivativeSubstrate();
-    ffnn->addCrossFirstDerivativeSubstrate();
-    ffnn->addCrossSecondDerivativeSubstrate();
 
     double fixed_beta[7] = {0.6, -1.1, 0.4, -0.55, 0.45, 1.2, -0.75}; // just some betas
     for (int i=0; i<7; ++i) ffnn->setBeta(i, fixed_beta[i]);
@@ -162,6 +159,10 @@ int main(){
     training_workspace tws;
     tws.copyDatConf(tdata, tconfig);
     tws.ffnn = ffnn;
+    tws.ffnn_vderiv = new FeedForwardNeuralNetwork(ffnn);
+    tws.ffnn_vderiv->addVariationalFirstDerivativeSubstrate();
+    tws.ffnn_vderiv->addCrossFirstDerivativeSubstrate();
+    tws.ffnn_vderiv->addCrossSecondDerivativeSubstrate();
 
     // validate Jacobians
     validateJacobian(tws, TINY, verbose); // pure
@@ -198,6 +199,7 @@ int main(){
     delete [] d1data;
     delete [] d2data;
 
+    delete tws.ffnn_vderiv;
     delete ffnn;
 
     return 0;

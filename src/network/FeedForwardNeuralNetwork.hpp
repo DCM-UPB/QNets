@@ -16,7 +16,7 @@
 class FeedForwardNeuralNetwork
 {
 private:
-    void _construct(const int &insize, const int &hidlaysize, const int &outsize);
+    void _construct(const int &insize, const int &hidlaysize, const int &outsize); // construct from minimal set of unit numbers
     void _registerLayer(NetworkLayer * newLayer, const int &indexFromBack = 0); // register layers to correct vectors, position controlled by indexFromBack
     void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0); // creates and registers a new layer according to idCode and nunits
     void _addNewLayer(const std::string &idCode, const std::string &params="", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
@@ -28,10 +28,10 @@ protected:
     InputLayer * _L_in = NULL; // input layer
     OutputNNLayer * _L_out = NULL; // output layer
 
-    bool _flag_connected;  // flag that tells if the FFNN has been connected or not
-    bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d, _flag_c2d;  // flag that indicates if the substrates for the derivatives have been activated or not
+    bool _flag_connected = false;  // flag that tells if the FFNN has been connected or not
+    bool _flag_1d = false, _flag_2d = false, _flag_v1d = false, _flag_c1d = false, _flag_c2d = false;  // flag that indicates if the substrates for the derivatives have been activated or not
 
-    int _nvp;  // global number of variational parameters
+    int _nvp = 0;  // global number of variational parameters
 
 public:
     FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize);

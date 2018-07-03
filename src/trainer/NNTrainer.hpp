@@ -19,6 +19,12 @@ protected:
     const bool _flag_r; // lambda_r > 0 ?
     const bool _flag_d1; // lambda_d1 > 0 ?
     const bool _flag_d2; // lambda_d2 > 0 ?
+
+    // return a copy of ffnn with enabled vderiv substrates
+    FeedForwardNeuralNetwork * _createVDerivFFNN(FeedForwardNeuralNetwork * const ffnn);
+
+    // connect and add necessary substrates to ffnn (vderiv substrates only if flag is true)
+    void _configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_vderiv = false);
 public:
     // construct from individual structures / ffnn
     NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig)
@@ -29,9 +35,6 @@ public:
 
     // set shift/scale parameters of NN units, to achieve proper normalization with respect to tdata
     void setNormalization(FeedForwardNeuralNetwork * const ffnn);
-
-    // connect and add necessary substrates to ffnn, also set normalization if flag_norm
-    void configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_norm = false);
 
     // compute testing residual of ffnn vs testing data in _tdata (vs training+validation if no testing present)
     double computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r = false, const bool &flag_d = false);

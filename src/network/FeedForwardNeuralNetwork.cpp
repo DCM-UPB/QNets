@@ -789,17 +789,14 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (il!=nlayers) throw std::invalid_argument("Stored FFNN file declares to have more layers than it has layer codes.");
 
     // connect the NN, if connected is found true
-    _nvp = 0;
     bool connected;
     file >> connected;
-    _flag_connected = false;
     if (connected) connectFFNN();
 
     // set betas and all other params/actf
     for (int i=0; i<getNLayers(); ++i) getLayer(i)->setMemberParams(layerMemberCodes[i]);
 
     // read and set the substrates
-    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
     bool flag_1d = 0, flag_2d = 0, flag_v1d = 0, flag_c1d = 0, flag_c2d = 0;
     file >> flag_1d;
     if (flag_1d) addFirstDerivativeSubstrate();
@@ -816,17 +813,14 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 }
 
 
-FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn){
-
+FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn)
+{
     // copy layer structure
     for (int i=0; i<ffnn->getNLayers(); ++i) _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getNUnits());
 
      // read and set the substrates
-    _nvp = 0;
-    _flag_connected = false;
     if (ffnn->isConnected()) connectFFNN();
 
-    _flag_1d = 0; _flag_2d = 0; _flag_v1d = 0; _flag_c1d = 0; _flag_c2d = 0;
     if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();
     if (ffnn->hasSecondDerivativeSubstrate()) addSecondDerivativeSubstrate();
     if (ffnn->hasVariationalFirstDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
@@ -845,20 +839,12 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int 
     _construct(insize, hidlaysize, outsize);
 }
 
-
 void FeedForwardNeuralNetwork::_construct(const int &insize, const int &hidlaysize, const int &outsize){
     _addNewLayer("INL", insize);
     _addNewLayer("NNL", hidlaysize);
     _addNewLayer("OUTL", outsize);
 
-    _flag_connected = false;
-    _flag_1d = false;
-    _flag_2d = false;
-    _flag_v1d = false;
-    _flag_c1d = false;
-    _flag_c2d = false;
 
-    _nvp=0;
 }
 
 

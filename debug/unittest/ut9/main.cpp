@@ -33,7 +33,7 @@ void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const b
 void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = false)
 {
     NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->configureFFNN(ffnn, flag_norm); // NOTE: in most cases here we do not normalize, to keep known beta targets
+    if (flag_norm) trainer->setNormalization(ffnn); // NOTE: in most cases here we do not normalize, to keep known beta targets
     trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
     double resi = trainer->computeResidual(ffnn, false, flag_d);
     assert(resi <= TINY);

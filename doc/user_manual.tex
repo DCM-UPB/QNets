@@ -372,6 +372,7 @@ If we leave out generating the data though, it comes down to the following:
 
   FeedFowardNeuralNetwork * ffnn =
       new FeedFowardNeuralNetwork(xndim+1, nhunits, yndim+1);
+  ffnn->connectFFNN(); // only connect, don't add substrates
 
   // create config and data structs
   // (for reference see respective header files)
@@ -392,9 +393,8 @@ If we leave out generating the data though, it comes down to the following:
   // create trainer
   NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
 
-  // connect FFNN and add the correct substrates
-  trainer->configureFFNN(ffnn, flag_norm);
-  // flag_norm: setup ffnn's internal data normalization
+  // (optional) setup ffnn's internal data normalization
+  trainer->setNormalization(ffnn);
 
   // find a fit out of nfits with minimal testing residual
   trainer->bestFit(ffnn, nfits);

@@ -78,7 +78,8 @@ int main (void) {
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
-    // NOTE: No manual substrate setting/connection has to be done, if trainer->configureFFNN is used later
+    ffnn->connectFFNN();
+    // NOTE: No manual substrate setting has to be done, especially you shouldn't set any variational substrates manually
 
 
     // create data and config structs
@@ -117,7 +118,7 @@ int main (void) {
 
     // create trainer and find best fit
     NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
-    trainer->configureFFNN(ffnn, true); // configure FFNN substrates and setup proper normalization before fitting
+    trainer->setNormalization(ffnn); // (optional) setup proper normalization before fitting
     trainer->bestFit(ffnn, nfits, maxchi, verbose ? 2 : 1); // find a fit out of nfits with minimal testing residual
 
     //

@@ -38,6 +38,23 @@ inline void computeBounds(const double * const * const array, const int &len, co
 
 // -- Class methods
 
+FeedForwardNeuralNetwork * NNTrainer::_createVDerivFFNN(FeedForwardNeuralNetwork * const ffnn)
+{
+    FeedForwardNeuralNetwork * ffnn_vderiv = new FeedForwardNeuralNetwork(ffnn);
+    _configureFFNN(ffnn_vderiv, true);
+
+    return ffnn_vderiv;
+}
+
+void NNTrainer::_configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_vderiv)
+{
+    if (!ffnn->isConnected()) ffnn->connectFFNN();
+    const bool flag_cd1 = _flag_d1 || _flag_d2; // second cross derivative also needs first one
+    if (flag_vderiv) ffnn->addSubstrates(flag_cd1, _flag_d2, true, flag_cd1, _flag_d2);
+    else ffnn->addSubstrates(flag_cd1, _flag_d2, false, false, false);
+}
+
+
 void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
 {
     using namespace std;
@@ -54,15 +71,6 @@ void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
         computeBounds(_tdata.y, _tdata.ndata, i, lbound, ubound);
         ffnn->getOutputLayer()->getOutputNNUnit(i)->setOutputBounds(lbound, ubound);
     }
-}
-
-void NNTrainer::configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_norm) // takes a FFNN and adds the proper substrates + normalization, if flag_norm
-{
-    if (!ffnn->isConnected()) ffnn->connectFFNN();
-    const bool flag_cd1 = _flag_d1 || _flag_d2; // second cross derivative also needs first one
-    ffnn->addSubstrates(flag_cd1, _flag_d2, true, flag_cd1, _flag_d2);
-
-    if (flag_norm) setNormalization(ffnn);
 }
 
 double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r, const bool &flag_d)
@@ -102,6 +110,8 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
 
     if (!_flag_test && verbose > 0) fprintf(stderr, "[NNTrainer] Warning: Testing residual calculation disabled, i.e. testing is based on training+validation data.\n");
 
+    _configureFFNN(ffnn, false); // set non-vderiv substrates (the child implementation may use a copy FFNN with variational substrates)
+
     int ifit = 0;
     while(true) {
         // initial parameters
@@ -113,6 +123,7 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
 
         findFit(ffnn, fit, err, verbose); // try new fit
         ffnn->setBeta(fit); // make sure ffnn is set to fit betas
+
         double resi_full = computeResidual(ffnn, true, true);
         double resi_noreg = computeResidual(ffnn, false, true);
         double resi_pure = computeResidual(ffnn, false, false);

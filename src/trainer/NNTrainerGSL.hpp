@@ -14,6 +14,7 @@ namespace nn_trainer_gsl_details {
     struct training_workspace: public NNTrainingData, public NNTrainingConfig
     {
         FeedForwardNeuralNetwork * ffnn = NULL; // Storing a pointer to the to-be-trained FFNN
+        FeedForwardNeuralNetwork * ffnn_vderiv = NULL; // Storing a pointer to the to-be-trained FFNN with vderivs
 
         // validation residuals
         gsl_vector * fvali_full = NULL;

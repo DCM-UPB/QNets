@@ -122,6 +122,11 @@ namespace nn_trainer_gsl_details {
 
     // --- Cost functions
 
+    /*int ffnn_f(const gsl_vector * betas, struct training_workspace * tws, gsl_vector * f)
+    {
+
+    }*/
+
     // cost function without regularization and derivative terms
     int ffnn_f_pure(const gsl_vector * betas, void * const tws, gsl_vector * f) {
         const int ntrain = ((struct training_workspace *)tws)->ntraining;
@@ -157,15 +162,15 @@ namespace nn_trainer_gsl_details {
         const int yndim = ((struct training_workspace *)tws)->yndim;
         const double * const * const x = ((struct training_workspace *)tws)->x;
         const double * const * const w = ((struct training_workspace *)tws)->w;
-        FeedForwardNeuralNetwork * const ffnn = ((struct training_workspace *)tws)->ffnn;
+        FeedForwardNeuralNetwork * const ffnn = ((struct training_workspace *)tws)->ffnn_vderiv;
 
         const int nbeta = setBetas(ffnn, betas);
 
         //calculate cost gradient
-        for (int ibeta=0; ibeta<nbeta; ++ibeta) {
-            for (int i=0; i<ntrain; ++i) {
-                ffnn->setInput(x[i]);
-                ffnn->FFPropagate();
+        for (int i=0; i<ntrain; ++i) {
+            ffnn->setInput(x[i]);
+            ffnn->FFPropagate();
+            for (int ibeta=0; ibeta<nbeta; ++ibeta) {
                 for (int j=0; j<yndim; ++j) {
                     gsl_matrix_set(J, i*yndim + j, ibeta, w[i][j] * ffnn->getVariationalFirstDerivative(j, ibeta));
                 }
@@ -243,7 +248,7 @@ namespace nn_trainer_gsl_details {
         const double lambda_d2 = ((struct training_workspace *)tws)->lambda_d2;
         const bool flag_d1 = ((struct training_workspace *)tws)->flag_d1;
         const bool flag_d2 = ((struct training_workspace *)tws)->flag_d2;
-        FeedForwardNeuralNetwork * const ffnn = ((struct training_workspace *)tws)->ffnn;
+        FeedForwardNeuralNetwork * const ffnn = ((struct training_workspace *)tws)->ffnn_vderiv;
 
         const double lambda_d1_red = sqrt(lambda_d1), lambda_d2_red = sqrt(lambda_d2);
         int nshift, nshift2, ishift, inshift, inshift2;
@@ -252,15 +257,15 @@ namespace nn_trainer_gsl_details {
         calcOffset12(ntrain, yndim, xndim, nshift, nshift2);
 
         //calculate cost gradient
-        for (int ibeta=0; ibeta<nbeta; ++ibeta) {
-            for (int i=0; i<ntrain; ++i) {
-                ffnn->setInput(x[i]);
-                ffnn->FFPropagate();
+        for (int i=0; i<ntrain; ++i) {
+            ffnn->setInput(x[i]);
+            ffnn->FFPropagate();
 
-                ishift = i*yndim;
-                inshift = ishift + nshift;
-                inshift2 = ishift + nshift2;
+            ishift = i*yndim;
+            inshift = ishift + nshift;
+            inshift2 = ishift + nshift2;
 
+            for (int ibeta=0; ibeta<nbeta; ++ibeta) {
                 for (int j=0; j<yndim; ++j) {
                     gsl_matrix_set(J, ishift + j, ibeta, w[i][j] * ffnn->getVariationalFirstDerivative(j, ibeta));
                     for (int k=0; k<xndim; ++k) {
@@ -312,7 +317,7 @@ namespace nn_trainer_gsl_details {
         const int ntrain = ((struct training_workspace *)tws)->ntraining;
         const int yndim = ((struct training_workspace *)tws)->yndim;
         const double lambda_r = ((struct training_workspace *)tws)->lambda_r;
-        FeedForwardNeuralNetwork * ffnn = ((struct training_workspace *)tws)->ffnn;
+        FeedForwardNeuralNetwork * ffnn = ((struct training_workspace *)tws)->ffnn_vderiv;
 
         const int nbeta = ffnn->getNBeta(), n_reg = calcNData(ntrain, yndim, nbeta);
         const double lambda_r_red = sqrt(lambda_r / nbeta);
@@ -370,7 +375,7 @@ namespace nn_trainer_gsl_details {
         const int xndim = ((struct training_workspace *)tws)->xndim;
         const int yndim = ((struct training_workspace *)tws)->yndim;
         const double lambda_r = ((struct training_workspace *)tws)->lambda_r;
-        FeedForwardNeuralNetwork * ffnn = ((struct training_workspace *)tws)->ffnn;
+        FeedForwardNeuralNetwork * ffnn = ((struct training_workspace *)tws)->ffnn_vderiv;
 
         const int nbeta = ffnn->getNBeta(), nshift = calcNData(ntrain, yndim, 0, xndim), n_reg = nshift + nbeta;
         const double lambda_r_red = sqrt(lambda_r / nbeta);
@@ -456,7 +461,7 @@ namespace nn_trainer_gsl_details {
 // --- Class method implementation
 
 void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &verbose) {
-    //   Fit NN with the following passed variables:
+    //   Fit NN ffnn with the following passed variables:
     //   fit: holds the to be fitted variables, i.e. betas
     //   err: holds the corresponding fit error
     //   verbose: print verbose output while fitting
@@ -481,11 +486,11 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     double resi_full, resi_noreg, resi_pure;
     double resi_vali_full = 0., resi_vali_noreg = 0., resi_vali_pure = 0.;
 
-
     // configure training workspace
     training_workspace tws;
     tws.copyDatConf(_tdata, _tconfig);
     tws.ffnn = ffnn; // set the to-be-fitted FFNN
+    tws.ffnn_vderiv = _createVDerivFFNN(ffnn); // set the copy with vderivs
 
     // configure all three fdf objects
 
@@ -596,6 +601,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         fprintf(stderr, "\n");
     }
 
+    // free allocations
     gsl_multifit_nlinear_free(w_full);
     gsl_multifit_nlinear_free(w_noreg);
     gsl_multifit_nlinear_free(w_pure);
@@ -604,4 +610,5 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         if (flag_d) gsl_vector_free(tws.fvali_noreg);
         if (tws.flag_r) gsl_vector_free(tws.fvali_full);
     }
+    delete tws.ffnn_vderiv;
 };
