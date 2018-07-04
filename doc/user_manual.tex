@@ -360,11 +360,20 @@ best NN fit among several fits to target data.
 Currently the only actual trainer implementation is the one using GSL nlinear
 multifit, namely \verb+NNTrainerGSL+. This class provides the actual routine for
 an individual fit, \verb+findFit+.
-\\All trainers support adding a L2 beta regularization residual term, controlled via
+\\The trainer supports adding a L2 beta regularization residual term, controlled via
 \verb+lambda_r+, and first/second derivative residual terms, controlled via
-\verb+lambda_d1+ and \verb+lambda_d2+. In the latter case, the user has to
-provide the first and second derivatives with respect to all input variables for
-every data point.
+\verb+lambda_d1+ and \verb+lambda_d2+. In the latter case (if one of those
+$\lambda$ is >0), the user has to
+provide the respective derivative $\vec{y}_{d1_j}[]$, $\vec{y}_{d2_j}[]$ arrays with respect to all
+input variables (index $j$) for every data point.
+\\So concluding, the fully fledged residual \verb+R+ is computed as follows:
+\begin{multline*}
+  R^2 = \frac{1}{N} \sum_i^N  \left(\vec{f}(\vec{x}[i]) - \vec{y}[i]\right)^2 + \frac{1}{n_{\beta}} \sum_i^{n_{\beta}} \left( \lambda_r^2\ \beta_i^2 \right) \\
+    + \frac{1}{N n_x} \sum_i^N \sum_j^{n_x} \left[ \lambda_{d1}^2\ (\partial_{x_j} \vec{f}(\vec{x}[i]) - \vec{y}_{d1_j}[i])^2  + \lambda_{d2}^2\ (\partial_{x_j}^2 \vec{f}(\vec{x}[i]) - \vec{y}_{d2_j}[i])^2 \right]
+\end{multline*}
+The design of the residual makes sure that it doesn't vary in magnitude with
+respect to number of data point \verb+N+, input/output dimensions $n_x$,
+$n_y$ or number of betas $n_{\beta}$.
 \\\\How a complete code for NN training looks, you can see in the example 10.
 If we leave out generating the data though, it comes down to the following:
 \begin{lstlisting}

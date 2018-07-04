@@ -108,10 +108,12 @@ namespace nn_trainer_gsl_details {
         const int n = tws->ntraining + tws->nvalidation;
         const bool flag_vali = tws->nvalidation>0;
         FeedForwardNeuralNetwork * ffnn = tws->ffnn;
-        gsl_vector * fnow = f;
 
         const int nbeta = ffnn->getNBeta();
-        const double lambda_d1_red = sqrt(tws->lambda_d1), lambda_d2_red = sqrt(tws->lambda_d2), lambda_r_red = sqrt(tws->lambda_r / nbeta);
+        const double lambda_d1_red = tws->lambda_d1/sqrt(tws->xndim), lambda_d2_red = tws->lambda_d2/sqrt(tws->xndim), lambda_r_red = tws->lambda_r / sqrt(nbeta);
+
+        gsl_vector * fnow = f;
+        double scale_now = 1./sqrt(tws->ntraining);
 
         setBetas(ffnn, betas);
         if (flag_vali) gsl_vector_set_zero(tws->fvali); // set fvali to zero
@@ -124,18 +126,18 @@ namespace nn_trainer_gsl_details {
             if (i==tws->ntraining) { // now setup the validation calculation
                 idx = 0;
                 fnow = tws->fvali;
-
+                scale_now = 1./sqrt(tws->nvalidation);
             }
 
             for (int j=0; j<tws->yndim; ++j) {
-                gsl_vector_set(fnow, idx,  tws->w[i][j] * (ffnn->getOutput(j) - tws->y[i][j])); // the "pure" residual
+                gsl_vector_set(fnow, idx, scale_now * tws->w[i][j] * (ffnn->getOutput(j) - tws->y[i][j])); // the "pure" residual
                 ++idx;
 
                 if (flag_d) { // derivative residual
                     for (int k=0; k<tws->xndim; ++k) {
-                        gsl_vector_set(fnow, idx, tws->flag_d1 ? tws->w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - tws->yd1[i][j][k]) : 0.0);
+                        gsl_vector_set(fnow, idx, tws->flag_d1 ? scale_now * tws->w[i][j] * lambda_d1_red * (ffnn->getFirstDerivative(j, k) - tws->yd1[i][j][k]) : 0.0);
                         ++idx;
-                        gsl_vector_set(fnow, idx, tws->flag_d2 ? tws->w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - tws->yd2[i][j][k]) : 0.0);
+                        gsl_vector_set(fnow, idx, tws->flag_d2 ? scale_now * tws->w[i][j] * lambda_d2_red * (ffnn->getSecondDerivative(j, k) - tws->yd2[i][j][k]) : 0.0);
                         ++idx;
                     }
                 }
@@ -159,7 +161,7 @@ namespace nn_trainer_gsl_details {
         FeedForwardNeuralNetwork * ffnn = tws->ffnn_vderiv;
 
         const int nbeta = ffnn->getNBeta();
-        const double lambda_d1_red = sqrt(tws->lambda_d1), lambda_d2_red = sqrt(tws->lambda_d2), lambda_r_red = sqrt(tws->lambda_r / nbeta);
+        const double scale = 1./sqrt(tws->ntraining), lambda_d1_red = scale*tws->lambda_d1/sqrt(tws->xndim), lambda_d2_red = scale*tws->lambda_d2/sqrt(tws->xndim), lambda_r_red = tws->lambda_r / sqrt(nbeta);
 
         setBetas(ffnn, betas);
 
@@ -169,7 +171,7 @@ namespace nn_trainer_gsl_details {
             ffnn->FFPropagate();
 
             for (int j=0; j<tws->yndim; ++j) {
-                for (int ib=0; ib<nbeta; ++ib) gsl_matrix_set(J, idx, ib, tws->w[i][j] * ffnn->getVariationalFirstDerivative(j, ib)); // the "pure" gradient
+                for (int ib=0; ib<nbeta; ++ib) gsl_matrix_set(J, idx, ib, scale * tws->w[i][j] * ffnn->getVariationalFirstDerivative(j, ib)); // the "pure" gradient
                 ++idx;
 
                 if (flag_d) { // derivative residual gradient
@@ -455,3 +457,4 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     }
     delete tws.ffnn_vderiv;
 };
+

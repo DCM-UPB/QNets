@@ -75,15 +75,24 @@ void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
 
 double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const bool &flag_r, const bool &flag_d)
 {
+    //
+    // Basic form is sqrt(1/N sum (f(x) - y)^2), but inside the sqrt additional terms may be added
+    //
     const int nbeta = ffnn->getNBeta();
-    const double lambda_r_red = _tconfig.lambda_r / nbeta;
     const int offset = _flag_test ? _tdata.ntraining + _tdata.nvalidation : 0; // if no testing data, we fall back to the full training + vali set
+    const double scale = _flag_test ? 1./(_tdata.ndata - offset) : 1./(_tdata.ntraining + _tdata.nvalidation);
+    const double lambda_r_fac = _tconfig.lambda_r * _tconfig.lambda_r / nbeta;
+    const double lambda_d1_fac = scale*_tconfig.lambda_d1 * _tconfig.lambda_d1 / _tdata.xndim;
+    const double lambda_d2_fac = scale*_tconfig.lambda_d2 * _tconfig.lambda_d2 / _tdata.xndim;
+
 
     double resi = 0.;
 
-    // add regularization residual from NN betas
-    for (int i=0; i<nbeta; ++i){
-        resi += (_flag_r && flag_r) ? lambda_r_red * pow(ffnn->getBeta(i), 2) : 0.;
+    if (_flag_r && flag_r) {
+        // add regularization residual from NN betas
+        for (int i=0; i<nbeta; ++i){
+            resi += lambda_r_fac * pow(ffnn->getBeta(i), 2);
+        }
     }
 
     //get difference NN vs data
@@ -91,15 +100,17 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
         ffnn->setInput(_tdata.x[i]);
         ffnn->FFPropagate();
         for (int j=0; j<_tdata.yndim; ++j) {
-            resi += pow(_tdata.w[i][j] * (ffnn->getOutput(j) - _tdata.y[i][j]), 2);
+            resi += scale * pow(_tdata.w[i][j] * (ffnn->getOutput(j) - _tdata.y[i][j]), 2);
 
-            for (int k=0; k<_tdata.xndim; ++k) {
-                resi += (_flag_d1 && flag_d) ? _tconfig.lambda_d1 * pow(_tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - _tdata.yd1[i][j][k]), 2) : 0.;
-                resi += (_flag_d2 && flag_d) ? _tconfig.lambda_d2 * pow(_tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - _tdata.yd2[i][j][k]), 2) : 0.;
+            if (flag_d) { // add derivative residuals
+                for (int k=0; k<_tdata.xndim; ++k) {
+                    if (_flag_d1) resi += lambda_d1_fac * pow(_tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - _tdata.yd1[i][j][k]), 2);
+                    if (_flag_d2) resi += lambda_d2_fac * pow(_tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - _tdata.yd2[i][j][k]), 2);
+                }
             }
         }
     }
-    return sqrt(0.5*resi);
+    return sqrt(resi);
 }
 
 void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit, double * bestfit_err, const int &nfits, const double &resi_target, const int &verbose, const bool &flag_smart_beta)

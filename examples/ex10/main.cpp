@@ -6,14 +6,12 @@
 
 
 /*
-  Example: Train FFNN via GSL's Non-Linear Fit with Levenberg-Marquardt solver
+  Example: Train FFNN via NNTrainerGSL (Levenberg-Marquardt solver)
 
-  In this example we want to demonstrate how a FFNN can be trained via GSL's fit routines to fit target data (in this case a gaussian).
+  In this example we want to demonstrate how a FFNN can be trained via our trainer class to fit target data (in this case a gaussian).
 
-  The fit is achieved by minimizing the mean square distance of NN to data (by Levenberg-Marquardt), where the distance and gradient are integrated on a unifrom grid.
-  Hence, we have to create the NN and target data, define functions for distance and gradient, and pass all the information to the GSL lib.
-
-  For convenience, a NNTrainerGSL object is created, which handles the whole process in a user-friendly way, including normalization of the data.
+  The fit is achieved by minimizing the mean square error of NN to data (by Levenberg-Marquardt), where the error and gradient are computed from sets of random data points.
+  Hence, we have to create the NN and target data (a gaussian), and then let the trainer class do the rest.
 */
 
 double gaussian(const double x, const double a, const double b) {
@@ -42,12 +40,12 @@ int main (void) {
     cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    cout << "How many hidden layers should the FFNN have? (must be >0) ";
+    cout << "How many hidden layers should the FFNN have? (>0) ";
     cin >> nhl;
 
     int nhu[nhl];
     for (int i=0; i<nhl; ++i) {
-        cout << "How many units should hidden layer " << i+1 << " have? (<=1 for none) ";
+        cout << "How many units should hidden layer " << i+1 << " have? (>1) ";
         cin >> nhu[i];
     }
     cout << endl;
@@ -60,18 +58,22 @@ int main (void) {
     cout << endl;
     cout << "In the following we use GSL non-linear fit to minimize the mean-squared-distance+regularization of NN vs. target function, i.e. find optimal betas." << endl;
     cout << endl;
-    cout << "Please enter the regularization lambda. ";
+    cout << "Please enter the regularization lambda. (e.g. 0.0001) ";
     cin >> lambda_r;
-    cout << "Please enter the first derivative lambda. ";
+    cout << "Please enter the first derivative lambda. (e.g. 0.1) ";
     cin >> lambda_d1;
-    cout << "Please enter the second derivative lambda. ";
+    cout << "Please enter the second derivative lambda. (e.g. 0.1) ";
     cin >> lambda_d2;
-    cout << "Please enter the the maximum tolerable fit residual. ";
+    cout << "Please enter the the maximum tolerable fit residual. (0 to disable) ";
     cin >> maxchi;
-    cout << "Please enter the maximum number of fitting runs. ";
+    cout << "Please enter the ";
+    if (maxchi > 0) cout << "maximum ";
+    cout << "number of fitting runs. (>0) ";
     cin >> nfits;
     cout << endl << endl;
     cout << "Now we find the best fit ... " << endl;
+    if (!verbose) cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
+    cout << endl;
 
     // NON I/O CODE
 
