@@ -12,6 +12,31 @@
 \usepackage{lipsum}
 \usepackage{hyperref}
 
+% C++ formatting
+\usepackage{listings}  % for code formatting
+\usepackage{color}
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+  backgroundcolor=\color{lbcolor},
+  tabsize=4,
+  language=C++,
+  captionpos=b,
+  tabsize=3,
+  frame=lines,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  breaklines=true,
+  showstringspaces=false,
+  basicstyle=\footnotesize,
+  identifierstyle=\color{magenta},
+  keywordstyle=\color[rgb]{0,0,1},
+  commentstyle=\color{OliveGreen},
+  stringstyle=\color{red}
+}
+
+
 \title{The Feed Forward Neural Network library}
 \author{Francesco Calcavecchia}
 
@@ -32,89 +57,94 @@
 \maketitle
 
 FFNN (Feed Forward Neural Network) is a C++ library which allows the implementation of a feed forward neural network with few simple calls.
-By itself it does not allow for training, but it can be easily combined with the NoisyFunMin library (https://github.com/francesco086/NoisyFunMin) to do so.
-The library currently support the evaluation of the NN value, its first and second derivatives in respect to the input, and the first derivative in respect to the variational parameters within the FFNN.
+The library includes a training method, which currently utilizes GSL nonlinear
+multifit routines (trust region based Levenberg-Marquardt) to achieve least
+square fitting against target data. A data split into training, validation and
+testing is supported and enables early stopping. The library features inherent data
+normalization, completely hidden from the user.
+In terms of derivatives of the NN value, the library currently supports its
+first and second derivatives with respect to the NN input, the first derivative with
+respect to the variational weights within the FFNN and first/second order cross
+derivatives, with respect to both input (first / second order) and variational
+parameters (only first order).
 
 The code has been developed using the standard C++11.
 
-In the following we will present the classes made available by the library.
-At the beginning we will report the necessary \verb+#include+ call and the prototype of the class.
-The comment \verb+TO DO+ indicates that the method needs to be implemented (as in the case of a pure virtual class).
-
+In the following we will present some classes made available by the library.
+At the beginning we will report the necessary \verb+#include+ call and the
+prototype of the class (not necessarily equal to actual code).
 
 \section{FeedForwardNeuralNetwork}
-\label{sec:NoisyFunction}
+\label{sec:feedforwardneuralnetwork}
 
-\begin{verbatim}
+\begin{lstlisting}
 // #include "FeedForwardNeuralNetwork.hpp"
 class FeedForwardNeuralNetwork
 {
-   // Constructor and destructor
-   FeedForwardNeuralNetwork(const int &insize,
+    // Constructor and destructor
+    FeedForwardNeuralNetwork(const int &insize,
          const int &hidlaysize,
          const int &outsize);
-   FeedForwardNeuralNetwork(const char * filename);
-   ~FeedForwardNeuralNetwork();
+    FeedForwardNeuralNetwork(const char * filename);
+    ~FeedForwardNeuralNetwork();
 
-   // Getters for the basic information
-   int getNHiddenLayers();
-   int getNLayers();
-   int getLayerSize(const int &li);
-   ActivationFunctionInterface *
+    // Getters for the basic information
+    int getNHiddenLayers();
+    int getNLayers();
+    int getLayerSize(const int &li);
+    ActivationFunctionInterface *
          getLayerActivationFunction(const int &li);
 
-   // Getters for the variational parameters
-   int getNBeta();
-   double getBeta(const int &ib);
-   void setBeta(const int &ib, const double &beta);
+    // Getters for the variational parameters
+    int getNBeta();
+    double getBeta(const int &ib);
+    void setBeta(const int &ib, const double &beta);
 
-   // Set the structure of the FFNN
-   void pushHiddenLayer(const int &size);
-   void popHiddenLayer();
-   void setLayerSize(const int &li, const int &size);
-   void setGlobalActivationFunctions(
+    // Set the structure of the FFNN
+    void pushHiddenLayer(const int &size);
+    void popHiddenLayer();
+    void setLayerSize(const int &li, const int &size);
+    void setGlobalActivationFunctions(
          ActivationFunctionInterface * actf);
-   void setLayerActivationFunction(const int &li,
+    void setLayerActivationFunction(const int &li,
          ActivationFunctionInterface * actf);
 
-   // Set the computations required
-   void addFirstDerivativeSubstrate();
-   void addSecondDerivativeSubstrate();
-   void addVariationalFirstDerivativeSubstrate();
-   void addCrossFirstDerivativeSubstrate();
-   void addCrossSecondDerivativeSubstrate();
+    // Set the computations required
+    void addFirstDerivativeSubstrate();
+    void addSecondDerivativeSubstrate();
+    void addVariationalFirstDerivativeSubstrate();
+    void addCrossFirstDerivativeSubstrate();
+    void addCrossSecondDerivativeSubstrate();
 
-   // Connect the FFNN,
-   void connectFFNN();
-   void disconnectFFNN();
+    // Connect the FFNN,
+    void connectFFNN();
+    void disconnectFFNN();
 
-   // Set the input
-   void setInput(const int &n, const double * in);
+    // Set the input
+    void setInput(const int &n, const double * in);
 
-   // Feed Forward propagate the input signal
-   void FFPropagate();
+    // Feed Forward propagate the input signal
+    void FFPropagate();
 
-   // Get the ouput after the FFNN Propagation
-   double getOutput(const int &i);
-   double getFirstDerivative(const int &i,
+    // Get the ouput after the FFNN Propagation
+    double getOutput(const int &i);
+    double getFirstDerivative(const int &i,
                              const int &i1d);
-   double getSecondDerivative(const int &i,
+    double getSecondDerivative(const int &i,
                               const int &i2d);
-   double getVariationalFirstDerivative(const int &i,
+    double getVariationalFirstDerivative(const int &i,
                                         const int &iv1d);
-   double getCrossFirstDerivative(const int &i,
+    double getCrossFirstDerivative(const int &i,
                                   const int &i1d,
                                   const int &iv1d);
-   double getCrossFirstDerivative(const int &i,
+    double getCrossFirstDerivative(const int &i,
                                   const int &i2d,
                                   const int &iv1d);
 
-   // Store the FFNN structure on a file
-   void storeOnFile(const char * filename);
+    // Store the FFNN structure on a file
+    void storeOnFile(const char * filename);
 };
-\end{verbatim}
-
-A \verb+NoisyFunction+ implements a function $f:\mathbb{R}^{n} \rightarrow \mathbb{R} \times \mathbb{R}$ which takes a multidimensional vector as input, and returns a scalar value with an associated error bar.
+\end{lstlisting}
 
 Fig. \ref{fig:FFNN} illustrates the structure of a Feed Forward Neural Network (FFNN).
 A FFNN has always at least one \emph{hidden layer}, an \emph{input layer}, and an \emph{output layer}.
@@ -167,7 +197,7 @@ The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and be
 The Scaled Exponential Units (with two fixed hyper-parameters $\alpha$ and $\lambda$) solve some problems of ReLUs and can provide a self-normalizing network. But still they are not differentiable at x=0. 
 
 \end{enumerate}
-
+$\\$
 The use of the FFNN library should be organised in four major steps:
 \begin{enumerate}
 \item generate the geometry of the FFNN;
@@ -214,22 +244,29 @@ Now that the notation of the FFNN has been introduced, and we have briefly seen 
 \end{itemize}
 
 
-
-
 \section{ActivationFunctionInterface} % (fold)
 \label{sec:activationfunctioninterface}
 
-\begin{verbatim}
+\begin{lstlisting}
 // #include "ActivationFunctionInterface.hpp"
 class ActivationFunctionInterface
 {
-   public:
+public:
 
       // allocate a new copy of this to returned ptr
       virtual ActivationFunctionInterface * getCopy() = 0;
 
       // return an unique identifier code
       virtual std::string getIdCode() = 0;
+
+      // return the ideal input mean value (mu) and standard deviation (sigma)
+      virtual double getIdealInputMu() = 0;
+      virtual double getIdealInputSigma() = 0;
+
+      // return the output mean value (mu) and standard deviation (sigma)
+      // (pretending a flat distribution)
+      virtual double getOutputMu() = 0;
+      virtual double getOutputSigma() = 0;
 
       // compute the activation function value
       virtual double f(const double &) = 0;
@@ -246,14 +283,13 @@ class ActivationFunctionInterface
       // calculate all derivatives together to save redundant calculations
       virtual void fad(const double &, const double &, const double &, const double &, const double &, const bool &, const bool &, const bool &);
 };
-\end{verbatim}
+\end{lstlisting}
 
 The \verb+ActivationFunctionInterface+ is a pure virtual class, which can be used to generate customised activation functions to feed a FFNN.
-It is necessary to provide the methods \verb+getCopy+, \verb+getIdCode+, \verb+f+, \verb+f1d+, \verb+f2d+ ,
-\verb+f3d+ and highly recommended to provide \verb+fad+ (otherwise fad will use the other methods via virtual function calls -> slow).
+It is necessary to provide implementations of all virtual methods except \verb+fad+ and highly recommended to provide \verb+fad+ (otherwise fad will use the other methods via virtual function calls -> slow).
 As example we report the class for the logistic function:
 
-\begin{verbatim}
+\begin{lstlisting}
 class LogisticActivationFunction: public ActivationFunctionInterface
 {
    public:
@@ -261,6 +297,14 @@ class LogisticActivationFunction: public ActivationFunctionInterface
       ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}
       
       std::string getIdCode(){return "LGS";}
+
+      // input should be in the rage [-5 : 5] -> mu=0   sigma=sqrt(3)
+      double getIdealInputMu(){return 0.;}
+      double getIdealInputSigma(){return 2.886751345948129;}
+
+      // output is in the range [0 : 1] -> mu=0.5   sigma=1/(2*sqrt(3))
+      double getOutputMu(){return 0.5;}
+      double getOutputSigma(){return 0.288675134594813;}
 
       double f(const double &in)
       {
@@ -302,15 +346,160 @@ class LogisticActivationFunction: public ActivationFunctionInterface
       }
 };
 
-\end{verbatim}
+\end{lstlisting}
 
 % section activationfunctioninterface (end)
+
+\section{Training} % (fold)
+\label{sec:training}
+
+The library contains trainer classes for training a FFNN to match target data,
+by the means of least squares fitting. All trainers derive from the virtual base class
+\verb+NNTrainer+, which already contains the \verb+bestFit+ method to find the
+best NN fit among several fits to target data.
+Currently the only actual trainer implementation is the one using GSL nlinear
+multifit, namely \verb+NNTrainerGSL+. This class provides the actual routine for
+an individual fit, \verb+findFit+.
+\\The trainer supports adding a L2 beta regularization residual term, controlled via
+\verb+lambda_r+, and first/second derivative residual terms, controlled via
+\verb+lambda_d1+ and \verb+lambda_d2+. In the latter case (if one of those
+$\lambda$ is >0), the user has to
+provide the respective derivative $\vec{y}_{d1_j}[]$, $\vec{y}_{d2_j}[]$ arrays with respect to all
+input variables (index $j$) for every data point.
+\\So concluding, the fully fledged residual \verb+R+ is computed as follows:
+\begin{multline*}
+  R^2 = \frac{1}{N} \sum_i^N  \left(\vec{f}(\vec{x}[i]) - \vec{y}[i]\right)^2 + \frac{1}{n_{\beta}} \sum_i^{n_{\beta}} \left( \lambda_r^2\ \beta_i^2 \right) \\
+    + \frac{1}{N n_x} \sum_i^N \sum_j^{n_x} \left[ \lambda_{d1}^2\ (\partial_{x_j} \vec{f}(\vec{x}[i]) - \vec{y}_{d1_j}[i])^2  + \lambda_{d2}^2\ (\partial_{x_j}^2 \vec{f}(\vec{x}[i]) - \vec{y}_{d2_j}[i])^2 \right]
+\end{multline*}
+The design of the residual makes sure that it doesn't vary in magnitude with
+respect to number of data point \verb+N+, input/output dimensions $n_x$,
+$n_y$ or number of betas $n_{\beta}$.
+\\\\How a complete code for NN training looks, you can see in the example 9.
+If we leave out generating the data though, it comes down to the following:
+\begin{lstlisting}
+  #include "NNTrainerGSL.hpp"
+
+  FeedFowardNeuralNetwork * ffnn =
+      new FeedFowardNeuralNetwork(xndim+1, nhunits, yndim+1);
+  ffnn->connectFFNN(); // only connect, don't add substrates
+  ffnn->assignVariationalParameters(); // declare all betas to be variational parameters
+
+  // create config and data structs
+  // (for reference see respective header files)
+  NNTrainingConfig tconfig =
+      {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
+  NNTrainingData tdata =
+      {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL};
+  // instead of NULL you may pass existing allocations, but then don't use tdata.(de)allocate!  
+
+  // allocate data arrays
+  tdata.allocate(lambda_d1>0, lambda_d2>0)
+  // if you provide deriv data in any case, just pass true
+
+  // ... //
+  // ... // fill tdata . x,y,w (and yd1/yd2 if you use derivs)
+  // ... //
+
+  // create trainer
+  NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
+
+  // (optional) setup ffnn's internal data normalization
+  trainer->setNormalization(ffnn);
+
+  // find a fit out of nfits with minimal testing residual
+  trainer->bestFit(ffnn, nfits);
+
+  // (optional) print output files along all axis
+  trainer->printFitOutput(ffnn, lower_bound, upper_bound, npoints, flag_d1, flag_d2);
+
+  tdata.deallocate();
+  delete trainer;
+  delete ffnn;
+
+\end{lstlisting}
+Afterwards, the \verb+ffnn+ will be in best fit configuration.
+\\Make sure that you provide the necessary derivative data if you set
+\verb+lambda_d1+ or \verb+lambda_d2+ greater than 0.
+\\\\Also, it is important to understand the meaning of \verb+training+, \verb+validation+ and \verb+testing+
+here:
+\begin{itemize}
+\item \verb+training+: The data that will be used by the least square solver itself.
+  Especially the residual gradients will only be calculated from \verb+training+ data.
+\item \verb+validation+: Every time the least square solver finds a new \verb+training+
+  residual minimum, the residual of the \verb+validation+ data set will be calculated. If
+  it didn't decrease (for too long, controlled by \verb+maxn_novali+), the
+  fitting stops early.
+\item \verb+testing+: When the individual fitting routine terminates (because
+  \\\verb+maxn_steps+ reached or early stop), for the resulting fit the residual with
+  respect to the \verb+testing+ data is calculated. Out of all fits, the fit with best
+  \verb+testing+ residual is returned.
+\end{itemize}
+Note that \verb+validation+ can be disabled by setting \verb+nvalidation+ in the
+\\\verb+NNTrainingData+ struct to 0 (this disables early stopping). \verb+testing+ however is disabled, if
+\verb+ndata+ is equal to \verb+ntraining+ plus \verb+nvalidation+ (in this case
+the training data set is used as replacement).
+\\\\It is also possible to fine tune the GSL nlinear multifit algorithm by passing a
+\verb+gsl_multifit_nlinear_parameters+ (see GSL docs) struct at trainer
+creation:
+
+\begin{lstlisting}
+  gsl_multifit_nlinear_parameters your_gsl_parameters =
+      gsl_multifit_nlinear_default_parameters();
+  ... // tweak your gsl parameters
+  NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig, your_gsl_parameters);
+\end{lstlisting}
+Finally, you can pass more arguments to \verb+bestFit+ to tweak the behavior:
+
+\begin{lstlisting}
+  trainer->bestFit(ffnn, nfits, resi_target, verbose, flag_smart_beta);
+\end{lstlisting}
+This will terminate the whole \verb+bestFit+ routine, if a \verb+testing+
+residual below \verb+resi_target+ is found. Depending on int \verb+verbose+ (0,
+1 or 2), it will print different levels of information. And if
+\verb+flag_smart_beta+ is \verb+true+, it will use smart beta generation to
+randomize betas before fitting. More about that in the next section. 
+
+% section training (end)
+
+
+\section{Smart Beta} % (fold)
+\label{sec:smart_beta}
+
+To understand this section, first read the pdf \verb+smart_initial_beta.pdf+ in
+this folder. It should be noted that this feature is a bit experimental, so
+double check that it actually works well for you.
+
+It is possible to initialise the beta of a FFNN by doing the following:
+\begin{lstlisting}
+#include "SmartBetaGenerator.hpp"
+
+FeedFowardNeuralNetwork * ffnn =
+    new FeedFowardNeuralNetwork(4, 10, 2);
+smart_beta::generateSmartBeta(ffnn);
+\end{lstlisting}
+
+For each unit we computed the desired $\mu_{\beta}$ and $\sigma_{\beta}$ using the formula reported in \verb+smart_initial_beta.pdf+, and sampled the beta accordingly.
+
+To enforce the orthogonality we proceeded in the following way.
+We sampled the first unit beta, a vector that we will now label as $v$. Then we sampled the second unit one, $u$, and applied the following modification:
+\begin{equation}
+   u \quad \rightarrow \quad u - \frac{\langle u, v \rangle}{\langle v, v \rangle} v     \label{eq:orthogonality}
+\end{equation}
+where $\langle u, v \rangle$ denotes the scalar product between $u$ and $v$.
+This modification enforces the orthogonality.
+We then multiply it by a scalar to make $u$ have the same norm as before the modification in Eq. \ref{eq:orthogonality}.
+In case we sampled $u$ such that after the modification its norm is very small, we then sample it again.
+We proceed in this way as long as possible. When we have enough beta to form a complete basis set, we stop applying the orthogonality procedure and we sample them randomly again.
+
+% section smart_beta (end)
+
 
 \section{Serializable Components} % (fold)
 \label{sec:serializablecomponents}
 All classes deriving from SerializableComponent (i.e. all components of our
-network) support serialization of their restorable configuration (i.e. no
-pointers) into simple strings, by a code system. It is explained in detail in
+network) support serialization of their restorable configuration (e.g. pointers
+to other runtime objects usually can't be restored) into simple strings, by a
+code system. It is explained in detail in
 the StringCodeUtilities.hpp header file and the examples, but will quickly be
 illustrated here.
 \\Consider an output unit (type id \verb+OUT+) of our neural network. It has two simple parameters
@@ -326,6 +515,8 @@ identifier, enclosed in () or \{\} brackets, respectively.
 \\\\NOTE: Because the system relies on the spacing between every token, the
 spaces must not be neglected. Also a parameter value of string type may not
 contain any spaces, commas or brackets of kind () or \{\}.
+
+% section serializablecomponents (end)
 
 
 \printindex

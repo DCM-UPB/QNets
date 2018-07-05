@@ -23,6 +23,14 @@ public:
         return "MyA";
     }
 
+    // range [-2 : 2]
+    double getIdealInputMu(){return 0.;};
+    double getIdealInputSigma(){return 1.154700538379252;};
+
+    // range [0 : 4]
+    double getOutputMu(){return 2.;};
+    double getOutputSigma(){return 1.154700538379252;};
+
     // computation
     double f(const double &in){
         // function

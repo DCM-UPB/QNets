@@ -47,3 +47,9 @@
 ## Example 8
 
 `ex8/`: read FFNN structure from a file
+
+
+
+## Example 9
+
+`ex9/`: use NNTrainer(GSL) to make FFNN fit a gaussian

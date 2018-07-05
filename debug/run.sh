@@ -3,38 +3,30 @@
 # After using this script it is necessary to run again the build.sh script
 # for generating again the library with the optimization flags
 
-source ../config.sh
-OS_NAME=$(uname)
-
-\rm -f exe
-\rm -f *.o
-\rm -f ../src/*.o
-\rm -f ../*.so
-
-#runtime dynamic library path
-RPATH="$(dirname $(pwd))"
+rm -f exe
+rm -f *.o
 
 # Build the library using the debugging flags
+export ROOT_FOLDER=$(dirname $(pwd))
+source ../config.sh
 cd ..
-./build_debug_library.sh
+./build.sh coverage
 cd debug
 echo "Rebuilt the library with the debugging flags"
 echo ""
 
 # Build the debugging main executable
-echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -c *.cpp"
-$CC $FLAGS $DEBUGFLAGS -Wall -I$(pwd)/../src/ -c *.cpp
+echo "$CC $FLAGS $DEBUGFLAGS ${FULL_I} -c *.cpp"
+$CC $FLAGS $DEBUGFLAGS -Wall ${FULL_I} -c *.cpp
 
 case ${OS_NAME} in
     "Darwin")
-        echo "$CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src -L$(pwd)/.. -L${RPATH} -o exe *.o -l${LIBNAME}"
-        $CC $FLAGS $DEBUGFLAGS -I$(pwd)/../src/ -L$(pwd)/../ -L${RPATH} -o exe *.o -l${LIBNAME}
-        # echo "install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe"
-        # install_name_tool -change libffnn.so ${RPATH}/libffnn.so exe
+        echo "$CC $FLAGS $DEBUGFLAGS ${FULL_L} -o exe *.o ${FULL_LIBS}"
+        $CC $FLAGS $DEBUGFLAGS ${FULL_L} -o exe *.o ${FULL_LIBS}
         ;;
     "Linux")
-        echo "$CC $FLAGS $DEBUGFLAGS -L$(pwd)/.. -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}"
-        $CC $FLAGS $DEBUGFLAGS -L$(pwd)/../ -Wl,-rpath=${RPATH} -o exe *.o -l${LIBNAME}
+        echo "$CC $FLAGS $DEBUGFLAGS ${FULL_L} -Wl,-rpath=${ROOT_FOLDER} -o exe *.o ${FULL_LIBS}"
+        $CC $FLAGS $DEBUGFLAGS ${FULL_L} -Wl,-rpath=${ROOT_FOLDER} -o exe *.o ${FULL_LIBS}
         ;;
 esac
 

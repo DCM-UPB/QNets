@@ -42,7 +42,7 @@ matrix:
     - USE_GCOV="TRUE"
 
 before_install:
-- cp config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
+- cp script/config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
 - if [[ "$USE_OPENMP" == "TRUE" ]]; then sed -i -e "s/FLAGS=\"/FLAGS=\"-fopenmp -DOPENMP /g" config.sh; fi;
 - if [[ "$USE_DOCKER" == "TRUE" ]]; then docker pull nnvmc/base; fi;
 - if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;

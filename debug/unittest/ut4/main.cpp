@@ -18,7 +18,7 @@ int main(){
     ffnn->getNNLayer(0)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
     ffnn->connectFFNN();
     ffnn->setBeta(beta);
-
+    ffnn->assignVariationalParameters();
 
 
     // --- create two set of variables that will be compared.
@@ -40,8 +40,8 @@ int main(){
 
     double ** vd1_1 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
-        vd1_1[i] = new double[ffnn->getNBeta()];
-        for (int j=0; j<ffnn->getNBeta(); ++j) vd1_1[i][j] = -6.66;
+        vd1_1[i] = new double[ffnn->getNVariationalParameters()];
+        for (int j=0; j<ffnn->getNVariationalParameters(); ++j) vd1_1[i][j] = -6.66;
     }
 
     // the second variable set will be used with the evaluate function
@@ -61,8 +61,8 @@ int main(){
 
     double ** vd1_2 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
-        vd1_2[i] = new double[ffnn->getNBeta()];
-        for (int j=0; j<ffnn->getNBeta(); ++j) vd1_2[i][j] = -6.66;
+        vd1_2[i] = new double[ffnn->getNVariationalParameters()];
+        for (int j=0; j<ffnn->getNVariationalParameters(); ++j) vd1_2[i][j] = -6.66;
     }
 
 
@@ -92,7 +92,7 @@ int main(){
             assert( d1_2[i][j] == -6.66 );
             assert( d2_2[i][j] == -6.66 );
         }
-        for (int j=0; j<ffnn->getNBeta(); ++j){
+        for (int j=0; j<ffnn->getNVariationalParameters(); ++j){
             assert( vd1_2[i][j] == -6.66 );
         }
     }
@@ -126,7 +126,7 @@ int main(){
             assert( d1_1[i][j] == d1_2[i][j] );
             assert( d2_1[i][j] == d2_2[i][j] );
         }
-        for (int j=0; j<ffnn->getNBeta(); ++j){
+        for (int j=0; j<ffnn->getNVariationalParameters(); ++j){
             assert( vd1_1[i][j] == vd1_2[i][j] );
         }
     }
