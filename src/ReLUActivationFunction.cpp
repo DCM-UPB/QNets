@@ -1,7 +1,20 @@
 #include "ReLUActivationFunction.hpp"
+#include "StringCodeUtilities.hpp"
 
+#include <string>
+#include <vector>
 
 // Activation Function Interface implementation
+
+std::string ReLUActivationFunction::getParams()
+{
+    return composeParamCode("alpha", _alpha);
+}
+
+void ReLUActivationFunction::setParams(const std::string &params)
+{
+    setParamValue(params, "alpha", _alpha);
+}
 
 double ReLUActivationFunction::f(const double &in)
 {

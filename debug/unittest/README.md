@@ -29,3 +29,9 @@
 ## Unit Test 5
 
 `ut5/`: check that the activation functions derivatives are correct
+
+
+
+## Unit Test 6
+
+`ut6/`: check the utility functions of the string code system

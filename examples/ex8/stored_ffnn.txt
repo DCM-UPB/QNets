@@ -1,0 +1,7 @@
+4
+INL ( nunits 2 ) { OFF , IN ( shift 0 , scale 1 ) }
+NNL ( nunits 5 ) { OFF , NNU { LGS } , NNU { LGS } , NNU { LGS } , NNU { LGS } }
+NNL ( nunits 3 ) { OFF , NNU { LGS } , NNU { LGS } }
+OUTL ( nunits 2 ) { OFF , OUT ( shift 0 , scale 1 ) { LGS } }
+0
+0 0 0 0 0

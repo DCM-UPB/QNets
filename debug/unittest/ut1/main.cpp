@@ -338,6 +338,8 @@ int main(){
     delete[] anal_dfxdx2dbeta;
     delete[] anal_dfydx2dbeta;
 
+    delete[] anal_dfxdbeta;
+    delete[] anal_dfydbeta;
 
     delete ffnn;
 

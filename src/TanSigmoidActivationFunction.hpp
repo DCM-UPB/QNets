@@ -10,11 +10,11 @@ class TanSigmoidActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-    TanSigmoidActivationFunction(){}
-    ~TanSigmoidActivationFunction(){}
+    // getters
+    ActivationFunctionInterface * getCopy(){return new TanSigmoidActivationFunction();}
+    std::string getIdCode(){return "TANS";}
 
-    std::string getIdCode(){return "tans";}
-
+    // computation
     double f(const double &in);
 
     double f1d(const double &in);

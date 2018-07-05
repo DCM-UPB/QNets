@@ -11,7 +11,7 @@ int main() {
 
     int n0, n1, n2;
 
-    cout << "Let's start by creating a Feed Forward Artificial Neural Netowrk (FFANN)" << endl;
+    cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
     cin.ignore();
 
@@ -32,17 +32,23 @@ int main() {
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(n0,n1,n2);
     //
 
-    cout << "Graphically it looks like this" << endl;
+    cout << "Graphically it looks like this:" << endl;
     cin.ignore();
     printFFNNStructure(ffnn);
 
     cout << endl << "where it must be read from left to right, and:" << endl;
-    cout << "idf: identity activation function" << endl;
-    cout << "lgs: logistic activation function (sigmoid)" << endl;
-    cout << "gss: gaussian activation function" << endl << endl << endl;
+    cout << "OFF: Offset Unit" << endl;
+    cout << "IN:  Input Unit" << endl;
+    cout << "NNU: (Hidden) Neural Network Unit" << endl;
+    cout << "OUT: Output Unit" << endl << endl;
     cin.ignore();
 
-    cout << "Let's add one more layer" << endl;
+    cout << "At the moment the substructure of the units looks like this:" << endl;
+    cin.ignore();
+    printFFNNStructure(ffnn, true, 0);
+    cout << endl << "which means that NNU and OUT units apply an logistic activation function (LGS)." << endl << endl << endl;
+
+    cout << "Now let's add one more layer" << endl;
     cout << "========================" << endl;
     cin.ignore();
     cout << "How many units should this new layer have? ";

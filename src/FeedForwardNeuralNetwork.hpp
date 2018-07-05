@@ -2,19 +2,31 @@
 #define FEED_FORWARD_NEURAL_NETWORK
 
 #include "ActivationFunctionInterface.hpp"
+#include "NetworkLayer.hpp"
+#include "InputLayer.hpp"
+#include "FedNetworkLayer.hpp"
 #include "NNLayer.hpp"
+#include "OutputNNLayer.hpp"
+#include "NetworkUnit.hpp"
 
 #include <vector>
 #include <string>
-
+#include <cstddef>
 
 class FeedForwardNeuralNetwork
 {
 private:
-    void construct(const int &insize, const int &hidlaysize, const int &outsize);
+    void _construct(const int &insize, const int &hidlaysize, const int &outsize);
+    void _registerLayer(NetworkLayer * newLayer, const int &indexFromBack = 0); // register layers to correct vectors, position controlled by indexFromBack
+    void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0); // creates and registers a new layer according to idCode and nunits
+    void _addNewLayer(const std::string &idCode, const std::string &params="", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
 
 protected:
-    std::vector<NNLayer *> _L;
+    std::vector<NetworkLayer *> _L; // contains all kinds of layers
+    std::vector<FedNetworkLayer *> _L_fed; // contains layers with feeder
+    std::vector<NNLayer *> _L_nn; // contains neural layers
+    InputLayer * _L_in = NULL; // input layer
+    OutputNNLayer * _L_out = NULL; // output layer
 
     bool _flag_connected;  // flag that tells if the FFNN has been connected or not
     bool _flag_1d, _flag_2d, _flag_v1d, _flag_c1d, _flag_c2d;  // flag that indicates if the substrates for the derivatives have been activated or not
@@ -29,15 +41,22 @@ public:
     ~FeedForwardNeuralNetwork();
 
 
-
     // --- Get information about the NN structure
-    int getNHiddenLayers(){return _L.size()-2;}
     int getNLayers(){return _L.size();}
-    int getNInput(){return _L.front()->getNUnits()-1;}
-    int getNOutput(){return _L.back()->getNUnits()-1;}
+    int getNFedLayers(){return _L_fed.size();}
+    int getNNeuralLayers(){return _L_nn.size();}
+    int getNHiddenLayers(){return _L_nn.size()-1;}
+
+    int getNInput(){return _L_in->getNInputUnits();}
+    int getNOutput(){return _L_out->getNOutputNNUnits();}
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
-    ActivationFunctionInterface * getLayerActivationFunction(const int &li){return _L[li]->getActivationFunction();}
-    NNLayer * getLayer(const int &li){return _L[li];}
+
+    NetworkLayer * getLayer(const int &li){return _L[li];}
+    FedNetworkLayer * getFedLayer(const int &li){return _L_fed[li];}
+    NNLayer * getNNLayer(const int &li){return _L_nn[li];}
+    InputLayer * getInputLayer(){return _L_in;}
+    OutputNNLayer * getOutputLayer(){return _L_out;}
+
     bool isConnected(){return _flag_connected;}
     bool hasFirstDerivativeSubstrate(){return _flag_1d;}
     bool hasSecondDerivativeSubstrate(){return _flag_2d;}
@@ -49,7 +68,7 @@ public:
     // --- Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
     void setLayerSize(const int &li, const int &size);
-    void setLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
+    void setNNLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
 
@@ -58,7 +77,6 @@ public:
     // --- Connect the neural network
     void connectFFNN();
     void disconnectFFNN();
-
 
 
     // --- Manage the betas, which exist only after that the FFNN has been connected
@@ -131,7 +149,7 @@ public:
 
 
     // --- Store FFNN on file
-    void storeOnFile(const char * filename);
+    void storeOnFile(const char * filename, const bool store_betas = true);
 
 };
 

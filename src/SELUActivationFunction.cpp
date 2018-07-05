@@ -1,7 +1,23 @@
 #include "SELUActivationFunction.hpp"
+#include "StringCodeUtilities.hpp"
 
 #include <math.h>
+#include <string>
+#include <vector>
 
+std::string SELUActivationFunction::getParams()
+{
+    std::vector<std::string> paramCodes;
+    paramCodes.push_back(composeParamCode("alpha", _alpha));
+    paramCodes.push_back(composeParamCode("lambda", _lambda));
+    return composeCodeList(paramCodes);
+}
+
+void SELUActivationFunction::setParams(const std::string &params)
+{
+    setParamValue(params, "alpha", _alpha);
+    setParamValue(params, "lambda", _lambda);
+}
 
 // Activation Function Interface implementation
 

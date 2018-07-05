@@ -1,15 +1,16 @@
-#ifndef NN_RAY
-#define NN_RAY
+#ifndef NETWORK_UNIT_RAY
+#define NETWORK_UNIT_RAY
 
-#include "NNUnit.hpp"
-#include "NNLayer.hpp"
-#include "NNUnitFeederInterface.hpp"
+#include "NetworkUnitFeederInterface.hpp"
+#include "NetworkUnit.hpp"
+#include "NetworkLayer.hpp"
 
 #include <vector>
-#include <set>
 #include <random>
+#include <set>
+#include <string>
 
-class NNRay: public NNUnitFeederInterface{
+class NetworkUnitRay: public NetworkUnitFeederInterface {
 protected:
     // random number generator, used to initialize the intensities
     std::random_device _rdev;
@@ -17,7 +18,7 @@ protected:
     std::uniform_real_distribution<double> _rd;
 
     // key component of the ray: the source and their intensisities
-    std::vector<NNUnit *> _source;   // units from which the ray takes the values from
+    std::vector<NetworkUnit *> _source;   // units from which the ray takes the values from
     std::vector<double> _intensity;   // intensity of each sorgent unit, i.e. its weight
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
     int _intensity_id_shift;  // shift of the previous vector
@@ -31,16 +32,21 @@ protected:
     std::set<int> _betas_used_for_this_ray;
 
 public:
-    NNRay(NNLayer * nnl);
-    virtual ~NNRay();
+    explicit NetworkUnitRay(NetworkLayer * nl);
+    virtual ~NetworkUnitRay();
+
+    // string code methods
+    virtual std::string getIdCode(){return "RAY";}; // return an identification string
+    virtual std::string getParams();
+    virtual void setParams(const std::string &params);
 
     // beta
-    int getNBeta(){return _intensity.size();}
-    double getBeta(const int &i){return _intensity[i];}
-    void setBeta(const int &i, const double &b){_intensity[i]=b;}
+    int getNBeta();
+    double getBeta(const int &i);
+    void setBeta(const int &i, const double &b);
 
     // Variational Parameters
-    int getNVariationalParameters(){return _intensity.size();}
+    int getNVariationalParameters();
     int setVariationalParametersIndexes(const int &starting_index);
     bool getVariationalParameterValue(const int &id, double &value);
     bool setVariationalParameterValue(const int &id, const double &value);
@@ -56,8 +62,6 @@ public:
     // Beta Index
     bool isBetaIndexUsedInThisRay(const int &id);   // beta is directly used?
     bool isBetaIndexUsedForThisRay(const int &id);   // beta is used directly or indirectly?
-
 };
-
 
 #endif

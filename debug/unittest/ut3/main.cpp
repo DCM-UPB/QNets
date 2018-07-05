@@ -14,10 +14,10 @@ int main(){
     // make a check while the FFNN is not connected yet
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
     ffnn->pushHiddenLayer(4);
-    ffnn->getLayer(0)->getUnit(2)->setActivationFunction(std_actf::provideActivationFunction("lgs"));
-    ffnn->getLayer(1)->getUnit(3)->setActivationFunction(std_actf::provideActivationFunction("gss"));
-    ffnn->getLayer(2)->getUnit(1)->setActivationFunction(std_actf::provideActivationFunction("gss"));
-    ffnn->getLayer(3)->getUnit(2)->setActivationFunction(std_actf::provideActivationFunction("gss"));
+
+    ffnn->getNNLayer(0)->getNNUnit(2)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
+    ffnn->getNNLayer(1)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
+    ffnn->getNNLayer(2)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
 
     FeedForwardNeuralNetwork * ffnn2 = new FeedForwardNeuralNetwork(ffnn);
 
@@ -31,25 +31,20 @@ int main(){
     assert(!ffnn2->hasFirstDerivativeSubstrate());
     assert(!ffnn2->hasSecondDerivativeSubstrate());
     assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
-    assert(ffnn->getLayer(0)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(0)->getUnit(1)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(0)->getUnit(2)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(1)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(1)->getUnit(1)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(1)->getUnit(2)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(1)->getUnit(3)->getActivationFunction()->getIdCode() == "gss");
-    assert(ffnn->getLayer(1)->getUnit(4)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(2)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(2)->getUnit(1)->getActivationFunction()->getIdCode() == "gss");
-    assert(ffnn->getLayer(2)->getUnit(2)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(2)->getUnit(3)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(3)->getUnit(0)->getActivationFunction()->getIdCode() == "id_");
-    assert(ffnn->getLayer(3)->getUnit(1)->getActivationFunction()->getIdCode() == "lgs");
-    assert(ffnn->getLayer(3)->getUnit(2)->getActivationFunction()->getIdCode() == "gss");
+    assert(ffnn->getNNLayer(0)->getNNUnit(0)->getActivationFunction()->getIdCode() == "LGS");
+    assert(ffnn->getNNLayer(0)->getNNUnit(1)->getActivationFunction()->getIdCode() == "LGS");
+    assert(ffnn->getNNLayer(0)->getNNUnit(2)->getActivationFunction()->getIdCode() == "GSS");
+    assert(ffnn->getNNLayer(0)->getNNUnit(3)->getActivationFunction()->getIdCode() == "LGS");
+    assert(ffnn->getNNLayer(1)->getNNUnit(0)->getActivationFunction()->getIdCode() == "GSS");
+    assert(ffnn->getNNLayer(1)->getNNUnit(1)->getActivationFunction()->getIdCode() == "LGS");
+    assert(ffnn->getNNLayer(1)->getNNUnit(2)->getActivationFunction()->getIdCode() == "LGS");
+    assert(ffnn->getNNLayer(2)->getNNUnit(0)->getActivationFunction()->getIdCode() == "LGS");
+    assert(ffnn->getNNLayer(2)->getNNUnit(1)->getActivationFunction()->getIdCode() == "GSS");
 
     delete ffnn2;
-
 
 
 
@@ -62,6 +57,8 @@ int main(){
     assert(!ffnn2->hasFirstDerivativeSubstrate());
     assert(!ffnn2->hasSecondDerivativeSubstrate());
     assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     assert(ffnn->getNBeta() == ffnn2->getNBeta());
     for (int i=0; i<ffnn2->getNBeta(); ++i){
@@ -69,7 +66,6 @@ int main(){
     }
 
     delete ffnn2;
-
 
 
 
@@ -82,9 +78,10 @@ int main(){
     assert(ffnn2->hasFirstDerivativeSubstrate());
     assert(!ffnn2->hasSecondDerivativeSubstrate());
     assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     delete ffnn2;
-
 
 
 
@@ -97,9 +94,10 @@ int main(){
     assert(ffnn2->hasFirstDerivativeSubstrate());
     assert(!ffnn2->hasSecondDerivativeSubstrate());
     assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     delete ffnn2;
-
 
 
 
@@ -112,8 +110,40 @@ int main(){
     assert(ffnn2->hasFirstDerivativeSubstrate());
     assert(ffnn2->hasSecondDerivativeSubstrate());
     assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
+
+    delete ffnn2;
 
 
+
+    // add cross first derivative substrate and make a check
+    ffnn->addCrossFirstDerivativeSubstrate();
+
+    ffnn2 = new FeedForwardNeuralNetwork(ffnn);
+
+    assert(ffnn2->isConnected());
+    assert(ffnn2->hasFirstDerivativeSubstrate());
+    assert(ffnn2->hasSecondDerivativeSubstrate());
+    assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
+
+    delete ffnn2;
+
+
+
+    // add cross second derivative substrate and make a check
+    ffnn->addCrossSecondDerivativeSubstrate();
+
+    ffnn2 = new FeedForwardNeuralNetwork(ffnn);
+
+    assert(ffnn2->isConnected());
+    assert(ffnn2->hasFirstDerivativeSubstrate());
+    assert(ffnn2->hasSecondDerivativeSubstrate());
+    assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(ffnn2->hasCrossFirstDerivativeSubstrate());
+    assert(ffnn2->hasCrossSecondDerivativeSubstrate());
 
 
     // check that, once the input is the same for the two FFNN, all outputs (including derivatives) are the same
@@ -123,29 +153,25 @@ int main(){
     ffnn2->setInput(input);
     ffnn2->FFPropagate();
 
-    assert(ffnn->getOutput(0) == ffnn2->getOutput(0));
-    assert(ffnn->getOutput(1) == ffnn2->getOutput(1));
+    for (int i=0; i<2; ++i) {
+        assert(ffnn->getOutput(i) == ffnn2->getOutput(i));
 
-    assert(ffnn->getFirstDerivative(0, 0) == ffnn2->getFirstDerivative(0, 0));
-    assert(ffnn->getFirstDerivative(0, 1) == ffnn2->getFirstDerivative(0, 1));
-    assert(ffnn->getFirstDerivative(1, 0) == ffnn2->getFirstDerivative(1, 0));
-    assert(ffnn->getFirstDerivative(1, 1) == ffnn2->getFirstDerivative(1, 1));
+        for (int j=0; j<2; ++j) {
+            assert(ffnn->getFirstDerivative(i, j) == ffnn2->getFirstDerivative(i, j));
+            assert(ffnn->getSecondDerivative(i, j) == ffnn2->getSecondDerivative(i, j));
 
-    assert(ffnn->getSecondDerivative(0, 0) == ffnn2->getSecondDerivative(0, 0));
-    assert(ffnn->getSecondDerivative(0, 1) == ffnn2->getSecondDerivative(0, 1));
-    assert(ffnn->getSecondDerivative(1, 0) == ffnn2->getSecondDerivative(1, 0));
-    assert(ffnn->getSecondDerivative(1, 1) == ffnn2->getSecondDerivative(1, 1));
+            for (int k=0; k<ffnn->getNBeta(); ++k){
+                assert(ffnn->getCrossFirstDerivative(i, j, k) == ffnn2->getCrossFirstDerivative(i, j, k));
+                assert(ffnn->getCrossSecondDerivative(i, j, k) == ffnn2->getCrossSecondDerivative(i, j, k));
+            }
+        }
 
-    for (int i=0; i<ffnn->getNBeta(); ++i){
-        assert(ffnn->getVariationalFirstDerivative(0, i) == ffnn2->getVariationalFirstDerivative(0, i));
-        assert(ffnn->getVariationalFirstDerivative(1, i) == ffnn2->getVariationalFirstDerivative(1, i));
+        for (int k=0; k<ffnn->getNBeta(); ++k){
+            assert(ffnn->getVariationalFirstDerivative(i, k) == ffnn2->getVariationalFirstDerivative(i, k));
+        }
     }
 
-
     delete ffnn2;
-
-
-
     delete ffnn;
 
     return 0;

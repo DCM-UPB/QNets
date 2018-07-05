@@ -8,7 +8,7 @@
 #include <string>
 
 
-void printFFNNStructure(FeedForwardNeuralNetwork * ffnn);
+void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params = true, const int &drop_member_lvl = 1); // will drop members from level drop_member_lvl onward (0 means drop is disabled)
 
 void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn);
 

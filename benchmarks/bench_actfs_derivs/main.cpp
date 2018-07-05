@@ -23,7 +23,7 @@ int main (void) {
     const int nruns = 50;
 
     const int nactfs = 7;
-    const string actf_ids[nactfs] = {"lgs", "gss", "id_", "tans", "sin", "relu", "selu"};
+    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU"};
 
     double * const indata = new double[neval]; // 1d input data for actf bench
 

@@ -1,72 +1,51 @@
 #ifndef NN_LAYER
 #define NN_LAYER
 
+#include "FedNetworkLayer.hpp"
+#include "NetworkLayer.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
-#include "IdentityActivationFunction.hpp"
-#include "LogisticActivationFunction.hpp"
+#include "ActivationFunctionManager.hpp"
+#include "NetworkUnitFeederInterface.hpp"
+#include "NetworkUnitRay.hpp"
 
 #include <vector>
+#include <string>
 
-
-class NNLayer
+class NNLayer: public FedNetworkLayer
 {
 protected:
-    std::vector<NNUnit *> _U;
+    std::vector<NNUnit *> _U_nn; // stores pointers to all neural units
 
+    void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from NNUnit and register
 public:
-    NNLayer(const int &nunits, ActivationFunctionInterface * actf);
-    ~NNLayer();
+    // --- Constructor
+
+    NNLayer(const int &nunits = 1, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()){if (nunits>1) construct(nunits, actf);}
+    virtual void construct(const int &nunits);
+    virtual void construct(const int &nunits, ActivationFunctionInterface * actf);
+
+    // --- Deconstructor
+
+    virtual ~NNLayer(){_U_nn.clear();}
+    virtual void deconstruct(){FedNetworkLayer::deconstruct(); _U_nn.clear();}
+
+    // --- String Codes
+
+    virtual std::string getIdCode(){return "NNL";}
 
     // --- Getters
-    int getNUnits(){return _U.size();}
-    NNUnit * getUnit(const int & i){return _U[i];}
-    ActivationFunctionInterface * getActivationFunction(){return _U[1]->getActivationFunction();}
+
+    int getNNeuralUnits() {return _U_nn.size();}
+    NNUnit * getNNUnit(const int &i) {return _U_nn[i];}
 
     // --- Modify structure
-    void setSize(const int &nunits);
+
     void setActivationFunction(ActivationFunctionInterface * actf);
 
-    // --- Values to compute
-    void addFirstDerivativeSubstrate(const int &nx0);
-    /* add the first derivative substrate to all units
-       nx0 is the number of units used as input, i.e.
-       the number of derivatives that will be computed */
-
-    void addSecondDerivativeSubstrate(const int &nx0);
-    /* add the second derivative substrate to all units
-       nx0 is the number of units used as input, i.e.
-       the number of derivatives that will be computed */
-
-    void addVariationalFirstDerivativeSubstrate(const int &nvp);
-    /* add the variational first derivative substrate to all units.
-       nvp is the number of variational parameters in the NN */
-
-    void addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp);
-    /* add the cross first derivative substrate to all units.
-       nx0 is the number of units used as input
-       nvp is the number of variational parameters in the NN */
-
-    void addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp);
-    /* add the cross second derivative substrate to all units.
-       nx0 is the number of units used as input
-       nvp is the number of variational parameters in the NN */
-
-    int setVariationalParametersID(const int &id_vp);   // assign the id of the variational parameters to the feeders
-
-
     // --- Connection
-    void connectOnTopOfLayer(NNLayer * nnl);
-    void disconnect();
 
-    // --- Computation
-    void computeValues();
-
-    // --- Variational Parameters
-    int getNVariationalParameters();
-    bool getVariationalParameter(const int &id, double &vp);
-    bool setVariationalParameter(const int &id, const double &vp);
-
+    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) {return new NetworkUnitRay(nl);}
 };
 
 

@@ -24,10 +24,10 @@ namespace std_actf{
     extern SELUActivationFunction selu_actf;
     extern TanSigmoidActivationFunction tans_actf;
     extern SineActivationFunction sin_actf;
-    
+
     extern std::vector<ActivationFunctionInterface *> supported_actf;
 
-    ActivationFunctionInterface * provideActivationFunction(const std::string idcode);
+    ActivationFunctionInterface * provideActivationFunction(const std::string &idCode = "LGS", const std::string &params = ""); // currently defaults to logistic actf
 }
 
 

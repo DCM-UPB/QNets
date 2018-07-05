@@ -10,11 +10,11 @@ class GaussianActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-    GaussianActivationFunction(){}
-    ~GaussianActivationFunction(){}
+    // getters
+    ActivationFunctionInterface * getCopy(){return new GaussianActivationFunction();}
+    std::string getIdCode(){return "GSS";}
 
-    std::string getIdCode(){return "gss";}
-
+    // computation
     double f(const double &in);
 
     double f1d(const double &in);

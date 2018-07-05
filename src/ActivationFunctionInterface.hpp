@@ -1,18 +1,36 @@
 #ifndef ACTIVATION_FUNCTION_INTERFACE
 #define ACTIVATION_FUNCTION_INTERFACE
 
+#include "SerializableComponent.hpp"
 
 #include <string>
 
 
-class ActivationFunctionInterface
+class ActivationFunctionInterface: public SerializableComponent
 {
 protected:
 
 public:
 
-    //return a 3-characters identification string
-    virtual std::string getIdCode() = 0;
+    // Constructors: every child with hyper parameters should implement 3 constructors:
+
+    // Construct from passed parameter values
+    //ActivationFunctionInterface(){}
+
+    // Construct from passed param string
+    //ActivationFunctionInterface(const std::string &params){}
+
+    // Construct from passed activation function
+    //ActivationFunctionInterface(ActivationFunctionInterface * const actf){}
+
+    // Destructor
+    virtual ~ActivationFunctionInterface(){}
+
+    // allocate a new copy of this to *actf
+    virtual ActivationFunctionInterface * getCopy() = 0;
+
+    // set class id code
+    std::string getClassIdCode(){return "ACTF";}
 
     // compute the activation function value
     virtual double f(const double &) = 0;

@@ -9,11 +9,11 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 protected:
 
 public:
-    LogisticActivationFunction(){}
-    ~LogisticActivationFunction(){}
+    // getters
+    ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}
+    std::string getIdCode(){return "LGS";}
 
-    std::string getIdCode(){return "lgs";}
-
+    // computation
     double f(const double &in);
 
     double f1d(const double &in);

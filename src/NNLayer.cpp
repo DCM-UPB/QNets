@@ -1,156 +1,36 @@
 #include "NNLayer.hpp"
 
-#include "NNRay.hpp"
+#include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
+#include "NNUnit.hpp"
 
-#include <iostream>
 
+// --- Register Unit
 
-// --- Variational Parameters
-
-bool NNLayer::setVariationalParameter(const int &id, const double &vp)
+void NNLayer::_registerUnit(NetworkUnit * newUnit)
 {
-    std::vector<NNUnit *>::size_type i=1;
-    NNUnitFeederInterface * feeder;
-    bool flag = false;
-    while ( (!flag) && (i<_U.size()) )
-        {
-            feeder = _U[i]->getFeeder();
-            if (feeder)
-                {
-                    flag = feeder->setVariationalParameterValue(id,vp);
-                }
-            i++;
-        }
-    return flag;
+    FedNetworkLayer::_registerUnit(newUnit);
+    if(NNUnit * nnu = dynamic_cast<NNUnit *>(newUnit)) {
+        _U_nn.push_back(nnu);
+    }
 }
 
 
-bool NNLayer::getVariationalParameter(const int &id, double &vp)
+// --- Constructor
+
+void NNLayer::construct(const int &nunits)
 {
-    std::vector<NNUnit *>::size_type i=1;
-    NNUnitFeederInterface * feeder;
-    bool flag = false;
-    while ( (!flag) && (i<_U.size()) )
-        {
-            feeder = _U[i]->getFeeder();
-            if (feeder)
-                {
-                    flag = feeder->getVariationalParameterValue(id, vp);
-                }
-            i++;
-        }
-    return flag;
+    construct(nunits, std_actf::provideActivationFunction());
 }
 
-
-int NNLayer::getNVariationalParameters()
+void NNLayer::construct(const int &nunits, ActivationFunctionInterface * actf)
 {
-    int nvp=0;
-    NNUnitFeederInterface * feeder;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
+    for (int i=1; i<nunits; ++i)
         {
-            feeder = _U[i]->getFeeder();
-            if (feeder)
-                {
-                    nvp += feeder->getNVariationalParameters();
-                }
+            NNUnit * newUnit = new NNUnit(actf->getCopy());
+            _registerUnit(newUnit);
         }
-    return nvp;
-}
-
-
-// --- Computation
-
-void NNLayer::computeValues()
-{
-#ifdef OPENMP
-#pragma omp for schedule(static, 1)
-#endif
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
-}
-
-
-// --- Values to compute
-
-int NNLayer::setVariationalParametersID(const int &id_vp)
-{
-    int id = id_vp;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            id = _U[i]->getFeeder()->setVariationalParametersIndexes(id);
-        }
-    return id;
-}
-
-
-void NNLayer::addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setCrossSecondDerivativeSubstrate(nx0, nvp);
-        }
-}
-
-
-void NNLayer::addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
-        }
-}
-
-
-void NNLayer::addVariationalFirstDerivativeSubstrate(const int &nvp)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setVariationalFirstDerivativeSubstrate(nvp);
-        }
-}
-
-
-void NNLayer::addSecondDerivativeSubstrate(const int &nx0)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setSecondDerivativeSubstrate(nx0);
-        }
-}
-
-
-void NNLayer::addFirstDerivativeSubstrate(const int &nx0)
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            _U[i]->setFirstDerivativeSubstrate(nx0);
-        }
-}
-
-
-// --- Connection
-
-void NNLayer::connectOnTopOfLayer(NNLayer * nnl)
-{
-    NNUnitFeederInterface * ray;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            ray = new NNRay(nnl);
-            _U[i]->setFeeder(ray);
-        }
-}
-
-
-void NNLayer::disconnect()
-{
-    NNUnitFeederInterface * ray;
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
-        {
-            ray = _U[i]->getFeeder();
-            delete ray;
-            _U[i]->setFeeder(NULL);
-        }
+    delete actf;
 }
 
 
@@ -158,56 +38,9 @@ void NNLayer::disconnect()
 
 void NNLayer::setActivationFunction(ActivationFunctionInterface * actf)
 {
-    _U[0]->setActivationFunction(std_actf::provideActivationFunction("lgs"));
-    for (std::vector<NNUnit *>::size_type i=1; i<_U.size(); ++i)
+    for (std::vector<NNUnit *>::size_type i=0; i<_U_nn.size(); ++i)
         {
-            _U[i]->setActivationFunction(actf);
+            _U_nn[i]->setActivationFunction(actf->getCopy());
         }
-}
-
-
-void NNLayer::setSize(const int &nunits)
-{
-    ActivationFunctionInterface * actf = _U[1]->getActivationFunction();
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            delete _U[i];
-        }
-    _U.clear();
-    _U.push_back(new NNUnit(std_actf::provideActivationFunction("lgs")));
-    _U[0]->setProtoValue(1.);
-    for (int i=1; i<nunits; ++i)
-        {
-            _U.push_back(new NNUnit(actf));
-        }
-}
-
-
-// --- Getters
-
-
-
-// --- Constructor
-
-NNLayer::NNLayer(const int &nunits, ActivationFunctionInterface * actf)
-{
-    _U.push_back(new NNUnit(std_actf::provideActivationFunction("id_")));
-    _U[0]->setProtoValue(1.);
-
-    for (int i=1; i<nunits; ++i)
-        {
-            _U.push_back(new NNUnit(actf));
-        }
-}
-
-
-// --- Destructor
-
-NNLayer::~NNLayer()
-{
-    for (std::vector<NNUnit *>::size_type i=0; i<_U.size(); ++i)
-        {
-            delete _U[i];
-        }
-    _U.clear();
+    delete actf;
 }

@@ -28,7 +28,7 @@ int main (void) {
     const int nhu[nhl] = {9,5};
 
     const int nactfs = 7;
-    const string actf_ids[nactfs] = {"lgs", "gss", "id_", "tans", "sin", "relu", "selu"};
+    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU"};
 
     FeedForwardNeuralNetwork * ffnn;
 
@@ -55,19 +55,19 @@ int main (void) {
         //Set ACTFs for hidden units
         for (int i=0; i<nhl; ++i) {
             for (int j=1; j<nhu[i]; ++j) {
-                ffnn->getLayer(i+1)->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction(actf_ids[iactf]));
+                ffnn->getNNLayer(i)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_ids[iactf]));
             }
         }
 
         //Set ID ACTFs for output units
         for (int j=1; j<yndim+1; ++j) {
-            ffnn->getLayer(nhl+1)->getUnit(j)->setActivationFunction(std_actf::provideActivationFunction("id_"));
+            ffnn->getNNLayer(nhl)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction("ID"));
         }
 
         cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
         cout << "=========================================================================================" << endl << endl;
-        cout << "NN structure looks like:" << endl;
-        printFFNNStructure(ffnn);
+        cout << "NN structure looks like:" << endl << endl;
+        printFFNNStructure(ffnn, true, 0);
         cout << endl;
         cout << "Benchmark results (time per propagation):" << endl;
 
