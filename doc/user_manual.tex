@@ -374,7 +374,7 @@ input variables (index $j$) for every data point.
 The design of the residual makes sure that it doesn't vary in magnitude with
 respect to number of data point \verb+N+, input/output dimensions $n_x$,
 $n_y$ or number of betas $n_{\beta}$.
-\\\\How a complete code for NN training looks, you can see in the example 10.
+\\\\How a complete code for NN training looks, you can see in the example 9.
 If we leave out generating the data though, it comes down to the following:
 \begin{lstlisting}
   #include "NNTrainerGSL.hpp"
@@ -382,6 +382,7 @@ If we leave out generating the data though, it comes down to the following:
   FeedFowardNeuralNetwork * ffnn =
       new FeedFowardNeuralNetwork(xndim+1, nhunits, yndim+1);
   ffnn->connectFFNN(); // only connect, don't add substrates
+  ffnn->assignVariationalParameters(); // declare all betas to be variational parameters
 
   // create config and data structs
   // (for reference see respective header files)

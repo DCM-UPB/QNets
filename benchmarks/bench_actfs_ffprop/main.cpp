@@ -51,6 +51,7 @@ int main (void) {
         ffnn = new FeedForwardNeuralNetwork(xndim+1, nhu[0], yndim+1);
         for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
         ffnn->connectFFNN();
+        ffnn->assignVariationalParameters();
 
         //Set ACTFs for hidden units
         for (int i=0; i<nhl; ++i) {

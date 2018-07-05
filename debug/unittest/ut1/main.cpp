@@ -28,10 +28,7 @@ int main(){
         ffnn->setBeta(i, rd(rgen));
     }
 
-    ffnn->addFirstDerivativeSubstrate();
-    ffnn->addSecondDerivativeSubstrate();
-    ffnn->addVariationalFirstDerivativeSubstrate();
-    ffnn->addCrossFirstDerivativeSubstrate();
+    ffnn->assignVariationalParameters();
     ffnn->addCrossSecondDerivativeSubstrate();
 
 
@@ -174,9 +171,9 @@ int main(){
     }
 
 
-    for (int i=0; i<ffnn->getNBeta(); ++i){
-        const double orig_beta = ffnn->getBeta(i);
-        ffnn->setBeta(i, orig_beta+dx);
+    for (int i=0; i<ffnn->getNVariationalParameters(); ++i){
+        const double orig_vp = ffnn->getVariationalParameter(i);
+        ffnn->setVariationalParameter(i, orig_vp+dx);
         ffnn->FFPropagate();
         fx1 = ffnn->getOutput(0);
         fy1 = ffnn->getOutput(1);
@@ -195,7 +192,7 @@ int main(){
         // cout << endl;
         assert( abs( (anal_dfydbeta[i]-num_dfydbeta) ) < TINY);
 
-        ffnn->setBeta(i, orig_beta);
+        ffnn->setVariationalParameter(i, orig_vp);
     }
 
 
@@ -217,24 +214,24 @@ int main(){
     ffnn->getCrossFirstDerivative(1, anal_dfydxdbeta);
 
     for (int i1d=0; i1d<ffnn->getNInput(); ++i1d){
-        for (int iv1d=0; iv1d<ffnn->getNBeta(); ++iv1d){
+        for (int iv1d=0; iv1d<ffnn->getNVariationalParameters(); ++iv1d){
             const double orig_x = x[i1d];
-            const double orig_beta = ffnn->getBeta(iv1d);
+            const double orig_vp = ffnn->getVariationalParameter(iv1d);
 
             ffnn->setInput(i1d, orig_x);
-            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->setVariationalParameter(iv1d, orig_vp+dx);
             ffnn->FFPropagate();
             const double fxdbeta = ffnn->getOutput(0);
             const double fydbeta = ffnn->getOutput(1);
 
             ffnn->setInput(i1d, orig_x+dx);
-            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->setVariationalParameter(iv1d, orig_vp);
             ffnn->FFPropagate();
             const double fxdx = ffnn->getOutput(0);
             const double fydx = ffnn->getOutput(1);
 
             ffnn->setInput(i1d, orig_x+dx);
-            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->setVariationalParameter(iv1d, orig_vp+dx);
             ffnn->FFPropagate();
             const double fxdxdbeta = ffnn->getOutput(0);
             const double fydxdbeta = ffnn->getOutput(1);
@@ -251,7 +248,7 @@ int main(){
             assert(abs( (anal_dfydxdbeta[i1d][iv1d]-num_dfydxdbeta) ) < TINY);
 
             ffnn->setInput(i1d, orig_x);
-            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->setVariationalParameter(iv1d, orig_vp);
         }
     }
 
@@ -273,36 +270,36 @@ int main(){
     ffnn->getCrossSecondDerivative(1, anal_dfydx2dbeta);
 
     for (int i2d=0; i2d<ffnn->getNInput(); ++i2d){
-        for (int iv1d=0; iv1d<ffnn->getNBeta(); ++iv1d){
+        for (int iv1d=0; iv1d<ffnn->getNVariationalParameters(); ++iv1d){
             const double orig_x = x[i2d];
-            const double orig_beta = ffnn->getBeta(iv1d);
+            const double orig_vp = ffnn->getVariationalParameter(iv1d);
 
             ffnn->setInput(i2d, orig_x+dx);
-            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->setVariationalParameter(iv1d, orig_vp+dx);
             ffnn->FFPropagate();
             const double fxdxdbeta = ffnn->getOutput(0);
             const double fydxdbeta = ffnn->getOutput(1);
 
             ffnn->setInput(i2d, orig_x);
-            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->setVariationalParameter(iv1d, orig_vp+dx);
             ffnn->FFPropagate();
             const double fxdbeta = ffnn->getOutput(0);
             const double fydbeta = ffnn->getOutput(1);
 
             ffnn->setInput(i2d, orig_x-dx);
-            ffnn->setBeta(iv1d, orig_beta+dx);
+            ffnn->setVariationalParameter(iv1d, orig_vp+dx);
             ffnn->FFPropagate();
             const double fxmdxdbeta = ffnn->getOutput(0);
             const double fymdxdbeta = ffnn->getOutput(1);
 
             ffnn->setInput(i2d, orig_x+dx);
-            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->setVariationalParameter(iv1d, orig_vp);
             ffnn->FFPropagate();
             const double fxdx = ffnn->getOutput(0);
             const double fydx = ffnn->getOutput(1);
 
             ffnn->setInput(i2d, orig_x-dx);
-            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->setVariationalParameter(iv1d, orig_vp);
             ffnn->FFPropagate();
             const double fxmdx = ffnn->getOutput(0);
             const double fymdx = ffnn->getOutput(1);
@@ -319,7 +316,7 @@ int main(){
             assert(abs( (anal_dfydx2dbeta[i2d][iv1d]-num_dfydx2dbeta) ) < TINY);
 
             ffnn->setInput(i2d, orig_x);
-            ffnn->setBeta(iv1d, orig_beta);
+            ffnn->setVariationalParameter(iv1d, orig_vp);
         }
     }
 

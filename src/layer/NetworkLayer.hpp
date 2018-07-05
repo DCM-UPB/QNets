@@ -56,7 +56,7 @@ public:
     virtual bool setVariationalParameter(const int &id, const double &vp) {return false;}
     virtual bool getVariationalParameter(const int &id, double &vp) {return false;}
     virtual int getNVariationalParameters() {return 0;}
-    virtual int getMaxVariationalParameterIndex(){return 0;} // return the max appearing variational parameter index in the layer and it's input
+    virtual int getMaxVariationalParameterIndex(){return -1;} // return the max appearing variational parameter index in the layer and it's input
     virtual int setVariationalParametersID(const int &id_vp) { return id_vp;}
 
 

@@ -24,10 +24,10 @@ double gaussian_d2dx(const double x) {
 
 void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const beta, const double &TINY = 0.000001)
 {
-    const bool case1 = abs(ffnn->getBeta(0) - beta[0]) < TINY && abs(ffnn->getBeta(1) - beta[1]) < TINY && abs(ffnn->getBeta(2) - beta[2]) < TINY;
-    const bool case2 = abs(ffnn->getBeta(0) + beta[0]) < TINY && abs(ffnn->getBeta(1) + beta[1]) < TINY && abs(ffnn->getBeta(2) + beta[2]) < TINY;
+    const bool case1 = abs(ffnn->getVariationalParameter(0) - beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) - beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) - beta[2]) < TINY;
+    const bool case2 = abs(ffnn->getVariationalParameter(0) + beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) + beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) + beta[2]) < TINY;
     assert(case1 || case2); // symmetric gaussian allows both combinations
-    for (int i=3; i<ffnn->getNBeta(); ++i) assert(abs(ffnn->getBeta(i) - beta[i]) < TINY);
+    for (int i=3; i<ffnn->getNVariationalParameters(); ++i) assert(abs(ffnn->getVariationalParameter(i) - beta[i]) < TINY);
 }
 
 void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = false)
@@ -70,6 +70,10 @@ int main (void) {
     assert(ffnn->getLayer(2)->getNUnits() == yndim+1);
     assert(ffnn->getNBeta() == nbeta);
 
+
+    // assign variational parameters
+    ffnn->assignVariationalParameters();
+    assert(ffnn->getNVariationalParameters() == nbeta);
 
     // create data/config structs
     const int ntraining = 20;

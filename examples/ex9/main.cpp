@@ -81,6 +81,8 @@ int main (void) {
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
     ffnn->connectFFNN();
+    ffnn->assignVariationalParameters(); // since the trainer works on variational parameter interface, we need to make all betas variational parameters
+    //ffnn->assignVariationalParameters(starting_layer_index); // allows you to exclude all betas from layers<starting_layer
     // NOTE: No manual substrate setting has to be done, especially you shouldn't set any variational substrates manually
 
 

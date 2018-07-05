@@ -51,6 +51,7 @@ int main(){
 
     // connect the FFNN and make a check
     ffnn->connectFFNN();
+    ffnn->assignVariationalParameters();
     ffnn->storeOnFile("ffnn_stage2.txt");
 
     ffnn2 = new FeedForwardNeuralNetwork("ffnn_stage2.txt");
@@ -67,8 +68,12 @@ int main(){
         assert(ffnn->getBeta(i) == ffnn2->getBeta(i));
     }
 
-    delete ffnn2;
+    assert(ffnn->getNVariationalParameters() == ffnn2->getNVariationalParameters());
+    for (int i=0; i<ffnn2->getNVariationalParameters(); ++i){
+        assert(ffnn->getVariationalParameter(i) == ffnn2->getVariationalParameter(i));
+    }
 
+    delete ffnn2;
 
 
     // add first derivative substrate and make a check
@@ -87,26 +92,24 @@ int main(){
     delete ffnn2;
 
 
-
-    // add variational first derivative substrate and make a check
-    ffnn->addVariationalFirstDerivativeSubstrate();
+    // add second derivative substrate and make a check
+    ffnn->addSecondDerivativeSubstrate();
     ffnn->storeOnFile("ffnn_stage4.txt");
 
     ffnn2 = new FeedForwardNeuralNetwork("ffnn_stage4.txt");
 
     assert(ffnn2->isConnected());
     assert(ffnn2->hasFirstDerivativeSubstrate());
-    assert(!ffnn2->hasSecondDerivativeSubstrate());
-    assert(ffnn2->hasVariationalFirstDerivativeSubstrate());
+    assert(ffnn2->hasSecondDerivativeSubstrate());
+    assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
     assert(!ffnn2->hasCrossFirstDerivativeSubstrate());
     assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     delete ffnn2;
 
 
-
-    // add second derivative substrate and make a check
-    ffnn->addSecondDerivativeSubstrate();
+    // add variational first derivative substrate and make a check
+    ffnn->addVariationalFirstDerivativeSubstrate();
     ffnn->storeOnFile("ffnn_stage5.txt");
 
     ffnn2 = new FeedForwardNeuralNetwork("ffnn_stage5.txt");
@@ -119,7 +122,6 @@ int main(){
     assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     delete ffnn2;
-
 
 
     // add cross first derivative substrate and make a check
@@ -168,13 +170,13 @@ int main(){
             assert(ffnn->getFirstDerivative(i, j) == ffnn2->getFirstDerivative(i, j));
             assert(ffnn->getSecondDerivative(i, j) == ffnn2->getSecondDerivative(i, j));
 
-            for (int k=0; k<ffnn->getNBeta(); ++k){
+            for (int k=0; k<ffnn->getNVariationalParameters(); ++k){
                 assert(ffnn->getCrossFirstDerivative(i, j, k) == ffnn2->getCrossFirstDerivative(i, j, k));
                 assert(ffnn->getCrossSecondDerivative(i, j, k) == ffnn2->getCrossSecondDerivative(i, j, k));
             }
         }
 
-        for (int k=0; k<ffnn->getNBeta(); ++k){
+        for (int k=0; k<ffnn->getNVariationalParameters(); ++k){
             assert(ffnn->getVariationalFirstDerivative(i, k) == ffnn2->getVariationalFirstDerivative(i, k));
         }
     }

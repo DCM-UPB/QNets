@@ -101,49 +101,45 @@ for key in axs:
     axs[key].legend(handles, labels, loc='upper right')
 
 # Commented out, because these plots only make sense for multipe NNs
-'''
+#dfigs = {}
+#daxs = {}
 
-dfigs = {}
-daxs = {}
+#fig = figure(4)
+#ax = fig.add_subplot(111)
+#x, y = zip(*sorted(diffv.items(), key=lambda x: -x[1]))
+#ax.plot(y, '-o')
+#ax.set_xticks(arange(len(x)))
+#ax.set_xticklabels([z[2:] for z in x])
+#ax.set_title('RMSE of Fitted NNs vs. Gaussian')
+#dfigs['v'] = fig
+#daxs['v'] = ax
 
-fig = figure(4)
-ax = fig.add_subplot(111)
-x, y = zip(*sorted(diffv.items(), key=lambda x: -x[1]))
-ax.plot(y, '-o')
-ax.set_xticks(arange(len(x)))
-ax.set_xticklabels([z[2:] for z in x])
-ax.set_title('RMSE of Fitted NNs vs. Gaussian')
-dfigs['v'] = fig
-daxs['v'] = ax
+#fig = figure(5)
+#ax = fig.add_subplot(111)
+#x, y = zip(*sorted(diffd1.items(), key=lambda x: -x[1]))
+#ax.plot(y, '-o')
+#ax.set_xticks(arange(len(x)))
+#ax.set_xticklabels([z[3:] for z in x])
+#ax.set_title('RMSE of Fitted NNs vs. Gaussian, first derivative')
+#dfigs['d1'] = fig
+#daxs['d1'] = ax
 
-fig = figure(5)
-ax = fig.add_subplot(111)
-x, y = zip(*sorted(diffd1.items(), key=lambda x: -x[1]))
-ax.plot(y, '-o')
-ax.set_xticks(arange(len(x)))
-ax.set_xticklabels([z[3:] for z in x])
-ax.set_title('RMSE of Fitted NNs vs. Gaussian, first derivative')
-dfigs['d1'] = fig
-daxs['d1'] = ax
+#fig = figure(6)
+#ax = fig.add_subplot(111)
+#x, y = zip(*sorted(diffd2.items(), key=lambda x: -x[1]))
+#ax.plot(y, '-o')
+#ax.set_xticks(arange(len(x)))
+#ax.set_xticklabels([z[3:] for z in x])
+#ax.set_title('RMSE of Fitted NNs vs. Gaussian, second derivative')
+#dfigs['d2'] = fig
+#daxs['d2'] = ax
 
-fig = figure(6)
-ax = fig.add_subplot(111)
-x, y = zip(*sorted(diffd2.items(), key=lambda x: -x[1]))
-ax.plot(y, '-o')
-ax.set_xticks(arange(len(x)))
-ax.set_xticklabels([z[3:] for z in x])
-ax.set_title('RMSE of Fitted NNs vs. Gaussian, second derivative')
-dfigs['d2'] = fig
-daxs['d2'] = ax
-
-for key in daxs:
-    daxs[key].set_ylabel('RMSE')
+#for key in daxs:
+#    daxs[key].set_ylabel('RMSE')
 
 
-for key in dfigs:
-    dfigs[key].savefig('diff_'+key+'.pdf')
-
-'''
+#for key in dfigs:
+#    dfigs[key].savefig('diff_'+key+'.pdf')
 
 #for key in figs:
 #    figs[key].savefig('comp_'+key+'.pdf')

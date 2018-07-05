@@ -29,6 +29,14 @@ int main() {
     cout << "Done." << endl;
     cin.ignore();
 
+    cout << "Now we assign all betas to variational parameter indices and store it into a new file 'vpar_ffnn.txt'." << endl;
+    //NON I/O CODE
+    ffnn->assignVariationalParameters();
+    ffnn->storeOnFile("vpar_ffnn.txt");
+    //
+    cout << "Done." << endl;
+    cin.ignore();
+
     cout << "We may also choose to store the FFNN without beta weights into 'nobetas_ffnn.txt'. " << endl;
     //NON I/O CODE
     ffnn->storeOnFile("nobetas_ffnn.txt", false);

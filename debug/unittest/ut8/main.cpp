@@ -16,7 +16,7 @@ using namespace nn_trainer_gsl_details;
 
 void validateJacobian(training_workspace &tws, const double &TINY = 0.00001, const bool &verbose = false)
 {
-    const int npar = tws.ffnn->getNBeta(), ndata = tws.ntraining;
+    const int npar = tws.ffnn->getNVariationalParameters(), ndata = tws.ntraining;
     const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust, *T_fd = gsl_multifit_nlinear_trust;
     gsl_multifit_nlinear_fdf fdf, fdf_fd;
     gsl_multifit_nlinear_workspace *w, *w_fd;
@@ -29,7 +29,7 @@ void validateJacobian(training_workspace &tws, const double &TINY = 0.00001, con
     const bool flag_r = tws.flag_r;
     int nresi = 0;
 
-    for (int i=0; i<npar; ++i) fit[i] = tws.ffnn->getBeta(i);
+    for (int i=0; i<npar; ++i) fit[i] = tws.ffnn->getVariationalParameter(i);
 
     // configure fdf object
 
@@ -101,7 +101,7 @@ int main(){
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhid, yndim+1);
     ffnn->connectFFNN();
-    ffnn->addFirstDerivativeSubstrate();
+    ffnn->assignVariationalParameters();
     ffnn->addSecondDerivativeSubstrate();
 
     double fixed_beta[7] = {0.6, -1.1, 0.4, -0.55, 0.45, 1.2, -0.75}; // just some betas
@@ -160,8 +160,6 @@ int main(){
     tws.copyDatConf(tdata, tconfig);
     tws.ffnn = ffnn;
     tws.ffnn_vderiv = new FeedForwardNeuralNetwork(ffnn);
-    tws.ffnn_vderiv->addVariationalFirstDerivativeSubstrate();
-    tws.ffnn_vderiv->addCrossFirstDerivativeSubstrate();
     tws.ffnn_vderiv->addCrossSecondDerivativeSubstrate();
 
     // validate Jacobians

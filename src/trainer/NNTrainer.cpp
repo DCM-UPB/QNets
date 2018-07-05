@@ -48,7 +48,10 @@ FeedForwardNeuralNetwork * NNTrainer::_createVDerivFFNN(FeedForwardNeuralNetwork
 
 void NNTrainer::_configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool flag_vderiv)
 {
-    if (!ffnn->isConnected()) ffnn->connectFFNN();
+    if (!ffnn->isConnected()) { // if the user didn't connect, we default for him
+        ffnn->connectFFNN();
+        ffnn->assignVariationalParameters();
+    }
     const bool flag_cd1 = _flag_d1 || _flag_d2; // second cross derivative also needs first one
     if (flag_vderiv) ffnn->addSubstrates(flag_cd1, _flag_d2, true, flag_cd1, _flag_d2);
     else ffnn->addSubstrates(flag_cd1, _flag_d2, false, false, false);
@@ -57,7 +60,6 @@ void NNTrainer::_configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool
 
 void NNTrainer::setNormalization(FeedForwardNeuralNetwork * const ffnn)
 {
-    using namespace std;
     // input side
     for (int i=0; i<_tdata.xndim; ++i) {
         double mu = computeMu(_tdata.x, _tdata.ndata, i);
@@ -78,10 +80,10 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
     //
     // Basic form is sqrt(1/N sum (f(x) - y)^2), but inside the sqrt additional terms may be added
     //
-    const int nbeta = ffnn->getNBeta();
+    const int npar = ffnn->getNVariationalParameters();
     const int offset = _flag_test ? _tdata.ntraining + _tdata.nvalidation : 0; // if no testing data, we fall back to the full training + vali set
     const double scale = _flag_test ? 1./(_tdata.ndata - offset) : 1./(_tdata.ntraining + _tdata.nvalidation);
-    const double lambda_r_fac = _tconfig.lambda_r * _tconfig.lambda_r / nbeta;
+    const double lambda_r_fac = _tconfig.lambda_r * _tconfig.lambda_r / npar;
     const double lambda_d1_fac = scale*_tconfig.lambda_d1 * _tconfig.lambda_d1 / _tdata.xndim;
     const double lambda_d2_fac = scale*_tconfig.lambda_d2 * _tconfig.lambda_d2 / _tdata.xndim;
 
@@ -90,7 +92,7 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
 
     if (_flag_r && flag_r) {
         // add regularization residual from NN betas
-        for (int i=0; i<nbeta; ++i){
+        for (int i=0; i<npar; ++i){
             resi += lambda_r_fac * pow(ffnn->getBeta(i), 2);
         }
     }
@@ -115,7 +117,7 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
 
 void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit, double * bestfit_err, const int &nfits, const double &resi_target, const int &verbose, const bool &flag_smart_beta)
 {
-    int npar = ffnn->getNBeta();
+    int npar = ffnn->getNVariationalParameters();
     double fit[npar], err[npar];
     double bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
 
@@ -128,12 +130,9 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
         // initial parameters
         if (flag_smart_beta) smart_beta::generateSmartBeta(ffnn);
         else ffnn->randomizeBetas();
-        for (int i = 0; i<npar; ++i) {
-            fit[i] = ffnn->getBeta(i);
-        }
 
         findFit(ffnn, fit, err, verbose); // try new fit
-        ffnn->setBeta(fit); // make sure ffnn is set to fit betas
+        ffnn->setVariationalParameter(fit); // make sure ffnn is set to fit betas
 
         double resi_full = computeResidual(ffnn, true, true);
         double resi_noreg = computeResidual(ffnn, false, true);
@@ -173,12 +172,12 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     }
 
     // set ffnn to bestfit betas
-    ffnn->setBeta(bestfit);
+    ffnn->setVariationalParameter(bestfit);
 }
 
 void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits, const double &resi_target, const int &verbose, const bool &flag_smart_beta)
 {
-    double bestfit[ffnn->getNBeta()], bestfit_err[ffnn->getNBeta()];
+    double bestfit[ffnn->getNVariationalParameters()], bestfit_err[ffnn->getNVariationalParameters()];
     bestFit(ffnn, bestfit, bestfit_err, nfits, resi_target, verbose, flag_smart_beta);
 }
 

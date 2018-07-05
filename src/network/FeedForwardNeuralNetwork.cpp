@@ -178,6 +178,29 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 
 // --- Variational Parameters
 
+void FeedForwardNeuralNetwork::_updateNVP()
+{
+    // count the total number of variational parameters
+    _nvp=0;
+    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
+        {
+            _nvp += _L[i]->getNVariationalParameters();
+        }
+}
+
+
+void FeedForwardNeuralNetwork::assignVariationalParameters(const int &starting_layer_index)
+{
+    // make betas variational parameters, starting from starting_layer
+    int id_vp=0;
+    for (std::vector<NetworkLayer *>::size_type i=starting_layer_index; i<_L.size(); ++i)
+        {
+            id_vp = _L[i]->setVariationalParametersID(id_vp);
+        }
+    _updateNVP();
+}
+
+
 double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp)
 {
     using namespace std;
@@ -243,7 +266,7 @@ void FeedForwardNeuralNetwork::setVariationalParameter(const double * vp)
     for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
         int idmax = _L[i]->getMaxVariationalParameterIndex();
         if (ivp<=idmax) {
-            for ( ; ivp<idmax; ++ivp) {
+            for ( ; ivp<=idmax; ++ivp) {
                 bool status = _L[i]->setVariationalParameter(ivp, vp[ivp]);
                 if (!status) {
                     cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
@@ -461,37 +484,15 @@ void FeedForwardNeuralNetwork::setInput(const int &i, const double &in)
 // --- Substrates
 
 
-void FeedForwardNeuralNetwork::addLastHiddenLayerCrossSecondDerivativeSubstrate()
-{
-    using namespace std;
-
-    if (_flag_c2d) return; // nothing to do
-
-    // cross second derivatives require first, second, and variational first derivatives
-    if (!_flag_1d || !_flag_v1d || !_flag_c1d || !_flag_2d){
-        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, CrossFirstDerivative and SecondDerivative" );
-    }
-
-    // set the substrate in the units
-    for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
-        {
-            _L_nn[i]->addCrossSecondDerivativeSubstrate(getNInput(), _nvp);
-        }
-
-    _flag_c2d = true;
-}
-
-
 void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
 {
     using namespace std;
 
     if (_flag_c2d) return; // nothing to do
 
-    // cross second derivatives require first, second, and variational first derivatives
-    if (!_flag_1d || !_flag_v1d || !_flag_c1d || !_flag_2d){
-        throw std::runtime_error( "CrossSecondDerivative requires FirstDerivative, VariationalFirstDerivative, CrossFirstDerivative and SecondDerivative" );
-    }
+    // add dependencies (which themselves add all other required substrates)
+    if (!_flag_2d) addSecondDerivativeSubstrate();
+    if (!_flag_c1d) addCrossFirstDerivativeSubstrate();
 
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i){
@@ -502,37 +503,15 @@ void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
 }
 
 
-
-void FeedForwardNeuralNetwork::addLastHiddenLayerCrossFirstDerivativeSubstrate()
-{
-    using namespace std;
-
-    if (_flag_c1d) return; // nothing to do
-
-    // cross first derivatives require first and variational first derivatives
-    if (!_flag_1d || !_flag_v1d){
-        throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
-    }
-
-    // set the substrate in the units
-    for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i){
-            _L_nn[i]->addCrossFirstDerivativeSubstrate(getNInput(), _nvp);
-        }
-
-    _flag_c1d = true;
-}
-
-
 void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 {
     using namespace std;
 
     if (_flag_c1d) return; // nothing to do
 
-    // cross first derivatives require first and variational first derivatives
-    if (!_flag_1d || !_flag_v1d){
-        throw std::runtime_error( "CrossFirstDerivative requires FirstDerivative and VariationalFirstDerivative" );
-    }
+    // add dependencies
+    if (!_flag_1d) addFirstDerivativeSubstrate();
+    if (!_flag_v1d) addVariationalFirstDerivativeSubstrate();
 
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
@@ -544,51 +523,9 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 }
 
 
-void FeedForwardNeuralNetwork::addLastHiddenLayerVariationalFirstDerivativeSubstrate()
-{
-    if (_flag_v1d) return; // nothing to do
-
-    // set the id of the variational parameters for all the feeders
-    int id_vp=0;
-    for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
-        {
-            id_vp = _L_nn[i]->setVariationalParametersID(id_vp);
-        }
-
-    // count the total number of variational parameters
-    _nvp=0;
-    for (std::vector<NNLayer *>::size_type i=_L_nn.size()-2; i<_L_nn.size(); ++i)
-        {
-            _nvp += _L_nn[i]->getNVariationalParameters();
-        }
-
-    // set the substrate in the units
-    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
-        {
-            _L[i]->addVariationalFirstDerivativeSubstrate(_nvp);
-        }
-
-    _flag_v1d = true;
-}
-
-
 void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 {
     if (_flag_v1d) return; // nothing to do
-
-    // set the id of the variational parameters for all the feeders
-    int id_vp=0;
-    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
-        {
-            id_vp = _L[i]->setVariationalParametersID(id_vp);
-        }
-
-    // count the total number of variational parameters
-    _nvp=0;
-    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
-        {
-            _nvp += _L[i]->getNVariationalParameters();
-        }
 
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
@@ -603,6 +540,7 @@ void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 void FeedForwardNeuralNetwork::addSecondDerivativeSubstrate()
 {
     if (_flag_2d) return; // nothing to do
+    if (!_flag_1d) addFirstDerivativeSubstrate();
 
     // add the second derivative substrate to all the layers
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
@@ -648,12 +586,6 @@ void FeedForwardNeuralNetwork::connectFFNN()
             _L_fed[i]->connectOnTopOfLayer(_L_fed[i-1]);
         }
     _flag_connected = true;
-}
-
-
-void FeedForwardNeuralNetwork::connectAndAddSubstrates(const bool flag_d1, const bool flag_d2, const bool flag_vd1, const bool flag_c1d, const bool flag_c2d){
-    connectFFNN();
-    addSubstrates(flag_d1, flag_d2, flag_vd1, flag_c1d, flag_c2d);
 }
 
 
@@ -877,7 +809,10 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     if (connected) connectFFNN();
 
     // set betas and all other params/actf
-    for (int i=0; i<getNLayers(); ++i) getLayer(i)->setMemberParams(layerMemberCodes[i]);
+    for (int i=0; i<getNLayers(); ++i) {
+        getLayer(i)->setMemberParams(layerMemberCodes[i]);
+    }
+    _updateNVP();
 
     // read and set the substrates
     bool flag_1d = 0, flag_2d = 0, flag_v1d = 0, flag_c1d = 0, flag_c2d = 0;
@@ -904,16 +839,17 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ff
      // read and set the substrates
     if (ffnn->isConnected()) connectFFNN();
 
+    // now copy the parameter tree (incl. betas) for all layers
+    for (int i=0; i<ffnn->getNLayers(); ++i) {
+        _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
+    }
+    _updateNVP();
+
     if (ffnn->hasFirstDerivativeSubstrate()) addFirstDerivativeSubstrate();
     if (ffnn->hasSecondDerivativeSubstrate()) addSecondDerivativeSubstrate();
     if (ffnn->hasVariationalFirstDerivativeSubstrate()) addVariationalFirstDerivativeSubstrate();
     if (ffnn->hasCrossFirstDerivativeSubstrate()) addCrossFirstDerivativeSubstrate();
     if (ffnn->hasCrossSecondDerivativeSubstrate()) addCrossSecondDerivativeSubstrate();
-
-    // now copy the parameter tree (incl. betas) for all layers
-    for (int i=0; i<ffnn->getNLayers(); ++i) {
-        _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
-    }
 }
 
 

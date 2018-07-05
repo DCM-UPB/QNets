@@ -20,7 +20,7 @@ private:
     void _registerLayer(NetworkLayer * newLayer, const int &indexFromBack = 0); // register layers to correct vectors, position controlled by indexFromBack
     void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0); // creates and registers a new layer according to idCode and nunits
     void _addNewLayer(const std::string &idCode, const std::string &params="", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
-
+    void _updateNVP(); // internal method to update _nvp member, call it after you changed/created variational parameter assignment
 protected:
     std::vector<NetworkLayer *> _L; // contains all kinds of layers
     std::vector<FedNetworkLayer *> _L_fed; // contains layers with feeder
@@ -86,7 +86,9 @@ public:
     void setBeta(const double * beta);
     void randomizeBetas(); // has to be changed maybe if we add beta that are not "normal" weights
 
-    // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters), which exist only after that the variational substrate has been set
+    // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters),
+    //     which exist only after that they are assigned to actual parameters in the network (e.g. betas)
+    void assignVariationalParameters(const int &starting_layer_index = 0); // make betas variational parameters, starting from starting_layer
     int getNVariationalParameters(){return _nvp;}
     double getVariationalParameter(const int &ivp);
     void getVariationalParameter(double * vp);
@@ -98,16 +100,12 @@ public:
     void addFirstDerivativeSubstrate();  // coordinates first derivatives
     void addSecondDerivativeSubstrate();  // coordinates second derivatives
 
-    // Variational Derivative: either this ...
+    // Substrate for the variational derivative d/dbeta:
     void addVariationalFirstDerivativeSubstrate();  // variational first derivatives
-    // ... or this
-    void addLastHiddenLayerVariationalFirstDerivativeSubstrate();  // variational first derivative for and from the last hidden layer
 
     // Substrate for the cross derivatives d/dx d/dbeta
     void addCrossFirstDerivativeSubstrate();  // cross first derivatives
-    void addLastHiddenLayerCrossFirstDerivativeSubstrate();
     void addCrossSecondDerivativeSubstrate();  // cross second derivatives
-    void addLastHiddenLayerCrossSecondDerivativeSubstrate();
 
     // shortcut for (connecting and) adding substrates
     void addSubstrates(const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_vd1 = false, const bool flag_c1d = false, const bool flag_c2d = false);

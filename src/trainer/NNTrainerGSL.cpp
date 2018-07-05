@@ -47,21 +47,21 @@ namespace nn_trainer_gsl_details {
     // --- Helper functions
 
     // set new NN betas
-    int setBetas(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * const betas)
+    int setVP(FeedForwardNeuralNetwork * const ffnn, const gsl_vector * const betas)
     {
-        const int nbeta = ffnn->getNBeta();
-        for (int i=0; i<nbeta; ++i){
-            ffnn->setBeta(i, gsl_vector_get(betas, i));
+        const int npar = ffnn->getNVariationalParameters();
+        for (int i=0; i<npar; ++i){
+            ffnn->setVariationalParameter(i, gsl_vector_get(betas, i));
         }
-        return nbeta;
+        return npar;
     };
 
     // counts total residual vector size
-    // set nbeta or xndim to >0 to count regularization and derivative residual terms, respectively
+    // set npar or xndim to >0 to count regularization and derivative residual terms, respectively
     // set nderiv = 1 if only one of both deriv residuals should be counted
-    int calcNData(const int &nbase, const int &yndim, const int &nbeta, const int &xndim, const int &nderiv)
+    int calcNData(const int &nbase, const int &yndim, const int &npar, const int &xndim, const int &nderiv)
     {
-        return (nbase > 0) ? nbase*yndim + nbeta + nderiv * nbase*xndim*yndim : 0;
+        return (nbase > 0) ? nbase*yndim + npar + nderiv * nbase*xndim*yndim : 0;
     };
 
     // store (root) square sum of residual vector f in chisq (chi)
@@ -109,13 +109,13 @@ namespace nn_trainer_gsl_details {
         const bool flag_vali = tws->nvalidation>0;
         FeedForwardNeuralNetwork * ffnn = tws->ffnn;
 
-        const int nbeta = ffnn->getNBeta();
-        const double lambda_d1_red = tws->lambda_d1/sqrt(tws->xndim), lambda_d2_red = tws->lambda_d2/sqrt(tws->xndim), lambda_r_red = tws->lambda_r / sqrt(nbeta);
+        const int npar = ffnn->getNVariationalParameters();
+        const double lambda_d1_red = tws->lambda_d1/sqrt(tws->xndim), lambda_d2_red = tws->lambda_d2/sqrt(tws->xndim), lambda_r_red = tws->lambda_r / sqrt(npar);
 
         gsl_vector * fnow = f;
         double scale_now = 1./sqrt(tws->ntraining);
 
-        setBetas(ffnn, betas);
+        setVP(ffnn, betas);
         if (flag_vali) gsl_vector_set_zero(tws->fvali); // set fvali to zero
 
         int idx = 0;
@@ -147,7 +147,7 @@ namespace nn_trainer_gsl_details {
         if (flag_r) { //append regularization residual
             int offr_train = calcNData(tws->ntraining, tws->yndim, 0, flag_d ? tws->xndim : 0, 2);
             int offr_vali = calcNData(tws->nvalidation, tws->yndim, 0, flag_d ? tws->xndim : 0, 2);
-            for (int ib=0; ib<nbeta; ++ib) {
+            for (int ib=0; ib<npar; ++ib) {
                 gsl_vector_set(f, offr_train + ib, lambda_r_red * gsl_vector_get(betas, ib));
                 if (flag_vali) gsl_vector_set(tws->fvali, offr_vali + ib, lambda_r_red * gsl_vector_get(betas, ib));
             }
@@ -160,10 +160,10 @@ namespace nn_trainer_gsl_details {
     {
         FeedForwardNeuralNetwork * ffnn = tws->ffnn_vderiv;
 
-        const int nbeta = ffnn->getNBeta();
-        const double scale = 1./sqrt(tws->ntraining), lambda_d1_red = scale*tws->lambda_d1/sqrt(tws->xndim), lambda_d2_red = scale*tws->lambda_d2/sqrt(tws->xndim), lambda_r_red = tws->lambda_r / sqrt(nbeta);
+        const int npar = ffnn->getNVariationalParameters();
+        const double scale = 1./sqrt(tws->ntraining), lambda_d1_red = scale*tws->lambda_d1/sqrt(tws->xndim), lambda_d2_red = scale*tws->lambda_d2/sqrt(tws->xndim), lambda_r_red = tws->lambda_r / sqrt(npar);
 
-        setBetas(ffnn, betas);
+        setVP(ffnn, betas);
 
         int idx = 0;
         for (int i=0; i<tws->ntraining; ++i) {
@@ -171,14 +171,14 @@ namespace nn_trainer_gsl_details {
             ffnn->FFPropagate();
 
             for (int j=0; j<tws->yndim; ++j) {
-                for (int ib=0; ib<nbeta; ++ib) gsl_matrix_set(J, idx, ib, scale * tws->w[i][j] * ffnn->getVariationalFirstDerivative(j, ib)); // the "pure" gradient
+                for (int ib=0; ib<npar; ++ib) gsl_matrix_set(J, idx, ib, scale * tws->w[i][j] * ffnn->getVariationalFirstDerivative(j, ib)); // the "pure" gradient
                 ++idx;
 
                 if (flag_d) { // derivative residual gradient
                     for (int k=0; k<tws->xndim; ++k) {
-                        for (int ib=0; ib<nbeta; ++ib) gsl_matrix_set(J, idx, ib, tws->flag_d1? tws->w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ib) : 0.0);
+                        for (int ib=0; ib<npar; ++ib) gsl_matrix_set(J, idx, ib, tws->flag_d1? tws->w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ib) : 0.0);
                         ++idx;
-                        for (int ib=0; ib<nbeta; ++ib) gsl_matrix_set(J, idx, ib, tws->flag_d2? tws->w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ib) : 0.0);
+                        for (int ib=0; ib<npar; ++ib) gsl_matrix_set(J, idx, ib, tws->flag_d2? tws->w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ib) : 0.0);
                         ++idx;
                     }
                 }
@@ -187,8 +187,8 @@ namespace nn_trainer_gsl_details {
 
         if (flag_r) {//append regularization gradient
             int offr = calcNData(tws->ntraining, tws->yndim, 0, flag_d ? tws->xndim : 0, 2);
-            for (int ib=0; ib<nbeta; ++ib) {
-                for (int ib2=0; ib2<nbeta; ++ib2) {
+            for (int ib=0; ib<npar; ++ib) {
+                for (int ib2=0; ib2<npar; ++ib2) {
                     gsl_matrix_set(J, offr+ib, ib2, 0.0);
                 }
                 gsl_matrix_set(J, offr+ib, ib, lambda_r_red);
@@ -314,7 +314,7 @@ namespace nn_trainer_gsl_details {
 
 void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const fit, double * const err, const int &verbose) {
     //   Fit NN ffnn with the following passed variables:
-    //   fit: holds the to be fitted variables, i.e. betas
+    //   fit: holds the to be fitted variables, (i.e. betas)
     //   err: holds the corresponding fit error
     //   verbose: print verbose output while fitting
     //
@@ -324,7 +324,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
 
     using namespace nn_trainer_gsl_details; // to use local workspace / functions above
 
-    int npar = ffnn->getNBeta(), ntrain = _tdata.ntraining, nvali = _tdata.nvalidation;
+    int npar = ffnn->getNVariationalParameters(), ntrain = _tdata.ntraining, nvali = _tdata.nvalidation;
     const gsl_multifit_nlinear_type *T_full = gsl_multifit_nlinear_trust, *T_noreg = gsl_multifit_nlinear_trust, *T_pure = gsl_multifit_nlinear_trust;
     gsl_multifit_nlinear_fdf fdf_full, fdf_noreg, fdf_pure;
     gsl_multifit_nlinear_workspace * w_full, * w_noreg, * w_pure;
@@ -337,6 +337,12 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     double resih, chisq, chi0, chi0_vali = 0.;
     double resi_full, resi_noreg, resi_pure;
     double resi_vali_full = 0., resi_vali_noreg = 0., resi_vali_pure = 0.;
+
+    // make sure the ffnn is configured
+    _configureFFNN(ffnn, false); // without vderiv substrates!
+
+    // set fit to initial betas
+    for (int i=0; i<npar; ++i) fit[i] = ffnn->getVariationalParameter(i);
 
     // configure training workspace
     training_workspace tws;
