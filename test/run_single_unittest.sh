@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ROOT_FOLDER=$(dirname $(dirname $(dirname $(pwd))))
+export ROOT_FOLDER=$(dirname $(dirname $(pwd)))
 source "${ROOT_FOLDER}/config.sh"
 
 rm -f exe

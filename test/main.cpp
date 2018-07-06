@@ -71,6 +71,7 @@ int main(){
 
     cout << "Connect the FFNN" << endl;
     ffnn->connectFFNN();
+    ffnn->assignVariationalParameters();
 
     ffnn->addFirstDerivativeSubstrate();
     cout << "Add the first derivative to the computations" << endl;

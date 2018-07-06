@@ -49,11 +49,9 @@ before_install:
 - if [[ "$USE_GCOV" == "TRUE" ]]; then pip install cpp-coveralls; fi;
 
 script:
-- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug && ./run.sh"; fi;
-- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/debug/unittest && ./run.sh"; fi;
-- if [[ "$USE_DOCKER" == "FALSE" ]]; then cd debug && ./run.sh; fi;
-- if [[ "$USE_DOCKER" == "FALSE" ]]; then cd unittest && ./run.sh && cd ../../; fi;
-- if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -r ./ -b ./ -e include -e debug -e benchmarks -e examples -e doc -e script -i src --gcov-options '\-lp'; fi;
+- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/test && ./run_all.sh"; fi;
+- if [[ "$USE_DOCKER" == "FALSE" ]]; then cd test && ./run_all.sh && cd ../; fi;
+- if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -r ./ -b ./ -e include -e test -e benchmark -e examples -e doc -e script -i src --gcov-options '\-lp'; fi;
 
 notifications:
   slack:

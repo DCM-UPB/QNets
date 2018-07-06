@@ -27,8 +27,8 @@ FLAG_TO_USE="${OPTFLAGS}"
 rm -f exe
 rm -f *.o
 
-#benchmarks/common path
-COM_PATH="${ROOT_FOLDER}/benchmarks/common/"
+#benchmark/common path
+COM_PATH="${ROOT_FOLDER}/benchmark/common/"
 
 echo ""
 echo ""

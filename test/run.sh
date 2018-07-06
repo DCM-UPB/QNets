@@ -11,7 +11,7 @@ export ROOT_FOLDER=$(dirname $(pwd))
 source ../config.sh
 cd ..
 ./build.sh coverage
-cd debug
+cd test
 echo "Rebuilt the library with the debugging flags"
 echo ""
 

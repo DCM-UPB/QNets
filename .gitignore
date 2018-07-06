@@ -61,25 +61,20 @@ DerivedData
 # -- project specific ignores --
 lib*
 config.sh
-*exe*
+**/exe
 vgcore* 
+*.o
+*.dSYM
+*.swp
+*.swo
 
-src/*.o
-src/*.dSYM
-src/*.swp
-src/*.swo
+test/*.txt
+test/ut*/run_single_unittest.sh
+test/ut*/*.txt
 
-debug/*.o
-debug/*.txt
-debug/unittest/*/*.o
-debug/unittest/*/run_single_unittest.sh
-debug/unittest/*/*.txt
-
-benchmarks/*/*.o
-benchmarks/*/benchmark_*.out
+benchmark/*/benchmark_*.out
 
 examples/*/a.out
-examples/*/*.o
 examples/*/*.txt
 examples/*/*/*.txt
 
