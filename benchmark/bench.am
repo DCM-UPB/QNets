@@ -1,0 +1,9 @@
+AM_CXXFLAGS += $(OPTFLAGS)
+AM_CPPFLAGS += -I../common
+
+if PROFILING
+  AM_CPPFLAGS += $(PERFFLAGS)
+endif
+
+bin_PROGRAMS = exe    
+exe_SOURCES = main.cpp

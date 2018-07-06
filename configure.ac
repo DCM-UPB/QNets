@@ -3,30 +3,28 @@
 
 AC_PREREQ([2.69])
 AC_INIT([DCM-FFNN], [0.3], [ithanil@mail.uni-paderborn.de])
-: ${CXXFLAGS=""}
-#AC_CONFIG_SRCDIR([include/InputUnit.hpp])
+: ${CXXFLAGS=""} # delete default optimization user flags
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
-LT_INIT
+LT_INIT # use libtool
 
-# Checks for programs.
-AC_PROG_CXX
-AC_PROG_CPP
-AC_PROG_LN_S
 
-# Checks for libraries.
+# --- Compiler flags
 
-# Checks for header files.
+AC_SUBST([OPTFLAGS], ["-O3 -flto"])
+AC_SUBST([DEBUGFLAGS], ["-g -O0"])
+AC_SUBST([COVCFLAGS], ["-fprofile-arcs -ftest-coverage"])
+AC_SUBST([PROFFLAGS], ["-DWITHGPERFTOOLS -lprofiler"])
+AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
 
-AC_CHECK_HEADERS([gsl/gsl_vector.h gsl/gsl_matrix.h gsl/gsl_blas.h gsl/gsl_multifit_nlinear.h])
+AC_SUBST([OMPLFLAGS], ["-lomp"])
+AC_SUBST([COVLFLAGS], ["-lgcov"])
 
-# Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
-AC_C_INLINE
-AC_TYPE_SIZE_T
+AC_SUBST([AM_CXXFLAGS], ["-fpic -Wall"])
+AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
 
-# Checks for library functions.
-AC_CHECK_FUNCS([pow sqrt])
+
+# --- Options
 
 # Add debug support
 AC_ARG_ENABLE(debug,
@@ -45,7 +43,7 @@ AM_COND_IF(DEBUG,
     AC_DEFINE(DEBUG, 0, [Define to 1 or higher if this is a debug build]))
 
 
-# Add debug support
+# Add coverage support (gcov)
 AC_ARG_ENABLE(coverage,
   AS_HELP_STRING(
     [--enable-coverage],
@@ -55,11 +53,80 @@ AC_ARG_ENABLE(coverage,
       no)  coverage=false ;;
       *)   AC_MSG_ERROR([bad value ${enableval} for --enable-coverage]) ;;
     esac],
-    [debug=false])
+    [coverage=false])
 AM_CONDITIONAL(COVERAGE, test x"$coverage" = x"true")
 AM_COND_IF(COVERAGE,
     AC_DEFINE(COVERAGE, 1, [Define to 0 if you don't need code coverage statistics.]),
     AC_DEFINE(COVERAGE, 0, [Define to 1 or higher if you want to generate code coverage statistics.]))
+
+
+# Add profiling support (gperftools)
+AC_ARG_ENABLE(profiling,
+  AS_HELP_STRING(
+    [--enable-profiling],
+    [enable profiling, default: no]),
+    [case "${enableval}" in
+      yes) profiling=true ;;
+      no)  profiling=false ;;
+      *)   AC_MSG_ERROR([bad value ${enableval} for --enable-profiling]) ;;
+    esac],
+    [profiling=false])
+AM_CONDITIONAL(PROFILING, test x"$profiling" = x"true")
+AM_COND_IF(PROFILING,
+    AC_DEFINE(PROFILING, 1, [Define to 0 if you don't need performance profiling.]),
+    AC_DEFINE(PROFILING, 0, [Define to 1 or higher if you want to generate performance profiles.]))
+
+
+# Add OpenMP support
+AC_ARG_ENABLE(openmp,
+  AS_HELP_STRING(
+    [--enable-openmp],
+    [enable openmp, default: no]),
+    [case "${enableval}" in
+      yes) openmp=true ;;
+      no)  openmp=false ;;
+      *)   AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
+    esac],
+    [openmp=false])
+AM_CONDITIONAL(OPENMP, test x"$openmp" = x"true")
+AM_COND_IF(OPENMP,
+    AC_DEFINE(OPENMP, 1, [Define to 0 if you don't want to use threading via OpenMP.]),
+    AC_DEFINE(OPENMP, 0, [Define to 1 or higher if you want to enable OpenMP threading.]))
+
+
+# --- LDFLAGS
+
+flags="-L$(pwd)/bin -lffnn -lgsl -lgslcblas"
+AM_COND_IF(COVERAGE,                               
+  flags+=" -lgcov")
+AM_COND_IF(OPENMP,
+  flags+=" -lomp")
+
+AC_SUBST([AM_LDFLAGS], [$flags])
+
+
+# --- Checks
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CPP
+AC_PROG_LN_S
+
+# Checks for libraries.
+
+# Checks for header files.
+
+AC_CHECK_HEADERS([gsl/gsl_vector.h gsl/gsl_matrix.h gsl/gsl_blas.h gsl/gsl_multifit_nlinear.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_CHECK_FUNCS([abs pow sqrt exp sin cos])
+
+
 
 AC_CONFIG_FILES([Makefile
                  benchmark/Makefile

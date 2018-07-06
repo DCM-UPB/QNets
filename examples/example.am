@@ -1,0 +1,4 @@
+AM_CXXFLAGS += $(OPTFLAGS)
+
+bin_PROGRAMS = exe
+exe_SOURCES = main.cpp
