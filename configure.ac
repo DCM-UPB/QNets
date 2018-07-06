@@ -20,7 +20,7 @@ AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
 AC_SUBST([OMPLFLAGS], ["-lomp"])
 AC_SUBST([COVLFLAGS], ["-lgcov"])
 
-AC_SUBST([AM_CXXFLAGS], ["-fpic -Wall"])
+AC_SUBST([AM_CXXFLAGS], ["-std=c++11 -fpic -Wall"])
 AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
 
 
@@ -96,7 +96,7 @@ AM_COND_IF(OPENMP,
 
 # --- LDFLAGS
 
-flags="-L$(pwd)/bin -lffnn -lgsl -lgslcblas"
+flags="-L$(pwd)/lib -lffnn -lgsl -lgslcblas"
 AM_COND_IF(COVERAGE,                               
   flags+=" -lgcov")
 AM_COND_IF(OPENMP,
@@ -132,7 +132,7 @@ AC_CONFIG_FILES([Makefile
                  benchmark/Makefile
                  benchmark/bench_actfs_derivs/Makefile
                  benchmark/bench_actfs_ffprop/Makefile
-                 bin/Makefile
+                 lib/Makefile
                  doc/Makefile
                  examples/Makefile
                  examples/ex1/Makefile

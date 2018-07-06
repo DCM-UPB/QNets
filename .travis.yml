@@ -15,19 +15,19 @@ matrix:
 #          - libgsl0-dev
 #          - valgrind
 #    env:
-#      - MYCC="g++-7"
+#      - MYCXX="g++-7"
 #      - USE_DOCKER="FALSE"
 
   - os: linux // arch linux docker
     env:
-    - MYCC="g++"
+    - MYCXX="g++"
     - USE_DOCKER="TRUE"
     - USE_OPENMP="FALSE"
     - USE_GCOV="FALSE"
 
   - os: linux // with enabled openmp
     env:
-    - MYCC="g++"
+    - MYCXX="g++"
     - USE_DOCKER="TRUE"
     - USE_OPENMP="TRUE"
     - USE_GCOV="FALSE"
@@ -35,31 +35,42 @@ matrix:
   - os: osx
     osx_image: xcode8
     env:
-    - MYCC="g++"
     - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
+    - MYCXX="g++"
     - USE_DOCKER="FALSE"
     - USE_OPENMP="FALSE"
     - USE_GCOV="TRUE"
 
 before_install:
-- cp script/config_template.sh config.sh && sed -i -e "s/g++/${MYCC}/g" config.sh
-- if [[ "$USE_OPENMP" == "TRUE" ]]; then sed -i -e "s/FLAGS=\"/FLAGS=\"-fopenmp -DOPENMP /g" config.sh; fi;
-- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker pull nnvmc/base; fi;
-- if [[ "$USE_DOCKER" == "FALSE" ]]; then eval "${MATRIX_EVAL}" && ${MYCC} -v; fi;
-- if [[ "$USE_GCOV" == "TRUE" ]]; then pip install cpp-coveralls; fi;
+- |
+  if [[ "$USE_DOCKER" == "TRUE" ]]; then
+  docker pull nnvmc/base;
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  docker run -it -e MYCXX -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure CXX=${MYCXX} --enable-debug --enable-openmp";
+  else
+  docker run -it -e MYCXX -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure CXX=${MYCXX} --enable-debug";
+  fi;
+  else
+  eval "${MATRIX_EVAL}" && ${CXX} -v;
+  ./autogen.sh
+  if [[ "$USE_GCOV" == "TRUE" ]]; then
+  ./configure CXX=${MYCXX} --enable-debug --enable-coverage;
+  pip install cpp-coveralls;
+  else
+  ./configure --enable-debug;
+  fi;
+  fi;
 
 script:
-- if [[ "$USE_DOCKER" == "TRUE" ]]; then docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/test && ./run_all.sh"; fi;
-- if [[ "$USE_DOCKER" == "FALSE" ]]; then cd test && ./run_all.sh && cd ../; fi;
-- if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -r ./ -b ./ -e include -e test -e benchmark -e examples -e doc -e script -i src --gcov-options '\-lp'; fi;
+- |
+  if [[ "$USE_DOCKER" == "TRUE" ]]; then
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && make check || exit 1";
+  else
+  make check || exit 1;
+  if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -r ./ -b ./ -e include -e lib -e test -e benchmark -e examples -e doc -e script -i src --gcov-options '\-lp'; fi;
+  fi;
 
 notifications:
-  slack:
-    on_success: always
-    on_failure: always
-    rooms:
-      - secure: kGus3xRzJdyQE0xA6y7kXBXstHfKzdCRwgxAaFYYtkh33+W2Wh/o2TZp1eQmEjPyv6mSy7i5uSrTtD7LRlFsAlbysjwTK3gUweWcBW7uC73BE7k5CsqoQlL3XuSSAX0qRN+LHJM2i7Gmbv1Mt4rFOFFB2bqtMXm61X3/6RqkANtVXW9CUx6023njSFaS2uMhVICo+IFgQ6UNbHXkJ3H0WLmV6WMGcYYss6dwl0BOkwwiVku1F5zApYiZQKuYwJrV5kOdA13mHQTwIkKhHMn7nue+RkS9opx5X2PBsJOzDOIVRRwHjPuXLmTP1KaKkRiLR6EIOu1ZTW0+ozDlzkGZDK9x/EOWgpCfLNNPOdQEzuzJLykH4oj59n+dfFWIXVXIW3/6RJydWY/lBWRnX5Q+cDh1daU7xGyihJccarBaxbGfQ6/fQquZbE2ZfR6/RD0Rtx8hICNNeCXFtjLAiZSyYCt3NJW6D6qzeLIUGjGLdeW6JMh9LAu5IvytxVvyR0dupLnpxyR9zFHrhEU9PR3AMRau5GTD4VXv3uDdNMf69CKujitAtsQVSu7/2XrEET/snqnEfyWc84hmX5dDfqjh1Ysq9ng/NWIb7P2GXJu2wi9sKItpuiq+yugGul97hgvtDUvz8cIEs8G9trfcNWEFRLUkYb4u75d3pAYX4rsjOS0=
-
   email:
     on_success: change
     on_failure: change

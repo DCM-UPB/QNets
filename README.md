@@ -16,13 +16,45 @@ In `examples/` there are several examples.
 
 # Build the library
 
-Insert the system parameters in a file named `config.sh` in the root folder (use `script/config_template.sh` as template) and then simply execute the command
+Make sure you have a reasonably recent development version of the GSL library installed on your system. Furthermore, we rely on the Autotools build system and libtool.
 
-   `./build.sh`
+If you have the prerequisites on your system, you have to setup the build environment by using the following script in the top level directory:
+
+   `./autogen.sh`
+
+Now you want to configure the build process for your platform by invoking:
+
+   `./configure`
+
+Finally, you are ready to compile all the code files in our repository together, by:
+
+   `make` or `make -jN`
+
+where N is the number of parallel threads used by make. As long as you changed, but didn't remove or add source files, it is sufficient to only run `make` again to rebuild.
+
+If you however removed old or added new code under src, you need to first update the source file lists and include links. Do so by invoking from root folder:
+
+   `script/update_file_lists.sh`
+
+NOTE: All the subdirectories of test, benchmark and examples support calling `make` inside them to recompile local changes.
+
+
+
+# Build options
+
+You may enable special compiler flags by using one or more of the following options after `configure`:
+
+   `--enable-debug` : Enables flags (like \-g and \-O0) suitable for debugging
+
+   `--enable-coverage` : Enables flags to generate test coverage reports via gcov
+
+   `--enable-profiling` : Enables flags to generate performance profiles for benchmarks
+
+
 
 
 ## Multi-threading: OpenMP
 
 This library supports multi-threading computation with a shared memory paradigm, thanks to OpenMP.
 
-To activate this feature add the flag `-DOPENMP -fopenmp` to `OPTFLAGS` in the `config.sh` file and recompile the library.
+To activate this feature use `--enable-openmp` at configuration. Currently it is not recommended to use this for most cases.

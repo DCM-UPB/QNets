@@ -1,5 +1,9 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = bin test benchmark examples
-#SUBDIRS = bin test benchmark examples doc
+SUBDIRS = lib test benchmark examples
+#SUBDIRS = lib test benchmark examples doc
+
+benchmark:
+	cd benchmark && make benchmark && cd ..
+.PHONY: benchmark

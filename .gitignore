@@ -62,7 +62,9 @@ DerivedData
 
 Makefile
 Makefile.in
+.libs
 .dirstamp
+test-suite.log
 /ar-lib
 /mdate-sh
 /py-compile
@@ -95,6 +97,7 @@ autom4te.cache
 # --- Files added by autoreconf -i
 
 /ltmain.sh
+libtool
 COPYING
 INSTALL
 
@@ -111,8 +114,6 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 
 # -- project specific ignores --
-lib*
-config.sh
 exe
 vgcore* 
 *.o
@@ -121,6 +122,10 @@ vgcore*
 *.swo
 *.gcno
 *.lo
+*.la
+*.gcda
+*.log
+*.trs
 
 test/*.txt
 test/ut*/run_single_unittest.sh
