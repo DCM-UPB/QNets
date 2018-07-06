@@ -1,4 +1,6 @@
-AM_CXXFLAGS += $(DEBUGFLAGS)
+if !DEBUG # then we want to add debug flags manually
+  AM_CXXFLAGS += $(DEBUGFLAGS)
+endif
 
 bin_PROGRAMS = exe
 exe_SOURCES = main.cpp

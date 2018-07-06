@@ -51,11 +51,11 @@ before_install:
   docker run -it -e MYCXX -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure CXX=${MYCXX} --enable-debug";
   fi;
   else
-  eval "${MATRIX_EVAL}" && ${CXX} -v;
+  eval "${MATRIX_EVAL}" && ${MYCXX} -v;
   ./autogen.sh
   if [[ "$USE_GCOV" == "TRUE" ]]; then
-  ./configure CXX=${MYCXX} --enable-debug --enable-coverage;
   pip install cpp-coveralls;
+  ./configure CXX=${MYCXX} --enable-debug --enable-coverage;
   else
   ./configure --enable-debug;
   fi;

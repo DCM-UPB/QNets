@@ -1,11 +1,13 @@
-if DEBUG
-  AM_CXXFLAGS += $(DEBUGFLAGS)
-else
-  AM_CXXFLAGS += $(OPTFLAGS)
-endif
+#if !DEBUG
+#  if !COVERAGE
+#  AM_CXXFLAGS += $(OPTFLAGS)
+#  endif
+#endif
 
 if COVERAGE
-  AM_CPPFLAGS += $(COVCFLAGS)
+  include $(top_srcdir)/aminclude_static.am
+  AM_CPPFLAGS += $(CODE_COVERAGE_CPPFLAGS)
+  AM_CXXFLAGS += $(CODE_COVERAGE_CXXFLAGS)
 endif
 
 if PROFILING

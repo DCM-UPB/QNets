@@ -1,4 +1,6 @@
-AM_CXXFLAGS += $(OPTFLAGS)
+if !DEBUG
+  AM_CXXFLAGS += $(OPTFLAGS)
+endif
 
 bin_PROGRAMS = exe
 exe_SOURCES = main.cpp

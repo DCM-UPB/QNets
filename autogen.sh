@@ -1,1 +1,1 @@
-autoreconf -i || exit 1
+autoreconf -fi || exit 1

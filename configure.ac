@@ -6,55 +6,25 @@ AC_INIT([DCM-FFNN], [0.3], [ithanil@mail.uni-paderborn.de])
 : ${CXXFLAGS=""} # delete default optimization user flags
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
-LT_INIT # use libtool
-
-
-# --- Compiler flags
-
-AC_SUBST([OPTFLAGS], ["-O3 -flto"])
-AC_SUBST([DEBUGFLAGS], ["-g -O0"])
-AC_SUBST([COVCFLAGS], ["-fprofile-arcs -ftest-coverage"])
-AC_SUBST([PROFFLAGS], ["-DWITHGPERFTOOLS -lprofiler"])
-AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
-
-AC_SUBST([OMPLFLAGS], ["-lomp"])
-AC_SUBST([COVLFLAGS], ["-lgcov"])
-
-AC_SUBST([AM_CXXFLAGS], ["-std=c++11 -fpic -Wall"])
-AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
+AC_LANG([C++])
 
 
 # --- Options
+#m4_pattern_allow([AC_MSG_ERROR])
 
 # Add debug support
-AC_ARG_ENABLE(debug,
-  AS_HELP_STRING(
-    [--enable-debug],
-    [enable debugging, default: no]),
-    [case "${enableval}" in
-      yes) debug=true ;;
-      no)  debug=false ;;
-      *)   AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
-    esac],
-    [debug=false])
-AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
+m4_include([m4/ax_check_enable_debug.m4])
+AX_CHECK_ENABLE_DEBUG()
+AM_CONDITIONAL(DEBUG, test x"$ax_enable_debug" = x"yes")
 AM_COND_IF(DEBUG,
     AC_DEFINE(DEBUG, 1, [Define to 0 if this is a release build]),
     AC_DEFINE(DEBUG, 0, [Define to 1 or higher if this is a debug build]))
 
 
 # Add coverage support (gcov)
-AC_ARG_ENABLE(coverage,
-  AS_HELP_STRING(
-    [--enable-coverage],
-    [enable coverage, default: no]),
-    [case "${enableval}" in
-      yes) coverage=true ;;
-      no)  coverage=false ;;
-      *)   AC_MSG_ERROR([bad value ${enableval} for --enable-coverage]) ;;
-    esac],
-    [coverage=false])
-AM_CONDITIONAL(COVERAGE, test x"$coverage" = x"true")
+#m4_include([m4/ax_code_coverage.m4])
+#AX_CODE_COVERAGE()
+AM_CONDITIONAL(COVERAGE, test x"$enable_code_coverage" = x"true")
 AM_COND_IF(COVERAGE,
     AC_DEFINE(COVERAGE, 1, [Define to 0 if you don't need code coverage statistics.]),
     AC_DEFINE(COVERAGE, 0, [Define to 1 or higher if you want to generate code coverage statistics.]))
@@ -68,7 +38,6 @@ AC_ARG_ENABLE(profiling,
     [case "${enableval}" in
       yes) profiling=true ;;
       no)  profiling=false ;;
-      *)   AC_MSG_ERROR([bad value ${enableval} for --enable-profiling]) ;;
     esac],
     [profiling=false])
 AM_CONDITIONAL(PROFILING, test x"$profiling" = x"true")
@@ -85,7 +54,6 @@ AC_ARG_ENABLE(openmp,
     [case "${enableval}" in
       yes) openmp=true ;;
       no)  openmp=false ;;
-      *)   AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
     esac],
     [openmp=false])
 AM_CONDITIONAL(OPENMP, test x"$openmp" = x"true")
@@ -94,23 +62,19 @@ AM_COND_IF(OPENMP,
     AC_DEFINE(OPENMP, 0, [Define to 1 or higher if you want to enable OpenMP threading.]))
 
 
-# --- LDFLAGS
-
-flags="-L$(pwd)/lib -lffnn -lgsl -lgslcblas"
-AM_COND_IF(COVERAGE,                               
-  flags+=" -lgcov")
-AM_COND_IF(OPENMP,
-  flags+=" -lomp")
-
-AC_SUBST([AM_LDFLAGS], [$flags])
-
 
 # --- Checks
+
+LT_INIT # use libtool
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CPP
 AC_PROG_LN_S
+
+# check for c++11 support
+m4_include([m4/ax_cxx_compile_stdcxx.m4])
+AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
 
 # Checks for libraries.
 
@@ -124,9 +88,37 @@ AC_C_INLINE
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([abs pow sqrt exp sin cos])
+AC_CHECK_FUNCS([pow sqrt])
 
 
+
+# --- Compiler flags
+
+AC_SUBST([DEBUGFLAGS], ["-g -O0"])
+AC_SUBST([OPTFLAGS], ["-O3 -flto"])
+AC_SUBST([PROFFLAGS], ["-DWITHGPERFTOOLS -lprofiler"])
+AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
+
+AC_SUBST([AM_CXXFLAGS], ["-std=c++11 -fpic -Wall"])
+AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
+
+
+# --- LDFLAGS
+
+#AC_SUBST([COVLFLAGS], ["$(CODE_COVERAGE_LIBS)"])
+AC_SUBST([OMPLFLAGS], ["-lomp"])
+
+flags="-L$(pwd)/lib -lffnn -lgsl -lgslcblas"
+AM_COND_IF(COVERAGE,
+  flags+=" ${COVLFLAGS}")
+AM_COND_IF(OPENMP,
+  flags+=" ${OMPLFLAGS}")
+
+AC_SUBST([AM_LDFLAGS], [$flags])
+
+
+
+# --- Makefiles
 
 AC_CONFIG_FILES([Makefile
                  benchmark/Makefile
