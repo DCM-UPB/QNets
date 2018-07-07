@@ -1,13 +1,14 @@
-#if !DEBUG
-#  if !COVERAGE
-#  AM_CXXFLAGS += $(OPTFLAGS)
-#  endif
-#endif
+if !DEBUG
+if !COVERAGE
+  AM_CXXFLAGS += $(OPTFLAGS)
+endif
+endif
+
+#include $(top_srcdir)/aminclude_static.am
 
 if COVERAGE
-  include $(top_srcdir)/aminclude_static.am
-  AM_CPPFLAGS += $(CODE_COVERAGE_CPPFLAGS)
-  AM_CXXFLAGS += $(CODE_COVERAGE_CXXFLAGS)
+  AM_CPPFLAGS += $(COVERAGE_CPPFLAGS)
+  AM_CXXFLAGS += $(COVERAGE_CXXFLAGS)
 endif
 
 if PROFILING

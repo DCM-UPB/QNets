@@ -10,7 +10,6 @@ AC_LANG([C++])
 
 
 # --- Options
-#m4_pattern_allow([AC_MSG_ERROR])
 
 # Add debug support
 m4_include([m4/ax_check_enable_debug.m4])
@@ -22,9 +21,9 @@ AM_COND_IF(DEBUG,
 
 
 # Add coverage support (gcov)
-#m4_include([m4/ax_code_coverage.m4])
-#AX_CODE_COVERAGE()
-AM_CONDITIONAL(COVERAGE, test x"$enable_code_coverage" = x"true")
+m4_include([m4/ax_coverage.m4])
+AX_COVERAGE()
+AM_CONDITIONAL(COVERAGE, test x"$enable_coverage" = x"yes")
 AM_COND_IF(COVERAGE,
     AC_DEFINE(COVERAGE, 1, [Define to 0 if you don't need code coverage statistics.]),
     AC_DEFINE(COVERAGE, 0, [Define to 1 or higher if you want to generate code coverage statistics.]))
@@ -105,7 +104,7 @@ AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
 
 # --- LDFLAGS
 
-#AC_SUBST([COVLFLAGS], ["$(CODE_COVERAGE_LIBS)"])
+AC_SUBST([COVLFLAGS], ["${COVERAGE_LIBS}"])
 AC_SUBST([OMPLFLAGS], ["-lomp"])
 
 flags="-L$(pwd)/lib -lffnn -lgsl -lgslcblas"
@@ -115,7 +114,6 @@ AM_COND_IF(OPENMP,
   flags+=" ${OMPLFLAGS}")
 
 AC_SUBST([AM_LDFLAGS], [$flags])
-
 
 
 # --- Makefiles
