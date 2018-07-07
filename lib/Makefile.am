@@ -4,7 +4,7 @@ if !COVERAGE
 endif
 endif
 
-#include $(top_srcdir)/aminclude_static.am
+include $(top_srcdir)/aminclude_static.am
 
 if COVERAGE
   AM_CPPFLAGS += $(COVERAGE_CPPFLAGS)

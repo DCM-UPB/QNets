@@ -61,6 +61,7 @@ script:
   else
   make check || exit 1;
   fi;
+- cat test/test-suite.log
 
 notifications:
   email:

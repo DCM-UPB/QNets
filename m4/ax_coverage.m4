@@ -135,7 +135,7 @@ AC_DEFUN([_AX_COVERAGE_ENABLED],[
 
 	dnl Build the code coverage flags
 	dnl Define COVERAGE_LDFLAGS for backwards compatibility
-	COVERAGE_CPPFLAGS="-DNDEBUG"
+	COVERAGE_CPPFLAGS=""
 	COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
 	COVERAGE_CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
 	COVERAGE_LIBS="-lgcov"

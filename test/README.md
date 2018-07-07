@@ -1,5 +1,6 @@
 # LEGEND OF THE UNIT TESTS
 
+You can either use `make check` inside test directory, run `./run_all.sh` or switch into a specific unittest folder and `./run.sh`. 
 
 
 ## Unit Test 1

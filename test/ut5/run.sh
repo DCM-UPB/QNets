@@ -1,2 +1,2 @@
 #!/bin/bash
-cd ut5 && ../run.sh && cd ../
+../run.sh
