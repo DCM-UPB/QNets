@@ -77,6 +77,10 @@ AC_PROG_RANLIB
 # check for c++11 support
 AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
 
+# check for valgrind
+AX_VALGRIND_CHECK
+
+
 # Checks for libraries.
 
 # Checks for header files.

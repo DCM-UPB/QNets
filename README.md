@@ -17,6 +17,7 @@ In `examples/` there are several examples.
 # Build the library
 
 Make sure you have a reasonably recent development version of the GSL library installed on your system. Furthermore, we rely on the Autotools build system and libtool.
+Optionally, if you have valgrind installed on your system, it will be used to check for memory errors when running unittests.
 
 If you have the prerequisites on your system, you have to setup the build environment by using the following script in the top level directory:
 
