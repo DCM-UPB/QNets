@@ -20,14 +20,12 @@ matrix:
 
   - os: linux // arch linux docker
     env:
-    - MYCXX="g++"
     - USE_DOCKER="TRUE"
     - USE_OPENMP="FALSE"
     - USE_GCOV="FALSE"
 
   - os: linux // with enabled openmp
     env:
-    - MYCXX="g++"
     - USE_DOCKER="TRUE"
     - USE_OPENMP="TRUE"
     - USE_GCOV="FALSE"
@@ -38,37 +36,44 @@ matrix:
     - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
     - MYCXX="g++"
     - USE_DOCKER="FALSE"
-    - USE_OPENMP="FALSE"
+    - USE_GCOV="FALSE"
+
+  - os: osx
+    osx_image: xcode8
+    env:
+    - MATRIX_EVAL="brew update && brew install gsl valgrind"
+    - MYCXX="clang++"
+    - USE_DOCKER="FALSE"
     - USE_GCOV="TRUE"
 
 before_install:
 - |
   if [[ "$USE_DOCKER" == "TRUE" ]]; then
   docker pull nnvmc/base;
-  if [[ "$USE_OPENMP" == "TRUE" ]]; then
-  docker run -it -e MYCXX -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure CXX=${MYCXX} --enable-debug --enable-openmp";
-  else
-  docker run -it -e MYCXX -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure CXX=${MYCXX} --enable-debug";
-  fi;
+  local configopt="--enable-debug"
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then configopt="${configopt} --enable-openmp"; fi;
+  if [[ "$USE_GCOV" == "TRUE" ]]; then configopt="${configopt} --enable-coverage"; fi;
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure ${configopt}";
   else
   eval "${MATRIX_EVAL}" && ${MYCXX} -v;
   ./autogen.sh
-  if [[ "$USE_GCOV" == "TRUE" ]]; then
-  pip install cpp-coveralls;
-  ./configure CXX=${MYCXX} --enable-debug --enable-coverage;
-  else
-  ./configure --enable-debug;
-  fi;
+  local configopt="--enable-debug"
+  if [[ "$USE_GCOV" == "TRUE" ]]; then pip install cpp-coveralls; configopt="${configopt} --enable-coverage"; fi;
+  ./configure CXX=${MYCXX} ${configopt};
   fi;
 
 script:
 - |
   if [[ "$USE_DOCKER" == "TRUE" ]]; then
-  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && make check || exit 1";
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && make check" || exit 1;
+  if [[ "$USE_GCOV" == "TRUE" ]]; then
+  docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "pip install cpp-coveralls && cd /root/repo && coveralls -b lib -e test -e benchmark -e include -e lib -e examples -e script -i src --gcov-options '\-lp'";
+  fi;
   else
   make check || exit 1;
-  if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -r ./ -b ./ -e include -e lib -e test -e benchmark -e examples -e doc -e script -i src --gcov-options '\-lp'; fi;
+  if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -b lib -e test -e benchmark -e include -e lib -e examples -e script -i src --gcov-options '\-lp' ; fi;
   fi;
+- cat test/test-suite.log test/ut*/exe.log
 
 notifications:
   email:

@@ -4,7 +4,7 @@ if !COVERAGE
 endif
 endif
 
-#include $(top_srcdir)/aminclude_static.am
+include $(top_srcdir)/aminclude_static.am
 
 if COVERAGE
   AM_CPPFLAGS += $(COVERAGE_CPPFLAGS)
@@ -30,4 +30,5 @@ source-lists:
 	find ../src/ -name *.hpp | tr '\n' ' ' >> headers.am
 	echo "libffnn_la_SOURCES = \\" > sources.am
 	find ../src/ -name *.cpp | tr '\n' ' ' >> sources.am
+
 .PHONY: source-lists

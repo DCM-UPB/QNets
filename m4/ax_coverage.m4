@@ -128,17 +128,16 @@ AC_DEFUN([_AX_COVERAGE_ENABLED],[
 	      [AC_MSG_ERROR([gcov is needed to do coverage])])
 	AC_SUBST([GCOV])
 
-	dnl Check if gcc is being used
-	AS_IF([ test "$GCC" = "no" ], [
-		AC_MSG_ERROR([not compiling with gcc, which is required for gcov code coverage])
-	      ])
-
 	dnl Build the code coverage flags
 	dnl Define COVERAGE_LDFLAGS for backwards compatibility
-	COVERAGE_CPPFLAGS="-DNDEBUG"
+	COVERAGE_CPPFLAGS=""
 	COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
 	COVERAGE_CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
-	COVERAGE_LIBS="-lgcov"
+        COVERAGE_LIBS="--coverage"
+
+	dnl Check if g++ is being used
+	AS_IF([ [[ "$CXX" == "g++"* ]] ], [ COVERAGE_LIBS="-lgcov" ])
+	AS_IF([ [[ "$CXX" == "gcc"* ]] ], [ COVERAGE_LIBS="-lgcov" ])
 
 	AC_SUBST([COVERAGE_CPPFLAGS])
 	AC_SUBST([COVERAGE_CFLAGS])

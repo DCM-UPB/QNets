@@ -12,7 +12,6 @@ AC_PREFIX_DEFAULT(lib)
 # --- Options
 
 # Add debug support
-m4_include([m4/ax_check_enable_debug.m4])
 AX_CHECK_ENABLE_DEBUG()
 AM_CONDITIONAL(DEBUG, test x"$ax_enable_debug" = x"yes")
 AM_COND_IF(DEBUG,
@@ -21,9 +20,9 @@ AM_COND_IF(DEBUG,
 
 
 # Add coverage support (gcov)
-m4_include([m4/ax_coverage.m4])
+AC_PROG_CXX
 AX_COVERAGE()
-AM_CONDITIONAL(COVERAGE, test x"$enable_coverage" = x"yes")
+AM_CONDITIONAL(COVERAGE, test "x$enable_coverage" = x"yes")
 AM_COND_IF(COVERAGE,
     AC_DEFINE(COVERAGE, 1, [Define to 0 if you don't need code coverage statistics.]),
     AC_DEFINE(COVERAGE, 0, [Define to 1 or higher if you want to generate code coverage statistics.]))
@@ -69,13 +68,22 @@ AM_PROG_AR
 LT_INIT # use libtool
 
 # Checks for programs.
-AC_PROG_CXX
+AC_PROG_AWK
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
 AC_PROG_LN_S
+AC_PROG_RANLIB
 
 # check for c++11 support
-m4_include([m4/ax_cxx_compile_stdcxx.m4])
 AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
+
+# check for valgrind
+AX_VALGRIND_CHECK
+
 
 # Checks for libraries.
 
