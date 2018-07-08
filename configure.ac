@@ -7,7 +7,7 @@ AC_INIT([DCM-FFNN], [0.3], [ithanil@mail.uni-paderborn.de])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_LANG([C++])
-
+AC_PREFIX_DEFAULT(lib)
 
 # --- Options
 
@@ -64,6 +64,8 @@ AM_COND_IF(OPENMP,
 
 # --- Checks
 
+AM_PROG_AR
+
 LT_INIT # use libtool
 
 # Checks for programs.
@@ -118,31 +120,36 @@ AC_SUBST([AM_LDFLAGS], [$flags])
 
 # --- Makefiles
 
-AC_CONFIG_FILES([Makefile
-                 benchmark/Makefile
-                 benchmark/bench_actfs_derivs/Makefile
-                 benchmark/bench_actfs_ffprop/Makefile
-                 lib/Makefile
-                 doc/Makefile
-                 examples/Makefile
-                 examples/ex1/Makefile
-                 examples/ex2/Makefile
-                 examples/ex3/Makefile
-                 examples/ex4/Makefile
-                 examples/ex5/Makefile
-                 examples/ex6/Makefile
-                 examples/ex7/Makefile
-                 examples/ex8/Makefile
-                 examples/ex9/Makefile
-                 test/Makefile
-                 test/ut1/Makefile
-                 test/ut2/Makefile
-                 test/ut3/Makefile
-                 test/ut4/Makefile
-                 test/ut5/Makefile
-                 test/ut6/Makefile
-                 test/ut7/Makefile
-                 test/ut8/Makefile
-                 test/ut9/Makefile])
-AM_INIT_AUTOMAKE([subdir-objects])
+# output of ./script/generate_ac_config_files.sh
+AC_CONFIG_FILES([
+lib/Makefile
+include/Makefile
+test/ut1/Makefile
+test/ut8/Makefile
+test/ut2/Makefile
+test/ut5/Makefile
+test/ut9/Makefile
+test/ut3/Makefile
+test/ut7/Makefile
+test/Makefile
+test/ut6/Makefile
+test/ut4/Makefile
+examples/ex9/Makefile
+examples/ex7/Makefile
+examples/ex1/Makefile
+examples/ex6/Makefile
+examples/ex4/Makefile
+examples/ex5/Makefile
+examples/ex2/Makefile
+examples/Makefile
+examples/ex8/Makefile
+examples/ex3/Makefile
+doc/Makefile
+Makefile
+benchmark/bench_actfs_derivs/Makefile
+benchmark/Makefile
+benchmark/bench_actfs_ffprop/Makefile
+])
+
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_OUTPUT

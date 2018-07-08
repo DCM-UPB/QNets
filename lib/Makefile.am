@@ -23,3 +23,11 @@ noinst_LTLIBRARIES = libffnn.la
 libffnn_ladir = ../
 include headers.am
 include sources.am
+
+
+source-lists:
+	echo "libffnn_la_HEADERS = \\" > headers.am
+	find ../src/ -name *.hpp | tr '\n' ' ' >> headers.am
+	echo "libffnn_la_SOURCES = \\" > sources.am
+	find ../src/ -name *.cpp | tr '\n' ' ' >> sources.am
+.PHONY: source-lists
