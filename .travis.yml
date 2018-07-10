@@ -1,3 +1,4 @@
+group: travis_latest
 sudo: required
 language: c++
 services:
@@ -5,18 +6,11 @@ services:
 
 matrix:
   include:
-#  - os: linux // ubuntu trusty has too old GSL lib
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#        packages:
-#          - g++-7
-#          - libgsl0-dev
-#          - valgrind
-#    env:
-#      - MYCXX="g++-7"
-#      - USE_DOCKER="FALSE"
+  - os: linux
+    env:
+      - MATRIX_EVAL="wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.3.tar.gz && tar -xvf gsl-2.3.tar.gz && cd gsl-2.3 && ./configure && make -j2 && sudo make install && cd ../ && export LDFLAGS=-L/usr/local/lib && export CPPFLAGS=-I/usr/local/include"
+      - USE_DOCKER="FALSE"
+      - USE_GCOV="FALSE"
 
   - os: linux // arch linux docker
     env:

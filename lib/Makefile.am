@@ -12,21 +12,20 @@ if COVERAGE
 endif
 
 if PROFILING
-  AM_CPPFLAGS += $(PROFFLAGS)
+  AM_CXXFLAGS += $(PROFFLAGS)
 endif
 
 if OPENMP
   AM_CPPFLAGS += $(OMPCFLAGS)
 endif
 
-noinst_LTLIBRARIES = libffnn.la
-libffnn_ladir = ../
+lib_LTLIBRARIES = libffnn.la
 include headers.am
 include sources.am
 
 
 source-lists:
-	echo "libffnn_la_HEADERS = \\" > headers.am
+	echo "pkginclude_HEADERS = \\" > headers.am
 	find ../src/ -name *.hpp | tr '\n' ' ' >> headers.am
 	echo "libffnn_la_SOURCES = \\" > sources.am
 	find ../src/ -name *.cpp | tr '\n' ' ' >> sources.am

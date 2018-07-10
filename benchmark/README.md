@@ -15,7 +15,10 @@ Currently there are the following benchmarks:
 # Using the benchmarks
 
 Enter the desired benchmark's directory and execute:
-   `./run.sh`
+   `make run-benchmark`
+
+Instead you may also run all benchmarks together by calling from root or from top benchmark folder:
+   `make run-benchmarks`
 
 Each benchmark will write the result into a file `benchmark_new.out`. For visualization execute the plot script:
    `python plot.py benchmark_new.out`
@@ -28,8 +31,8 @@ You may also change new/old to more meaningful labels, anything like benchmark_*
 
 # Profiling
 
-If you want to use the benchmarks for profiling, instead execute:
-   `./run_gperf.sh`
+If you want to use the benchmarks for profiling, recompile the library and benchmarks after configuring
+   `./configure --enable-profiling`
 
-And then view the profile with:
+Then execute a benchmark via make (!) and afterwards view the profile with:
    `pprof --text exe exe.prof`

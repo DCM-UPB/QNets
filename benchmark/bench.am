@@ -1,3 +1,4 @@
+AM_LDFLAGS += -lffnn
 AM_CPPFLAGS += -I../common
 
 if !DEBUG
@@ -5,8 +6,16 @@ if !DEBUG
 endif
 
 if PROFILING
-  AM_CPPFLAGS += $(PERFFLAGS)
+  AM_CXXFLAGS += $(PROFFLAGS)
 endif
 
-bin_PROGRAMS = exe    
+noinst_PROGRAMS = exe
 exe_SOURCES = main.cpp
+
+if PROFILING
+run-benchmark: exe
+	LD_PRELOAD=/usr/lib/libtcmalloc.so:/usr/lib/libprofiler.so CPUPROFILE=exe.prof ./exe > benchmark_new.out
+else
+run-benchmark: exe
+	./exe > benchmark_new.out
+endif

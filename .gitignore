@@ -117,6 +117,7 @@ m4/lt~obsolete.m4
 
 # -- project specific ignores --
 exe
+exe.prof*
 vgcore* 
 *.o
 *.dSYM

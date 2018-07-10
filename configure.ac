@@ -2,12 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([DCM-FFNN], [0.3], [ithanil@mail.uni-paderborn.de])
+AC_INIT([NNVMC-FFNN], [0.1], [ithanil@mail.uni-paderborn.de])
 : ${CXXFLAGS=""} # delete default optimization user flags
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_LANG([C++])
-AC_PREFIX_DEFAULT(lib)
+
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 # --- Options
 
@@ -89,7 +90,7 @@ AX_VALGRIND_CHECK
 
 # Checks for header files.
 
-AC_CHECK_HEADERS([gsl/gsl_vector.h gsl/gsl_matrix.h gsl/gsl_blas.h gsl/gsl_multifit_nlinear.h])
+AC_CHECK_HEADERS([gsl/gsl_vector.h gsl/gsl_matrix.h gsl/gsl_blas.h gsl/gsl_multifit_nlinear.h], [ ], [ AC_MSG_ERROR([Unable to find one or more required GSL headers!]) ])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -105,7 +106,7 @@ AC_CHECK_FUNCS([pow sqrt])
 
 AC_SUBST([DEBUGFLAGS], ["-g -O0"])
 AC_SUBST([OPTFLAGS], ["-O3 -flto"])
-AC_SUBST([PROFFLAGS], ["-DWITHGPERFTOOLS -lprofiler"])
+AC_SUBST([PROFFLAGS], ["-g -DWITHGPERFTOOLS -lprofiler"])
 AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
 
 AC_SUBST([AM_CXXFLAGS], ["-std=c++11 -fpic -Wall"])
@@ -117,11 +118,9 @@ AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
 AC_SUBST([COVLFLAGS], ["${COVERAGE_LIBS}"])
 AC_SUBST([OMPLFLAGS], ["-lomp"])
 
-flags="-L$(pwd)/lib -lffnn -lgsl -lgslcblas"
-AM_COND_IF(COVERAGE,
-  flags+=" ${COVLFLAGS}")
-AM_COND_IF(OPENMP,
-  flags+=" ${OMPLFLAGS}")
+flags="-L$(pwd)/lib -lgsl -lgslcblas"
+AM_COND_IF(COVERAGE, flags+=" ${COVLFLAGS}")
+AM_COND_IF(OPENMP, flags+=" ${OMPLFLAGS}")
 
 AC_SUBST([AM_LDFLAGS], [$flags])
 
@@ -159,5 +158,4 @@ benchmark/Makefile
 benchmark/bench_actfs_ffprop/Makefile
 ])
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_OUTPUT
