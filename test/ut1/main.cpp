@@ -136,7 +136,7 @@ int main(){
     //cout << "anal_dfxdx = " << anal_dfxdx << endl;
     //cout << "num_dfxdx = " << num_dfxdx << endl;
     //cout << endl;
-    //assert(abs(anal_dfxdx-num_dfxdx) < 0.001);
+    assert(abs( (anal_dfxdx-num_dfxdx) ) < TINY);
 
     //cout << "anal_dfydx = " << anal_dfydx << endl;
     //cout << "num_dfydx = " << num_dfydx << endl;
@@ -149,7 +149,7 @@ int main(){
     //cout << "anal_d2fxdx2 = " << anal_d2fxdx2 << endl;
     //cout << "num_d2fxdx2 = " << num_d2fxdx2 << endl;
     //cout << endl;
-    assert(abs( (anal_d2fydx2-num_d2fydx2) ) < TINY);
+    assert(abs( (anal_d2fxdx2-num_d2fxdx2) ) < TINY);
 
     //cout << "anal_d2fydx2 = " << anal_d2fydx2 << endl;
     //cout << "num_d2fydx2 = " << num_d2fydx2 << endl;

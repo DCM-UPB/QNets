@@ -89,15 +89,10 @@ int main(){
 
     // Plot of the 1-dimensional function
     const double L=10.;
-    double xh;
     const int N=150;
     double dL=L/N;
     const double h=0.00001;
-    double z, zh, zmh;
-    double z1d;
-    double z2d;
     const int ivar=2;
-    double vp, vph;
     // nn value
     ofstream file;
     file.open("randomNN.txt");
@@ -125,44 +120,44 @@ int main(){
             x+=dL;
             ffnn->setInput(&x);
             ffnn->FFPropagate();
-            z=ffnn->getOutput(0);
+            double z=ffnn->getOutput(0);
             file << x << "   " << z << endl;
 
             // first derivative
-            z1d=ffnn->getFirstDerivative(0,0);
+            double z1d=ffnn->getFirstDerivative(0,0);
             file1d << x << "   " << z1d << endl;
 
             // second derivative
-            z2d=ffnn->getSecondDerivative(0,0);
+            double z2d=ffnn->getSecondDerivative(0,0);
             file2d << x << "   " << z2d << endl;
 
             // variational first derivative
-            z1d=ffnn->getVariationalFirstDerivative(0,ivar);
-            filev1d << x << "   " << z1d << endl;
+            double zv1d=ffnn->getVariationalFirstDerivative(0,ivar);
+            filev1d << x << "   " << zv1d << endl;
 
             // numerical first derivative
-            xh=x+h;
-            ffnn->setInput(&xh);
+            double xu=x+h;
+            ffnn->setInput(&xu);
             ffnn->FFPropagate();
-            zh=ffnn->getOutput(0);
+            double zh=ffnn->getOutput(0);
             filen1d << x << "   " << (zh-z)/h << endl;
             ffnn->setInput(&x);
 
             // numerical second derivative
-            xh=x-h;
-            ffnn->setInput(&xh);
+            double xl=x-h;
+            ffnn->setInput(&xl);
             ffnn->FFPropagate();
-            zmh=ffnn->getOutput(0);
+            double zmh=ffnn->getOutput(0);
             filen2d << x << "   " << (zh-2.*z+zmh)/(h*h) << endl;
             ffnn->setInput(&x);
 
             // numerical variational first derivative
-            vp=ffnn->getBeta(ivar);
-            vph=vp+h;
+            double vp=ffnn->getBeta(ivar);
+            double vph=vp+h;
             ffnn->setBeta(ivar,vph);
             ffnn->FFPropagate();
-            zh=ffnn->getOutput(0);
-            filenv1d << x << "   " << (zh-z)/h << endl;
+            double zvh=ffnn->getOutput(0);
+            filenv1d << x << "   " << (zvh-z)/h << endl;
             ffnn->setBeta(ivar,vp);
         }
     file.close();
