@@ -105,7 +105,7 @@ AC_CHECK_FUNCS([pow sqrt])
 # --- Compiler flags
 
 AC_SUBST([DEBUGFLAGS], ["-g -O0"])
-AC_SUBST([OPTFLAGS], ["-O3 -flto"])
+AM_COND_IF(PROFILING, AC_SUBST([OPTFLAGS], ["-O3"]), AC_SUBST([OPTFLAGS], ["-O3 -flto"]))
 AC_SUBST([PROFFLAGS], ["-g -DWITHGPERFTOOLS -lprofiler"])
 AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
 

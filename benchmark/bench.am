@@ -12,10 +12,13 @@ endif
 noinst_PROGRAMS = exe
 exe_SOURCES = main.cpp
 
+
 if PROFILING
 run-benchmark: exe
-	LD_PRELOAD=/usr/lib/libtcmalloc.so:/usr/lib/libprofiler.so CPUPROFILE=exe.prof ./exe > benchmark_new.out
+	CPUPROFILE=exe.prof ./exe > benchmark_new.out
+	pprof --text exe exe.prof
 else
 run-benchmark: exe
 	./exe > benchmark_new.out
+	cat benchmark_new.out
 endif

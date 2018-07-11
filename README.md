@@ -39,7 +39,12 @@ Finally, you are ready to compile all the code files in our repository together,
 
    `make` or `make -jN`
 
-where N is the number of parallel threads used by make. As long as you changed, but didn't remove or add source files, it is sufficient to only run `make` again to rebuild.
+where N is the number of parallel threads used by make. Alternatively, you may use the following make targets to build only subparts of the project:
+
+   `make lib`, `make test`, `make benchmark`, `make examples`
+
+
+As long as you changed, but didn't remove or add source files, it is sufficient to only run `make` again to rebuild.
 
 If you however removed old or added new code files under `src/`, you need to first update the source file lists and include links. Do so by invoking from root folder:
 
