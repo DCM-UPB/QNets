@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void run_single_benchmark(const string label, const string actf_id, const double * const indata, const int neval, const int nruns, const bool flag_d1, const bool flag_d2, const bool flag_d3, const bool flag_fad) {
+void run_single_benchmark(const string &label, const string &actf_id, const double * const indata, const int neval, const int nruns, const bool flag_d1, const bool flag_d2, const bool flag_d3, const bool flag_fad) {
     pair<double, double> result;
     const double time_scale = 1000000000.; //nanoseconds
 
@@ -18,7 +18,6 @@ void run_single_benchmark(const string label, const string actf_id, const double
 }
 
 int main (void) {
-
     const int neval = 100000;
     const int nruns = 50;
 
@@ -60,6 +59,5 @@ int main (void) {
 
     delete [] indata;
     return 0;
-
 }
 

@@ -21,7 +21,6 @@ double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double
 }
 
 std::pair<double, double> sample_benchmark_FFPropagate(FeedForwardNeuralNetwork * ffnn, const double * const * const xdata, const int neval, const int nruns) {
-
     double times[nruns];
     double mean = 0., err = 0.;
 
@@ -65,7 +64,6 @@ double benchmark_actf_derivs(ActivationFunctionInterface * actf, const double * 
 }
 
 std::pair<double, double> sample_benchmark_actf_derivs(ActivationFunctionInterface * actf, const double * const xdata, const int neval, const int nruns, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true) {
-
     double times[nruns];
     double mean = 0., err = 0.;
 

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void run_single_benchmark(const string label, FeedForwardNeuralNetwork * const ffnn, const double * const * const xdata, const int neval, const int nruns) {
+void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const ffnn, const double * const * const xdata, const int neval, const int nruns) {
     pair<double, double> result;
     const double time_scale = 1000000.; //microseconds
 
@@ -19,7 +19,6 @@ void run_single_benchmark(const string label, FeedForwardNeuralNetwork * const f
 }
 
 int main (void) {
-
     const int neval = 1000;
     const int nruns = 5;
 
@@ -29,8 +28,6 @@ int main (void) {
 
     const int nactfs = 7;
     const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU"};
-
-    FeedForwardNeuralNetwork * ffnn;
 
     double ** const xdata = new double*[neval]; // xndim input data for propagate bench
     for (int i=0; i<neval; ++i) xdata[i] = new double[xndim];
@@ -48,7 +45,7 @@ int main (void) {
 
     // FFPropagate benchmark
     for (int iactf=0; iactf<nactfs; ++iactf) {
-        ffnn = new FeedForwardNeuralNetwork(xndim+1, nhu[0], yndim+1);
+        FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhu[0], yndim+1);
         for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
         ffnn->connectFFNN();
         ffnn->assignVariationalParameters();
@@ -97,6 +94,5 @@ int main (void) {
     for (int i=0; i<neval; ++i) delete [] xdata[i];
     delete [] xdata;
     return 0;
-
 }
 

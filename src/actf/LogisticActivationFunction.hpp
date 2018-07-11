@@ -6,8 +6,6 @@
 
 class LogisticActivationFunction: public ActivationFunctionInterface
 {
-protected:
-
 public:
     // getters
     ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}

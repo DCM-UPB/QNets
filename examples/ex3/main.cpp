@@ -9,10 +9,7 @@
 
 class MyActivationFunction: public ActivationFunctionInterface
 {
-protected:
-
 public:
-
     // get copy method
     ActivationFunctionInterface * getCopy(){
         return new MyActivationFunction();
@@ -28,7 +25,7 @@ public:
     double getIdealInputSigma(){return 1.154700538379252;};
 
     // since this is a monotonic activation function,
-    // we can leave the default getOutputMu() and getOutputSigma()   
+    // we can leave the default getOutputMu() and getOutputSigma()
 
 
     // computation

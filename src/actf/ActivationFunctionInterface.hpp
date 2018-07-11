@@ -8,10 +8,7 @@
 
 class ActivationFunctionInterface: public SerializableComponent
 {
-protected:
-
 public:
-
     // Constructors: every child with hyper parameters should implement 3 constructors:
 
     // Construct from passed parameter values

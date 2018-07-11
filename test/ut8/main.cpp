@@ -89,7 +89,6 @@ void validateJacobian(training_workspace &tws, const double &TINY = 0.00001, con
 }
 
 int main(){
-
     const bool verbose = false;
     const double TINY = 0.00001;
 
