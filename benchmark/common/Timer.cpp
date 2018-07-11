@@ -10,7 +10,6 @@ public:
         return _scale * std::chrono::duration_cast<_second>(_clock::now() - _beg).count(); }
 
 private:
-
     typedef std::chrono::high_resolution_clock _clock;
     std::chrono::time_point<_clock> _beg;
     const double _scale;

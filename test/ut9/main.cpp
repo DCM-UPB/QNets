@@ -41,10 +41,8 @@ void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardN
 }
 
 int main (void) {
-
     const int verbose = 0;
     const double TINY = 0.000001;
-
 
     const int ndim = 2;
     const int xndim = ndim;

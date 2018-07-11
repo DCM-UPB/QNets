@@ -7,8 +7,6 @@
 
 class IdentityActivationFunction: public ActivationFunctionInterface
 {
-protected:
-
 public:
     // getters
     ActivationFunctionInterface * getCopy(){return new IdentityActivationFunction();}

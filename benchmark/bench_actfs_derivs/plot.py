@@ -5,7 +5,7 @@ class benchmark_actf_derivs:
 
     def __init__(self, filename, label):
         self.label = label
-        self.data = {};
+        self.data = {}
 
         bnew = True
         with open(filename) as bmfile:
@@ -19,7 +19,6 @@ class benchmark_actf_derivs:
                 if lsplit[0] == 'ACTF':
                     if not bnew:
                         self.data[actf_name] = actf_data # store previous actf's data
-
                     actf_name = lsplit[10]
                     actf_data = {}
                     bnew = False
@@ -62,7 +61,8 @@ def plot_compare_actfs(benchmark_list, **kwargs):
                 ax.errorbar(xlabels, values, xerr=None, yerr=errors, **kwargs)
 
             ax.set_title(benchmark.label + ' version, ' + mode + ' function calls')
-            if mode=='individual': ax.set_ylabel('Time per eval [ns]')
+            if mode=='individual':
+                ax.set_ylabel('Time per eval [ns]')
             ax.legend(benchmark.data.keys())
 
     return fig
@@ -70,14 +70,16 @@ def plot_compare_actfs(benchmark_list, **kwargs):
 
 def plot_compare_runs(benchmark_list, actf_list, width = 0.8, **kwargs):
     nbm = len(benchmark_list)-1
-    if nbm <= 0: 
+    if nbm <= 0:
         print('Error: Not enough benchmarks for comparison plot.')
         return None
 
     bwidth = width/float(nbm)
     nactf = len(actf_list)
-    if nbm > 1: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']), 0, -1)
-    else: ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']), 0, -1) + 0.5*bwidth
+    if nbm > 1:
+        ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']), 0, -1)
+    else:
+        ind = arange(len(benchmark_list[0].data[actf_list[0]]['fad']), 0, -1) + 0.5*bwidth
     xlabels = benchmark_list[0].data[actf_list[0]]['fad'].keys()
 
     fig = figure()
@@ -98,7 +100,8 @@ def plot_compare_runs(benchmark_list, actf_list, width = 0.8, **kwargs):
                     ax.text(1, rect.get_y() + rect.get_height()/2., '%d' % int(rect.get_width()), ha='left', va='center', fontsize=8)
 
             ax.set_title(actf + ' actf, ' + mode + ' function calls')
-            if ita==len(actf_list)-1: ax.set_xlabel(r'Time per eval (%)')
+            if ita==len(actf_list)-1:
+                ax.set_xlabel(r'Time per eval (%)')
             ax.set_xlim([0,200])
             ax.set_yticks(ind - 0.5*(nbm-1)*bwidth)
             ax.set_yticklabels(xlabels)
@@ -114,12 +117,14 @@ for benchmark_file in sys.argv[1:]:
     try:
         benchmark = benchmark_actf_derivs(benchmark_file, benchmark_file.split('_')[1].split('.')[0])
         benchmark_list.append(benchmark)
-    except:
+    except(OSError):
         print("Warning: Couldn't load benchmark file " + benchmark_file + "!")
 
-if len(benchmark_list)<1: print("Error: Not even one benchmark loaded!")
+if len(benchmark_list)<1:
+    print("Error: Not even one benchmark loaded!")
 else:
     fig1 = plot_compare_actfs(benchmark_list, fmt='o--')
-    if len(benchmark_list)>1: fig2 = plot_compare_runs(benchmark_list, ['TANS', 'GSS', 'RELU'])
+    if len(benchmark_list)>1:
+        fig2 = plot_compare_runs(benchmark_list, ['TANS', 'GSS', 'RELU'])
 
 show()

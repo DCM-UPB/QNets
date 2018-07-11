@@ -164,7 +164,6 @@ int main(){
             zh=ffnn->getOutput(0);
             filenv1d << x << "   " << (zh-z)/h << endl;
             ffnn->setBeta(ivar,vp);
-
         }
     file.close();
     file1d.close();

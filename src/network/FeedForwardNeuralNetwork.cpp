@@ -117,7 +117,6 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
                         }
                 }
         }
-
 }
 
 
@@ -139,7 +138,6 @@ void FeedForwardNeuralNetwork::setBeta(const double * beta)
                         }
                 }
         }
-
 }
 
 
@@ -219,7 +217,6 @@ double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp)
     }
     cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found" << endl << endl;
     return -666.;
-
 }
 
 
@@ -432,7 +429,6 @@ bool compare_NUnits(NetworkLayer * A, NetworkLayer * B) { return A->getNUnits()<
 
 void FeedForwardNeuralNetwork::FFPropagate()
 {
-
     _L_in->computeValues(); // OpenMP not worth for input layer
 
 #ifdef OPENMP
@@ -448,18 +444,14 @@ void FeedForwardNeuralNetwork::FFPropagate()
             }
     }
     else {
-
 #endif
-
     for (std::vector<NetworkLayer *>::size_type i=1; i<_L.size(); ++i)
         {
             _L[i]->computeValues();
         }
-
 #ifdef OPENMP
     }
 #endif
-
 }
 
 
@@ -826,8 +818,6 @@ void FeedForwardNeuralNetwork::_construct(const int &insize, const int &hidlaysi
     _addNewLayer("INL", insize);
     _addNewLayer("NNL", hidlaysize);
     _addNewLayer("OUTL", outsize);
-
-
 }
 
 

@@ -150,7 +150,6 @@ public:
 
     // --- Store FFNN on file
     void storeOnFile(const char * filename, const bool store_betas = true);
-
 };
 
 

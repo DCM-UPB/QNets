@@ -19,7 +19,6 @@ void run_single_benchmark(const string label, FeedForwardNeuralNetwork * const f
 }
 
 int main (void) {
-
     const int neval = 1000;
     const int nruns = 5;
 
@@ -97,6 +96,5 @@ int main (void) {
     for (int i=0; i<neval; ++i) delete [] xdata[i];
     delete [] xdata;
     return 0;
-
 }
 

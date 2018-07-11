@@ -10,7 +10,8 @@
 #include <map>
 #include <string>
 
-class NetworkUnitRay: public NetworkUnitFeederInterface {
+class NetworkUnitRay: public NetworkUnitFeederInterface
+{
 protected:
     // random number generator, used to initialize the intensities
     std::random_device _rdev;
@@ -25,6 +26,7 @@ protected:
 
     // store indices of relevant sources for each variational parameter (in sources)
     std::vector<std::vector<int>> _map_index_to_sources;
+
 public:
     explicit NetworkUnitRay(NetworkLayer * nl);
     ~NetworkUnitRay();

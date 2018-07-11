@@ -18,7 +18,6 @@ void run_single_benchmark(const string label, const string actf_id, const double
 }
 
 int main (void) {
-
     const int neval = 100000;
     const int nruns = 50;
 
@@ -60,6 +59,5 @@ int main (void) {
 
     delete [] indata;
     return 0;
-
 }
 

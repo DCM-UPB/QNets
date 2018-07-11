@@ -76,7 +76,6 @@ namespace nn_trainer_gsl_details {
     {
         calcRSS(f, chi, chisq);
         if (fvali) calcRSS(fvali, chi_vali, chisq_vali);
-
     };
 
     // calculate all costs (from workspace and vali vector)
@@ -275,8 +274,8 @@ namespace nn_trainer_gsl_details {
                 break;
             }
 
-            if (tws->nvalidation > 0) { // then check if validation residual went down (we ignore the regularization part for that)
-
+            if (tws->nvalidation > 0) {
+                // then check if validation residual went down (we ignore the regularization part for that)
                 for (int i=0; i<n; ++i) gsl_vector_set(fvali_noreg, i, gsl_vector_get(tws->fvali, i));
                 double resih = gsl_blas_dnrm2(fvali_noreg);
 

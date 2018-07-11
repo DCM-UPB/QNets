@@ -131,15 +131,16 @@ int main(){
     string s = "", s_test = "N";
 
 
-    // working variables
+    // execute tests
+
     string str; // for storing strings
     int counter; // for storing counters
-
-    // go through different levels of useless brackets use
     int it = 0;
     for ( const string * testArray : testTreeCode_vec ) {
-        // and through different codes
+        // go through different levels of useless brackets use
+
         for (int j=0; j<ncodes; ++j) {
+            // and through different codes
 
             // --- READERS
 

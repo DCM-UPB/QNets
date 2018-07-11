@@ -52,9 +52,11 @@ gauss.update(gaussd2)
 diffs = {}
 for key in data:
     diff = 0
-    for itv, val in enumerate(data[key][1]):
-        diff += (val-gauss[key][itv])**2
-    diff /= (itv+1)
+    it = 0
+    for val in data[key][1]:
+        diff += (val-gauss[key][it])**2
+        it += 1
+    diff /= it
     diffs[key] = sqrt(diff)
 
 diffv = dict((key, diffs[key]) for key in diffs if key.split('_')[0]=='v')
@@ -145,4 +147,3 @@ for key in axs:
 #    figs[key].savefig('comp_'+key+'.pdf')
 
 show()
-

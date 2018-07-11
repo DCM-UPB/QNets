@@ -7,8 +7,6 @@
 
 class SineActivationFunction: public ActivationFunctionInterface
 {
-protected:
-
 public:
     // getters
     ActivationFunctionInterface * getCopy(){return new SineActivationFunction();}
