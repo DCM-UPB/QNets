@@ -6,3 +6,9 @@ endif
 
 noinst_PROGRAMS = exe
 exe_SOURCES = main.cpp
+
+clean-local:
+	rm -f *.txt
+if VALGRIND_ENABLED
+	rm -f vgcore.*
+endif

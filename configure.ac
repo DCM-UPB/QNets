@@ -79,7 +79,7 @@ AC_PROG_CXXCPP
 AC_PROG_LN_S
 AC_PROG_RANLIB
 
-# check for c++11 support
+# check for c++11 support (and add compiler flag)
 AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
 
 # check for valgrind
@@ -106,23 +106,14 @@ AC_CHECK_FUNCS([pow sqrt])
 
 AC_SUBST([DEBUGFLAGS], ["-g -O0"])
 AM_COND_IF(PROFILING, AC_SUBST([OPTFLAGS], ["-O3"]), AC_SUBST([OPTFLAGS], ["-O3 -flto"]))
-AC_SUBST([PROFFLAGS], ["-g -DWITHGPERFTOOLS -lprofiler"])
-AC_SUBST([OMPCFLAGS], ["-DOPENMP -fopenmp"])
+AC_SUBST([PROF_CFLAGS], ["-g -DWITHGPERFTOOLS"])
+AC_SUBST([PROF_LFLAGS], ["-lprofiler"])
+AC_SUBST([OMP_CFLAGS], ["-DOPENMP -fopenmp"])
+AC_SUBST([OMP_LFLAGS], ["-lomp"])
 
-AC_SUBST([AM_CXXFLAGS], ["-std=c++11 -fpic -Wall"])
+AC_SUBST([AM_CXXFLAGS], ["-Wall"])
 AC_SUBST([AM_CPPFLAGS], ["-I$(pwd)/include"])
-
-
-# --- LDFLAGS
-
-AC_SUBST([COVLFLAGS], ["${COVERAGE_LIBS}"])
-AC_SUBST([OMPLFLAGS], ["-lomp"])
-
-flags="-L$(pwd)/lib -lgsl -lgslcblas"
-AM_COND_IF(COVERAGE, flags+=" ${COVLFLAGS}")
-AM_COND_IF(OPENMP, flags+=" ${OMPLFLAGS}")
-
-AC_SUBST([AM_LDFLAGS], [$flags])
+AC_SUBST([AM_LDFLAGS], ["-L$(pwd)/lib -lgsl -lgslcblas"])
 
 
 # --- Makefiles

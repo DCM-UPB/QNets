@@ -6,14 +6,17 @@ if !DEBUG
 endif
 
 if PROFILING
-  AM_CXXFLAGS += $(PROFFLAGS)
+  AM_CXXFLAGS += $(PROF_CFLAGS)
+  AM_LDFLAGS += $(PROF_LFLAGS)
 endif
 
 noinst_PROGRAMS = exe
 exe_SOURCES = main.cpp
 
-
 if PROFILING
+clean-local:
+	rm -f exe.prof*
+
 run-benchmark: exe
 	CPUPROFILE=exe.prof ./exe > benchmark_new.out
 	pprof --text exe exe.prof

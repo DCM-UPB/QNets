@@ -1,5 +1,5 @@
-group: travis_latest
 sudo: required
+dist: trusty
 language: c++
 services:
 - docker
@@ -27,7 +27,7 @@ matrix:
   - os: osx
     osx_image: xcode8
     env:
-    - MATRIX_EVAL="brew update && brew install gcc gsl valgrind"
+    - MATRIX_EVAL="brew update && brew install gsl valgrind"
     - MYCXX="g++"
     - USE_DOCKER="FALSE"
     - USE_GCOV="FALSE"
@@ -67,7 +67,7 @@ script:
   make check || exit 1;
   if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -b lib -e test -e benchmark -e include -e lib -e examples -e script -i src --gcov-options '\-lp' ; fi;
   fi;
-- cat test/test-suite.log test/ut*/exe.log
+- cat test/test-suite.log test/exe.log test/ut*/exe.log
 
 notifications:
   email:

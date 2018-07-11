@@ -35,6 +35,8 @@ Now you want to configure the build process for your platform by invoking:
 
    `./configure`
 
+If you run into trouble here, `./configure --help` could be a start.
+
 Finally, you are ready to compile all the code files in our repository together, by:
 
    `make` or `make -jN`

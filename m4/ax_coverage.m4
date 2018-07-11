@@ -1,6 +1,6 @@
-# ===========================================================================
-#     https://www.gnu.org/software/autoconf-archive/ax_code_coverage.html
-# ===========================================================================
+# ===============================================================================
+# Adapted from https://www.gnu.org/software/autoconf-archive/ax_code_coverage.html
+# ================================================================================
 #
 # SYNOPSIS
 #
@@ -9,7 +9,7 @@
 # DESCRIPTION
 #
 #   Defines COVERAGE_CPPFLAGS, COVERAGE_CFLAGS,
-#   COVERAGE_CXXFLAGS and COVERAGE_LIBS which should be included
+#   COVERAGE_CXXFLAGS and COVERAGE_LDFLAGS which should be included
 #   in the CPPFLAGS, CFLAGS CXXFLAGS and LIBS/LIBADD variables of every
 #   build target (program or library) which should be built with code
 #   coverage support. Also add rules using AX_ADD_AM_MACRO_STATIC; and
@@ -34,20 +34,13 @@
 #
 #     include $(top_srcdir)/aminclude_static.am
 #
-#     my_program_LIBS = ... $(COVERAGE_LIBS) ...
+#     my_program_LIBS = ... $(COVERAGE_LDFLAGS) ...
 #     my_program_CPPFLAGS = ... $(COVERAGE_CPPFLAGS) ...
 #     my_program_CFLAGS = ... $(COVERAGE_CFLAGS) ...
 #     my_program_CXXFLAGS = ... $(COVERAGE_CXXFLAGS) ...
 #
 #     clean-local: coverage-clean
 #     dist-clean-local: coverage-dist-clean
-#
-#   This results in a "check-coverage" rule being added to any
-#   Makefile.am which do "include $(top_srcdir)/aminclude_static.am"
-#   (assuming the module has been configured with --enable-coverage).
-#   Running `make check-coverage` in that directory will run the
-#   module's test suite (`make check`) and build a code coverage report
-#   detailing the code which was touched, then print the URI for the report.
 #
 #   This code was derived from Makefile.decl in GLib, originally licensed
 #   under LGPLv2.1+.
@@ -60,6 +53,8 @@
 #   Copyright (c) 2012 Paolo Borelli
 #   Copyright (c) 2012 Dan Winship
 #   Copyright (c) 2015,2018 Bastien ROUCARIES
+#
+#   Modified in 2018 by Jan Kessler.
 #
 #   This library is free software; you can redistribute it and/or modify it
 #   under the terms of the GNU Lesser General Public License as published by
@@ -133,16 +128,14 @@ AC_DEFUN([_AX_COVERAGE_ENABLED],[
 	COVERAGE_CPPFLAGS=""
 	COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
 	COVERAGE_CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
-        COVERAGE_LIBS="--coverage"
+        COVERAGE_LDFLAGS="--coverage"
 
 	dnl Check if g++ is being used
-	AS_IF([ [[ "$CXX" == "g++"* ]] ], [ COVERAGE_LIBS="-lgcov" ])
-	AS_IF([ [[ "$CXX" == "gcc"* ]] ], [ COVERAGE_LIBS="-lgcov" ])
 
 	AC_SUBST([COVERAGE_CPPFLAGS])
 	AC_SUBST([COVERAGE_CFLAGS])
 	AC_SUBST([COVERAGE_CXXFLAGS])
-	AC_SUBST([COVERAGE_LIBS])
+	AC_SUBST([COVERAGE_LDFLAGS])
 ])
 
 AC_DEFUN([AX_COVERAGE],[

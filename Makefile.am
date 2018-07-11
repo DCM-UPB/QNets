@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = include lib test benchmark examples
+SUBDIRS = lib test benchmark examples
 
 # SUBDIRS targets
 
