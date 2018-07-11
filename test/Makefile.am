@@ -7,8 +7,8 @@ AUTOMAKE_OPTIONS = parallel-tests
 if !OPENMP
 if VALGRIND_ENABLED
   @VALGRIND_CHECK_RULES@
-  LOG_COMPILER = libtool e $(VALGRIND) --leak-check=full --track-origins=yes
+  LOG_COMPILER = $(LIBTOOL) e $(VALGRIND) --leak-check=full --track-origins=yes
 else
-  LOG_COMPILER = libtool e
+  LOG_COMPILER = $(LIBTOOL) e
 endif
 endif
