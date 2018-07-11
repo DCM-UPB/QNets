@@ -58,28 +58,85 @@ xcuserdata
 DerivedData
 *.xcuserstate
 
+# -- Automake files (http://www.gnu.org/software/automake)
+
+Makefile
+Makefile.in
+.libs
+.dirstamp
+test-suite.log
+/ar-lib
+/mdate-sh
+/py-compile
+/test-driver
+/ylwrap
+
+# --- Autoconf files (http://www.gnu.org/software/autoconf)
+
+aminclude_static.am
+config.h
+config.h.in
+config.h.in~
+config.log
+config.status
+.deps
+autom4te.cache
+/autoscan.log
+/autoscan-*.log
+/aclocal.m4
+/compile
+/config.guess
+/config.h.in
+/config.sub
+/configure
+/configure.scan
+/depcomp
+/install-sh
+/missing
+/stamp-h1
+
+# --- Files added by autoreconf -i
+
+/ltmain.sh
+libtool
+COPYING
+INSTALL
+
+# --- Texinfo files (http://www.gnu.org/software/texinfo)
+
+/texinfo.tex
+
+# --- M4 files (http://www.gnu.org/software/m4)
+
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+!ax_cxx_compile_stdcxx_11.m4
+
 # -- project specific ignores --
-lib*
-config.sh
-*exe*
+exe
+exe.prof*
 vgcore* 
+*.o
+*.dSYM
+*.swp
+*.swo
+*.gcno
+*.lo
+*.la
+*.gcda
+*.log
+*.trs
 
-src/*.o
-src/*.dSYM
-src/*.swp
-src/*.swo
+test/*.txt
+test/ut*/run_single_unittest.sh
+test/ut*/*.txt
 
-debug/*.o
-debug/*.txt
-debug/unittest/*/*.o
-debug/unittest/*/run_single_unittest.sh
-debug/unittest/*/*.txt
-
-benchmarks/*/*.o
-benchmarks/*/benchmark_*.out
+benchmark/*/benchmark_*.out
 
 examples/*/a.out
-examples/*/*.o
 examples/*/*.txt
 examples/*/*/*.txt
 

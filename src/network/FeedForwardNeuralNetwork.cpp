@@ -740,42 +740,6 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool sto
 
 // --- Constructor
 
-/* is this still useful?
-FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(std::vector<std::vector<std::string>> &actf){
-    using namespace std;
-
-    // check input
-    if (actf.size() < 3)
-        throw std::invalid_argument( "There must be at least 3 layers" );
-    for (vector<string> layer_actf : actf){
-        if (layer_actf.size() < 2)
-            throw std::invalid_argument( "Each layer must contain at least 2 units (one is for the offset)" );
-    }
-
-    // declare the NN with the right geometry
-    _construct(actf[0].size(), actf[1].size(), actf.back().size());
-    for (unsigned int l=2; l<actf.size()-1; ++l){
-        this->pushHiddenLayer(actf[l].size());
-    }
-
-    // set the activation functions
-    ActivationFunctionInterface * af;
-    for (unsigned int l=0; l<actf.size(); ++l){
-        for (unsigned int u=1; u<actf[l].size(); ++u){
-            af = std_actf::provideActivationFunction(actf[l][u]);
-
-            if (af){
-                if (l != 0) _L_nn[l-1]->getNNUnit(u-1)->setActivationFunction(af);
-            } else{
-                cout << "ERROR FeedForwardNeuralNetwork(const int &nlayers, const int * layersize, const char ** actf) : given activation function " << actf[l][u] << " not known" << endl;
-                throw std::invalid_argument( "invalid activation function id code" );
-            }
-        }
-    }
-
-}
-*/
-
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 {
     // open file
