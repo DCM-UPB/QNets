@@ -1,2 +1,0 @@
-AC_CONFIG_FILES([
-lib/Makefile include/Makefile test/ut1/Makefile test/ut8/Makefile test/ut2/Makefile test/ut5/Makefile test/ut9/Makefile test/ut3/Makefile test/ut7/Makefile test/Makefile test/ut6/Makefile test/ut4/Makefile examples/ex9/Makefile examples/ex7/Makefile examples/ex1/Makefile examples/ex6/Makefile examples/ex4/Makefile examples/ex5/Makefile examples/ex2/Makefile examples/Makefile examples/ex8/Makefile examples/ex3/Makefile doc/Makefile Makefile benchmark/bench_actfs_derivs/Makefile benchmark/Makefile benchmark/bench_actfs_ffprop/Makefile ])
