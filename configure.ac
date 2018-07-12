@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([NNVMC-FFNN], [0.1], [ithanil@mail.uni-paderborn.de])
+AC_INIT([FFNN], [0.1], [ithanil@mail.uni-paderborn.de])
 : ${CXXFLAGS=""} # delete default optimization user flags
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -142,7 +142,6 @@ examples/ex2/Makefile
 examples/Makefile
 examples/ex8/Makefile
 examples/ex3/Makefile
-doc/Makefile
 Makefile
 benchmark/bench_actfs_derivs/Makefile
 benchmark/Makefile

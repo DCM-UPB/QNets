@@ -24,18 +24,24 @@ However, in principle any system with C++11 supporting compiler should work, at 
 
 # Build the library
 
-Make sure you have a reasonably recent development version (>=2.3?) of the GSL library installed on your system. Furthermore, we rely on the Autotools build system and libtool.
+Make sure you have a reasonably recent development version (>=2.3?) of the GSL library on your system. Furthermore, we rely on the Autotools build system and libtool.
 Optionally, if you have valgrind installed on your system, it will be used to check for memory errors when running unittests.
 
-If you have the prerequisites on your system, you have to setup the build environment by using the following script in the top level directory:
+If you have the GSL librariy in non-standard paths or want to use custom compiler flags, copy a little script:
+
+   `cp script/config_template.sh config.sh`
+
+Now edit `config.sh` to your needs and before proceeding run:
+
+   `source config.sh`
+
+If you have the prerequisites, you may setup the build environment by using the following script in the top level directory:
 
    `./autogen.sh`
 
 Now you want to configure the build process for your platform by invoking:
 
    `./configure`
-
-If you run into trouble here, `./configure --help` could be a start.
 
 Finally, you are ready to compile all the code files in our repository together, by:
 
