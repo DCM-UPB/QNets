@@ -113,9 +113,9 @@ m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
-!ax_cxx_compile_stdcxx_11.m4
 
 # -- project specific ignores --
+config.sh
 exe
 exe.prof*
 vgcore* 
@@ -131,12 +131,10 @@ vgcore*
 *.trs
 
 test/*.txt
-test/ut*/run_single_unittest.sh
 test/ut*/*.txt
 
 benchmark/*/benchmark_*.out
 
-examples/*/a.out
 examples/*/*.txt
 examples/*/*/*.txt
 

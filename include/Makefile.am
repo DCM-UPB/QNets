@@ -1,4 +1,5 @@
 include-links:
 	rm -f *.hpp
-	ln -sf ../src/*/*.hpp ./
+	ln -s ../src/*/*.hpp ./
+
 .PHONY: include-links
