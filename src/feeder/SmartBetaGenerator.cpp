@@ -52,7 +52,7 @@ namespace smart_beta{
             //   mu_beta = mu_actf_input / (sum_U_sources mu_actf_output)
             //   sigma_beta = sigma_actf_input / (sum_U_sources mu_actf_output)
             //
-            NetworkUnitRay * ray = _castFeederToRay(U->getFeeder());
+            NetworkUnitFeederInterface * ray = U->getFeeder();
             if ( ray == 0 ){
                 throw std::runtime_error( "Provided unit does not have a ray, therefore it does not need beta" );
             }
@@ -72,7 +72,7 @@ namespace smart_beta{
         }
 
 
-        void _setRandomBeta(NetworkUnitRay * ray, const double &mu, const double &sigma){
+        void _setRandomBeta(NetworkUnitFeederInterface * ray, const double &mu, const double &sigma){
             //
             // Sample the beta of a given ray using a normal distribution with mean mu and standard deviation sigma.
             //
@@ -88,7 +88,7 @@ namespace smart_beta{
         }
 
 
-        void _makeBetaOrthogonal(NetworkUnitRay * fixed_ray, NetworkUnitRay * ray){
+        void _makeBetaOrthogonal(NetworkUnitFeederInterface * fixed_ray, NetworkUnitFeederInterface * ray){
             //
             // Modify ray in order to make it orthogonal to fixed_ray, preserving the norm
             //
@@ -147,14 +147,14 @@ namespace smart_beta{
             FedNetworkUnit * u0 = L->getFedUnit(idx[0]);
             double mu, sigma;
             _computeBetaMuAndSigma(u0, mu, sigma);
-            NetworkUnitRay * ray0 = _castFeederToRay(u0->getFeeder())
+            NetworkUnitFeederInterface * ray0 = u0->getFeeder();
             _setRandomBeta(ray0, mu, sigma);
 
             // set the other unit beta until a complete basis set is formed
             const int n_li_units = ( signed(idx.size()) <= ray0->getNBeta()-BETA_INDEX_OFFSET ) ? signed(idx.size()) : ray0->getNBeta()-BETA_INDEX_OFFSET;
             for (int i=1; i<n_li_units; ++i){
                 FedNetworkUnit * u = L->getFedUnit(idx[i]);
-                NetworkUnitRay * ray = _castFeederToRay(u->getFeeder());
+                NetworkUnitFeederInterface * ray = u->getFeeder();
                 double mu, sigma;
                 bool flag_sample_random_beta = true;
                 while (flag_sample_random_beta) {
@@ -163,7 +163,7 @@ namespace smart_beta{
                     flag_sample_random_beta = false;
                     for (int j=0; j<i; ++j){
                         try{
-                            _makeBetaOrthogonal(_castFeederToRay(L->getFedUnit(idx[j])->getFeeder()), ray);
+                            _makeBetaOrthogonal(L->getFedUnit(idx[j])->getFeeder(), ray);
                         } catch (std::runtime_error &e) {
                             // by applying the orthogonality prcedure, the norm of the beta vector has been reduced too much...
                             // This means the vector had the same direction of a previous one and it was not possible to generate a orthogonal one
@@ -176,7 +176,7 @@ namespace smart_beta{
             // set all the remaninig unit beta, which will be redundant / linear dependent
             for (int i=n_li_units; i<signed(idx.size()) ; ++i){
                 FedNetworkUnit * u = L->getFedUnit(idx[i]);
-                NetworkUnitRay * ray = _castFeederToRay(u->getFeeder());
+                NetworkUnitFeederInterface * ray = u->getFeeder();
                 double mu, sigma;
                 _computeBetaMuAndSigma(u, mu, sigma);
                 double best_dot_product = -1.;
@@ -189,7 +189,7 @@ namespace smart_beta{
                     double min_dot_product = -1.;
                     for (int j=0; j<i; ++j){
                         vector<double> beta_v;
-                        NetworkUnitRay * rayj = _castFeederToRay(L->getFedUnit(idx[j])->getFeeder());
+                        NetworkUnitFeederInterface * rayj = L->getFedUnit(idx[j])->getFeeder();
                         for (int ib=BETA_INDEX_OFFSET; ib<rayj->getNBeta(); ++ib) beta_v.push_back(rayj->getBeta(ib));
                         const double dot_product = abs(inner_product(begin(beta_u), end(beta_u), begin(beta_v), 0.0))/inner_product(begin(beta_u), end(beta_u), begin(beta_u), 0.0);
                         if (min_dot_product < 0.) min_dot_product = dot_product;

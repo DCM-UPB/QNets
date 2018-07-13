@@ -6,6 +6,7 @@
 #include "NetworkUnitFeederInterface.hpp"
 #include "NetworkUnitRay.hpp"
 
+
 namespace smart_beta {
 
     namespace details {
@@ -18,8 +19,8 @@ namespace smart_beta {
         NetworkUnitRay * _castFeederToRay(NetworkUnitFeederInterface * const feeder);
         std::vector<int> _findIndexesOfUnitsWithRay(FedNetworkLayer * L);
         void _computeBetaMuAndSigma(FedNetworkUnit * U, double &mu, double &sigma);
-        void _setRandomBeta(NetworkUnitRay * ray, const double &mu, const double &sigma);
-        void _makeBetaOrthogonal(NetworkUnitRay * fixed_ray, NetworkUnitRay * ray);
+        void _setRandomBeta(NetworkUnitFeederInterface * ray, const double &mu, const double &sigma);
+        void _makeBetaOrthogonal(NetworkUnitFeederInterface * fixed_ray, NetworkUnitFeederInterface * ray);
     }
 
     // generate and set smart betas for the Layer L

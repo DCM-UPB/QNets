@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 class NetworkUnit;  // forward declaration to solve circular dependency
 
@@ -14,16 +15,16 @@ class NetworkUnitFeederInterface: public SerializableComponent
 protected:
     std::vector<NetworkUnit *> _source;   // units from which the feeder takes output
     std::vector<std::vector<int>> _map_index_to_sources; // store indices of relevant sources for each variational parameter (in sources)
-    int _vp_index_offset // if we add vp, our vp indices start from here (-1 means variational parameter system not initialized)
+    int _vp_id_shift; // if we add vp, our vp indices start from here (-1 means variational parameter system not initialized)
 
 public:
-    NetworkUnitFeederInterface(): _vp_index_offset(-1) {}
+    NetworkUnitFeederInterface(): _vp_id_shift(-1) {}
     virtual ~NetworkUnitFeederInterface(){_source.clear(); _map_index_to_sources.clear();}
 
     // set string codes
     std::string getClassIdCode() {return "feeder";}
     virtual std::string getParams();
-    virtual std::string setParams(const std::string &params);
+    virtual void setParams(const std::string &params);
 
     // return the feed mean value (mu) and standard deviation (sigma)
     virtual double getFeedMu() = 0;
@@ -39,6 +40,11 @@ public:
     // derivatives
     virtual double getFirstDerivativeFeed(const int &i) = 0;  // e.g. get   sum_j( b_j dx_j/dx0_i ), where x0 is the coordinate in the input layer
     virtual double getSecondDerivativeFeed(const int &i) = 0;  // e.g. get   sum_j( b_j d^2x_j/dx0_j^2 ), where x0 is the coordinate in the input layer
+
+    // beta (meaning the individual factors directly multiplied to each used source output)
+    virtual int getNBeta(){return 0;} // we default to no beta
+    virtual double getBeta(const int &i) {throw std::invalid_argument("[Feeder::getBeta] Invalid Beta index.");}
+    virtual void setBeta(const int &i, const double &b) {throw std::invalid_argument("[Feeder::setBeta] Invalid Beta index.");}
 
     // variational parameters
     virtual int getNVariationalParameters(){return 0;}  // return the number of variational parameters involved

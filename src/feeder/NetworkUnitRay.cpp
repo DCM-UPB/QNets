@@ -78,7 +78,7 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, c
     //       max_id = starting_index + source.size() - 1 ,
     //       may be in use FOR (and trivially IN) this ray.
 
-    idx_base = NetworkUnitFeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp)
+    int idx_base = NetworkUnitFeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp);
 
     _intensity_id.clear();
 
@@ -118,7 +118,7 @@ void NetworkUnitRay::setParams(const std::string &params)
 
     double beta;
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
-        str = readParamValue(params, "b"+std::to_string(i));
+        std::string str = readParamValue(params, "b"+std::to_string(i));
         if (setParamValue(str, beta)) this->setBeta(i, beta);
     }
 }

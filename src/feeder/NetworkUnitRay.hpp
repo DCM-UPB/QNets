@@ -23,7 +23,7 @@ protected:
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
 
 public:
-    explicit NetworkUnitRay(NetworkLayer * nl): NetworkUnitFeederInterface();
+    explicit NetworkUnitRay(NetworkLayer * nl);
     ~NetworkUnitRay();
 
     // string code methods
