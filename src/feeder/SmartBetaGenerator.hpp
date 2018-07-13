@@ -3,7 +3,8 @@
 
 #include "FeedForwardNeuralNetwork.hpp"
 #include "FedNetworkLayer.hpp"
-
+#include "NetworkUnitFeederInterface.hpp"
+#include "NetworkUnitRay.hpp"
 
 namespace smart_beta {
 
@@ -14,10 +15,11 @@ namespace smart_beta {
         const int N_TRY_BEST_LD_BETA = 20; // how many tries to find best ld beta
         const int BETA_INDEX_OFFSET = 0; // leave out beta before index (experimental, don't use)
 
-        std::vector<int> _findIndexesOfUnitsWithFeeder(FedNetworkLayer * L);
+        NetworkUnitRay * _castFeederToRay(NetworkUnitFeederInterface * const feeder);
+        std::vector<int> _findIndexesOfUnitsWithRay(FedNetworkLayer * L);
         void _computeBetaMuAndSigma(FedNetworkUnit * U, double &mu, double &sigma);
-        void _setRandomBeta(NetworkUnitFeederInterface * feeder, const double &mu, const double &sigma);
-        void _makeBetaOrthogonal(NetworkUnitFeederInterface * fixed_feeder, NetworkUnitFeederInterface * feeder);
+        void _setRandomBeta(NetworkUnitRay * ray, const double &mu, const double &sigma);
+        void _makeBetaOrthogonal(NetworkUnitRay * fixed_ray, NetworkUnitRay * ray);
     }
 
     // generate and set smart betas for the Layer L

@@ -38,15 +38,15 @@ int main(){
     ffnn->getNNLayer(1)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
 
 
-    // --- _findIndexesOfUnitsWithFeeder
+    // --- _findIndexesOfUnitsWithRay
     vector<int> idx;
-    idx = smart_beta::details::_findIndexesOfUnitsWithFeeder(ffnn->getFedLayer(0));
+    idx = smart_beta::details::_findIndexesOfUnitsWithRay(ffnn->getFedLayer(0));
     assert( idx.size() == 4);
     assert( idx[0] == 0 );
     assert( idx[1] == 1 );
     assert( idx[2] == 2 );
     assert( idx[3] == 3 );
-    idx = smart_beta::details::_findIndexesOfUnitsWithFeeder(ffnn->getFedLayer(1));
+    idx = smart_beta::details::_findIndexesOfUnitsWithRay(ffnn->getFedLayer(1));
     assert( idx.size() == 2);
     assert( idx[0] == 0 );
     assert( idx[1] == 1 );
