@@ -38,21 +38,21 @@ void NetworkUnitRay::setBeta(const int &i, const double &b){_intensity[i]=b;}
 
 int NetworkUnitRay::getNVariationalParameters()
 {
-    return (_intensity_id_shift > -1) ? _intensity.size() : 0;
+    return (_vp_id_shift > -1) ? _intensity.size() : 0;
 }
 
 int NetworkUnitRay::getMaxVariationalParameterIndex()
 {
-    if (_intensity_id_shift > -1) {
-        return _intensity_id_shift + getNVariationalParameters() - 1;
+    if (_vp_id_shift > -1) {
+        return _vp_id_shift + getNVariationalParameters() - 1;
     }
     else return -1; // there are no vp in the whole feed
 }
 
 bool NetworkUnitRay::setVariationalParameterValue(const int &id, const double &value){
-    if (_intensity_id_shift > -1) {
+    if (_vp_id_shift > -1) {
         if ( isVPIndexUsedInFeeder(id) ){
-            _intensity[ id - _intensity_id_shift ] = value;
+            _intensity[ id - _vp_id_shift ] = value;
             return true;
         }
     }
@@ -61,9 +61,9 @@ bool NetworkUnitRay::setVariationalParameterValue(const int &id, const double &v
 
 
 bool NetworkUnitRay::getVariationalParameterValue(const int &id, double &value){
-    if (_intensity_id_shift > -1) {
+    if (_vp_id_shift > -1) {
         if ( isVPIndexUsedInFeeder(id) ){
-            value = _intensity[ id - _intensity_id_shift ];
+            value = _intensity[ id - _vp_id_shift ];
             return true;
         }
     }
@@ -72,38 +72,19 @@ bool NetworkUnitRay::getVariationalParameterValue(const int &id, double &value){
 }
 
 
-int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_betas){
+int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
     // Here we assign external vp indexes to internal indexes.
-    // Also, we create two betas_used sets which are explained in the header.
     // NOTE: The current method assumes, that no index larger than max_id,
     //       max_id = starting_index + source.size() - 1 ,
     //       may be in use FOR (and trivially IN) this ray.
-    // NOTE2: betas_used sets are automatically sorted -> binary_search can be used later
+
+    idx_base = NetworkUnitFeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp)
 
     _intensity_id.clear();
-    _map_index_to_sources.clear();
 
-    for (int j=0; j<starting_index; ++j) {
-        std::vector<int> empty_vec;
-        _map_index_to_sources.push_back(empty_vec);
-    }
-
-    for (std::vector<NetworkUnit *>::size_type i=1; i<_source.size(); ++i) {
-        if(FedNetworkUnit * fu = dynamic_cast<FedNetworkUnit *>(_source[i])) {
-            NetworkUnitFeederInterface * feeder = fu->getFeeder();
-            if (feeder != 0) {
-                for (int j=0; j<starting_index; ++j) {
-                    if (feeder->isVPIndexUsedForFeeder(j)) {
-                        _map_index_to_sources[j].push_back(i);
-                    }
-                }
-            }
-        }
-    }
-
-    if (flag_add_betas) {
-        _intensity_id_shift = starting_index;
-        int idx=starting_index;
+    if (flag_add_vp) {
+        _vp_id_shift = idx_base;
+        int idx=_vp_id_shift;
         for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
             _intensity_id.push_back(idx);
             idx++;
@@ -112,8 +93,7 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, c
         return idx;
     }
     else {
-        _intensity_id_shift = -1;
-        return starting_index;
+        return idx_base;
     }
 }
 
@@ -122,10 +102,9 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, c
 
 std::string NetworkUnitRay::getParams()
 {
-    std::string id_shift_str;
+    std::string id_shift_str = NetworkUnitFeederInterface::getParams();
     std::vector<std::string> beta_strs;
 
-    id_shift_str = composeParamCode("id_shift", _intensity_id_shift);
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
         beta_strs.push_back(composeParamCode("b"+std::to_string(i), _intensity[i]));
     }
@@ -135,12 +114,9 @@ std::string NetworkUnitRay::getParams()
 
 void NetworkUnitRay::setParams(const std::string &params)
 {
-    int starting_index;
+    NetworkUnitFeederInterface::setParams(params);
+
     double beta;
-    std::string str = readParamValue(params, "id_shift");
-
-    if (setParamValue(str, starting_index)) this->setVariationalParametersIndexes(starting_index);
-
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
         str = readParamValue(params, "b"+std::to_string(i));
         if (setParamValue(str, beta)) this->setBeta(i, beta);
@@ -182,10 +158,10 @@ double NetworkUnitRay::getSecondDerivativeFeed(const int &i2d){
 double NetworkUnitRay::getVariationalFirstDerivativeFeed(const int &iv1d){
     double feed = 0.;
 
-    if (iv1d < _intensity_id_shift+getNVariationalParameters()) {
+    if (iv1d < _vp_id_shift+getNVariationalParameters()) {
         // if the variational parameter with index iv1d is in the ray add the following element
-        if (iv1d >= _intensity_id_shift) {
-            feed += _source[ iv1d - _intensity_id_shift ]->getValue();
+        if (iv1d >= _vp_id_shift) {
+            feed += _source[ iv1d - _vp_id_shift ]->getValue();
         }
         else {
             // add source components
@@ -202,10 +178,10 @@ double NetworkUnitRay::getVariationalFirstDerivativeFeed(const int &iv1d){
 double NetworkUnitRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
     double feed = 0.;
 
-    if (iv1d < _intensity_id_shift+getNVariationalParameters()) {
+    if (iv1d < _vp_id_shift+getNVariationalParameters()) {
         // if the variational parameter with index iv1d is in the ray add the following element
-        if (iv1d >= _intensity_id_shift) {
-            feed += _source[ iv1d - _intensity_id_shift ]->getFirstDerivativeValue(i1d);
+        if (iv1d >= _vp_id_shift) {
+            feed += _source[ iv1d - _vp_id_shift ]->getFirstDerivativeValue(i1d);
         }
         else {
             // add source components
@@ -222,10 +198,10 @@ double NetworkUnitRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv
 double NetworkUnitRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
     double feed = 0.;
 
-    if (iv2d < _intensity_id_shift+getNVariationalParameters()) {
+    if (iv2d < _vp_id_shift+getNVariationalParameters()) {
         // if the variational parameter with index iv2d is in the ray add the following element
-        if (iv2d >= _intensity_id_shift) {
-            feed += _source[ iv2d - _intensity_id_shift ]->getSecondDerivativeValue(i2d);
+        if (iv2d >= _vp_id_shift) {
+            feed += _source[ iv2d - _vp_id_shift ]->getSecondDerivativeValue(i2d);
         }
         else {
             // add source components
@@ -239,33 +215,9 @@ double NetworkUnitRay::getCrossSecondDerivativeFeed(const int &i2d, const int &i
 }
 
 
-// --- Beta Index
-
-bool NetworkUnitRay::isVPIndexUsedInFeeder(const int &id){
-    if ( _intensity_id_shift <= id && id <_intensity_id_shift+getNVariationalParameters()) {
-        return true;
-    }
-    else return false;
-}
-
-bool NetworkUnitRay::isVPIndexUsedInSources(const int &id){
-    if (id < _intensity_id_shift) {
-        return (!_map_index_to_sources[id].empty());
-    }
-    else return false;
-}
-
-bool NetworkUnitRay::isVPIndexUsedForFeeder(const int &id){
-    if ( isVPIndexUsedInFeeder(id) || isVPIndexUsedInSources(id) ) {
-        return true;
-    }
-    else return false;
-}
-
-
 // --- Constructor
 
-NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl) {
+NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl): NetworkUnitFeederInterface() {
     // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
     // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
     const double bah = 4 * pow(nl->getNUnits(), -0.5); // (b-a)/2
@@ -278,15 +230,12 @@ NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl) {
         _intensity.push_back(_rd(_rgen));
     }
 
-    _intensity_id_shift = -1; // pro forma
     setVariationalParametersIndexes(nl->getMaxVariationalParameterIndex(), false); // per default we don't add betas as variational parameters
 }
 
 // --- Destructor
 
 NetworkUnitRay::~NetworkUnitRay(){
-    _source.clear();
     _intensity.clear();
     _intensity_id.clear();
-    _map_index_to_sources.clear();
 }

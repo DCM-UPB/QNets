@@ -19,16 +19,11 @@ protected:
     std::uniform_real_distribution<double> _rd;
 
     // key component of the ray: the source and their intensisities
-    std::vector<NetworkUnit *> _source;   // units from which the ray takes the values from
     std::vector<double> _intensity;   // intensity of each sorgent unit, i.e. its weight
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
-    int _intensity_id_shift = -1;  // shift of the previous vector (-1 means we don't add our betas to variational parameters)
-
-    // store indices of relevant sources for each variational parameter (in sources)
-    std::vector<std::vector<int>> _map_index_to_sources;
 
 public:
-    explicit NetworkUnitRay(NetworkLayer * nl);
+    explicit NetworkUnitRay(NetworkLayer * nl): NetworkUnitFeederInterface();
     ~NetworkUnitRay();
 
     // string code methods
@@ -40,10 +35,6 @@ public:
     double getFeedMu();
     double getFeedSigma();
 
-    // sources
-    int getNSources(){return _source.size();}
-    NetworkUnit * getSource(const int &i){return _source[i];}
-
     // beta
     int getNBeta();
     double getBeta(const int &i);
@@ -52,7 +43,7 @@ public:
     // Variational Parameters
     int getNVariationalParameters();
     int getMaxVariationalParameterIndex();
-    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_betas = true);
+    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = true);
     bool getVariationalParameterValue(const int &id, double &value);
     bool setVariationalParameterValue(const int &id, const double &value);
 
@@ -63,11 +54,6 @@ public:
     double getVariationalFirstDerivativeFeed(const int &iv1d);
     double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d);
     double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d);
-
-    // Beta Index
-    bool isVPIndexUsedInFeeder(const int &id);
-    bool isVPIndexUsedInSources(const int &id);
-    bool isVPIndexUsedForFeeder(const int &id);
 };
 
 #endif
