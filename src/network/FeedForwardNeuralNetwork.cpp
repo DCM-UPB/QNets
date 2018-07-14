@@ -608,18 +608,6 @@ void FeedForwardNeuralNetwork::setGlobalActivationFunctions(ActivationFunctionIn
 }
 
 
-void FeedForwardNeuralNetwork::setLayerSize(const int &li, const int &size)
-{
-    _L[li]->setSize(size);
-}
-
-
-void FeedForwardNeuralNetwork::setNNLayerActivationFunction(const int &li, ActivationFunctionInterface * actf)
-{
-    _L_nn[li]->setActivationFunction(actf);
-}
-
-
 void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
 {
     if (_flag_connected)

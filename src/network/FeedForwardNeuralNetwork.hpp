@@ -35,7 +35,8 @@ protected:
 
 public:
     FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize);
-    explicit FeedForwardNeuralNetwork(const char * filename);  // file must be formatted as with the method storeOnFile()
+    explicit FeedForwardNeuralNetwork(const char * fil
+                                      ename);  // file must be formatted as with the method storeOnFile()
     explicit FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn);
     ~FeedForwardNeuralNetwork();
 
@@ -66,8 +67,6 @@ public:
 
     // --- Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
-    void setLayerSize(const int &li, const int &size);
-    void setNNLayerActivationFunction(const int &li, ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
 
