@@ -1,10 +1,11 @@
 #ifndef INPUT_UNIT
 #define INPUT_UNIT
 
-#include "ShifterScalerNetworkUnit.hpp"
+#include "ShifterScalerUnit.hpp"
+#include <string>
 
 // Input Unit
-class InputUnit: public ShifterScalerNetworkUnit
+class InputUnit: public ShifterScalerUnit
 {
 protected:
     const int _index;
@@ -12,6 +13,7 @@ protected:
 
 public:
     explicit InputUnit(const int &index, const double inputMu = 0., const double inputSigma = 1.): _index(index) {_inputMu = inputMu; _inputSigma = inputSigma;} // the index of the input unit, i.e. d/dx_index f(_pv) = 1
+    virtual ~InputUnit(){}
 
     // string code methods
     virtual std::string getIdCode(){return "IN";} // return identifier for unit type

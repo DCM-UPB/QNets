@@ -1,5 +1,5 @@
-#ifndef SHIFTER_SCALER_NETWORK_UNIT
-#define SHIFTER_SCALER_NETWORK_UNIT
+#ifndef SHIFTER_SCALER_UNIT
+#define SHIFTER_SCALER_UNIT
 
 #include "NetworkUnit.hpp"
 #include "StringCodeUtilities.hpp"
@@ -7,7 +7,7 @@
 #include <string>
 
 // Unit with linear output function applied after activation
-class ShifterScalerNetworkUnit: virtual public NetworkUnit
+class ShifterScalerUnit: virtual public NetworkUnit
 {
 private:
     void _applyShiftScale() { // meant to be called in computeValues
@@ -25,7 +25,8 @@ protected:
 
 public:
     // Constructor
-    ShifterScalerNetworkUnit(const double shift = 0., const double scale = 1.)  {_shift = shift; _scale = scale;}
+    ShifterScalerUnit(const double shift = 0., const double scale = 1.)  {_shift = shift; _scale = scale;}
+    virtual ~ShifterScalerUnit(){};
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
     // (to reach m=0, s=1 normalized output)
@@ -39,8 +40,8 @@ public:
 
     // string code methods
     virtual std::string getParams(){return composeCodes(composeParamCode("shift", _shift), composeParamCode("scale", _scale));} // return parameter string
-
     virtual void setParams(const std::string &params){setParamValue(params, "shift", _shift); setParamValue(params, "scale", _scale);};
+    virtual std::string getIdCode() = 0; // abstract class
 
     // Setters
     void setShift(const double shift){_shift=shift;}

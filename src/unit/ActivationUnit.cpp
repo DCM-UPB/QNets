@@ -1,4 +1,4 @@
-#include "NNUnit.hpp"
+#include "ActivationUnit.hpp"
 #include "StringCodeUtilities.hpp"
 #include "ActivationFunctionManager.hpp"
 
@@ -6,9 +6,8 @@
 
 // --- String Code
 
-void NNUnit::setMemberParams(const std::string &memberTreeCode)
+void ActivationUnit::setMemberParams(const std::string &memberTreeCode)
 {
-    FedUnit::setMemberParams(memberTreeCode);
     using namespace std;
     std::string actfCode = readTreeCode(memberTreeCode, countNMembers(memberTreeCode)>1 ? 1 : 0); // atm using index
     this->setActivationFunction(std_actf::provideActivationFunction(readIdCode(actfCode)));
@@ -17,7 +16,7 @@ void NNUnit::setMemberParams(const std::string &memberTreeCode)
 
 // --- Computation
 
-void NNUnit::computeOutput(){
+void ActivationUnit::computeOutput(){
     const bool flag_d1 = _v1d || _v2d || _v1vd || _v1d1vd;
     const bool flag_d2 = _v2d || _v1vd;
     const bool flag_d3 = _v2d1vd;

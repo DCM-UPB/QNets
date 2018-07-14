@@ -35,8 +35,7 @@ protected:
 
 public:
     FeedForwardNeuralNetwork(const int &insize, const int &hidlaysize, const int &outsize);
-    explicit FeedForwardNeuralNetwork(const char * fil
-                                      ename);  // file must be formatted as with the method storeOnFile()
+    explicit FeedForwardNeuralNetwork(const char * filename);  // file must be formatted as with the method storeOnFile()
     explicit FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn);
     ~FeedForwardNeuralNetwork();
 

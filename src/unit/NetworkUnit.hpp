@@ -49,12 +49,13 @@ public:
     virtual double getIdealProtoSigma(){return 1.;}
 
     // return the final output mu and sigma
-    // (here pretending a ideal pv distribution)
-    virtual double getOutputMu(){return 0;}
-    virtual double getOutputSigma(){return 1;}
+    // (here pretending a constant pv input)
+    virtual double getOutputMu(){return _pv;}
+    virtual double getOutputSigma(){return 0;}
 
     // BaseComponent IdCodes
     virtual std::string getClassIdCode(){return "UNIT";}
+    virtual std::string getIdCode() = 0; // virtual class
 
     // Setters
     void setProtoValue(const double &pv){_pv=pv;}

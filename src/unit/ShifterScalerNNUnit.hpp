@@ -1,20 +1,23 @@
 #ifndef SHIFTER_SCALER_NN_UNIT
 #define SHIFTER_SCALER_NN_UNIT
 
-#include "ShifterScalerNetworkUnit.hpp"
+#include "ShifterScalerUnit.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
-#include "FeederInterface.hpp"
+#include "NNRay.hpp"
 
 #include <cstddef> // for NULL
+#include <string>
 
-// ShiftScaled Neural Network Unit
-class ShifterScalerNNUnit: public NNUnit, public ShifterScalerNetworkUnit
+// ShiftScaled NNUnit
+class ShifterScalerNNUnit: public NNUnit, public ShifterScalerUnit
 {
 public:
     // Constructor
-    ShifterScalerNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), FeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerNetworkUnit(shift, scale) {};
+    ShifterScalerNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NNRay * ray = NULL, const double shift = 0., const double scale = 1.)
+        : NNUnit(actf, ray), ShifterScalerUnit(shift, scale) {};
+    virtual ~ShifterScalerNNUnit(){};
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
     // (we copy NNUnit's IdealProto methods)
@@ -26,6 +29,8 @@ public:
     virtual double getOutputSigma(){return NNUnit::getOutputSigma() * _scale;}
 
     // string code methods
+    virtual std::string getParams(){return composeCodes(NNUnit::getParams(), ShifterScalerUnit::getParams());} // return parameter string
+    virtual void setParams(const std::string &params){NNUnit::setParams(params); ShifterScalerUnit::setParams(params);}
     virtual std::string getIdCode() = 0; // this class is meant to be abstract
 };
 
