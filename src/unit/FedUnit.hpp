@@ -1,5 +1,5 @@
-#ifndef FED_NETWORK_UNIT
-#define FED_NETWORK_UNIT
+#ifndef FED_UNIT
+#define FED_UNIT
 
 #include "NetworkUnit.hpp"
 #include "FeederInterface.hpp"

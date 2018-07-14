@@ -1,25 +1,31 @@
-#ifndef NETWORK_UNIT_FEEDER_INTERFACE
-#define NETWORK_UNIT_FEEDER_INTERFACE
+#ifndef FEEDER_INTERFACE
+#define FEEDER_INTERFACE
 
 #include "SerializableComponent.hpp"
-#include "NetworkUnit.hpp"
 
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 class NetworkUnit;  // forward declaration to solve circular dependency
+class NetworkLayer;
 
 class FeederInterface: public SerializableComponent
 {
 protected:
-    std::vector<NetworkUnit *> _source;   // units from which the feeder takes output
+    // sources
+    std::vector<NetworkUnit *> _sourcePool; // stored pool of possible sources
+    std::vector<NetworkUnit *> _source;   // actual sources from which the feeder takes output (to be filled by child)
+    std::vector<int> _source_ids;  // which index in sourcePool is the index in source
     std::vector<std::vector<int>> _map_index_to_sources; // store indices of relevant sources for each variational parameter (in sources)
+
+    // beta / variational parameters
+    std::vector<double> _beta;   // intensity of each sorgent unit, i.e. its weight
+
     int _vp_id_shift; // if we add vp, our vp indices start from here (-1 means variational parameter system not initialized)
 
 public:
-    FeederInterface(): _vp_id_shift(-1) {}
-    virtual ~FeederInterface(){_source.clear(); _map_index_to_sources.clear();}
+    explicit FeederInterface(NetworkLayer * nl);
+    virtual ~FeederInterface();
 
     // set string codes
     std::string getClassIdCode() {return "feeder";}
@@ -42,9 +48,9 @@ public:
     virtual double getSecondDerivativeFeed(const int &i) = 0;  // e.g. get   sum_j( b_j d^2x_j/dx0_j^2 ), where x0 is the coordinate in the input layer
 
     // beta (meaning the individual factors directly multiplied to each used source output)
-    virtual int getNBeta(){return 0;} // we default to no beta
-    virtual double getBeta(const int &i) {throw std::invalid_argument("[Feeder::getBeta] Invalid Beta index.");}
-    virtual void setBeta(const int &i, const double &b) {throw std::invalid_argument("[Feeder::setBeta] Invalid Beta index.");}
+    int getNBeta(){return _beta.size();}
+    double getBeta(const int &i){return _beta[i];}
+    void setBeta(const int &i, const double &b){_beta[i]=b;}
 
     // variational parameters
     virtual int getNVariationalParameters(){return 0;}  // return the number of variational parameters involved

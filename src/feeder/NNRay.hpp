@@ -1,5 +1,5 @@
-#ifndef NETWORK_UNIT_RAY
-#define NETWORK_UNIT_RAY
+#ifndef NN_RAY
+#define NN_RAY
 
 #include "FeederInterface.hpp"
 #include "NetworkUnit.hpp"
@@ -18,13 +18,9 @@ protected:
     std::mt19937_64 _rgen;
     std::uniform_real_distribution<double> _rd;
 
-    // key component of the ray: the source and their intensisities
-    std::vector<double> _intensity;   // intensity of each sorgent unit, i.e. its weight
-    std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
-
 public:
     explicit NNRay(NetworkLayer * nl);
-    ~NNRay();
+    ~NNRay(){};
 
     // string code methods
     std::string getIdCode(){return "RAY";}; // return an identification string
@@ -34,11 +30,6 @@ public:
     // return the feed mean value (mu) and standard deviation (sigma)
     double getFeedMu();
     double getFeedSigma();
-
-    // beta
-    int getNBeta();
-    double getBeta(const int &i);
-    void setBeta(const int &i, const double &b);
 
     // Variational Parameters
     int getNVariationalParameters();

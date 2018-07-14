@@ -1,6 +1,27 @@
 #include "FeederInterface.hpp"
 #include "NetworkUnit.hpp"
+#include "NetworkLayer.hpp"
 #include "FedUnit.hpp"
+
+
+// --- Base Constructor/Desctructor
+
+FeederInterface::FeederInterface(NetworkLayer * nl): _vp_id_shift(-1)
+{
+    for (int i=0; i<nl->getNUnits(); ++i){
+        _sourcePool.push_back(nl->getUnit(i));
+    }
+}
+
+FeederInterface::~FeederInterface()
+{
+    _sourcePool.clear();
+    _source.clear();
+    _source_ids.clear();
+    _beta.clear();
+    _map_index_to_sources.clear();
+}
+
 
 // --- StringCode methods
 
