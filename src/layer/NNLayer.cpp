@@ -9,7 +9,7 @@
 
 void NNLayer::_registerUnit(NetworkUnit * newUnit)
 {
-    FedNetworkLayer::_registerUnit(newUnit);
+    FedLayer::_registerUnit(newUnit);
     if(NNUnit * nnu = dynamic_cast<NNUnit *>(newUnit)) {
         _U_nn.push_back(nnu);
     }

@@ -1,29 +1,29 @@
 #ifndef FED_NETWORK_LAYER
 #define FED_NETWORK_LAYER
 
-#include "FedNetworkUnit.hpp"
-#include "NetworkUnitRay.hpp"
+#include "FedUnit.hpp"
+#include "NNRay.hpp"
 
 #include <vector>
 
-class FedNetworkLayer: public NetworkLayer
+class FedLayer: public NetworkLayer
 {
 protected:
-    std::vector<FedNetworkUnit *> _U_fed; // stores pointers to all units with feeder
+    std::vector<FedUnit *> _U_fed; // stores pointers to all units with feeder
 
-    void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from FedNetworkUnit and register
+    void _registerUnit(NetworkUnit * newUnit); // check if newUnit is a/derived from FedUnit and register
 
 public:
     // --- Destructor
 
-    virtual ~FedNetworkLayer() {_U_fed.clear();}
+    virtual ~FedLayer() {_U_fed.clear();}
 
     virtual void deconstruct(){NetworkLayer::deconstruct(); _U_fed.clear();}
 
     // --- Getters
 
     int getNFedUnits() {return _U_fed.size();}
-    FedNetworkUnit * getFedUnit(const int &i) {return _U_fed[i];}
+    FedUnit * getFedUnit(const int &i) {return _U_fed[i];}
 
 
     // --- Variational Parameters
@@ -39,7 +39,7 @@ public:
 
     // --- Connection
 
-    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) = 0; // should create and return the feeder for the given unit
+    virtual FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) = 0; // should create and return the feeder for the given unit
     void connectOnTopOfLayer(NetworkLayer * nl);
     void disconnect();
 };

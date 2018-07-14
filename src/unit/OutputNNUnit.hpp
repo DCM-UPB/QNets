@@ -3,14 +3,16 @@
 
 #include "ShifterScalerNNUnit.hpp"
 #include "ActivationFunctionManager.hpp"
-
+#include "NNRay.hpp"
 
 // Output Neural Network Unit
 class OutputNNUnit: public ShifterScalerNNUnit
 {
 public:
     // Constructor
-    OutputNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : ShifterScalerNNUnit(actf, feeder, shift, scale) {}
+    OutputNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NNRay * ray = NULL, const double shift = 0., const double scale = 1.) : ShifterScalerNNUnit(actf, ray, shift, scale) {}
+    OutputNNUnit(const std::string &actf_id, NNRay * ray = NULL) : OutputNNUnit(std_actf::provideActivationFunction(actf_id), ray) {}
+    virtual ~OutputNNUnit(){}
 
     // string code methods
     virtual std::string getIdCode(){return "OUT";} // return identifier for unit type

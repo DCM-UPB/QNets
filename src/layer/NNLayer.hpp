@@ -1,18 +1,18 @@
 #ifndef NN_LAYER
 #define NN_LAYER
 
-#include "FedNetworkLayer.hpp"
+#include "FedLayer.hpp"
 #include "NetworkLayer.hpp"
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
-#include "NetworkUnitFeederInterface.hpp"
-#include "NetworkUnitRay.hpp"
+#include "FeederInterface.hpp"
+#include "NNRay.hpp"
 
 #include <vector>
 #include <string>
 
-class NNLayer: public FedNetworkLayer
+class NNLayer: public FedLayer
 {
 protected:
     std::vector<NNUnit *> _U_nn; // stores pointers to all neural units
@@ -28,7 +28,7 @@ public:
     // --- Deconstructor
 
     virtual ~NNLayer(){_U_nn.clear();}
-    virtual void deconstruct(){FedNetworkLayer::deconstruct(); _U_nn.clear();}
+    virtual void deconstruct(){FedLayer::deconstruct(); _U_nn.clear();}
 
     // --- String Codes
 
@@ -45,7 +45,7 @@ public:
 
     // --- Connection
 
-    virtual NetworkUnitFeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) {return new NetworkUnitRay(nl);}
+    virtual FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) {return new NNRay(nl);}
 };
 
 

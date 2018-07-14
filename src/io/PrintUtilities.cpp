@@ -74,8 +74,8 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
     int maxNUnits, index;
     int * maxNBeta;
     size_t maxIdLength[ffnn->getNLayers()];
-    NetworkUnitFeederInterface * feeder;
-    NetworkUnitFeederInterface ** feeders;
+    FeederInterface * feeder;
+    FeederInterface ** feeders;
     string * ids;
 
     const string emptySpaceForBeta = "     ";
@@ -96,7 +96,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 
     // max number of beta for the units with index u over all layers
     maxNBeta = new int[maxNUnits];
-    feeders = new NetworkUnitFeederInterface*[nlayers*maxNUnits];
+    feeders = new FeederInterface*[nlayers*maxNUnits];
     ids = new string[nlayers*maxNUnits];
     for (int u=0; u<maxNUnits; ++u){
         maxNBeta[u] = 0;
@@ -105,7 +105,7 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
             feeder = NULL;
 
             if (u < ffnn->getLayer(l)->getNUnits()) {
-                if (FedNetworkUnit * fnu = dynamic_cast<FedNetworkUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                if (FedUnit * fnu = dynamic_cast<FedUnit *>(ffnn->getLayer(l)->getUnit(u))) {
                     feeder = fnu->getFeeder();
                     if (feeder){
                         if (feeder->getNBeta() > maxNBeta[u]){

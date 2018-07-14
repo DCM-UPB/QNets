@@ -54,7 +54,7 @@ int main(){
     printNNStructure(*ffnn);
 
     cout << "Change size of Layer 0 to 2" << endl;
-    ffnn->setLayerSize(0,2);
+    ffnn->getLayer(0)->setSize(2);
     printNNStructure(*ffnn);
 
     cout << "Pop a hidden layer" << endl;

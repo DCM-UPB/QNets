@@ -23,7 +23,7 @@ int FeedForwardNeuralNetwork::getNBeta()
 {
     using namespace std;
     int nbeta=0;
-    for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+    for (vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
         {
             for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                 {
@@ -48,7 +48,7 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
     else
         {
             int idx=0;
-            for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+            for (vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
                 {
                     for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                         {
@@ -71,7 +71,7 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
 void FeedForwardNeuralNetwork::getBeta(double * beta){
     using namespace std;
     int idx=0;
-    for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+    for (vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
         {
             for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                 {
@@ -99,7 +99,7 @@ void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
     else
         {
             int idx=0;
-            for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+            for (vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
                 {
                     for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                         {
@@ -124,7 +124,7 @@ void FeedForwardNeuralNetwork::setBeta(const double * beta)
 {
     using namespace std;
     int idx=0;
-    for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+    for (vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
         {
             for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                 {
@@ -152,7 +152,7 @@ void FeedForwardNeuralNetwork::randomizeBetas()
     int nsource;
     double bah;
 
-    for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+    for (vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
         {
             for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                 {
@@ -573,7 +573,7 @@ void FeedForwardNeuralNetwork::connectFFNN()
     if(_flag_connected) this->disconnectFFNN();
 
     _L_fed[0]->connectOnTopOfLayer(_L_in); // connect the first fed layer to the input layer
-    for (std::vector<FedNetworkLayer *>::size_type i=1; i<_L_fed.size(); ++i) // connect the rest
+    for (std::vector<FedLayer *>::size_type i=1; i<_L_fed.size(); ++i) // connect the rest
         {
             _L_fed[i]->connectOnTopOfLayer(_L_fed[i-1]);
         }
@@ -589,7 +589,7 @@ void FeedForwardNeuralNetwork::disconnectFFNN()
         cout << "ERROR: FeedForwardNeuralNetwork::disconnectFFNN() : trying to disconnect an already disconnected FFNN" << endl << endl;
     }
 
-    for (std::vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size(); ++i)
+    for (std::vector<FedLayer *>::size_type i=0; i<_L_fed.size(); ++i)
     {
         _L_fed[i]->disconnect();
     }
@@ -608,18 +608,6 @@ void FeedForwardNeuralNetwork::setGlobalActivationFunctions(ActivationFunctionIn
 }
 
 
-void FeedForwardNeuralNetwork::setLayerSize(const int &li, const int &size)
-{
-    _L[li]->setSize(size);
-}
-
-
-void FeedForwardNeuralNetwork::setNNLayerActivationFunction(const int &li, ActivationFunctionInterface * actf)
-{
-    _L_nn[li]->setActivationFunction(actf);
-}
-
-
 void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
 {
     if (_flag_connected)
@@ -627,7 +615,7 @@ void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
             using namespace std;
             // count the number of beta before the last (output) layer
             int nbeta = 0;
-            for (vector<FedNetworkLayer *>::size_type i=0; i<_L_fed.size()-1; ++i)
+            for (vector<FedLayer *>::size_type i=0; i<_L_fed.size()-1; ++i)
                 {
                     for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
                         {
@@ -682,7 +670,7 @@ void FeedForwardNeuralNetwork::popHiddenLayer()
     delete _L[_L.size()-2];
 
     std::vector<NetworkLayer *>::iterator it = _L.end()-2;
-    std::vector<FedNetworkLayer *>::iterator it_fed = _L_fed.end()-2;
+    std::vector<FedLayer *>::iterator it_fed = _L_fed.end()-2;
     std::vector<NNLayer *>::iterator it_nn = _L_nn.end()-2;
 
     _L.erase(it);
@@ -827,7 +815,7 @@ void FeedForwardNeuralNetwork::_registerLayer(NetworkLayer * newLayer, const int
 {
     _L.insert(_L.end()-indexFromBack, newLayer);
 
-    if(FedNetworkLayer * fnl = dynamic_cast<FedNetworkLayer *>(newLayer)) {
+    if(FedLayer * fnl = dynamic_cast<FedLayer *>(newLayer)) {
         _L_fed.insert(_L_fed.end()-indexFromBack, fnl);
     }
 

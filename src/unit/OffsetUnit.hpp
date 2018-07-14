@@ -10,7 +10,7 @@ public:
     OffsetUnit(){_pv = 1.; _v = 1.;}
 
     // there is no real ideal mu / sigma for offset, we return the closest thing
-    virtual double getIdealProtoMu(){return _pv;}
+    virtual double getIdealProtoMu(){return 1.;}
     virtual double getIdealProtoSigma(){return 0.;}
 
     // there is no variation in the offset
