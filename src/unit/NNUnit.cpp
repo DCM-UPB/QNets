@@ -8,7 +8,7 @@
 
 void NNUnit::setMemberParams(const std::string &memberTreeCode)
 {
-    FedNetworkUnit::setMemberParams(memberTreeCode);
+    FedUnit::setMemberParams(memberTreeCode);
     using namespace std;
     std::string actfCode = readTreeCode(memberTreeCode, countNMembers(memberTreeCode)>1 ? 1 : 0); // atm using index
     this->setActivationFunction(std_actf::provideActivationFunction(readIdCode(actfCode)));

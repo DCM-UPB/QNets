@@ -1,16 +1,16 @@
 #ifndef NN_UNIT
 #define NN_UNIT
 
-#include "FedNetworkUnit.hpp"
+#include "FedUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
-#include "NetworkUnitFeederInterface.hpp"
+#include "FeederInterface.hpp"
 
 #include <stdexcept>
 #include <string>
 
 // Unit of an Artificial Neural Network
-class NNUnit: public FedNetworkUnit
+class NNUnit: public FedUnit
 {
 protected:
     // Activation Function of the unit
@@ -19,8 +19,8 @@ protected:
 
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL) : FedNetworkUnit(feeder) {_actf = actf; if (!_actf) throw std::invalid_argument("NNUnit(): Passed pointer 'actf' was NULL.");}
-    NNUnit(const std::string &actf_id, NetworkUnitFeederInterface * feeder = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), feeder) {}
+    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), FeederInterface * feeder = NULL) : FedUnit(feeder) {_actf = actf; if (!_actf) throw std::invalid_argument("NNUnit(): Passed pointer 'actf' was NULL.");}
+    NNUnit(const std::string &actf_id, FeederInterface * feeder = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), feeder) {}
     virtual ~NNUnit(){ delete _actf; }
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
@@ -29,12 +29,12 @@ public:
     virtual double getIdealProtoSigma(){return _actf->getIdealInputSigma();}
 
     // return the output mean value (mu) and standard deviation (sigma)
-    virtual double getOutputMu(){return _actf->getOutputMu(FedNetworkUnit::getOutputMu());}
-    virtual double getOutputSigma(){return _actf->getOutputSigma(FedNetworkUnit::getOutputSigma());}
+    virtual double getOutputMu(){return _actf->getOutputMu(FedUnit::getOutputMu());}
+    virtual double getOutputSigma(){return _actf->getOutputSigma(FedUnit::getOutputSigma());}
 
     // string code getters / setter
     virtual std::string getIdCode(){return "NNU";} // return identifier for unit type
-    virtual std::string getMemberTreeCode(){return composeCodes(FedNetworkUnit::getMemberTreeCode(), _actf->getTreeCode());} // append actf treeCode
+    virtual std::string getMemberTreeCode(){return composeCodes(FedUnit::getMemberTreeCode(), _actf->getTreeCode());} // append actf treeCode
     virtual void setMemberParams(const std::string &memberTreeCode);
 
     // Setters

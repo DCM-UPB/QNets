@@ -2,7 +2,7 @@
 #define NETWORK_UNIT
 
 #include "SerializableComponent.hpp"
-#include "NetworkUnitFeederInterface.hpp"
+#include "FeederInterface.hpp"
 
 #include <string>
 #include <cstddef> // for NULL

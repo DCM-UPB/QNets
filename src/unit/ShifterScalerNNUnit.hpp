@@ -5,7 +5,7 @@
 #include "NNUnit.hpp"
 #include "ActivationFunctionInterface.hpp"
 #include "ActivationFunctionManager.hpp"
-#include "NetworkUnitFeederInterface.hpp"
+#include "FeederInterface.hpp"
 
 #include <cstddef> // for NULL
 
@@ -14,7 +14,7 @@ class ShifterScalerNNUnit: public NNUnit, public ShifterScalerNetworkUnit
 {
 public:
     // Constructor
-    ShifterScalerNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NetworkUnitFeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerNetworkUnit(shift, scale) {};
+    ShifterScalerNNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), FeederInterface * feeder = NULL, const double shift = 0., const double scale = 1.) : NNUnit(actf, feeder), ShifterScalerNetworkUnit(shift, scale) {};
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
     // (we copy NNUnit's IdealProto methods)

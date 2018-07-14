@@ -1,7 +1,7 @@
 #ifndef NETWORK_UNIT_RAY
 #define NETWORK_UNIT_RAY
 
-#include "NetworkUnitFeederInterface.hpp"
+#include "FeederInterface.hpp"
 #include "NetworkUnit.hpp"
 #include "NetworkLayer.hpp"
 
@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 
-class NetworkUnitRay: public NetworkUnitFeederInterface
+class NNRay: public FeederInterface
 {
 protected:
     // random number generator, used to initialize the intensities
@@ -23,8 +23,8 @@ protected:
     std::vector<int> _intensity_id;  // intensity identification id, useful for the NN
 
 public:
-    explicit NetworkUnitRay(NetworkLayer * nl);
-    ~NetworkUnitRay();
+    explicit NNRay(NetworkLayer * nl);
+    ~NNRay();
 
     // string code methods
     std::string getIdCode(){return "RAY";}; // return an identification string

@@ -64,7 +64,7 @@ int main() {
     // access the 1st neural unit of the 2nd hidden layer
     NNUnit * nnu = ffnn->getNNLayer(1)->getNNUnit(0);
     // require its feeder
-    NetworkUnitFeederInterface * feeder = nnu->getFeeder();
+    FeederInterface * feeder = nnu->getFeeder();
     cout << "Done! The feeder memory address is " << feeder << endl;
     cin.ignore();
 

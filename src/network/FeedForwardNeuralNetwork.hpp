@@ -4,7 +4,7 @@
 #include "ActivationFunctionInterface.hpp"
 #include "NetworkLayer.hpp"
 #include "InputLayer.hpp"
-#include "FedNetworkLayer.hpp"
+#include "FedLayer.hpp"
 #include "NNLayer.hpp"
 #include "OutputNNLayer.hpp"
 #include "NetworkUnit.hpp"
@@ -23,7 +23,7 @@ private:
     void _updateNVP(); // internal method to update _nvp member, call it after you changed/created variational parameter assignment
 protected:
     std::vector<NetworkLayer *> _L; // contains all kinds of layers
-    std::vector<FedNetworkLayer *> _L_fed; // contains layers with feeder
+    std::vector<FedLayer *> _L_fed; // contains layers with feeder
     std::vector<NNLayer *> _L_nn; // contains neural layers
     InputLayer * _L_in = NULL; // input layer
     OutputNNLayer * _L_out = NULL; // output layer
@@ -51,7 +51,7 @@ public:
     int getLayerSize(const int &li){return _L[li]->getNUnits();}
 
     NetworkLayer * getLayer(const int &li){return _L[li];}
-    FedNetworkLayer * getFedLayer(const int &li){return _L_fed[li];}
+    FedLayer * getFedLayer(const int &li){return _L_fed[li];}
     NNLayer * getNNLayer(const int &li){return _L_nn[li];}
     InputLayer * getInputLayer(){return _L_in;}
     OutputNNLayer * getOutputLayer(){return _L_out;}

@@ -2,10 +2,10 @@
 
 #include "ActivationFunctionInterface.hpp"
 #include "NetworkUnit.hpp"
-#include "FedNetworkUnit.hpp"
+#include "FedUnit.hpp"
 #include "NNUnit.hpp"
-#include "NetworkUnitFeederInterface.hpp"
-#include "NetworkUnitRay.hpp"
+#include "FeederInterface.hpp"
+#include "NNRay.hpp"
 
 #include <random>
 #include <numeric>
@@ -19,9 +19,9 @@ namespace smart_beta{
     namespace details
     {
         // little internal cast helper
-        NetworkUnitRay * _castFeederToRay(NetworkUnitFeederInterface * const feeder)
+        NNRay * _castFeederToRay(FeederInterface * const feeder)
         {
-            if (NetworkUnitRay * ray = dynamic_cast<NetworkUnitRay *>(feeder)) {
+            if (NNRay * ray = dynamic_cast<NNRay *>(feeder)) {
                 return ray;
             }
             else {
@@ -29,7 +29,7 @@ namespace smart_beta{
             }
         }
 
-        std::vector<int> _findIndexesOfUnitsWithRay(FedNetworkLayer * L){
+        std::vector<int> _findIndexesOfUnitsWithRay(FedLayer * L){
             //
             // Given a fed layer, find the indexes of the units which have a ray
             //
@@ -46,13 +46,13 @@ namespace smart_beta{
         }
 
 
-        void _computeBetaMuAndSigma(FedNetworkUnit * U, double &mu, double &sigma){
+        void _computeBetaMuAndSigma(FedUnit * U, double &mu, double &sigma){
             //
             // Use the formulas:
             //   mu_beta = mu_actf_input / (sum_U_sources mu_actf_output)
             //   sigma_beta = sigma_actf_input / (sum_U_sources mu_actf_output)
             //
-            NetworkUnitFeederInterface * ray = U->getFeeder();
+            FeederInterface * ray = U->getFeeder();
             if ( ray == 0 ){
                 throw std::runtime_error( "Provided unit does not have a ray, therefore it does not need beta" );
             }
@@ -72,7 +72,7 @@ namespace smart_beta{
         }
 
 
-        void _setRandomBeta(NetworkUnitFeederInterface * ray, const double &mu, const double &sigma){
+        void _setRandomBeta(FeederInterface * ray, const double &mu, const double &sigma){
             //
             // Sample the beta of a given ray using a normal distribution with mean mu and standard deviation sigma.
             //
@@ -88,7 +88,7 @@ namespace smart_beta{
         }
 
 
-        void _makeBetaOrthogonal(NetworkUnitFeederInterface * fixed_ray, NetworkUnitFeederInterface * ray){
+        void _makeBetaOrthogonal(FeederInterface * fixed_ray, FeederInterface * ray){
             //
             // Modify ray in order to make it orthogonal to fixed_ray, preserving the norm
             //
@@ -135,7 +135,7 @@ namespace smart_beta{
     }
 
 
-    void generateSmartBeta(FedNetworkLayer * L){
+    void generateSmartBeta(FedLayer * L){
         using namespace std;
         using namespace details;
 
@@ -144,17 +144,17 @@ namespace smart_beta{
 
         if ( idx.size() >= 1 ){
             // set the first unit beta
-            FedNetworkUnit * u0 = L->getFedUnit(idx[0]);
+            FedUnit * u0 = L->getFedUnit(idx[0]);
             double mu, sigma;
             _computeBetaMuAndSigma(u0, mu, sigma);
-            NetworkUnitFeederInterface * ray0 = u0->getFeeder();
+            FeederInterface * ray0 = u0->getFeeder();
             _setRandomBeta(ray0, mu, sigma);
 
             // set the other unit beta until a complete basis set is formed
             const int n_li_units = ( signed(idx.size()) <= ray0->getNBeta()-BETA_INDEX_OFFSET ) ? signed(idx.size()) : ray0->getNBeta()-BETA_INDEX_OFFSET;
             for (int i=1; i<n_li_units; ++i){
-                FedNetworkUnit * u = L->getFedUnit(idx[i]);
-                NetworkUnitFeederInterface * ray = u->getFeeder();
+                FedUnit * u = L->getFedUnit(idx[i]);
+                FeederInterface * ray = u->getFeeder();
                 double mu, sigma;
                 bool flag_sample_random_beta = true;
                 while (flag_sample_random_beta) {
@@ -175,8 +175,8 @@ namespace smart_beta{
 
             // set all the remaninig unit beta, which will be redundant / linear dependent
             for (int i=n_li_units; i<signed(idx.size()) ; ++i){
-                FedNetworkUnit * u = L->getFedUnit(idx[i]);
-                NetworkUnitFeederInterface * ray = u->getFeeder();
+                FedUnit * u = L->getFedUnit(idx[i]);
+                FeederInterface * ray = u->getFeeder();
                 double mu, sigma;
                 _computeBetaMuAndSigma(u, mu, sigma);
                 double best_dot_product = -1.;
@@ -189,7 +189,7 @@ namespace smart_beta{
                     double min_dot_product = -1.;
                     for (int j=0; j<i; ++j){
                         vector<double> beta_v;
-                        NetworkUnitFeederInterface * rayj = L->getFedUnit(idx[j])->getFeeder();
+                        FeederInterface * rayj = L->getFedUnit(idx[j])->getFeeder();
                         for (int ib=BETA_INDEX_OFFSET; ib<rayj->getNBeta(); ++ib) beta_v.push_back(rayj->getBeta(ib));
                         const double dot_product = abs(inner_product(begin(beta_u), end(beta_u), begin(beta_v), 0.0))/inner_product(begin(beta_u), end(beta_u), begin(beta_u), 0.0);
                         if (min_dot_product < 0.) min_dot_product = dot_product;

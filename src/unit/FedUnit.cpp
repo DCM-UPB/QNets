@@ -1,4 +1,4 @@
-#include "FedNetworkUnit.hpp"
+#include "FedUnit.hpp"
 #include "StringCodeUtilities.hpp"
 
 #include <string>
@@ -7,7 +7,7 @@
 
 // --- Computation
 
-void FedNetworkUnit::computeFeed(){
+void FedUnit::computeFeed(){
     if (_feeder){
         // unit value
         _pv = _feeder->getFeed();
@@ -40,7 +40,7 @@ void FedNetworkUnit::computeFeed(){
 }
 
 
-void FedNetworkUnit::computeDerivatives(){
+void FedUnit::computeDerivatives(){
     if (_feeder) {
         // first derivative
         if (_v1d){

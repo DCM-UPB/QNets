@@ -10,7 +10,7 @@
 
 class NetworkUnit;  // forward declaration to solve circular dependency
 
-class NetworkUnitFeederInterface: public SerializableComponent
+class FeederInterface: public SerializableComponent
 {
 protected:
     std::vector<NetworkUnit *> _source;   // units from which the feeder takes output
@@ -18,8 +18,8 @@ protected:
     int _vp_id_shift; // if we add vp, our vp indices start from here (-1 means variational parameter system not initialized)
 
 public:
-    NetworkUnitFeederInterface(): _vp_id_shift(-1) {}
-    virtual ~NetworkUnitFeederInterface(){_source.clear(); _map_index_to_sources.clear();}
+    FeederInterface(): _vp_id_shift(-1) {}
+    virtual ~FeederInterface(){_source.clear(); _map_index_to_sources.clear();}
 
     // set string codes
     std::string getClassIdCode() {return "feeder";}

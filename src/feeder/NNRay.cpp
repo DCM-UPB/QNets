@@ -1,5 +1,5 @@
-#include "NetworkUnitRay.hpp"
-#include "FedNetworkUnit.hpp"
+#include "NNRay.hpp"
+#include "FedUnit.hpp"
 #include "StringCodeUtilities.hpp"
 
 #include <vector>
@@ -8,7 +8,7 @@
 
 // --- Feed Mu and Sigma
 
-double NetworkUnitRay::getFeedMu()
+double NNRay::getFeedMu()
 {
     double mu = 0.;
     for (std::vector<NetworkUnit *>::size_type i=0; i<_source.size(); ++i) {
@@ -18,7 +18,7 @@ double NetworkUnitRay::getFeedMu()
 }
 
 
-double NetworkUnitRay::getFeedSigma()
+double NNRay::getFeedSigma()
 {
     double var = 0.;
     for (std::vector<NetworkUnit *>::size_type i=0; i<_source.size(); ++i) {
@@ -30,18 +30,18 @@ double NetworkUnitRay::getFeedSigma()
 
 // --- Betas
 
-int NetworkUnitRay::getNBeta(){return _intensity.size();}
-double NetworkUnitRay::getBeta(const int &i){return _intensity[i];}
-void NetworkUnitRay::setBeta(const int &i, const double &b){_intensity[i]=b;}
+int NNRay::getNBeta(){return _intensity.size();}
+double NNRay::getBeta(const int &i){return _intensity[i];}
+void NNRay::setBeta(const int &i, const double &b){_intensity[i]=b;}
 
 // --- Variational Parameters
 
-int NetworkUnitRay::getNVariationalParameters()
+int NNRay::getNVariationalParameters()
 {
     return (_vp_id_shift > -1) ? _intensity.size() : 0;
 }
 
-int NetworkUnitRay::getMaxVariationalParameterIndex()
+int NNRay::getMaxVariationalParameterIndex()
 {
     if (_vp_id_shift > -1) {
         return _vp_id_shift + getNVariationalParameters() - 1;
@@ -49,7 +49,7 @@ int NetworkUnitRay::getMaxVariationalParameterIndex()
     else return -1; // there are no vp in the whole feed
 }
 
-bool NetworkUnitRay::setVariationalParameterValue(const int &id, const double &value){
+bool NNRay::setVariationalParameterValue(const int &id, const double &value){
     if (_vp_id_shift > -1) {
         if ( isVPIndexUsedInFeeder(id) ){
             _intensity[ id - _vp_id_shift ] = value;
@@ -60,7 +60,7 @@ bool NetworkUnitRay::setVariationalParameterValue(const int &id, const double &v
 }
 
 
-bool NetworkUnitRay::getVariationalParameterValue(const int &id, double &value){
+bool NNRay::getVariationalParameterValue(const int &id, double &value){
     if (_vp_id_shift > -1) {
         if ( isVPIndexUsedInFeeder(id) ){
             value = _intensity[ id - _vp_id_shift ];
@@ -72,13 +72,13 @@ bool NetworkUnitRay::getVariationalParameterValue(const int &id, double &value){
 }
 
 
-int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
+int NNRay::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
     // Here we assign external vp indexes to internal indexes.
     // NOTE: The current method assumes, that no index larger than max_id,
     //       max_id = starting_index + source.size() - 1 ,
     //       may be in use FOR (and trivially IN) this ray.
 
-    int idx_base = NetworkUnitFeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp);
+    int idx_base = FeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp);
 
     _intensity_id.clear();
 
@@ -100,9 +100,9 @@ int NetworkUnitRay::setVariationalParametersIndexes(const int &starting_index, c
 
 // --- StringCode methods
 
-std::string NetworkUnitRay::getParams()
+std::string NNRay::getParams()
 {
-    std::string id_shift_str = NetworkUnitFeederInterface::getParams();
+    std::string id_shift_str = FeederInterface::getParams();
     std::vector<std::string> beta_strs;
 
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
@@ -112,9 +112,9 @@ std::string NetworkUnitRay::getParams()
 }
 
 
-void NetworkUnitRay::setParams(const std::string &params)
+void NNRay::setParams(const std::string &params)
 {
-    NetworkUnitFeederInterface::setParams(params);
+    FeederInterface::setParams(params);
 
     double beta;
     for (std::vector<double>::size_type i=0; i<_intensity.size(); ++i) {
@@ -127,7 +127,7 @@ void NetworkUnitRay::setParams(const std::string &params)
 // --- Computation
 
 
-double NetworkUnitRay::getFeed(){
+double NNRay::getFeed(){
     double feed = 0.;
     for (std::vector<NetworkUnit *>::size_type i=0; i<_source.size(); ++i){
         feed += _intensity[i]*_source[i]->getValue();
@@ -136,7 +136,7 @@ double NetworkUnitRay::getFeed(){
 }
 
 
-double NetworkUnitRay::getFirstDerivativeFeed(const int &i1d){
+double NNRay::getFirstDerivativeFeed(const int &i1d){
     double feed = 0.;
     for (std::vector<NetworkUnit *>::size_type i=1; i<_source.size(); ++i){
         feed += _intensity[i]*_source[i]->getFirstDerivativeValue(i1d);
@@ -146,7 +146,7 @@ double NetworkUnitRay::getFirstDerivativeFeed(const int &i1d){
 }
 
 
-double NetworkUnitRay::getSecondDerivativeFeed(const int &i2d){
+double NNRay::getSecondDerivativeFeed(const int &i2d){
     double feed = 0.;
     for (std::vector<NetworkUnit *>::size_type i=1; i<_source.size(); ++i){
         feed += _intensity[i]*_source[i]->getSecondDerivativeValue(i2d);
@@ -155,7 +155,7 @@ double NetworkUnitRay::getSecondDerivativeFeed(const int &i2d){
 }
 
 
-double NetworkUnitRay::getVariationalFirstDerivativeFeed(const int &iv1d){
+double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d){
     double feed = 0.;
 
     if (iv1d < _vp_id_shift+getNVariationalParameters()) {
@@ -175,7 +175,7 @@ double NetworkUnitRay::getVariationalFirstDerivativeFeed(const int &iv1d){
 }
 
 
-double NetworkUnitRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
+double NNRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
     double feed = 0.;
 
     if (iv1d < _vp_id_shift+getNVariationalParameters()) {
@@ -195,7 +195,7 @@ double NetworkUnitRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv
 }
 
 
-double NetworkUnitRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
+double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
     double feed = 0.;
 
     if (iv2d < _vp_id_shift+getNVariationalParameters()) {
@@ -217,7 +217,7 @@ double NetworkUnitRay::getCrossSecondDerivativeFeed(const int &i2d, const int &i
 
 // --- Constructor
 
-NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl): NetworkUnitFeederInterface() {
+NNRay::NNRay(NetworkLayer * nl): FeederInterface() {
     // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
     // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
     const double bah = 4 * pow(nl->getNUnits(), -0.5); // (b-a)/2
@@ -235,7 +235,7 @@ NetworkUnitRay::NetworkUnitRay(NetworkLayer * nl): NetworkUnitFeederInterface() 
 
 // --- Destructor
 
-NetworkUnitRay::~NetworkUnitRay(){
+NNRay::~NNRay(){
     _intensity.clear();
     _intensity_id.clear();
 }

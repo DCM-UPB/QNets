@@ -8,8 +8,8 @@
 #include "FeedForwardNeuralNetwork.hpp"
 #include "SmartBetaGenerator.hpp"
 #include "ActivationFunctionManager.hpp"
-#include "FedNetworkUnit.hpp"
-#include "NetworkUnitFeederInterface.hpp"
+#include "FedUnit.hpp"
+#include "FeederInterface.hpp"
 #include "PrintUtilities.hpp"
 
 
@@ -91,8 +91,8 @@ int main(){
 
 
     // --- _setRandomBeta
-    FedNetworkUnit * u = ffnn->getFedLayer(0)->getFedUnit(0);
-    NetworkUnitFeederInterface * feeder = u->getFeeder();
+    FedUnit * u = ffnn->getFedLayer(0)->getFedUnit(0);
+    FeederInterface * feeder = u->getFeeder();
     // compute mu and beta
     smart_beta::details::_computeBetaMuAndSigma(u, mu, sigma);
     // sample N times the beta
@@ -123,8 +123,8 @@ int main(){
 
     // --- _makeBetaOrthogonal
     // set random beta for a unit that will stay fixed
-    FedNetworkUnit * fixed_u = ffnn->getFedLayer(0)->getFedUnit(1);
-    NetworkUnitFeederInterface * fixed_feeder = fixed_u->getFeeder();
+    FedUnit * fixed_u = ffnn->getFedLayer(0)->getFedUnit(1);
+    FeederInterface * fixed_feeder = fixed_u->getFeeder();
     smart_beta::details::_computeBetaMuAndSigma(fixed_u, mu, sigma);
     smart_beta::details::_setRandomBeta(fixed_feeder, mu, sigma);
     // set random beta for a unit that will be made orthogonal to the previously defined unit
@@ -214,7 +214,7 @@ int main(){
     for (int il=0; il<ffnn->getNFedLayers(); ++il) {
         cout << "Fed Layer " << il << endl << endl;
         for (int j=0; j<ffnn->getFedLayer(il)->getNFedUnits(); ++j) {
-            FedNetworkUnit * u = ffnn->getFedLayer(il)->getFedUnit(j);
+            FedUnit * u = ffnn->getFedLayer(il)->getFedUnit(j);
             cout << "Fed Unit " << j << ", id: " << u->getIdCode() << endl;
             cout << "mu_idpv " << u->getIdealProtoMu() << ", sigma_idpv " << u->getIdealProtoSigma() << endl;
             cout << "mu_feed " << u->getFeeder()->getFeedMu() << ", sigma_feed " << u->getFeeder()->getFeedSigma() << endl;
