@@ -54,7 +54,7 @@ public:
     virtual double getOutputSigma(){return 0;}
 
     // BaseComponent IdCodes
-    virtual std::string getClassIdCode(){return "UNIT";}
+    std::string getClassIdCode(){return "UNIT";}
     virtual std::string getIdCode() = 0; // virtual class
 
     // Setters

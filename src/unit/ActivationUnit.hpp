@@ -18,8 +18,8 @@ protected:
 
 public:
     // Constructor and destructor
-    ActivationUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction()) : _actf(actf) {if (!_actf) throw std::invalid_argument("ActivationUnit(): Passed pointer 'actf' was NULL.");}
-    ActivationUnit(const std::string &actf_id) : ActivationUnit(std_actf::provideActivationFunction(actf_id)) {}
+    ActivationUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): _actf(actf) {if (!_actf) throw std::invalid_argument("ActivationUnit(): Passed pointer 'actf' was NULL.");}
+    ActivationUnit(const std::string &actf_id): _actf(std_actf::provideActivationFunction(actf_id)) {}
     virtual ~ActivationUnit(){ delete _actf; }
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
