@@ -1,25 +1,25 @@
-#ifndef WEIGHTED_FEEDER_INTERFACE
-#define WEIGHTED_FEEDER_INTERFACE
+#ifndef WEIGHTED_FEEDER
+#define WEIGHTED_FEEDER
 
-#include "FeederInterface.hpp"
+#include "VariableFeeder.hpp"
 #include "NetworkUnit.hpp"
 #include "NetworkLayer.hpp"
 
 #include <string>
 #include <vector>
 
-class WeightedFeederInterface: public FeederInterface
+class WeightedFeeder: public VariableFeeder
 {
 protected:
     // beta
     std::vector<double> _beta;   // intensity of each sorgent unit, i.e. its weight
 
     // method to fill beta after source is filled
-    // we provide a default method to add one beta per selected source
-    virtual void _fillBeta();
+    // we provide a method to add one beta per selected source
+    void _fillBeta();
 
 public:
-    virtual ~WeightedFeederInterface(){_beta.clear();}
+    virtual ~WeightedFeeder(){_beta.clear();}
 
     // set string codes
     virtual std::string getParams();

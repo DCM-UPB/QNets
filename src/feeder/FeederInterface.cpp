@@ -12,7 +12,6 @@ FeederInterface::~FeederInterface()
     _sources.clear();
     _source_ids.clear();
     _map_index_to_sources.clear();
-    _vp.clear();
 }
 
 
@@ -46,18 +45,16 @@ void FeederInterface::_fillSources() // add all sources from sourcePool
 
 std::string FeederInterface::getParams()
 {
-    return composeCodes(composeParamCode("id_shift", _vp_id_shift), composeParamCode("flag_vp", _flag_vp));
+    return composeParamCode("id_shift", _vp_id_shift);
 }
-
 
 void FeederInterface::setParams(const std::string &params)
 {
-    int starting_index;
-    bool flag_vp;
     std::string str_id = readParamValue(params, "id_shift");
-    std::string str_vp = readParamValue(params, "flag_vp");
-    if (setParamValue(str_id, starting_index) && setParamValue(str_vp, flag_vp)) this->setVariationalParametersIndexes(starting_index, flag_vp);
+    setParamValue(str_id, _vp_id_shift);
+    // in the child class you need to extend this and call setVariationalParametersIndexes after having all information
 }
+
 
 // set VP Indexes default version
 
@@ -68,7 +65,6 @@ int FeederInterface::setVariationalParametersIndexes(const int &starting_index, 
     // NOTE 2: Extend this to actually add variational parameters
 
     _map_index_to_sources.clear();
-    _vp.clear();
 
     for (int j=0; j<starting_index; ++j) {
         std::vector<size_t> empty_vec;
@@ -88,62 +84,10 @@ int FeederInterface::setVariationalParametersIndexes(const int &starting_index, 
         }
     }
 
-    _flag_vp = flag_add_vp;
     _vp_id_shift = starting_index;
     return starting_index;
 }
 
-
-// --- Variational Parameters
-
-int FeederInterface::getNVariationalParameters()
-{
-    return _vp.size();
-}
-
-int FeederInterface::getMaxVariationalParameterIndex()
-{
-    if (_vp_id_shift > -1) {
-        if(_flag_vp) {
-            return _vp_id_shift + _vp.size() - 1;
-        }
-        else return _vp_id_shift;
-    }
-    else return -1; // vp not initialized
-}
-
-bool FeederInterface::setVariationalParameterValue(const int &id, const double &value){
-    if (_flag_vp) {
-        if ( isVPIndexUsedInFeeder(id) ){
-            *_vp[ id - _vp_id_shift ] = value;
-            return true;
-        }
-    }
-    return false;
-}
-
-
-bool FeederInterface::getVariationalParameterValue(const int &id, double &value){
-    if (_flag_vp) {
-        if ( isVPIndexUsedInFeeder(id) ){
-            value = *_vp[ id - _vp_id_shift ];
-            return true;
-        }
-    }
-    value = 0.;
-    return false;
-}
-
-
-// --- is VP Index used
-
-bool FeederInterface::isVPIndexUsedInFeeder(const int &id)
-{
-    if ( _vp_id_shift <= id && id <_vp_id_shift+(int)_vp.size()) {
-        return true;
-    }
-    else return false;
-}
 
 bool FeederInterface::isVPIndexUsedInSources(const int &id)
 {

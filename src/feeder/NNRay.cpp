@@ -1,4 +1,5 @@
 #include "NNRay.hpp"
+#include "NetworkUnit.hpp"
 #include "StringCodeUtilities.hpp"
 
 #include <vector>
@@ -14,6 +15,18 @@ NNRay::NNRay(NetworkLayer * nl)
     _fillSources(); // select all sources
     _fillBeta(); // one beta per source
     randomizeBeta();
+}
+
+// --- final setParams
+
+void NNRay::setParams(const std::string &params){
+    WeightedFeeder::setParams(params); // we don't need more to init vp system
+    if (_vp_id_shift > -1) setVariationalParametersIndexes(_vp_id_shift, _flag_vp);
+}
+
+int NNRay::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp)
+{
+    return WeightedFeeder::setVariationalParametersIndexes(starting_index, flag_add_vp);
 }
 
 

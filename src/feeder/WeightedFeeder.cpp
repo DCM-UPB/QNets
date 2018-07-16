@@ -1,8 +1,8 @@
-#include "WeightedFeederInterface.hpp"
+#include "WeightedFeeder.hpp"
 
 // --- default fillBeta method
 
-void WeightedFeederInterface::_fillBeta()
+void WeightedFeeder::_fillBeta()
 {
     for (size_t i=0; i<_sources.size(); ++i) _beta.push_back(0.);
     randomizeBeta();
@@ -11,9 +11,9 @@ void WeightedFeederInterface::_fillBeta()
 
 // --- StringCode methods
 
-std::string WeightedFeederInterface::getParams()
+std::string WeightedFeeder::getParams()
 {
-    std::string base_str = FeederInterface::getParams();
+    std::string base_str = VariableFeeder::getParams();
     std::vector<std::string> beta_strs;
 
     for (std::vector<double>::size_type i=0; i<_beta.size(); ++i) {
@@ -22,9 +22,9 @@ std::string WeightedFeederInterface::getParams()
     return composeCodes(base_str, composeCodeList(beta_strs));
 }
 
-void WeightedFeederInterface::setParams(const std::string &params)
+void WeightedFeeder::setParams(const std::string &params)
 {
-    FeederInterface::setParams(params);
+    VariableFeeder::setParams(params);
 
     double beta;
     for (std::vector<double>::size_type i=0; i<_beta.size(); ++i) {
@@ -34,12 +34,12 @@ void WeightedFeederInterface::setParams(const std::string &params)
 }
 
 
-// set VP Indexes with Betas
+// set VP Indexes with all Betas (default, override if you want something else)
 
-int WeightedFeederInterface::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
-    int idx_base = FeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp);
+int WeightedFeeder::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
+    int idx_base = VariableFeeder::setVariationalParametersIndexes(starting_index, flag_add_vp);
 
-    if (flag_add_vp) {
+    if (_flag_vp) {
         for (double &b : _beta) {
             _vp.push_back(&b);
         }

@@ -1,13 +1,12 @@
 #ifndef NN_RAY
 #define NN_RAY
 
-#include "WeightedFeederInterface.hpp"
-#include "NetworkUnit.hpp"
+#include "WeightedFeeder.hpp"
 #include "NetworkLayer.hpp"
 
 #include <string>
 
-class NNRay: public WeightedFeederInterface
+class NNRay: public WeightedFeeder
 {
 public:
     explicit NNRay(NetworkLayer * nl);
@@ -15,6 +14,10 @@ public:
 
     // string code methods
     std::string getIdCode(){return "RAY";} // return an identification string
+    void setParams(const std::string &params);
+
+    // variational parameters
+    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = true);
 
     // return the feed mean value (mu) and standard deviation (sigma)
     double getFeedMu();

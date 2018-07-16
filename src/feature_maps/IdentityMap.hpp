@@ -1,13 +1,13 @@
 #ifndef IDENTITY_MAP
 #define IDENTITY_MAP
 
-#include "FeederInterface.hpp"
+#include "StaticFeeder.hpp"
 #include "NetworkUnit.hpp"
 #include "NetworkLayer.hpp"
 
 #include <string>
 
-class IdentityMap: public FeederInterface
+class IdentityMap: public StaticFeeder
 {
 public:
     IdentityMap(NetworkLayer * nl, const size_t &source_id);

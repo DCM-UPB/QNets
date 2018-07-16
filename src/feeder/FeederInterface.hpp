@@ -21,9 +21,7 @@ protected:
     std::vector<std::vector<size_t>> _map_index_to_sources; // store indices of relevant sources for each variational parameter (in sources)
 
     // variational parameters
-    std::vector<double*> _vp; // store pointers to beta/params used as variational parameters
     int _vp_id_shift = -1; // if we add vp, our vp indices start from here (-1 means variational parameter system not initialized)
-    bool _flag_vp = false; // do we add own vp?
 
 
     void _fillSourcePool(NetworkLayer * nl); // add units from nl to sourcePool
@@ -64,23 +62,24 @@ public:
     virtual void setBeta(const int &i, const double &b){throw std::runtime_error("FeederInterface::setBeta called, but the base interface defaults to no beta. Derive from WeightedFeederInterface to use beta.");}
 
     // variational parameters
-    int getNVariationalParameters();  // return the number of variational parameters involved
-    int getMaxVariationalParameterIndex(); // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
     virtual int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = true);  // set the index of each variational parameter starting from starting_index  and create vp pointer vector
+
+    virtual int getNVariationalParameters(){return 0;}  // return the number of variational parameters involved
+    virtual int getMaxVariationalParameterIndex(){return _vp_id_shift > 0 ? _vp_id_shift-1 : 0;} // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
     // return the index that the next feeder might take as input
-    bool getVariationalParameterValue(const int &id, double &value); // get the variational parameter with identification index id and store it in value
+    virtual bool getVariationalParameterValue(const int &id, double &value){return false;} // get the variational parameter with identification index id and store it in value
     // return true if the parameters has been found, false otherwise
-    bool setVariationalParameterValue(const int &id, const double &value); // set the variational parameter with identification index id with the number stored in value
+    virtual bool setVariationalParameterValue(const int &id, const double &value){return false;} // set the variational parameter with identification index id with the number stored in value
 
     // IsVPIndexUsed methods
     // return true if the parameters has been found, false otherwise
-    bool isVPIndexUsedInFeeder(const int &id);  // variational parameter is directly used?
-    bool isVPIndexUsedInSources(const int &id); // variational parameter is indirectly used?
-    bool isVPIndexUsedForFeeder(const int &id); // variational parameter is used directly or indirectly?
+    virtual bool isVPIndexUsedInFeeder(const int &id){return false;}  // variational parameter is directly used?
+    bool isVPIndexUsedInSources(const int &id);         // variational parameter is indirectly used?
+    virtual bool isVPIndexUsedForFeeder(const int &id); // variational parameter is used directly or indirectly?
 
     // Randomizers
     virtual void randomizeBeta(){}; // randomize beta intensities, do nothing since we default to no betas
-    virtual void randomizeParams(){} // randomize extra parameters, again do nothing by default
+    virtual void randomizeParams(){}; // randomize extra parameters, again do nothing by default
     virtual void randomizeVP(){}; // randomize all assigned variational parameters
 };
 
