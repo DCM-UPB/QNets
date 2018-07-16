@@ -68,4 +68,3 @@ double IdentityMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d
     }
     else return 0.;
 }
-
