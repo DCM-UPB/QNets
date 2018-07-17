@@ -13,10 +13,13 @@ protected:
 
 public:
     EuclideanDistanceMap(NetworkLayer * nl, const size_t &source_id1, const size_t &source_id2, const int ndim); // ids of the first index of relevant vectors
+    EuclideanDistanceMap(NetworkLayer * nl): EuclideanDistanceMap(nl, 0, 0, 0) {} // minimal default initialization
     ~EuclideanDistanceMap(){}
 
     // string code methods
     std::string getIdCode(){return "EDM";} // return an identification string
+    std::string getParams();
+    void setParams(const std::string &params);
 
     // return the feed mean value (mu) and standard deviation (sigma)
     double getFeedMu();

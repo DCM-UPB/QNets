@@ -10,11 +10,14 @@
 class IdentityMap: public StaticFeeder
 {
 public:
-    IdentityMap(NetworkLayer * nl, const size_t &source_id);
+    IdentityMap(NetworkLayer * nl, const size_t &source_id); // full initialization
+    IdentityMap(NetworkLayer * nl): IdentityMap(nl, 0) {} // minimal default initialization
     ~IdentityMap(){}
 
     // string code methods
     std::string getIdCode(){return "IDM";} // return an identification string
+    std::string getParams();
+    void setParams(const std::string &params);
 
     // return the feed mean value (mu) and standard deviation (sigma)
     double getFeedMu();

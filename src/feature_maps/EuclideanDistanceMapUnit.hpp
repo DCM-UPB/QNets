@@ -26,6 +26,8 @@ public:
             throw std::invalid_argument("[EuclideanDistanceMapUnit::setFeeder] Passed feeder is not of class EuclideanDistanceMap.");
         }
     }
+
+    EuclideanDistanceMap * getEDMap(){return static_cast<EuclideanDistanceMap *>(_feeder);}
 };
 
 

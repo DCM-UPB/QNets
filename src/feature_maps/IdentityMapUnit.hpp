@@ -26,6 +26,8 @@ public:
             throw std::invalid_argument("[IdentityMapUnit::setFeeder] Passed feeder is not of class IdentityMap.");
         }
     }
+
+    IdentityMap * getIdMap(){return static_cast<IdentityMap *>(_feeder);}
 };
 
 

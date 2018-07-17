@@ -14,6 +14,23 @@ IdentityMap::IdentityMap(NetworkLayer * nl, const size_t &source_id)
 }
 
 
+// --- StringCode methods
+
+std::string IdentityMap::getParams()
+{
+    return composeCodes(StaticFeeder::getParams(), composeParamCode("source_id", _source_ids[0]));
+}
+
+
+void IdentityMap::setParams(const std::string &params)
+{
+    StaticFeeder::setParams(params);
+    std::string str_id = readParamValue(params, "source_id");
+    setParamValue(str_id, _source_ids[0]);
+    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+}
+
+
 // --- Feed Mu and Sigma
 
 double IdentityMap::getFeedMu()

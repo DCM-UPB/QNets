@@ -43,6 +43,41 @@ EuclideanDistanceMap::EuclideanDistanceMap(NetworkLayer * nl, const size_t &sour
 }
 
 
+// --- StringCode methods
+
+std::string EuclideanDistanceMap::getParams()
+{
+    std::string params = composeParamCode("ndim", _ndim);
+    params = composeCodes(params, composeParamCode("source_id1", _source_ids[0]));
+    params = composeCodes(params, composeParamCode("source_id2", _source_ids[_ndim]));
+    return composeCodes(StaticFeeder::getParams(), params);
+}
+
+
+void EuclideanDistanceMap::setParams(const std::string &params)
+{
+    StaticFeeder::setParams(params);
+
+    std::string str_ndim = readParamValue(params, "ndim");
+    setParamValue(str_ndim, _ndim);
+
+    size_t id1, id2;
+    std::string str_id1 = readParamValue(params, "source_id1");
+    setParamValue(str_id1, id1);
+    std::string str_id2 = readParamValue(params, "source_id2");
+    setParamValue(str_id2, id2);
+
+    std::vector<size_t> ids;
+    for (size_t i=0; i<_ndim; ++i) {
+        ids.push_back(id1+i);
+        ids.push_back(id2+i);
+    }
+
+    _fillSources(ids);
+    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+}
+
+
 // --- Feed Mu and Sigma
 
 double EuclideanDistanceMap::getFeedMu()
