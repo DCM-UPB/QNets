@@ -17,6 +17,7 @@ protected:
 public:
     // --- Constructor
 
+    explicit FeatureMapLayer(const int &nunits); // "default" constructor with minimal information
     FeatureMapLayer(const int &nidmaps, const int &nedmaps, const int &nunits = -1);
     explicit FeatureMapLayer(const std::string &params);
 

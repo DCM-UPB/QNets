@@ -33,6 +33,11 @@ FeederInterface * FeatureMapLayer::_newFMF(NetworkLayer * nl, const int &i)
 
 // --- Constructor
 
+FeatureMapLayer::FeatureMapLayer(const int &nunits): _nidmaps(nunits-1), _nedmaps(0) // minimal initialization with ID maps
+{
+    if (nunits>1) construct(nunits);
+}
+
 FeatureMapLayer::FeatureMapLayer(const int &nidmaps, const int &nedmaps, const int &nunits): _nidmaps(nidmaps), _nedmaps(nedmaps)
 {
     // if the user did specify nunits, don't calculate it

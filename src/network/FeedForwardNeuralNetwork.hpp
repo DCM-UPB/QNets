@@ -7,6 +7,7 @@
 #include "FedLayer.hpp"
 #include "NNLayer.hpp"
 #include "OutputNNLayer.hpp"
+#include "FeatureMapLayer.hpp"
 #include "NetworkUnit.hpp"
 
 #include <vector>
@@ -18,13 +19,14 @@ class FeedForwardNeuralNetwork
 private:
     void _construct(const int &insize, const int &hidlaysize, const int &outsize); // construct from minimal set of unit numbers
     void _registerLayer(NetworkLayer * newLayer, const int &indexFromBack = 0); // register layers to correct vectors, position controlled by indexFromBack
-    void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0); // creates and registers a new layer according to idCode and nunits
+    void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0, const std::string &params=""); // creates and registers a new layer according to idCode and nunits
     void _addNewLayer(const std::string &idCode, const std::string &params="", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
     void _updateNVP(); // internal method to update _nvp member, call it after you changed/created variational parameter assignment
 protected:
     std::vector<NetworkLayer *> _L; // contains all kinds of layers
     std::vector<FedLayer *> _L_fed; // contains layers with feeder
     std::vector<NNLayer *> _L_nn; // contains neural layers
+    std::vector<FeatureMapLayer *> _L_fm; // contains feature map layers
     InputLayer * _L_in = NULL; // input layer
     OutputNNLayer * _L_out = NULL; // output layer
 
@@ -44,6 +46,7 @@ public:
     int getNLayers(){return _L.size();}
     int getNFedLayers(){return _L_fed.size();}
     int getNNeuralLayers(){return _L_nn.size();}
+    int getNFeatureMapLayers(){return _L_fm.size();}
     int getNHiddenLayers(){return _L_nn.size()-1;}
 
     int getNInput(){return _L_in->getNInputUnits();}
@@ -53,6 +56,7 @@ public:
     NetworkLayer * getLayer(const int &li){return _L[li];}
     FedLayer * getFedLayer(const int &li){return _L_fed[li];}
     NNLayer * getNNLayer(const int &li){return _L_nn[li];}
+    FeatureMapLayer * getFeatureMapLayer(const int &li){return _L_fm[li];}
     InputLayer * getInputLayer(){return _L_in;}
     OutputNNLayer * getOutputLayer(){return _L_out;}
 
@@ -68,6 +72,7 @@ public:
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
+    void pushFeatureMapLayer(const int &size, const std::string &params="");
 
 
     // --- Connect the neural network
