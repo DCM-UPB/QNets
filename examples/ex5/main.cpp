@@ -12,7 +12,7 @@ int main() {
 
 
 
-    cout << "Let's start by creating a Feed Forward Artificial Neural Netowrk (FFANN)" << endl;
+    cout << "Let's start by creating a Feed Forward Artificial Neural Network (FFANN)" << endl;
     cout << "========================================================================" << endl;
     cin.ignore();
 
