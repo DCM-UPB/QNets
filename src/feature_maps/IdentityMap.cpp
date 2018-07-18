@@ -3,14 +3,14 @@
 
 #include <vector>
 #include <string>
-
+#include <iostream>
 // --- Constructor
 
 IdentityMap::IdentityMap(NetworkLayer * nl, const size_t &source_id)
 {
     std::vector<size_t> source_ids = { source_id };
     _fillSourcePool(nl);
-    _fillSources(source_ids);
+    setParameters(source_id);
 }
 
 
@@ -35,9 +35,8 @@ void IdentityMap::setParams(const std::string &params)
 
 void IdentityMap::setParameters(const size_t &source_id)
 {
-    std::vector<size_t> ids = { source_id };
-
-    _fillSources(ids);
+    std::vector<size_t> source_ids = {source_id};
+    _fillSources(source_ids);
     if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
 }
 

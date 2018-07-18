@@ -4,14 +4,19 @@
 #include "FedUnit.hpp"
 #include <vector>
 
-// --- Base Desctructor
+// --- Base Destructor
+
+void FeederInterface::_clearSources()
+{
+    _sources.clear();
+    _source_ids.clear();
+    _map_index_to_sources.clear();
+}
 
 FeederInterface::~FeederInterface()
 {
     _sourcePool.clear();
-    _sources.clear();
-    _source_ids.clear();
-    _map_index_to_sources.clear();
+    FeederInterface::_clearSources();
 }
 
 
@@ -19,6 +24,8 @@ FeederInterface::~FeederInterface()
 
 void FeederInterface::_fillSourcePool(NetworkLayer * nl)
 {
+    _sourcePool.clear();
+    _clearSources();
     for (int i=0; i<nl->getNUnits(); ++i){
         _sourcePool.push_back(nl->getUnit(i));
     }
@@ -26,14 +33,16 @@ void FeederInterface::_fillSourcePool(NetworkLayer * nl)
 
 void FeederInterface::_fillSources(const std::vector<size_t> &source_ids) // add select sources from sourcePool
 {
+    //_clearSources();
     for (size_t i=0; i<source_ids.size(); ++i) {
-        _source_ids.push_back(source_ids[i]);
-        _sources.push_back(_sourcePool[_source_ids[i]]);
+        //_source_ids.push_back(source_ids[i]);
+        _sources.push_back(_sourcePool[source_ids[i]]);
     }
 }
 
 void FeederInterface::_fillSources() // add all sources from sourcePool
 {
+    _clearSources();
     for (size_t i=0; i<_sourcePool.size(); ++i) {
         _source_ids.push_back(i);
         _sources.push_back(_sourcePool[i]);

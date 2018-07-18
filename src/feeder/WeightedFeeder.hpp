@@ -14,6 +14,8 @@ protected:
     // beta
     std::vector<double> _beta;   // intensity of each sorgent unit, i.e. its weight
 
+    virtual void _clearSources(); // basically clear everything except sourcePool
+
     // method to fill beta after source is filled
     // we provide a method to add one beta per selected source
     void _fillBeta();

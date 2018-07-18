@@ -16,6 +16,8 @@ protected:
     std::vector<double*> _vp; // store pointers to beta/params used as variational parameters
     bool _flag_vp = false; // do we add own vp?
 
+    virtual void _clearSources(); // basically clear everything except sourcePool
+
 public:
     virtual ~VariableFeeder(){_vp.clear();}
 

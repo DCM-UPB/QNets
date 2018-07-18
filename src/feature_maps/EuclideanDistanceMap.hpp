@@ -12,8 +12,8 @@ protected:
     double _calcDist(); // calculate euclidean distance
 
 public:
-    EuclideanDistanceMap(NetworkLayer * nl, const size_t &source_id1, const size_t &source_id2, const int ndim); // ids of the first index of relevant vectors
-    EuclideanDistanceMap(NetworkLayer * nl): EuclideanDistanceMap(nl, 0, 0, 1) {} // minimal default initialization
+    EuclideanDistanceMap(NetworkLayer * nl, const int ndim, const size_t &source_id1, const size_t &source_id2); // ids of the first index of relevant vectors
+    EuclideanDistanceMap(NetworkLayer * nl): EuclideanDistanceMap(nl, 0, 0, 0) {} // minimal default initialization
     ~EuclideanDistanceMap(){}
 
     // string code methods

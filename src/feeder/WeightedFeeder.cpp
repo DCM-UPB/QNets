@@ -1,5 +1,14 @@
 #include "WeightedFeeder.hpp"
 
+// --- clear method
+
+void WeightedFeeder::_clearSources()
+{
+    _beta.clear();
+    VariableFeeder::_clearSources();
+}
+
+
 // --- default fillBeta method
 
 void WeightedFeeder::_fillBeta()

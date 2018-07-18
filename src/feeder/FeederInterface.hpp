@@ -23,7 +23,7 @@ protected:
     // variational parameters
     int _vp_id_shift = -1; // if we add vp, our vp indices start from here (-1 means variational parameter system not initialized)
 
-
+    virtual void _clearSources(); // basically clear everything except sourcePool
     void _fillSourcePool(NetworkLayer * nl); // add units from nl to sourcePool
     void _fillSources(const std::vector<size_t> &source_ids); // add select sources from sourcePool
     void _fillSources(); // add all sources from sourcePool

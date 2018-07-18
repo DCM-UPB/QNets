@@ -2,6 +2,14 @@
 
 #include <string>
 
+// --- clear method
+
+void VariableFeeder::_clearSources()
+{
+    _vp.clear();
+    FeederInterface::_clearSources();
+}
+
 // --- StringCode methods
 
 std::string VariableFeeder::getParams()

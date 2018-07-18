@@ -30,16 +30,10 @@ double EuclideanDistanceMap::_calcDist()
 
 // --- Constructor
 
-EuclideanDistanceMap::EuclideanDistanceMap(NetworkLayer * nl, const size_t &source_id1, const size_t &source_id2, const int ndim): _ndim(ndim)
+EuclideanDistanceMap::EuclideanDistanceMap(NetworkLayer * nl, const int ndim, const size_t &source_id1, const size_t &source_id2): _ndim(ndim)
 {
-    std::vector<size_t> source_ids;
-    for (int i=0; i<_ndim; ++i) {
-        source_ids.push_back(source_id1+i);
-        source_ids.push_back(source_id2+i);
-    }
-
     _fillSourcePool(nl);
-    _fillSources(source_ids);
+    setParameters(ndim, source_id1, source_id2);
 }
 
 
@@ -82,15 +76,21 @@ void EuclideanDistanceMap::setParams(const std::string &params)
 
 void EuclideanDistanceMap::setParameters(const int &ndim, const size_t &source_id1, const size_t &source_id2)
 {
-    _ndim = ndim;
+    std::vector<size_t> source_ids;
 
-    std::vector<size_t> ids;
-    for (size_t i=0; i<(size_t)_ndim; ++i) {
-        ids.push_back(source_id1+i);
-        ids.push_back(source_id2+i);
+    _ndim = ndim;
+    if (_ndim > 0) {
+        for (int i=0; i<_ndim; ++i) {
+            source_ids.push_back(source_id1+i);
+            source_ids.push_back(source_id2+i);
+        }
+    }
+    else { // default to input from offset (which is always there)
+        source_ids.push_back(0);
+        source_ids.push_back(0);
     }
 
-    _fillSources(ids);
+    _fillSources(source_ids);
     if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
 }
 
@@ -135,57 +135,70 @@ double EuclideanDistanceMap::getFeed()
 
 double EuclideanDistanceMap::getFirstDerivativeFeed(const int &i1d)
 {
-    double d1 = 0.;
-    for (int i=0; i<_ndim; ++i) {
-        const double v1 = _sources[i]->getValue();
-        const double v2 = _sources[i+_ndim]->getValue();
-        const double d1v1 = _sources[i]->getFirstDerivativeValue(i1d);
-        const double d1v2 = _sources[i+_ndim]->getFirstDerivativeValue(i1d);
-        d1 += (v1 - v2) * (d1v1 - d1v2);
-    }
+    const double dist = _calcDist();
 
-    return d1 / _calcDist();
+    if (dist > 0) {
+        double d1 = 0.;
+        for (int i=0; i<_ndim; ++i) {
+            const double v1 = _sources[i]->getValue();
+            const double v2 = _sources[i+_ndim]->getValue();
+            const double d1v1 = _sources[i]->getFirstDerivativeValue(i1d);
+            const double d1v2 = _sources[i+_ndim]->getFirstDerivativeValue(i1d);
+            d1 += (v1 - v2) * (d1v1 - d1v2);
+        }
+
+        return d1 / dist;
+    }
+    else return 0.;
 }
 
 
 double EuclideanDistanceMap::getSecondDerivativeFeed(const int &i2d)
 {
     const double dist = _calcDist();
-    const double dist2 = dist * dist;
 
-    double d21 = 0.;
-    double d22 = 0.;
-    for (int i=0; i<_ndim; ++i) {
-        const double v1 = _sources[i]->getValue();
-        const double v2 = _sources[i+_ndim]->getValue();
-        const double d1v1 = _sources[i]->getFirstDerivativeValue(i2d);
-        const double d1v2 = _sources[i+_ndim]->getFirstDerivativeValue(i2d);
-        const double d2v1 = _sources[i]->getSecondDerivativeValue(i2d);
-        const double d2v2 = _sources[i+_ndim]->getSecondDerivativeValue(i2d);
+    if (dist > 0) {
+        const double dist2 = dist * dist;
 
-        const double d1d = d1v1 - d1v2;
-        d21 += (v1 - v2) * (d2v1 - d2v2) + d1d*d1d;
-        d22 += (v1 - v2) * d1d;
+        double d21 = 0.;
+        double d22 = 0.;
+        for (int i=0; i<_ndim; ++i) {
+            const double v1 = _sources[i]->getValue();
+            const double v2 = _sources[i+_ndim]->getValue();
+            const double d1v1 = _sources[i]->getFirstDerivativeValue(i2d);
+            const double d1v2 = _sources[i+_ndim]->getFirstDerivativeValue(i2d);
+            const double d2v1 = _sources[i]->getSecondDerivativeValue(i2d);
+            const double d2v2 = _sources[i+_ndim]->getSecondDerivativeValue(i2d);
+
+            const double d1d = d1v1 - d1v2;
+            d21 += (v1 - v2) * (d2v1 - d2v2) + d1d*d1d;
+            d22 += (v1 - v2) * d1d;
+        }
+
+        return (d21 + d22*d22 / dist2) / dist;
     }
-
-    return (d21 + d22*d22 / dist2) / dist;
+    else return 0.;
 }
 
 double EuclideanDistanceMap::getVariationalFirstDerivativeFeed(const int &iv1d)
 {
     if (iv1d < _vp_id_shift) {
-        double vd1 = 0.;
-        for (int i=0; i<_ndim; ++i) {
-            const double v1 = _sources[i]->getValue();
-            const double v2 = _sources[i+_ndim]->getValue();
-            const double vdv1 = _sources[i]->getVariationalFirstDerivativeValue(iv1d);
-            const double vdv2 = _sources[i+_ndim]->getVariationalFirstDerivativeValue(iv1d);
-            vd1 += (v1 - v2) * (vdv1-vdv2);
-        }
+        const double dist = _calcDist();
 
-        return vd1 / _calcDist();
+        if (dist > 0) {
+            double vd1 = 0.;
+            for (int i=0; i<_ndim; ++i) {
+                const double v1 = _sources[i]->getValue();
+                const double v2 = _sources[i+_ndim]->getValue();
+                const double vdv1 = _sources[i]->getVariationalFirstDerivativeValue(iv1d);
+                const double vdv2 = _sources[i+_ndim]->getVariationalFirstDerivativeValue(iv1d);
+                vd1 += (v1 - v2) * (vdv1-vdv2);
+            }
+
+            return vd1 / dist;
+        }
     }
-    else return 0.;
+    return 0.;
 }
 
 

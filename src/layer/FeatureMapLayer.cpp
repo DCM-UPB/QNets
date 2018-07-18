@@ -8,6 +8,20 @@
 
 #include <iostream>
 
+// --- Register Unit
+
+void FeatureMapLayer::_registerUnit(NetworkUnit * newUnit)
+{
+    FedLayer::_registerUnit(newUnit);
+    if(IdentityMapUnit * idmu = dynamic_cast<IdentityMapUnit *>(newUnit)) {
+        _U_idm.push_back(idmu);
+    }
+    if(EuclideanDistanceMapUnit * edmu = dynamic_cast<EuclideanDistanceMapUnit *>(newUnit)) {
+        _U_edm.push_back(edmu);
+    }
+}
+
+
 // --- Feature Map helpers
 
 FedUnit * FeatureMapLayer::_newFMU(const int &i)
