@@ -68,9 +68,26 @@ void EuclideanDistanceMap::setParams(const std::string &params)
     setParamValue(str_id2, id2);
 
     std::vector<size_t> ids;
-    for (size_t i=0; i<_ndim; ++i) {
+    for (size_t i=0; i<(size_t)_ndim; ++i) {
         ids.push_back(id1+i);
         ids.push_back(id2+i);
+    }
+
+    _fillSources(ids);
+    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+}
+
+
+// --- Parameter manipulation
+
+void EuclideanDistanceMap::setParameters(const int &ndim, const size_t &source_id1, const size_t &source_id2)
+{
+    _ndim = ndim;
+
+    std::vector<size_t> ids;
+    for (size_t i=0; i<(size_t)_ndim; ++i) {
+        ids.push_back(source_id1+i);
+        ids.push_back(source_id2+i);
     }
 
     _fillSources(ids);

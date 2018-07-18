@@ -12,7 +12,7 @@
 
 FedUnit * FeatureMapLayer::_newFMU(const int &i)
 {
-    if (i<=_nedmaps) {
+    if (i<_nedmaps) {
         return new EuclideanDistanceMapUnit();
     }
     else {
@@ -22,7 +22,7 @@ FedUnit * FeatureMapLayer::_newFMU(const int &i)
 
 FeederInterface * FeatureMapLayer::_newFMF(NetworkLayer * nl, const int &i)
 {
-    if (i<=_nedmaps) {
+    if (i<_nedmaps) {
         return new EuclideanDistanceMap(nl);
     }
     else {
@@ -70,7 +70,7 @@ void FeatureMapLayer::construct(const int &nunits)
 
     FedUnit * newUnit;
     for (int i=1; i<nunits; ++i) {
-        newUnit = _newFMU(i);
+        newUnit = _newFMU(i-1); // we need fedUnit indices here
         _registerUnit(newUnit);
     }
 }

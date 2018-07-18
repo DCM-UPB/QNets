@@ -19,6 +19,9 @@ public:
     std::string getParams();
     void setParams(const std::string &params);
 
+    // parameter manipulation
+    void setParameters(const size_t &source_id);
+
     // return the feed mean value (mu) and standard deviation (sigma)
     double getFeedMu();
     double getFeedSigma();

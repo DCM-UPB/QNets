@@ -2,9 +2,11 @@
 #include <random>
 
 #include "FeedForwardNeuralNetwork.hpp"
+#include "PrintUtilities.hpp"
 #include "../common/checkDerivatives.hpp"
 
-int main(){
+int main()
+{
     using namespace std;
 
     const double TINY = 0.0001;
@@ -12,6 +14,11 @@ int main(){
 
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
     ffnn->pushHiddenLayer(4);
+    ffnn->pushFeatureMapLayer(5);
+    ffnn->pushFeatureMapLayer(5);
+    ffnn->getFeatureMapLayer(0)->setNMaps(3,0);
+    ffnn->getFeatureMapLayer(1)->setNMaps(1,0);
+
     ffnn->connectFFNN();
 
     // random generator with fixed seed for generating the beta, in order to eliminate randomness of results in the unittest
@@ -26,7 +33,11 @@ int main(){
     }
 
     ffnn->assignVariationalParameters();
-    ffnn->addCrossSecondDerivativeSubstrate();
+    ffnn->addFirstDerivativeSubstrate();
+    ffnn->addSecondDerivativeSubstrate();
+    ffnn->addVariationalFirstDerivativeSubstrate();
+
+    printFFNNStructure(ffnn);
 
     check_derivatives(ffnn, TINY);
 

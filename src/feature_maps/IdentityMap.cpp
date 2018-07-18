@@ -31,6 +31,17 @@ void IdentityMap::setParams(const std::string &params)
 }
 
 
+// --- Parameter manipulation
+
+void IdentityMap::setParameters(const size_t &source_id)
+{
+    std::vector<size_t> ids = { source_id };
+
+    _fillSources(ids);
+    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+}
+
+
 // --- Feed Mu and Sigma
 
 double IdentityMap::getFeedMu()

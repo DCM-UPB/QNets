@@ -34,7 +34,7 @@ public:
 
     // --- Modify structure
 
-    void setNMaps(const int &nidmaps, const int &nedmaps);
+    void setNMaps(const int &nedmaps, const int &nidmaps);
 
     // --- Connection
 
