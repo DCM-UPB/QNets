@@ -168,12 +168,14 @@ double EuclideanDistanceMap::getSecondDerivativeFeed(const int &i2d)
             const double d2v1 = _sources[i]->getSecondDerivativeValue(i2d);
             const double d2v2 = _sources[i+_ndim]->getSecondDerivativeValue(i2d);
 
+            const double dv = (v1 -v2);
             const double d1d = d1v1 - d1v2;
-            d21 += (v1 - v2) * (d2v1 - d2v2) + d1d*d1d;
-            d22 += (v1 - v2) * d1d;
+            const double d2d = d2v1 - d2v2;
+            d21 += dv * d2d + d1d*d1d;
+            d22 += dv * d1d;
         }
 
-        return (d21 + d22*d22 / dist2) / dist;
+        return (d21 - d22*d22 / dist2) / dist;
     }
     else return 0.;
 }

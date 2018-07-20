@@ -23,14 +23,14 @@ int main()
 
     ffnn->connectFFNN();
 
-    ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getEDMap()->setParameters(0, 1, 2); // distance of both previous non-offset units
+    ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getEDMap()->setParameters(1, 1, 2); // distance of both previous non-offset units
     ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getIdMap()->setParameters(1); // set first identity to first non-offset unit
     ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getIdMap()->setParameters(2); // set second identity to second non-offset unit
 
     // all useful distances from previous layer
-    ffnn->getFeatureMapLayer(1)->getEDMapUnit(0)->getEDMap()->setParameters(0, 1, 2);
-    ffnn->getFeatureMapLayer(1)->getEDMapUnit(1)->getEDMap()->setParameters(0, 1, 3);
-    ffnn->getFeatureMapLayer(1)->getEDMapUnit(2)->getEDMap()->setParameters(0, 2, 3);
+    ffnn->getFeatureMapLayer(1)->getEDMapUnit(0)->getEDMap()->setParameters(1, 1, 2);
+    ffnn->getFeatureMapLayer(1)->getEDMapUnit(1)->getEDMap()->setParameters(1, 1, 3);
+    ffnn->getFeatureMapLayer(1)->getEDMapUnit(2)->getEDMap()->setParameters(1, 2, 3);
 
     // set identities to previous units
     ffnn->getFeatureMapLayer(1)->getIdMapUnit(0)->getIdMap()->setParameters(1);
