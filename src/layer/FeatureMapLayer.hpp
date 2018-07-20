@@ -5,39 +5,40 @@
 #include "FedLayer.hpp"
 #include "FedUnit.hpp"
 
-#include "IdentityMapUnit.hpp"
 #include "EuclideanDistanceMapUnit.hpp"
+#include "IdentityMapUnit.hpp"
 
 class FeatureMapLayer: public FedLayer
 {
 protected:
-    // currently we control the feature map unit creation just by these integers (actually now obsolete since we use vectors of feature map units)
-    int _nidmaps; // number of identity maps
-    int _nedmaps; // number of euclidean distance maps
+    // currently we control the feature map unit creation by these integers
+    int _nedmaps; // DESIRED number of euclidean distance maps
+    int _nidmaps; // DESIRED number of identity maps
 
-    std::vector<IdentityMapUnit *> _U_idm; // stores pointers to all identity map units
     std::vector<EuclideanDistanceMapUnit *> _U_edm; // stores pointers to all euclidean distance map units
+    std::vector<IdentityMapUnit *> _U_idm; // stores pointers to all identity map units
 
     FedUnit * _newFMU(const int &i); // create a new FeatureMapUnit for index i
     FeederInterface * _newFMF(NetworkLayer * nl, const int &i); // create a new FeatureMap feeder for index i
     void _registerUnit(NetworkUnit * newUnit); // check if newUnit is one of the known feature maps and register
 public:
-    // --- Constructor
+    // --- Constructor / Destructor
 
     explicit FeatureMapLayer(const int &nunits); // "default" constructor with minimal information
-    FeatureMapLayer(const int &nidmaps, const int &nedmaps, const int &nunits = -1);
+    FeatureMapLayer(const int &nedmaps, const int &nidmaps, const int &nunits = -1);
     explicit FeatureMapLayer(const std::string &params);
+    ~FeatureMapLayer();
 
-    virtual void construct(const int &nunits);
+    // --- construct / deconstruct methods
 
-    // --- Deconstructor
-
-    virtual ~FeatureMapLayer(){}
-    virtual void deconstruct(){FedLayer::deconstruct(); _U_idm.clear(); _U_edm.clear();}
+    void construct(const int &nunits);
+    void deconstruct();
 
     // --- String Codes
 
-    virtual std::string getIdCode(){return "FML";}
+    std::string getIdCode(){return "FML";}
+    std::string getParams();
+    void setParams(const std::string &params);
 
     // --- Modify structure
 
@@ -52,7 +53,7 @@ public:
 
     // --- Connection
 
-    virtual FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i);
+    FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i);
 };
 
 #endif

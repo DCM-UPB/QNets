@@ -16,8 +16,8 @@ int main()
     ffnn->pushHiddenLayer(4);
     ffnn->pushFeatureMapLayer(4);
     ffnn->pushFeatureMapLayer(6);
-    ffnn->getFeatureMapLayer(0)->setNMaps(2,1);
-    ffnn->getFeatureMapLayer(1)->setNMaps(2,3);
+    ffnn->getFeatureMapLayer(0)->setNMaps(1,2);
+    ffnn->getFeatureMapLayer(1)->setNMaps(3,2);
 
     printFFNNStructure(ffnn);
     ffnn->connectFFNN();
@@ -51,7 +51,7 @@ int main()
     ffnn->addSecondDerivativeSubstrate();
     ffnn->addVariationalFirstDerivativeSubstrate();
 
-    //printFFNNStructure(ffnn);
+    printFFNNStructure(ffnn);
 
     check_derivatives(ffnn, TINY);
 

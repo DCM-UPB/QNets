@@ -29,7 +29,8 @@ public:
     // variational parameters (we don't have any, so we can default the methods)
     int getNVariationalParameters(){return 0;}
     int getMaxVariationalParameterIndex(){return FeederInterface::getMaxVariationalParameterIndex();}
-    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = false){return FeederInterface::setVariationalParametersIndexes(starting_index, false);}
+    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = false){ // we don't add vp and if there are no previous vp, we can just pretend vps aren't initialized (faster?)
+        const int ret = FeederInterface::setVariationalParametersIndexes(starting_index, false); if (starting_index < 1) _vp_id_shift = -1; return ret;}
     bool getVariationalParameterValue(const int &id, double &value){return FeederInterface::getVariationalParameterValue(id, value);}
     bool setVariationalParameterValue(const int &id, const double &value){return FeederInterface::setVariationalParameterValue(id, value);}
 
