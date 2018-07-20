@@ -182,10 +182,13 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits,
 }
 
 // print output of fitted NN to file
-void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const bool &print_d1, const bool &print_d2)
+void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const bool &print_d1, const bool &print_d2, const double * base_input)
 {
     using namespace std;
-    double base_input = 0.;
+    const double default_base_input = 0.;
+    const double * my_base_input;
+    if (base_input) my_base_input = base_input;
+    else my_base_input = &default_base_input;
 
     // add required substrates if necessary
     if ((print_d1 || print_d2) && !ffnn->hasFirstDerivativeSubstrate()) ffnn->addFirstDerivativeSubstrate();
@@ -195,9 +198,9 @@ void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const doub
         for (int j = 0; j<_tdata.yndim; ++j) {
             stringstream ss;
             ss << i << "_" << j << ".txt";
-            writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str());
-            if (print_d1) writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str());
-            if (print_d2) writePlotFile(ffnn, &base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str());
+            writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str());
+            if (print_d1) writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str());
+            if (print_d2) writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str());
         }
     }
 }

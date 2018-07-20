@@ -58,7 +58,7 @@ int main (void) {
         cin >> nhu[i];
     }
     cout << endl;
-    cout << "Do you want to use the pair distance map layer? (0/1)";
+    cout << "Do you want to use the pair distance map layer? (0/1) ";
     cin >> flag_fm;
     cout << endl;
     cout << endl;
@@ -67,7 +67,7 @@ int main (void) {
     if (flag_fm) nl += 1;
 
     cout << "We generate a FFANN with " << nl << " layers and 3, ";
-    if (flag_fm) cout << "2, " << endl;
+    if (flag_fm) cout << "2, ";
     for (int i=0; i<nhl; ++i) cout << nhu[i] << ", ";
     cout << "2 units respectively" << endl;
     cout << "========================================================================" << endl;
@@ -76,10 +76,10 @@ int main (void) {
     cout << endl;
     cout << "Please enter the regularization lambda. (e.g. 0.0001) ";
     cin >> lambda_r;
-    cout << "Please enter the first derivative lambda. (e.g. 0.1) ";
+    /*cout << "Please enter the first derivative lambda. (e.g. 0.1) ";
     cin >> lambda_d1;
     cout << "Please enter the second derivative lambda. (e.g. 0.1) ";
-    cin >> lambda_d2;
+    cin >> lambda_d2;*/ // cross derivs not yet implemented for distance
     cout << "Please enter the the maximum tolerable fit residual. (0 to disable) ";
     cin >> maxchi;
     cout << "Please enter the ";
@@ -102,6 +102,13 @@ int main (void) {
         ffnn->getFeatureMapLayer(0)->setNMaps(1,2);
     }
 
+    //ffnn->getNNLayer(0)->getNNUnit(0)->setActivationFunction("GSS");
+    /*for (int i=0; i<ffnn->getNNeuralLayers()-1; ++i) {
+        for (int j=1; j<ffnn->getNNLayer(i)->getNNeuralUnits(); ++j) {
+            ffnn->getNNLayer(i)->getNNUnit(j)->setActivationFunction("TANS");
+        }
+    }*/
+
     ffnn->connectFFNN();
 
     if (flag_fm) {
@@ -113,9 +120,9 @@ int main (void) {
     printFFNNStructure(ffnn);
 
     // create data and config structs
-    const int ntraining = 2000; // how many training data points
-    const int nvalidation = 1000; // how many validation data points
-    const int ntesting = 3000; // how many testing data points
+    const int ntraining = 5000; // how many training data points
+    const int nvalidation = 5000; // how many validation data points
+    const int ntesting = 10000; // how many testing data points
     const int ndata = ntraining + nvalidation + ntesting;
     const int maxn_steps = 100; // maximum number of iterations for least squares solver
     const int maxn_novali = 5; // maximum number of iteration without decreasing validation residual (aka early stopping)
@@ -131,8 +138,8 @@ int main (void) {
     tdata.allocate(flag_d1, flag_d2);
 
     // generate the data to be fitted
-    const double lb = -10; // lower input boundary for data
-    const double ub = 10; // upper input boundary for data
+    const double lb = -5; // lower input boundary for data
+    const double ub = 5; // upper input boundary for data
     random_device rdev;
 
     mt19937_64 rgen = std::mt19937_64(rdev());
@@ -140,7 +147,7 @@ int main (void) {
     for (int i = 0; i < ndata; ++i) {
         tdata.x[i][0] = rd(rgen);
         tdata.x[i][1] = rd(rgen);
-        tdata.y[i][0] = gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]*tdata.x[i][0]) * gaussian(tdata.x[i][1]*tdata.x[i][1]);
+        tdata.y[i][0] = gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
         if (flag_d1) {
             tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
                 + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
@@ -148,11 +155,11 @@ int main (void) {
                 + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1]);
         }
         if (flag_d2) {
-            tdata.yd1[i][0][0] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+            tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
                 + gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1])
                 + gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1])
                 + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian_d2dx(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
-            tdata.yd1[i][0][1] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+            tdata.yd2[i][0][1] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
                 - gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1])
                 - gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1])
                 + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_d2dx(tdata.x[i][1]);
@@ -172,10 +179,20 @@ int main (void) {
     cout << "Done." << endl;
     cout << "========================================================================" << endl;
     cout << endl;
-    cout << "Now we print the output/NN to a file. The end." << endl;
+    cout << "Now we print the output/NN to a file. The end." << endl << endl;
+
+    cout << "NOTE: The files with 0_0 in their name contain values along the x-axis, with y=0." << endl;
+    cout << "      The files with 1_0 however go along they y-axis, with x=0.5." << endl;
+    cout << endl;
+    cout << "NOTE 2: Since higher dimensional data is hard to visualize, it is recommended to look more at the resulintg overall residual values." << endl;
+    cout << "        Also remember that there is a bit of luck involved in finding really optimal best fits, especially with low number of fits."<< endl;
 
     // NON I/O CODE
-    trainer->printFitOutput(ffnn, lb, ub, 200, true, true);
+    double base_input[2]; // while one variable is varied, the other will be set to this
+    base_input[0] = 0.5;
+    base_input[1] = 0.0;
+    trainer->printFitOutput(ffnn, lb, ub, 200, true, true, &base_input[0]);
+
     ffnn->storeOnFile("nn.txt");
 
 

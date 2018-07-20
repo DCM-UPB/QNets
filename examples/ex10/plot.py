@@ -1,7 +1,26 @@
 from pylab import *
 
-gauss_a = 1.0
-gauss_b = 0
+# since the two ffnn plot data files are for x=0.5 and y=0 respectively
+# we can simplify our comparison functions here
+
+def f_v_1(x):
+    return exp(-2.0*x**2);
+
+def f_d1_1(x):
+    return -4.0*x * f_v_1(x)
+
+def f_d2_1(x):
+    return -4.0 * f_v_1(x) - 4.0*x * f_d1_1(x)
+
+x0 = 0.5
+def f_v_2(y):
+    return exp(-x0**2)*exp(-(x0-y)**2) * exp(-y**2);
+
+def f_d1_2(y):
+    return f_v_2(y) * (2*(x0-y) - 2*y)
+
+def f_d2_2(y):
+    return f_d1_2(y) * (2*(x0-y) - 2*y) - 4.0 * f_v_2(y)
 
 fnames = ['v_0_0','v_1_0', 'd1_0_0', 'd1_1_0', 'd2_0_0', 'd2_1_0']
 
@@ -30,19 +49,22 @@ gaussd2 = {}
 for key in vdata:
     gausl = []
     for x in vdata[key][0]:
-        gausl.append(exp(-gauss_a * (x - gauss_b)**2))
+        if key.split('_')[1]=='0': gausl.append(f_v_1(x))
+        else: gausl.append(f_v_2(x))
     gaussv[key] = array(gausl)
 
 for key in d1data:
     gausl = []
     for x in d1data[key][0]:
-        gausl.append(- 2 * gauss_a * (x - gauss_b) * exp(-gauss_a * (x - gauss_b)**2))
+        if key.split('_')[1]=='0': gausl.append(f_d1_1(x))
+        else: gausl.append(f_d1_2(x))
     gaussd1[key] = array(gausl)
 
 for key in d2data:
     gausl = []
     for x in d2data[key][0]:
-        gausl.append(- 2 * gauss_a * (1 - 2 * gauss_a * (x - gauss_b)**2 ) * exp(-gauss_a * (x - gauss_b)**2))
+        if key.split('_')[1]=='0': gausl.append(f_d2_1(x))
+        else: gausl.append(f_d2_2(x))
     gaussd2[key] = array(gausl)
 
 gauss = gaussv.copy()
@@ -68,7 +90,8 @@ axs = {}
 
 fig = figure(1)
 ax = fig.add_subplot(111)
-ax.plot(vdata[list(vdata.keys())[0]][0], gaussv[list(vdata.keys())[0]], label='Gauss')
+ax.plot(vdata[list(vdata.keys())[0]][0], gaussv[list(vdata.keys())[0]], label='Gauss_0')
+ax.plot(vdata[list(vdata.keys())[1]][0], gaussv[list(vdata.keys())[1]], label='Gauss_1')
 for key in vdata:
     ax.plot(vdata[key][0], vdata[key][1], '--', label=key[2:])
 ax.set_ylabel('f(x)')
@@ -78,7 +101,8 @@ axs['v'] = ax
 
 fig = figure(2)
 ax = fig.add_subplot(111)
-ax.plot(d1data[list(d1data.keys())[0]][0], gaussd1[list(d1data.keys())[0]], label='Gauss')
+ax.plot(d1data[list(d1data.keys())[0]][0], gaussd1[list(d1data.keys())[0]], label='Gauss_0')
+ax.plot(d1data[list(d1data.keys())[1]][0], gaussd1[list(d1data.keys())[1]], label='Gauss_1')
 for key in d1data:
     ax.plot(d1data[key][0], d1data[key][1], '--', label=key[3:])
 ax.set_ylabel('d/dx f(x)')
@@ -88,7 +112,8 @@ axs['d1'] = ax
 
 fig = figure(3)
 ax = fig.add_subplot(111)
-ax.plot(d2data[list(d2data.keys())[0]][0], gaussd2[list(d2data.keys())[0]], label='Gauss')
+ax.plot(d2data[list(d2data.keys())[0]][0], gaussd2[list(d2data.keys())[0]], label='Gauss_0')
+ax.plot(d2data[list(d2data.keys())[1]][0], gaussd2[list(d2data.keys())[1]], label='Gauss_1')
 for key in d2data:
     ax.plot(d2data[key][0], d2data[key][1], '--', label=key[3:])
 ax.set_ylabel('d^2/dx^2 f(x)')
