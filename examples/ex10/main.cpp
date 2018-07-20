@@ -11,28 +11,28 @@
   In this example we want to demonstrate how a feature map layer can be used to
   pre-process the raw input and pass only the relevant information to the Multi-Layer Perceptron.
 
-  Like in the previous example, we consider a gaussian. But this time we use two variables x,y as input,
-  as f(x) = exp(-(x-y)²) . To learn this function appropriately, a basic MLP that takes only the raw data requires
+  Like in the previous example, we consider gaussians. But this time we use two variables x,y as input,
+  as f(x) = exp(-(x-y)²) * exp(-x²) * exp(-y²). To learn this function appropriately, a basic MLP that takes only the raw data requires
   significantly more units and/or layers than before. If you however have the knowledge, that only
   the distance between those two variables is relevant, you can use a minimal feature map layer with
   one distance map unit to reduce the problem for the NN to the same size as before.
 
   NOTE: In some use cases it is just as easy, but faster, to do the pre-processing on the data yourself (and only once) before
         passing the data to the network. However, when you need the derivatives with respect to the raw input or if you are anyway
-        contiously feeding randomly generated data (that you would have to process), the feature-map feature can be very convenient. 
+        contiously feeding randomly generated data (that you would have to process), the feature-map feature can be very convenient.
 */
 
-double gaussian(const double x, const double a, const double b) {
+double gaussian(const double x, const double a = 1., const double b = 0.) {
     return exp(-a*pow(x-b, 2));
 };
 
 // first derivative of gaussian
-double gaussian_ddx(const double x, const double a, const double b) {
+double gaussian_ddx(const double x, const double a = 1., const double b = 0.) {
     return 2.0*a*(b-x) * exp(-a*pow(x-b, 2));
 };
 
 // first derivative of gaussian
-double gaussian_d2dx(const double x, const double a, const double b) {
+double gaussian_d2dx(const double x, const double a = 1., const double b = 0.) {
     return (pow(2.0*a*(b-x), 2) - 2.0*a) * exp(-a*pow(x-b, 2));
 };
 
@@ -98,14 +98,17 @@ int main (void) {
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
 
     if (flag_fm) {
-        ffnn->pushFeatureMapLayer(2);
-        ffnn->getFeatureMapLayer(0)->setNMaps(1,0);
+        ffnn->pushFeatureMapLayer(4);
+        ffnn->getFeatureMapLayer(0)->setNMaps(1,2);
     }
 
     ffnn->connectFFNN();
 
-    if (flag_fm) ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getEDMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
-
+    if (flag_fm) {
+        ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getEDMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
+        ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getIdMap()->setParameters(1);
+        ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getIdMap()->setParameters(2);
+    }
     ffnn->assignVariationalParameters();
     printFFNNStructure(ffnn);
 
@@ -131,19 +134,28 @@ int main (void) {
     const double lb = -10; // lower input boundary for data
     const double ub = 10; // upper input boundary for data
     random_device rdev;
+
     mt19937_64 rgen = std::mt19937_64(rdev());
     uniform_real_distribution<double> rd(lb,ub);
     for (int i = 0; i < ndata; ++i) {
         tdata.x[i][0] = rd(rgen);
         tdata.x[i][1] = rd(rgen);
-        tdata.y[i][0] = gaussian(tdata.x[i][0]-tdata.x[i][1], 1, 0);
+        tdata.y[i][0] = gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]*tdata.x[i][0]) * gaussian(tdata.x[i][1]*tdata.x[i][1]);
         if (flag_d1) {
-            tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0]-tdata.x[i][1], 1, 0);
-            tdata.yd1[i][0][1] = -gaussian_ddx(tdata.x[i][0]-tdata.x[i][1], 1, 0);
+            tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
+            tdata.yd1[i][0][1] = -gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1]);
         }
         if (flag_d2) {
-            tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1], 1, 0);
-            tdata.yd2[i][0][1] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1], 1, 0);
+            tdata.yd1[i][0][0] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+                + gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+                + gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian_d2dx(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
+            tdata.yd1[i][0][1] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
+                - gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1])
+                - gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1])
+                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_d2dx(tdata.x[i][1]);
         }
         tdata.w[i][0] = 1.0; // our data have no error, so set all weights to 1
         if (verbose) printf ("data: %i %g %g\n", i, tdata.x[i][0]-tdata.x[i][1], tdata.y[i][0]);
