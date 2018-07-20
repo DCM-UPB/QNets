@@ -702,7 +702,7 @@ void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::s
         // disconnect the layer after the last feature map layer
         _L_fed[_L_fm.size()]->disconnect();  // disconnect the first non-fm fed layer
         // insert new layer
-        _addNewLayer("FML", size, _L_nn.size()-1, params);
+        _addNewLayer("FML", size, _L_nn.size(), params);
         // reconnect the layers
         _L_fm[_L_fm.size()-1]->connectOnTopOfLayer(_L[_L_fm.size()-1]);
         _L_fed[_L_fm.size()]->connectOnTopOfLayer(_L_fm[_L_fm.size()-1]);
@@ -722,7 +722,7 @@ void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::s
         delete[] old_beta;
     }
     else {
-        _addNewLayer("FML", size, _L_nn.size()-1, params);
+        _addNewLayer("FML", size, _L_nn.size(), params);
     }
 }
 
@@ -872,7 +872,7 @@ void FeedForwardNeuralNetwork::_registerLayer(NetworkLayer * newLayer, const int
     }
 
     if(FeatureMapLayer * fml = dynamic_cast<FeatureMapLayer *>(newLayer)) {
-        if (indexFromBack>(int)(_L_nn.size()-1)) _L_fm.insert(_L_fm.end()-(indexFromBack-_L_nn.size()+1), fml);
+        if (indexFromBack>(int)(_L_nn.size())) _L_fm.insert(_L_fm.end()-(indexFromBack-_L_nn.size()), fml);
         else _L_fm.insert(_L_fm.end(), fml);
     }
 }

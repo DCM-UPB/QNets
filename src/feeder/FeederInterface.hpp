@@ -65,7 +65,7 @@ public:
     virtual int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = true);  // set the index of each variational parameter starting from starting_index  and create vp pointer vector
 
     virtual int getNVariationalParameters(){return 0;}  // return the number of variational parameters involved
-    virtual int getMaxVariationalParameterIndex(){return _vp_id_shift > 0 ? _vp_id_shift-1 : 0;} // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
+    virtual int getMaxVariationalParameterIndex(){return _vp_id_shift > 0 ? _vp_id_shift-1 : -1;} // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
     // return the index that the next feeder might take as input
     virtual bool getVariationalParameterValue(const int &id, double &value){return false;} // get the variational parameter with identification index id and store it in value
     // return true if the parameters has been found, false otherwise

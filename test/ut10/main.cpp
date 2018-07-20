@@ -19,6 +19,7 @@ int main()
     ffnn->getFeatureMapLayer(0)->setNMaps(2,1);
     ffnn->getFeatureMapLayer(1)->setNMaps(2,3);
 
+    printFFNNStructure(ffnn);
     ffnn->connectFFNN();
 
     ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getEDMap()->setParameters(1, 1, 2); // distance of both previous non-offset units
