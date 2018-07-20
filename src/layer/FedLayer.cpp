@@ -100,8 +100,8 @@ void FedLayer::connectOnTopOfLayer(NetworkLayer * nl)
 {
     for (std::vector<FedUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
-            FeederInterface * ray = this->connectUnitOnTopOfLayer(nl, i);
-            if (ray) _U_fed[i]->setFeeder(ray);
+            FeederInterface * feeder = this->connectUnitOnTopOfLayer(nl, i); // note that i==0 means the first non-offset unit
+            if (feeder) _U_fed[i]->setFeeder(feeder);
         }
 }
 

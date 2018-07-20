@@ -12,10 +12,10 @@ class EuclideanDistanceMapUnit: public FedUnit
 public:
     // Constructor and destructor
     EuclideanDistanceMapUnit(EuclideanDistanceMap * edmap = NULL) : FedUnit(static_cast<FeederInterface *>(edmap)) {}
-    virtual ~EuclideanDistanceMapUnit(){}
+    ~EuclideanDistanceMapUnit(){}
 
     // string code id
-    virtual std::string getIdCode(){return "EDMU";} // return identifier for unit type
+    std::string getIdCode(){return "EDMU";} // return identifier for unit type
 
     // restrict feeder to EuclideanDistanceMap
     void setFeeder(FeederInterface * feeder){
@@ -28,7 +28,10 @@ public:
     }
 
     EuclideanDistanceMap * getEDMap(){return static_cast<EuclideanDistanceMap *>(_feeder);}
-};
 
+    // devirtualize
+    void computeActivation(){}
+    void computeValues(){NetworkUnit::computeValues();}
+};
 
 #endif

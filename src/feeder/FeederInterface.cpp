@@ -33,7 +33,7 @@ void FeederInterface::_fillSourcePool(NetworkLayer * nl)
 
 void FeederInterface::_fillSources(const std::vector<size_t> &source_ids) // add select sources from sourcePool
 {
-    //_clearSources();
+    _clearSources();
     for (size_t i=0; i<source_ids.size(); ++i) {
         _source_ids.push_back(source_ids[i]);
         _sources.push_back(_sourcePool[source_ids[i]]);

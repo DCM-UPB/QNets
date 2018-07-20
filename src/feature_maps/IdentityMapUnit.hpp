@@ -12,10 +12,11 @@ class IdentityMapUnit: public FedUnit
 public:
     // Constructor and destructor
     IdentityMapUnit(IdentityMap * idmap = NULL) : FedUnit(static_cast<FeederInterface *>(idmap)) {}
-    virtual ~IdentityMapUnit(){}
+    ~IdentityMapUnit(){}
 
     // string code id
-    virtual std::string getIdCode(){return "IDMU";} // return identifier for unit type
+
+    std::string getIdCode(){return "IDMU";} // return identifier for unit type
 
     // restrict feeder to IdentityMap
     void setFeeder(FeederInterface * feeder){
@@ -28,7 +29,10 @@ public:
     }
 
     IdentityMap * getIdMap(){return static_cast<IdentityMap *>(_feeder);}
-};
 
+    // devirtualize
+    void computeActivation(){}
+    void computeValues(){NetworkUnit::computeValues();}
+};
 
 #endif

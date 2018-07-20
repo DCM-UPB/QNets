@@ -8,7 +8,6 @@
 
 IdentityMap::IdentityMap(NetworkLayer * nl, const size_t &source_id)
 {
-    std::vector<size_t> source_ids = { source_id };
     _fillSourcePool(nl);
     setParameters(source_id);
 }
@@ -24,10 +23,10 @@ std::string IdentityMap::getParams()
 
 void IdentityMap::setParams(const std::string &params)
 {
+    std::vector<size_t> source_ids(1);
+    setParamValue(readParamValue(params, "source_id"), source_ids[0]);
+    _fillSources(source_ids);
     StaticFeeder::setParams(params);
-    std::string str_id = readParamValue(params, "source_id");
-    setParamValue(str_id, _source_ids[0]);
-    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
 }
 
 
@@ -35,7 +34,7 @@ void IdentityMap::setParams(const std::string &params)
 
 void IdentityMap::setParameters(const size_t &source_id)
 {
-    std::vector<size_t> source_ids = {source_id};
+    std::vector<size_t> source_ids { source_id };
     _fillSources(source_ids);
     if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
 }

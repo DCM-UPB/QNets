@@ -826,7 +826,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn)
 {
     // copy layer structure
-    for (int i=0; i<ffnn->getNLayers(); ++i) _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getNUnits());
+    for (int i=0; i<ffnn->getNLayers(); ++i) _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getParams());
 
      // read and set the substrates
     if (ffnn->isConnected()) connectFFNN();
