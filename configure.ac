@@ -143,6 +143,7 @@ examples/ex2/Makefile
 examples/Makefile
 examples/ex8/Makefile
 examples/ex3/Makefile
+examples/ex10/Makefile
 Makefile
 benchmark/bench_actfs_derivs/Makefile
 benchmark/Makefile
