@@ -8,7 +8,7 @@
 
 double SRLUActivationFunction::f(const double &in)
 {
-    return log(1.+exp(in));
+    return log1p(exp(in)); // log(1+exp(in))
 }
 
 
@@ -34,11 +34,11 @@ double SRLUActivationFunction::f3d(const double &in)
 
 void SRLUActivationFunction::fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1, const bool flag_d2, const bool flag_d3)
 {
-    const double ep1 = 1.+exp(in);
-    v = log(ep1);
+    const double expin = exp(in);
+    v = log1p(expin); // log(1+exp(in))
 
     if (flag_d1 || flag_d2 || flag_d3) {
-        const double v1dh = exp(in) / ep1;
+        const double v1dh = expin / (1.+expin);
         v1d = flag_d1 ? v1dh : 0.;
         v2d = flag_d2 ? v1dh - v1dh*v1dh : 0.;
         v3d = flag_d3 ? v1dh - 3.*v1dh*v1dh + 2.*v1dh*v1dh*v1dh : 0.;
