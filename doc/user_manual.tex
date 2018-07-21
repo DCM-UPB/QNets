@@ -51,7 +51,7 @@
 \newcommand{\idaf}{\sigma_{\text{id}}}
 \newcommand{\reluaf}{\sigma_{\text{ReLU}}}
 \newcommand{\seluaf}{\sigma_{\text{SELU}}}
-
+\newcommand{\srluaf}{\sigma_{\text{SRLU}}}
 
 \begin{document}
 \maketitle
@@ -195,6 +195,8 @@ The fixed hyper-parameter $\alpha$ defaults to 0. Due to their efficiency and be
   \alpha e^{x}- \alpha & \text{if $x<=0$}
 \end{cases}$ \\
 The Scaled Exponential Units (with two fixed hyper-parameters $\alpha$ and $\lambda$) solve some problems of ReLUs and can provide a self-normalizing network. But still they are not differentiable at x=0. 
+\item the \emph{SRLU function}: $\srluaf(x) \equiv ln(1+exp(x))$ \\
+The Smooth Rectified Linear Unit is the natural and differentiable, but much less performant version of a hard linear rectifier (ReLU).
 
 \end{enumerate}
 $\\$
