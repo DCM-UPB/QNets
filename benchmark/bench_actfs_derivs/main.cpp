@@ -19,10 +19,10 @@ void run_single_benchmark(const string &label, const string &actf_id, const doub
 
 int main (void) {
     const int neval = 100000;
-    const int nruns = 50;
+    const int nruns = 10;
 
-    const int nactfs = 7;
-    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU"};
+    const int nactfs = 8;
+    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU", "SRLU"};
 
     double * const indata = new double[neval]; // 1d input data for actf bench
 

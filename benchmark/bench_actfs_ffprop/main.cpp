@@ -26,8 +26,8 @@ int main (void) {
     const int nhl = 2;
     const int nhu[nhl] = {9,5};
 
-    const int nactfs = 7;
-    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU"};
+    const int nactfs = 8;
+    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU", "SRLU"};
 
     double ** const xdata = new double*[neval]; // xndim input data for propagate bench
     for (int i=0; i<neval; ++i) xdata[i] = new double[xndim];
