@@ -9,10 +9,10 @@
 #include <stdexcept>
 
 // --- Helpers
-double calcDistHelper(std::vector<double> srcv, const int ndim)
+double calcDistHelper(std::vector<double> srcv, const size_t ndim)
 {
     double dist = 0.;
-    for (int i=0; i<ndim; ++i) {
+    for (size_t i=0; i<ndim; ++i) {
         dist += pow(srcv[i] - srcv[i+ndim], 2);
     }
     return sqrt(dist);
@@ -21,75 +21,19 @@ double calcDistHelper(std::vector<double> srcv, const int ndim)
 double EuclideanDistanceMap::_calcDist()
 {
     double dist = 0.;
-    for (int i=0; i<_ndim; ++i) {
+    for (size_t i=0; i<_ndim; ++i) {
         dist += pow(_sources[i]->getValue() - _sources[i+_ndim]->getValue(), 2);
     }
     return sqrt(dist);
 }
 
 
-// --- Constructor
-
-EuclideanDistanceMap::EuclideanDistanceMap(NetworkLayer * nl, const int ndim, const size_t &source_id1, const size_t &source_id2)
-{
-    _fillSourcePool(nl);
-    setParameters(ndim, source_id1, source_id2);
-}
-
-
-// --- StringCode methods
-
-std::string EuclideanDistanceMap::getParams()
-{
-    std::string params = composeParamCode("ndim", _ndim);
-    params = composeCodes(params, composeParamCode("source_id1", _source_ids[0]));
-    params = composeCodes(params, composeParamCode("source_id2", _source_ids[_ndim]));
-    return composeCodes(StaticFeeder::getParams(), params);
-}
-
-
-void EuclideanDistanceMap::setParams(const std::string &params)
-{
-    std::string str_ndim = readParamValue(params, "ndim");
-    setParamValue(str_ndim, _ndim);
-
-    size_t id1, id2;
-    std::string str_id1 = readParamValue(params, "source_id1");
-    setParamValue(str_id1, id1);
-    std::string str_id2 = readParamValue(params, "source_id2");
-    setParamValue(str_id2, id2);
-
-    std::vector<size_t> source_ids;
-    for (size_t i=0; i<(size_t)_ndim; ++i) {
-        source_ids.push_back(id1+i);
-        source_ids.push_back(id2+i);
-    }
-
-    _fillSources(source_ids);
-    StaticFeeder::setParams(params);
-}
-
-
 // --- Parameter manipulation
 
-void EuclideanDistanceMap::setParameters(const int &ndim, const size_t &source_id1, const size_t &source_id2)
+void EuclideanDistanceMap::setParameters(const size_t &ndim, const size_t &source_id1, const size_t &source_id2)
 {
-    std::vector<size_t> source_ids;
-
-    _ndim = ndim;
-    if (_ndim > 0) {
-        for (int i=0; i<_ndim; ++i) {
-            source_ids.push_back(source_id1+i);
-            source_ids.push_back(source_id2+i);
-        }
-    }
-    else { // nevertheless push the sources
-        source_ids.push_back(source_id1);
-        source_ids.push_back(source_id2);
-    }
-
-    _fillSources(source_ids);
-    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+    std::vector<size_t> source_id0s = {source_id1, source_id2};
+    MultiDimStaticMap::setParameters(ndim, source_id0s);
 }
 
 
@@ -114,7 +58,7 @@ double EuclideanDistanceMap::getFeedSigma()
     double dist =  calcDistHelper(srcv, _ndim);
 
     double sigma = 0.;
-    for (int i=0; i<_ndim; ++i) {
+    for (size_t i=0; i<_ndim; ++i) {
         sigma += pow(srcv[i] - srcv[i+_ndim], 2) * ( pow(_sources[i]->getOutputSigma(), 2) + pow(_sources[i+_ndim]->getOutputSigma(), 2) ); // (d²/dx² sigmaX)²
     }
 
@@ -137,7 +81,7 @@ double EuclideanDistanceMap::getFirstDerivativeFeed(const int &i1d)
 
     if (dist > 0) {
         double d1 = 0.;
-        for (int i=0; i<_ndim; ++i) {
+        for (size_t i=0; i<_ndim; ++i) {
             const double v1 = _sources[i]->getValue();
             const double v2 = _sources[i+_ndim]->getValue();
             const double d1v1 = _sources[i]->getFirstDerivativeValue(i1d);
@@ -160,7 +104,7 @@ double EuclideanDistanceMap::getSecondDerivativeFeed(const int &i2d)
 
         double d21 = 0.;
         double d22 = 0.;
-        for (int i=0; i<_ndim; ++i) {
+        for (size_t i=0; i<_ndim; ++i) {
             const double v1 = _sources[i]->getValue();
             const double v2 = _sources[i+_ndim]->getValue();
             const double d1v1 = _sources[i]->getFirstDerivativeValue(i2d);
@@ -187,7 +131,7 @@ double EuclideanDistanceMap::getVariationalFirstDerivativeFeed(const int &iv1d)
 
         if (dist > 0) {
             double vd1 = 0.;
-            for (int i=0; i<_ndim; ++i) {
+            for (size_t i=0; i<_ndim; ++i) {
                 const double v1 = _sources[i]->getValue();
                 const double v2 = _sources[i+_ndim]->getValue();
                 const double vdv1 = _sources[i]->getVariationalFirstDerivativeValue(iv1d);

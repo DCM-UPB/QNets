@@ -1,26 +1,32 @@
 #ifndef IDENTITY_MAP
 #define IDENTITY_MAP
 
-#include "StaticFeeder.hpp"
+#include "OneDimStaticMap.hpp"
 #include "NetworkUnit.hpp"
 #include "NetworkLayer.hpp"
 
 #include <string>
+#include <cstddef> // NULL
 
-class IdentityMap: public StaticFeeder
+class IdentityMap: public OneDimStaticMap
 {
+protected:
+    NetworkUnit * _src; // we gain some performance by maintaining and using this single pointer over vector with one element
+
+    void _fillSources(const std::vector<size_t> &source_ids); // we extend this to maintain _src
+    void _clearSources();
+
 public:
-    IdentityMap(NetworkLayer * nl, const size_t &source_id); // full initialization
+    IdentityMap(NetworkLayer * nl, const size_t &source_id)
+        : OneDimStaticMap(nl, 1), _src(NULL) {setParameters(source_id);} // full initialization
     IdentityMap(NetworkLayer * nl): IdentityMap(nl, 0) {} // minimal default initialization
     ~IdentityMap(){}
 
     // string code methods
     std::string getIdCode(){return "IDM";} // return an identification string
-    std::string getParams();
-    void setParams(const std::string &params);
 
     // parameter manipulation
-    void setParameters(const size_t &source_id);
+    void setParameters(const size_t &source_id); // calls base setParameters with vectorized argument
 
     // return the feed mean value (mu) and standard deviation (sigma)
     double getFeedMu();
