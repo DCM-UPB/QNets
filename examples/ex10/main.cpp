@@ -112,9 +112,9 @@ int main (void) {
     ffnn->connectFFNN();
 
     if (flag_fm) {
-        ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getEDMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
-        ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getIdMap()->setParameters(1);
-        ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getIdMap()->setParameters(2);
+        ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
+        ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getMap()->setParameters(1);
+        ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getMap()->setParameters(2);
     }
     ffnn->assignVariationalParameters();
     printFFNNStructure(ffnn);
