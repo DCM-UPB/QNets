@@ -99,7 +99,7 @@ int main (void) {
 
     if (flag_fm) {
         ffnn->pushFeatureMapLayer(4);
-        ffnn->getFeatureMapLayer(0)->setNMaps(1,2);
+        ffnn->getFeatureMapLayer(0)->setNMaps(0,1,2);
     }
 
     //ffnn->getNNLayer(0)->getNNUnit(0)->setActivationFunction("GSS");
@@ -112,7 +112,7 @@ int main (void) {
     ffnn->connectFFNN();
 
     if (flag_fm) {
-        ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
+        ffnn->getFeatureMapLayer(0)->getEPDMapUnit(0)->getMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
         ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getMap()->setParameters(1);
         ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getMap()->setParameters(2);
     }
