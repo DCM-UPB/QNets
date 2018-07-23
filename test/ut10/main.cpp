@@ -14,10 +14,13 @@ int main()
 
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
     ffnn->pushHiddenLayer(4);
+
     ffnn->pushFeatureMapLayer(5);
+    ffnn->getFeatureMapLayer(0)->setNMaps(0, 0, 1, 1, 2);
+
     ffnn->pushFeatureMapLayer(4);
-    ffnn->getFeatureMapLayer(0)->setNMaps(1, 1, 2);
-    ffnn->getFeatureMapLayer(1)->setNMaps(0, 1, 2);
+    ffnn->getFeatureMapLayer(1)->setNMaps(1, 1, 0, 1, 0); // we specify only 3 units
+    ffnn->getFeatureMapLayer(1)->setSize(6); // now the other 2 should be defaulted to IDMU
 
     printFFNNStructure(ffnn);
 
@@ -30,8 +33,10 @@ int main()
     ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getMap()->setParameters(2); // set second identity to second non-offset unit
 
     // second feature map layer
-    ffnn->getFeatureMapLayer(1)->getEPDMapUnit(0)->getMap()->setParameters(2, 1, 3);
-    ffnn->getFeatureMapLayer(1)->getIdMapUnit(0)->getMap()->setParameters(3);
+    ffnn->getFeatureMapLayer(1)->getPSMapUnit(0)->getMap()->setParameters(1, 3); // pair sum of 1 and 3
+    ffnn->getFeatureMapLayer(1)->getPDMapUnit(0)->getMap()->setParameters(2, 4); // pair difference of 2 and 4
+    ffnn->getFeatureMapLayer(1)->getEPDMapUnit(0)->getMap()->setParameters(2, 1, 3); // 2D euclidean pair distance of 1&2 and 3&4
+    ffnn->getFeatureMapLayer(1)->getIdMapUnit(0)->getMap()->setParameters(3); // pass-through identities
     ffnn->getFeatureMapLayer(1)->getIdMapUnit(1)->getMap()->setParameters(4);
 
     // random generator with fixed seed for generating the beta, in order to eliminate randomness of results in the unittest

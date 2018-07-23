@@ -13,9 +13,9 @@
 
   Like in the previous example, we consider gaussians. But this time we use two variables x,y as input,
   as f(x) = exp(-(x-y)²) * exp(-x²) * exp(-y²). To learn this function appropriately, a basic MLP that takes only the raw data requires
-  significantly more units and/or layers than before. If you however have the knowledge, that only
-  the distance between those two variables is relevant, you can use a minimal feature map layer with
-  one distance map unit to reduce the problem for the NN to the same size as before.
+  significantly more units and/or layers than before. If you however have the knowledge, that the
+  problem only depends on x-y distance and (x,y) length/radius, you can use a feature map layer with
+  two different distance map units to reduce the problem for the NN.
 
   NOTE: In some use cases it is just as easy, but faster, to do the pre-processing on the data yourself (and only once) before
         passing the data to the network. However, when you need the derivatives with respect to the raw input or if you are anyway
@@ -98,24 +98,18 @@ int main (void) {
     for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
 
     if (flag_fm) {
-        ffnn->pushFeatureMapLayer(4);
-        ffnn->getFeatureMapLayer(0)->setNMaps(0,1,2);
+        ffnn->pushFeatureMapLayer(3);
+        ffnn->getFeatureMapLayer(0)->setNMaps(0, 0, 1, 1, 0);
     }
-
-    //ffnn->getNNLayer(0)->getNNUnit(0)->setActivationFunction("GSS");
-    /*for (int i=0; i<ffnn->getNNeuralLayers()-1; ++i) {
-        for (int j=1; j<ffnn->getNNLayer(i)->getNNeuralUnits(); ++j) {
-            ffnn->getNNLayer(i)->getNNUnit(j)->setActivationFunction("TANS");
-        }
-    }*/
 
     ffnn->connectFFNN();
 
     if (flag_fm) {
-        ffnn->getFeatureMapLayer(0)->getEPDMapUnit(0)->getMap()->setParameters(1, 1, 2); // distance of first and second non-offset input
-        ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getMap()->setParameters(1);
-        ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getMap()->setParameters(2);
+        std::vector<double> origin {0., 0.};
+        ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getMap()->setParameters(2, 1, origin); // length of (x,y) vec
+        ffnn->getFeatureMapLayer(0)->getEPDMapUnit(0)->getMap()->setParameters(1, 1, 2); // sqrt((x-y)²) a.k.a abs(x-y)
     }
+
     ffnn->assignVariationalParameters();
     printFFNNStructure(ffnn);
 
