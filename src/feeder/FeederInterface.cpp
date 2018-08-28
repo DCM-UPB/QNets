@@ -1,25 +1,52 @@
 #include "FeederInterface.hpp"
-#include "NetworkUnit.hpp"
 #include "NetworkLayer.hpp"
+#include "NetworkUnit.hpp"
 #include "FedUnit.hpp"
+#include <vector>
 
+// --- Base Destructor
 
-// --- Base Constructor/Desctructor
-
-FeederInterface::FeederInterface(NetworkLayer * nl): _vp_id_shift(-1)
+void FeederInterface::_clearSources()
 {
-    for (int i=0; i<nl->getNUnits(); ++i){
-        _sourcePool.push_back(nl->getUnit(i));
-    }
+    _sources.clear();
+    _source_ids.clear();
+    _map_index_to_sources.clear();
 }
 
 FeederInterface::~FeederInterface()
 {
     _sourcePool.clear();
-    _source.clear();
-    _source_ids.clear();
-    _beta.clear();
-    _map_index_to_sources.clear();
+    FeederInterface::_clearSources();
+}
+
+
+// --- fillSources methods
+
+void FeederInterface::_fillSourcePool(NetworkLayer * nl)
+{
+    _sourcePool.clear();
+    _clearSources();
+    for (int i=0; i<nl->getNUnits(); ++i){
+        _sourcePool.push_back(nl->getUnit(i));
+    }
+}
+
+void FeederInterface::_fillSources(const std::vector<size_t> &source_ids) // add select sources from sourcePool
+{
+    _clearSources();
+    for (size_t i=0; i<source_ids.size(); ++i) {
+        _source_ids.push_back(source_ids[i]);
+        _sources.push_back(_sourcePool[source_ids[i]]);
+    }
+}
+
+void FeederInterface::_fillSources() // add all sources from sourcePool
+{
+    _clearSources();
+    for (size_t i=0; i<_sourcePool.size(); ++i) {
+        _source_ids.push_back(i);
+        _sources.push_back(_sourcePool[i]);
+    }
 }
 
 
@@ -30,31 +57,31 @@ std::string FeederInterface::getParams()
     return composeParamCode("id_shift", _vp_id_shift);
 }
 
-
 void FeederInterface::setParams(const std::string &params)
 {
-    int starting_index;
-    std::string str = readParamValue(params, "id_shift");
-    if (setParamValue(str, starting_index)) this->setVariationalParametersIndexes(starting_index);
+    std::string str_id = readParamValue(params, "id_shift");
+    setParamValue(str_id, _vp_id_shift);
+    // in the child class you need to extend this and call setVariationalParametersIndexes after having all information
 }
+
 
 // set VP Indexes default version
 
 int FeederInterface::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
     // Here we assign external vp indexes to internal indexes.
-    // NOTE: The current method assumes, that no index larger than max_id,
-    //       max_id = starting_index + source.size() - 1 ,
-    //       may be in use FOR (and trivially IN) this feeder.
+    // NOTE: The current method assumes, that no index relevant
+    // to this feeder is larger than starting_index (+ n_own_vp - 1)
+    // NOTE 2: Extend this to actually add variational parameters
 
     _map_index_to_sources.clear();
 
     for (int j=0; j<starting_index; ++j) {
-        std::vector<int> empty_vec;
+        std::vector<size_t> empty_vec;
         _map_index_to_sources.push_back(empty_vec);
     }
 
-    for (std::vector<NetworkUnit *>::size_type i=1; i<_source.size(); ++i) {
-        if(FedUnit * fu = dynamic_cast<FedUnit *>(_source[i])) {
+    for (std::vector<NetworkUnit *>::size_type i=1; i<_sources.size(); ++i) {
+        if(FedUnit * fu = dynamic_cast<FedUnit *>(_sources[i])) {
             FeederInterface * feeder = fu->getFeeder();
             if (feeder != 0) {
                 for (int j=0; j<starting_index; ++j) {
@@ -66,30 +93,21 @@ int FeederInterface::setVariationalParametersIndexes(const int &starting_index, 
         }
     }
 
-    _vp_id_shift = -1;
+    _vp_id_shift = starting_index;
     return starting_index;
 }
 
 
-
-
-// --- is VP Index used
-
-bool FeederInterface::isVPIndexUsedInFeeder(const int &id){
-    if ( _vp_id_shift <= id && id <_vp_id_shift+getNVariationalParameters()) {
-        return true;
-    }
-    else return false;
-}
-
-bool FeederInterface::isVPIndexUsedInSources(const int &id){
+bool FeederInterface::isVPIndexUsedInSources(const int &id)
+{
     if (id < _vp_id_shift) {
         return (!_map_index_to_sources[id].empty());
     }
     else return false;
 }
 
-bool FeederInterface::isVPIndexUsedForFeeder(const int &id){
+bool FeederInterface::isVPIndexUsedForFeeder(const int &id)
+{
     if ( isVPIndexUsedInFeeder(id) || isVPIndexUsedInSources(id) ) {
         return true;
     }

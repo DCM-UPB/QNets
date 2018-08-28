@@ -57,3 +57,8 @@ Run it after the exe by `python plot.py` (requires matplotlib).
 ## Example 9
 
 `ex9/`: use NNTrainer(GSL) to make FFNN fit a gaussian
+
+
+## Example 10
+
+`ex10/`: use a FeatureMapLayer to fit more easily a gaussian of x-y-distance

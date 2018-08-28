@@ -679,6 +679,54 @@ void FeedForwardNeuralNetwork::popHiddenLayer()
 }
 
 
+void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::string &params)
+{
+    if (_flag_connected) {
+        using namespace std;
+        // count the number of beta up to and including the last feature map layer
+        int nbeta = 0;
+        for (vector<FeatureMapLayer *>::size_type i=0; i<_L_fm.size(); ++i) {
+            for (int j=0; j<_L_fm[i]->getNFedUnits(); ++j) {
+                if (_L_fm[i]->getFedUnit(j)->getFeeder()) {
+                    nbeta += _L_fm[i]->getFedUnit(j)->getFeeder()->getNBeta();
+                }
+            }
+        }
+        int total_nbeta = this->getNBeta();
+        // store the beta for the output
+        double * old_beta = new double[total_nbeta-nbeta];
+        for (int i=nbeta; i<total_nbeta; ++i) {
+            old_beta[i-nbeta] = getBeta(i);
+        }
+
+        // disconnect the layer after the last feature map layer
+        _L_fed[_L_fm.size()]->disconnect();  // disconnect the first non-fm fed layer
+        // insert new layer
+        _addNewLayer("FML", size, _L_nn.size(), params);
+        // reconnect the layers
+        _L_fm[_L_fm.size()-1]->connectOnTopOfLayer(_L[_L_fm.size()-1]);
+        _L_fed[_L_fm.size()]->connectOnTopOfLayer(_L_fm[_L_fm.size()-1]);
+
+        // restore the old beta
+        for (int i=nbeta; i<total_nbeta; ++i) {
+            this->setBeta(i,old_beta[i-nbeta]);
+        }
+        // set all the other beta to zero
+        for (int i=total_nbeta; i<this->getNBeta(); ++i) {
+            this->setBeta(i,0.);
+        }
+        for (int i=0; i<_L_fed[_L_fed.size()-1]->getNFedUnits(); ++i) {
+            _L_fed[_L_fed.size()-1]->getFedUnit(i)->getFeeder()->setBeta(i,1.);
+        }
+        // free memory
+        delete[] old_beta;
+    }
+    else {
+        _addNewLayer("FML", size, _L_nn.size(), params);
+    }
+}
+
+
 // --- Store FFNN on a file
 
 void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool store_betas)
@@ -778,7 +826,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn)
 {
     // copy layer structure
-    for (int i=0; i<ffnn->getNLayers(); ++i) _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getNUnits());
+    for (int i=0; i<ffnn->getNLayers(); ++i) _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getParams());
 
      // read and set the substrates
     if (ffnn->isConnected()) connectFFNN();
@@ -822,10 +870,15 @@ void FeedForwardNeuralNetwork::_registerLayer(NetworkLayer * newLayer, const int
     if(NNLayer * nnl = dynamic_cast<NNLayer *>(newLayer)) {
         _L_nn.insert(_L_nn.end()-indexFromBack, nnl);
     }
+
+    if(FeatureMapLayer * fml = dynamic_cast<FeatureMapLayer *>(newLayer)) {
+        if (indexFromBack>(int)(_L_nn.size())) _L_fm.insert(_L_fm.end()-(indexFromBack-_L_nn.size()), fml);
+        else _L_fm.insert(_L_fm.end(), fml);
+    }
 }
 
 
-void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack)
+void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack, const std::string &params)
 {
     if (idCode == "INL") {
         if (_L_in) {
@@ -844,10 +897,15 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int
             delete _L_out;
             _L.erase(_L.end()-1);
             _L_fed.erase(_L_fed.end()-1);
-            _L_nn.erase(_L_nn.end()-1);;
+            _L_nn.erase(_L_nn.end()-1);
         }
         _L_out = new OutputNNLayer(nunits);
         _registerLayer(_L_out, indexFromBack);
+    }
+    else if (idCode == "FML") {
+        FeatureMapLayer * fml = new FeatureMapLayer(nunits);
+        _registerLayer(fml, indexFromBack);
+        if (params != "") fml->setParams(params);
     }
     else {
         throw std::invalid_argument("FFNN::_addNewLayer: Unknown layer identifier '" + idCode + "' passed.");
@@ -859,7 +917,8 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const std
 {
     int nunits;
     if (!setParamValue(params, "nunits", nunits)) nunits = 1; // if params has no information about nunits
-    _addNewLayer(idCode, nunits, indexFromBack);
+    if (countNParams(params) > 1) _addNewLayer(idCode, nunits, indexFromBack, params);
+    else _addNewLayer(idCode, nunits, indexFromBack, "");
 }
 
 
@@ -875,6 +934,7 @@ FeedForwardNeuralNetwork::~FeedForwardNeuralNetwork()
     _L.clear();
     _L_fed.clear();
     _L_nn.clear();
+    _L_fm.clear();
     _L_in = NULL;
     _L_out = NULL;
 

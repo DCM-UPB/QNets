@@ -6,7 +6,7 @@
 #include "NNTrainingData.hpp"
 #include "NNTrainingConfig.hpp"
 #include <sstream>
-#include <cstddef>
+#include <cstddef> // NULL
 
 
 class NNTrainer
@@ -47,7 +47,7 @@ public:
     void bestFit(FeedForwardNeuralNetwork * const ffnn, const int &nfits, const double &resi_target = 0., const int &verbose = 0, const bool &flag_smart_beta = false); // fits NN and uses internal bestfit(_err) arrays
 
     // print output of fitted NN to file
-    void printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const bool &print_d1 = false, const bool &print_d2 = false);
+    void printFitOutput(FeedForwardNeuralNetwork * const ffnn, const double &min, const double &max, const int &npoints, const bool &print_d1 = false, const bool &print_d2 = false, const double * base_input = NULL);
 };
 
 

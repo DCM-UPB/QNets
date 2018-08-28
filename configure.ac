@@ -122,6 +122,7 @@ AC_SUBST([AM_LDFLAGS], ["-L$(pwd)/lib -lgsl -lgslcblas"])
 AC_CONFIG_FILES([
 lib/Makefile
 include/Makefile
+test/ut10/Makefile
 test/ut1/Makefile
 test/ut8/Makefile
 test/ut2/Makefile
@@ -142,6 +143,7 @@ examples/ex2/Makefile
 examples/Makefile
 examples/ex8/Makefile
 examples/ex3/Makefile
+examples/ex10/Makefile
 Makefile
 benchmark/bench_actfs_derivs/Makefile
 benchmark/Makefile

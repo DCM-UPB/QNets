@@ -31,6 +31,8 @@ public:
             throw std::invalid_argument("[NNUnit::setFeeder] Passed feeder is not of class NNRay, but only NNRay or derived are allowed.");
         }
     }
+
+    NNRay * getRay(){return static_cast<NNRay *>(_feeder);}
 };
 
 
