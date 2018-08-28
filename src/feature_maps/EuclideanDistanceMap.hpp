@@ -23,6 +23,10 @@ public:
     // string code methods
     std::string getIdCode(){return "EDM";} // return an identification string
 
+    // string code methods
+    virtual std::string getParams();
+    virtual void setParams(const std::string &params);
+
     // parameter manipulation
     void setParameters(const size_t &ndim, const size_t &source_id0, const std::vector<double> &fixedPoint);
     void setParameters(const size_t &ndim, const vector<size_t> &source_id0s, const std::vector<double> &fixedPoint); // overriding

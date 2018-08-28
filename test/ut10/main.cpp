@@ -4,6 +4,7 @@
 #include "FeedForwardNeuralNetwork.hpp"
 #include "PrintUtilities.hpp"
 #include "../common/checkDerivatives.hpp"
+#include "../common/checkStoreOnFile.hpp"
 
 int main()
 {
@@ -22,7 +23,7 @@ int main()
     ffnn->getFeatureMapLayer(1)->setNMaps(1, 1, 0, 1, 0); // we specify only 3 units
     ffnn->getFeatureMapLayer(1)->setSize(6); // now the other 2 should be defaulted to IDMU
 
-    printFFNNStructure(ffnn);
+    //printFFNNStructure(ffnn);
 
     ffnn->connectFFNN();
 
@@ -50,14 +51,11 @@ int main()
         ffnn->setBeta(i, rd(rgen));
     }
 
-    ffnn->assignVariationalParameters();
-    ffnn->addFirstDerivativeSubstrate();
-    ffnn->addSecondDerivativeSubstrate();
-    ffnn->addVariationalFirstDerivativeSubstrate();
+    //printFFNNStructure(ffnn, false, 0);
 
-    printFFNNStructure(ffnn, false, 0);
+    checkStoreOnFile(ffnn, true); // as a side effect the function also adds all substrates to ffnn
 
-    check_derivatives(ffnn, TINY);
+    checkDerivatives(ffnn, TINY);
 
     delete ffnn;
 

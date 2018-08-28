@@ -28,6 +28,31 @@ double EuclideanDistanceMap::_calcDist()
 }
 
 
+// --- StringCode methods
+
+std::string EuclideanDistanceMap::getParams()
+{
+    std::string params = MultiDimStaticMap::getParams();
+    for (size_t i=0; i<_ndim; ++i) {
+        params = composeCodes(params, composeParamCode("fp" + std::to_string(i), _fixedPoint[i]));
+    }
+    return params;
+}
+
+
+void EuclideanDistanceMap::setParams(const std::string &params)
+{
+    MultiDimStaticMap::setParams(params);
+
+    _fixedPoint.clear();
+    for (size_t i=0; i<_ndim; ++i) {
+        double x;
+        std::string str = readParamValue(params, "fp" + std::to_string(i));
+        setParamValue(str, x);
+        _fixedPoint.push_back(x);
+    }
+}
+
 // --- Parameter manipulation
 
 void EuclideanDistanceMap::setParameters(const size_t &ndim, const size_t &source_id0, const vector<double> &fixedPoint)

@@ -28,7 +28,7 @@ int main(){
     ffnn->assignVariationalParameters();
     ffnn->addCrossSecondDerivativeSubstrate();
 
-    check_derivatives(ffnn, TINY);
+    checkDerivatives(ffnn, TINY);
 
     delete ffnn;
 

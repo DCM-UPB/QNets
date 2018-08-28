@@ -4,7 +4,7 @@
 
 #include "FeedForwardNeuralNetwork.hpp"
 
-void check_derivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
+void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 {
     double x[2] = {1.7, -0.2};
     const double dx = 0.0005;
