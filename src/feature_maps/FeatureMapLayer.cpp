@@ -100,8 +100,6 @@ FeatureMapLayer::FeatureMapLayer(const int &npsmaps, const int &npdmaps, const i
 
 FeatureMapLayer::FeatureMapLayer(const std::string &params)
 {
-    int nunits;
-    setParamValue(readParamValue(params, "nunits"), nunits);
     int npsmaps;
     setParamValue(readParamValue(params, "npsmaps"), npsmaps);
     int npdmaps;
@@ -112,6 +110,8 @@ FeatureMapLayer::FeatureMapLayer(const std::string &params)
     setParamValue(readParamValue(params, "nepdmaps"), nepdmaps);
     int nidmaps;
     setParamValue(readParamValue(params, "nidmaps"), nidmaps);
+    int nunits;
+    setParamValue(readParamValue(params, "nunits"), nunits);
 
     FeatureMapLayer(npsmaps, npdmaps, nedmaps, nepdmaps, nidmaps, nunits);
 }
@@ -138,9 +138,8 @@ void FeatureMapLayer::construct(const int &nunits)
         cout << endl << "[FeatureMapLayer::construct] Warning: Desired number of units is lower than 1 (offset) + number of maps. This means desired maps beyond nunits will not be created." << endl << endl;
     }
 
-    FedUnit * newUnit;
     for (int i=1; i<nunits; ++i) {
-        newUnit = _newFMU(i-1); // we need fedUnit indices here
+        FedUnit * newUnit = _newFMU(i-1); // we need fedUnit indices here
         _registerUnit(newUnit);
     }
 }

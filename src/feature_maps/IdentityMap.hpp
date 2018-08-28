@@ -19,7 +19,7 @@ protected:
 public:
     IdentityMap(NetworkLayer * nl, const size_t &source_id)
         : OneDimStaticMap(nl, 1), _src(NULL) {setParameters(source_id);} // full initialization
-    IdentityMap(NetworkLayer * nl): IdentityMap(nl, 0) {} // minimal default initialization
+    explicit IdentityMap(NetworkLayer * nl): IdentityMap(nl, 0) {} // minimal default initialization
     ~IdentityMap(){}
 
     // string code methods

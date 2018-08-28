@@ -20,7 +20,7 @@ class FeatureMapUnit: public FedUnit
 {
 public:
     // Constructor and destructor
-    FeatureMapUnit(FM * fmap = NULL) : FedUnit(static_cast<FeederInterface *>(fmap)) {}
+    explicit FeatureMapUnit(FM * fmap = NULL) : FedUnit(static_cast<FeederInterface *>(fmap)) {}
     ~FeatureMapUnit(){}
 
     // restrict feeder to FM

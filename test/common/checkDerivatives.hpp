@@ -8,7 +8,6 @@ void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 {
     double x[2] = {1.7, -0.2};
     const double dx = 0.0005;
-    double x1[2];
 
     ffnn->setInput(x);
     ffnn->FFPropagate();
@@ -21,6 +20,8 @@ void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
     // --- first and second derivative in respect to first input
 
     if (ffnn->hasFirstDerivativeSubstrate() && ffnn->hasSecondDerivativeSubstrate()) {
+        double x1[2];
+
         ffnn->setInput(x);
         ffnn->FFPropagate();
         double anal_dfxdx = ffnn->getFirstDerivative(0, 0);

@@ -4,7 +4,7 @@ from pylab import *
 # we can simplify our comparison functions here
 
 def f_v_1(x):
-    return exp(-2.0*x**2);
+    return exp(-2.0*x**2)
 
 def f_d1_1(x):
     return -4.0*x * f_v_1(x)
@@ -14,7 +14,7 @@ def f_d2_1(x):
 
 x0 = 0.5
 def f_v_2(y):
-    return exp(-x0**2)*exp(-(x0-y)**2) * exp(-y**2);
+    return exp(-x0**2)*exp(-(x0-y)**2) * exp(-y**2)
 
 def f_d1_2(y):
     return f_v_2(y) * (2*(x0-y) - 2*y)

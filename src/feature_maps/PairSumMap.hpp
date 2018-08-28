@@ -21,7 +21,7 @@ protected:
 public:
     PairSumMap(NetworkLayer * nl, const size_t &source_id0, const size_t &source_id1)
         : OneDimStaticMap(nl, 2), _src0(NULL), _src1(NULL) {setParameters(source_id0, source_id1);} // full initialization
-    PairSumMap(NetworkLayer * nl): PairSumMap(nl, 0, 0) {} // minimal default initialization
+    explicit PairSumMap(NetworkLayer * nl): PairSumMap(nl, 0, 0) {} // minimal default initialization
     ~PairSumMap(){}
 
     // string code methods

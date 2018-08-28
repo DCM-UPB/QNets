@@ -21,7 +21,7 @@ protected:
 public:
     PairDifferenceMap(NetworkLayer * nl, const size_t &source_id0, const size_t &source_id1)
         : OneDimStaticMap(nl, 2), _src0(NULL), _src1(NULL) {setParameters(source_id0, source_id1);} // full initialization
-    PairDifferenceMap(NetworkLayer * nl): PairDifferenceMap(nl, 0, 0) {} // minimal default initialization
+    explicit PairDifferenceMap(NetworkLayer * nl): PairDifferenceMap(nl, 0, 0) {} // minimal default initialization
     ~PairDifferenceMap(){}
 
     // string code methods

@@ -15,9 +15,9 @@ protected:
     double _calcDist(); // calculate euclidean distance
 
 public:
-    EuclideanDistanceMap(NetworkLayer * nl, const size_t ndim, const size_t &source_id0, const std::vector<double> fixedPoint)
+    EuclideanDistanceMap(NetworkLayer * nl, const size_t ndim, const size_t &source_id0, const std::vector<double> &fixedPoint)
         : MultiDimStaticMap(nl, ndim, 1) {setParameters(ndim, source_id0, fixedPoint);} // full initialization;
-    EuclideanDistanceMap(NetworkLayer * nl): EuclideanDistanceMap(nl, 1, 0, std::vector<double> {0.} ) {} // minimal default initialization
+    explicit EuclideanDistanceMap(NetworkLayer * nl): EuclideanDistanceMap(nl, 1, 0, std::vector<double> {0.} ) {} // minimal default initialization
     ~EuclideanDistanceMap(){}
 
     // string code methods

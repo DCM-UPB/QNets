@@ -168,5 +168,4 @@ void checkStoreOnFile(FeedForwardNeuralNetwork * const ffnn, const bool isConnec
     }
 
     delete ffnn2;
-
 }
