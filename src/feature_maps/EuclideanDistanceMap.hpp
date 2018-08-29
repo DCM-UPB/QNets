@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstddef>
 
+// takes coordinates on input side and calculates squared euclidean distance against a fixed point
 class EuclideanDistanceMap: public MultiDimStaticMap
 {
 protected:
