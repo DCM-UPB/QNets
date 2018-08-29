@@ -4,6 +4,7 @@
 #include "MultiDimStaticMap.hpp"
 #include "NetworkLayer.hpp"
 
+// takes coordinates on input side and calculates squared euclidean distance of a pair
 class EuclideanPairDistanceMap: public MultiDimStaticMap
 {
 protected:

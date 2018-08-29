@@ -121,7 +121,6 @@ double EuclideanDistanceMap::getFirstDerivativeFeed(const int &i1d)
 
 double EuclideanDistanceMap::getSecondDerivativeFeed(const int &i2d)
 {
-
     double d2 = 0.;
     for (size_t i=0; i<_ndim; ++i) {
         const double v = _sources[i]->getValue();
