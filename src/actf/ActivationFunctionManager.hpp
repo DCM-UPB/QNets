@@ -11,6 +11,7 @@
 #include "SELUActivationFunction.hpp"
 #include "SRLUActivationFunction.hpp"
 #include "SineActivationFunction.hpp"
+#include "ExponentialActivationFunction.hpp"
 
 #include <string>
 #include <vector>
@@ -26,6 +27,7 @@ namespace std_actf{
     extern SELUActivationFunction selu_actf;
     extern SRLUActivationFunction srlu_actf;
     extern SineActivationFunction sin_actf;
+    extern ExponentialActivationFunction exp_actf;
 
     extern std::vector<ActivationFunctionInterface *> supported_actf;
 
