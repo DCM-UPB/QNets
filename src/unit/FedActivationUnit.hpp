@@ -19,8 +19,8 @@ public:
     virtual ~FedActivationUnit(){}
 
     // return the output mean value (mu) and standard deviation (sigma)
-    virtual double getOutputMu(){return _actf->getOutputMu(FedUnit::getOutputMu());}
-    virtual double getOutputSigma(){return _actf->getOutputSigma(FedUnit::getOutputSigma());}
+    virtual double getOutputMu(){return _actf->getOutputMu(FedUnit::getOutputMu(), FedUnit::getOutputSigma());}
+    virtual double getOutputSigma(){return _actf->getOutputSigma(FedUnit::getOutputMu(), FedUnit::getOutputSigma());}
 
     // string code getters / setter
     virtual std::string getMemberTreeCode(){return composeCodes(FedUnit::getMemberTreeCode(), ActivationUnit::getMemberTreeCode());} // append actf treeCode
