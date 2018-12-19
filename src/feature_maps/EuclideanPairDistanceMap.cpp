@@ -58,7 +58,7 @@ double EuclideanPairDistanceMap::getFeedSigma()
 
     double sigma = 0.;
     for (size_t i=0; i<_ndim; ++i) {
-        sigma += 2.0 * pow(srcv[i] - srcv[i+_ndim], 2) * ( pow(_sources[i]->getOutputSigma(), 2) + pow(_sources[i+_ndim]->getOutputSigma(), 2) ); // (d²/dx² sigmaX)²
+        sigma += 2.0 * pow(srcv[i] - srcv[i+_ndim], 2) * ( pow(_sources[i]->getOutputSigma(), 2) + pow(_sources[i+_ndim]->getOutputSigma(), 2) ); // (d/dx * sigmaX)²
     }
 
     return sqrt(sigma);

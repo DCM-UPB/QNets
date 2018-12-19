@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <random>
 
 // --- Helpers
 
@@ -129,6 +130,12 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     while(true) {
         // initial parameters
         if (flag_smart_beta) smart_beta::generateSmartBeta(ffnn);
+        else if (ffnn->getNFeatureMapLayers() > 0) { // hack because of fitting problems when using FMLs
+            random_device rdev;
+            mt19937_64 rgen = std::mt19937_64(rdev());
+            uniform_real_distribution<double> rd(-0.1,0.1);
+            for (int i=0; i<ffnn->getNBeta(); ++i) ffnn->setBeta(i, rd(rgen));
+        }
         else ffnn->randomizeBetas();
 
         findFit(ffnn, fit, err, verbose); // try new fit

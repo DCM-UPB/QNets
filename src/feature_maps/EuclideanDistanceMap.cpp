@@ -90,7 +90,7 @@ double EuclideanDistanceMap::getFeedSigma()
 
     double sigma = 0.;
     for (size_t i=0; i<_ndim; ++i) {
-        sigma += 4.0 * srcv[i]*srcv[i] * pow(_sources[i]->getOutputSigma(), 2); // (d²/dx² sigmaX)²
+        sigma += 4.0 * pow(srcv[i] * _sources[i]->getOutputSigma(), 2); // (d/dx * sigmaX)²
     }
 
     return sqrt(sigma);
