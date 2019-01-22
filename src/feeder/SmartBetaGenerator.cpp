@@ -191,7 +191,7 @@ namespace smart_beta{
                         vector<double> beta_v;
                         FeederInterface * rayj = L->getFedUnit(idx[j])->getFeeder();
                         for (int ib=BETA_INDEX_OFFSET; ib<rayj->getNBeta(); ++ib) beta_v.push_back(rayj->getBeta(ib));
-                        const double dot_product = abs(inner_product(begin(beta_u), end(beta_u), begin(beta_v), 0.0))/inner_product(begin(beta_u), end(beta_u), begin(beta_u), 0.0);
+                        const double dot_product = fabs(inner_product(begin(beta_u), end(beta_u), begin(beta_v), 0.0))/inner_product(begin(beta_u), end(beta_u), begin(beta_u), 0.0);
                         if (min_dot_product < 0.) min_dot_product = dot_product;
                         if (dot_product < min_dot_product) min_dot_product = dot_product;
                     }
