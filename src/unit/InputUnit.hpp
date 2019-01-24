@@ -8,7 +8,7 @@
 class InputUnit: public ShifterScalerUnit
 {
 protected:
-    const int _index;
+    int _index;
     double _inputMu, _inputSigma;
 
 public:
@@ -29,6 +29,10 @@ public:
     // get the input data mu and sigma
     double getInputMu(){return _inputMu;}
     double getInputSigma(){return _inputSigma;}
+
+    // set/get the dedicated input index
+    void setInputIndex(int &index){_index=index;}
+    int getInputIndex(){return _index;}
 
     // Computation
     void computeFeed(){}

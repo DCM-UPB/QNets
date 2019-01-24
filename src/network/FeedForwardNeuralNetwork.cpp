@@ -887,6 +887,7 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int
         }
         _L_in = new InputLayer(nunits);
         _registerLayer(_L_in, indexFromBack);
+        if (params != "") _L_in->setParams(params);
     }
     else if (idCode == "NNL") {
         NNLayer * nnl = new NNLayer(nunits);
