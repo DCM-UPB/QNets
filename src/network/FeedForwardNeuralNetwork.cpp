@@ -227,12 +227,10 @@ void FeedForwardNeuralNetwork::getVariationalParameter(double * vp)
     int ivp = 0;
     for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
         int idmax = _L[i]->getMaxVariationalParameterIndex();
-        if (ivp<=idmax) {
-            for ( ; ivp<idmax; ++ivp) {
-                bool status = _L[i]->getVariationalParameter(ivp, vp[ivp]);
-                if (!status) {
-                    cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
-                }
+        for ( ; ivp<=idmax; ++ivp) {
+            bool status = _L[i]->getVariationalParameter(ivp, vp[ivp]);
+            if (!status) {
+                cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
             }
         }
     }
@@ -247,8 +245,9 @@ void FeedForwardNeuralNetwork::setVariationalParameter(const int &ivp, const dou
     }
     for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
         if (ivp<=_L[i]->getMaxVariationalParameterIndex()) {
-            _L[i]->setVariationalParameter(ivp, vp);
-            return;
+            bool status = _L[i]->setVariationalParameter(ivp, vp);
+            if (status) return;
+            else break;
         }
     }
     cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found" << endl << endl;
@@ -262,12 +261,10 @@ void FeedForwardNeuralNetwork::setVariationalParameter(const double * vp)
     int ivp = 0;
     for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
         int idmax = _L[i]->getMaxVariationalParameterIndex();
-        if (ivp<=idmax) {
-            for ( ; ivp<=idmax; ++ivp) {
-                bool status = _L[i]->setVariationalParameter(ivp, vp[ivp]);
-                if (!status) {
-                    cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
-                }
+        for ( ; ivp<=idmax; ++ivp) {
+            bool status = _L[i]->setVariationalParameter(ivp, vp[ivp]);
+            if (!status) {
+                cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
             }
         }
     }
