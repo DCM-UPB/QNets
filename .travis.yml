@@ -1,0 +1,96 @@
+dist: xenial
+language: c++
+services:
+- docker
+
+addons:
+  apt:
+    packages:
+    - valgrind
+    - libgsl-dev
+
+  homebrew:
+    packages:
+    - valgrind
+    - gsl
+
+matrix:
+  include:
+  - os: linux // arch linux docker
+    env:
+    - MYCXX="g++"
+    - USE_DOCKER="TRUE"
+    - USE_GCOV="FALSE"
+    - USE_OPENMP="TRUE"
+
+  - os: osx
+    osx_image: xcode10.1
+    env:
+    - MYCXX="g++"
+    - USE_DOCKER="FALSE"
+    - USE_GCOV="TRUE"
+    - USE_OPENMP="FALSE"
+
+  - os: osx
+    osx_image: xcode10.1
+    env:
+    - MYCXX="clang++"
+    - USE_DOCKER="FALSE"
+    - USE_GCOV="FALSE"
+    - USE_OPENMP="FALSE"
+
+before_install:
+- |
+  if [[ "$USE_DOCKER" == "TRUE" ]]; then
+  docker pull nnvmc/base;
+  else
+  ${MYCXX} -v;
+  fi;
+  echo "CXX_COMPILER=${MYCXX}" >> config.sh;
+  echo "CXX_FLAGS=\"-O0 -g -Wall -Wno-unused-function ${configopt}\"" >> config.sh;
+  if [[ "$USE_GCOV" == "TRUE" ]]; then
+  echo "USE_COVERAGE=1" >> config.sh;
+  else
+  echo "USE_COVERAGE=0" >> config.sh;
+  fi;
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  echo "USE_OPENMP=1" >> config.sh;
+  else
+  echo "USE_OPENMP=0" >> config.sh;
+  fi;
+  echo "GSL_ROOT=" >> config.sh;
+
+script:
+- |
+  if [[ "$USE_DOCKER" == "TRUE" ]]; then
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./build.sh" || exit 1;
+  else
+  ./build.sh || exit 1;
+  fi;
+
+- |  
+  if [[ "$USE_DOCKER" == "TRUE" ]]; then
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/build && make test";
+  elif [[ "$USE_GCOV" == "TRUE" ]]; then
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/build && make test";
+  docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "pip install cpp-coveralls && cd /root/repo/build && coveralls --verbose -b ./ -r ../ -i include -i src -x .cpp -x .hpp --gcov-options '\-lp'";
+  else
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/test && ./run.sh";
+  fi;
+  else
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  cd build && make test && cd ..;
+  elif [[ "$USE_GCOV" == "TRUE" ]]; then
+  cd build && make test;
+  sudo pip install cpp-coveralls && coveralls --verbose -b ./ -r ../ -i include -i src -x .cpp -x .hpp --gcov-options '\-lp';
+  cd ..;
+  else
+  cd test && ./run.sh && cd .. ;
+  fi;
+  fi;
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
