@@ -1,14 +1,14 @@
 #ifndef FEED_FORWARD_NEURAL_NETWORK
 #define FEED_FORWARD_NEURAL_NETWORK
 
-#include "ActivationFunctionInterface.hpp"
-#include "NetworkLayer.hpp"
-#include "InputLayer.hpp"
-#include "FedLayer.hpp"
-#include "NNLayer.hpp"
-#include "OutputNNLayer.hpp"
-#include "FeatureMapLayer.hpp"
-#include "NetworkUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/layer/InputLayer.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/layer/NNLayer.hpp"
+#include "ffnn/layer/OutputNNLayer.hpp"
+#include "ffnn/fmap/FeatureMapLayer.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <vector>
 #include <string>

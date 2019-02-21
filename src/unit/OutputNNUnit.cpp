@@ -1,4 +1,4 @@
-#include "OutputNNUnit.hpp"
+#include "ffnn/unit/OutputNNUnit.hpp"
 
 void OutputNNUnit::setOutputBounds(const double &lbound, const double &ubound)
 {

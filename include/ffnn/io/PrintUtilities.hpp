@@ -2,7 +2,7 @@
 #define PRINT_UTILITIES
 
 
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 #include <string>

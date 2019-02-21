@@ -1,8 +1,8 @@
 #ifndef PAIR_DIFFERENCE_MAP_UNIT
 #define PAIR_DIFFERENCE_MAP_UNIT
 
-#include "FeatureMapUnit.hpp"
-#include "PairDifferenceMap.hpp"
+#include "ffnn/fmap/FeatureMapUnit.hpp"
+#include "ffnn/fmap/PairDifferenceMap.hpp"
 
 #include <string>
 

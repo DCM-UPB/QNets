@@ -1,8 +1,8 @@
 #ifndef NN_RAY
 #define NN_RAY
 
-#include "WeightedFeeder.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/feed/WeightedFeeder.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 #include <string>
 

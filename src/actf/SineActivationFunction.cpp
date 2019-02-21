@@ -1,4 +1,4 @@
-#include "SineActivationFunction.hpp"
+#include "ffnn/actf/SineActivationFunction.hpp"
 
 #include <math.h>
 

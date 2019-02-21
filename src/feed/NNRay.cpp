@@ -1,6 +1,6 @@
-#include "NNRay.hpp"
-#include "NetworkUnit.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/feed/NNRay.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <vector>
 #include <string>

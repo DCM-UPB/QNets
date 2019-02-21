@@ -1,7 +1,7 @@
 #ifndef INPUT_UNIT
 #define INPUT_UNIT
 
-#include "ShifterScalerUnit.hpp"
+#include "ffnn/unit/ShifterScalerUnit.hpp"
 #include <string>
 
 // Input Unit

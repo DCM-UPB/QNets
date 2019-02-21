@@ -1,13 +1,13 @@
 #ifndef NN_LAYER
 #define NN_LAYER
 
-#include "FedLayer.hpp"
-#include "NetworkLayer.hpp"
-#include "NNUnit.hpp"
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "FeederInterface.hpp"
-#include "NNRay.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/NNUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 #include <vector>
 #include <string>

@@ -1,11 +1,11 @@
-#include "SmartBetaGenerator.hpp"
+#include "ffnn/feed/SmartBetaGenerator.hpp"
 
-#include "ActivationFunctionInterface.hpp"
-#include "NetworkUnit.hpp"
-#include "FedUnit.hpp"
-#include "NNUnit.hpp"
-#include "FeederInterface.hpp"
-#include "NNRay.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/unit/NNUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 #include <random>
 #include <numeric>

@@ -24,69 +24,20 @@ However, in principle any system with C++11 supporting compiler should work, at 
 
 # Build the library
 
-Make sure you have a reasonably recent development version (>=2.3?) of the GSL library on your system. Furthermore, we rely on the Autotools build system and libtool.
-Optionally, if you have valgrind installed on your system, it will be used to check for memory errors when running unittests.
+Make sure you have a reasonably recent development version (>=2.3?) of the GSL library on your system. Furthermore, we rely on the CMake build system.
 
-If you have the GSL librariy in non-standard paths or want to use custom compiler flags, copy a little script:
+Before compiling, copy the config template:
+   `cp config_template.sh config.sh`
 
-   `cp script/config_template.sh config.sh`
+and edit it as needed (especially if you have the GSL library in non-standard paths.
 
-Now edit `config.sh` to your needs and before proceeding run:
+If you are done, simply use the following script to compile the library and all tests, benchmarks and examples:
+   `./build.sh`
 
-   `source config.sh`
+Note that we build out-of-tree, so the compiled library and executable files can be found in the directories under `./build/`.
 
-If you have the prerequisites, you may setup the build environment by using the following script in the top level directory:
-
-   `./autogen.sh`
-
-Now you want to configure the build process for your platform by invoking:
-
-   `./configure`
-
-Finally, you are ready to compile all the code files in our repository together, by:
-
-   `make` or `make -jN`
-
-where N is the number of parallel threads used by make. Alternatively, you may use the following make targets to build only subparts of the project:
-
-   `make lib`, `make test`, `make benchmark`, `make examples`
-
-
-As long as you changed, but didn't remove or add source files, it is sufficient to only run `make` again to rebuild.
-
-If you however removed old or added new code files under `src/`, you need to first update the source file lists and include links. Do so by invoking from root folder:
-
-   `make update-sources`
-
-NOTE: All the subdirectories of test, benchmark and examples support calling `make` inside them to recompile local changes.
-
-
-
-# Installation
-
-To install the freshly built library and headers into the standard system paths, run (usually sudo is required):
-  `make install`
-
-If you however want to install the library under a custom path, before installing you have to use
-  `./configure --prefix=/your/absolute/path
-
-
-
-# Build options
-
-You may enable special compiler flags by using one or more of the following options after `configure`:
-
-   `--enable-debug` : Enables flags (like \-g and \-O0) suitable for debugging
-
-   `--enable-coverage` : Enables flags to generate test coverage reports via gcov
-
-   `--enable-profiling` : Enables flags to generate performance profiles for benchmarks
-
-
-
-
-## Multi-threading: OpenMP
+# Multi-threading: OpenMP
 
 This library supports multi-threading computation with a shared memory paradigm, thanks to OpenMP.
 
-To activate this feature use `--enable-openmp` at configuration. Currently it is not recommended to use this for most cases.
+To activate this feature, set `USE_OPENMP=1` inside your config.sh, before building. Currently it is not recommended to use this, in most cases.

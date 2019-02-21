@@ -1,7 +1,7 @@
 #include <iostream>
 #include <random>
 
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "../common/checkDerivatives.hpp"
 
 int main(){

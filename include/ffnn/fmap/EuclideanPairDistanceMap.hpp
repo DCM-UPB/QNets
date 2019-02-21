@@ -1,8 +1,8 @@
 #ifndef EUCLIDEAN_PAIR_DISTANCE_MAP
 #define EUCLIDEAN_PAIR_DISTANCE_MAP
 
-#include "MultiDimStaticMap.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/fmap/MultiDimStaticMap.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 // takes coordinates on input side and calculates squared euclidean distance of a pair
 class EuclideanPairDistanceMap: public MultiDimStaticMap

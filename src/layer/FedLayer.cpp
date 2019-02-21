@@ -1,6 +1,6 @@
-#include "FedLayer.hpp"
-#include "FeederInterface.hpp"
-#include "FedUnit.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/unit/FedUnit.hpp"
 
 #include <vector>
 

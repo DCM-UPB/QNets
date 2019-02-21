@@ -1,6 +1,6 @@
-#include "EuclideanDistanceMap.hpp"
-#include "StringCodeUtilities.hpp"
-#include "NetworkUnit.hpp"
+#include "ffnn/fmap/EuclideanDistanceMap.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <vector>
 #include <string>

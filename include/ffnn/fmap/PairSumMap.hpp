@@ -1,9 +1,9 @@
 #ifndef PAIR_SUM_MAP
 #define PAIR_SUM_MAP
 
-#include "OneDimStaticMap.hpp"
-#include "NetworkUnit.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/fmap/OneDimStaticMap.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 #include <string>
 #include <cstddef> // NULL

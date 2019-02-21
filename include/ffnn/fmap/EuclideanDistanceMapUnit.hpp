@@ -1,8 +1,8 @@
 #ifndef EUCLIDEAN_DISTANCE_MAP_UNIT
 #define EUCLIDEAN_DISTANCE_MAP_UNIT
 
-#include "FeatureMapUnit.hpp"
-#include "EuclideanDistanceMap.hpp"
+#include "ffnn/fmap/FeatureMapUnit.hpp"
+#include "ffnn/fmap/EuclideanDistanceMap.hpp"
 
 #include <string>
 

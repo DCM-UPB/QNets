@@ -1,7 +1,7 @@
 #ifndef SERIALIZABLE_COMPONENT
 #define SERIALIZABLE_COMPONENT
 
-#include "StringCodeUtilities.hpp" // for functions on stringCodes, look there for documentation about stringCodes
+#include "ffnn/serial/StringCodeUtilities.hpp" // for functions on stringCodes, look there for documentation about stringCodes
 
 #include <string>
 

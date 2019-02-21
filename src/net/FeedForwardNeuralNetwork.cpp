@@ -1,8 +1,8 @@
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
-#include "NNUnit.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/unit/NNUnit.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <iostream>
 #include <fstream>

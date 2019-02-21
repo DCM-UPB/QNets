@@ -1,11 +1,11 @@
 #ifndef SHIFTER_SCALER_NN_UNIT
 #define SHIFTER_SCALER_NN_UNIT
 
-#include "ShifterScalerUnit.hpp"
-#include "NNUnit.hpp"
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "NNRay.hpp"
+#include "ffnn/unit/ShifterScalerUnit.hpp"
+#include "ffnn/unit/NNUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 #include <cstddef> // for NULL
 #include <string>

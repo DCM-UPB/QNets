@@ -1,8 +1,8 @@
 #ifndef NETWORK_UNIT
 #define NETWORK_UNIT
 
-#include "SerializableComponent.hpp"
-#include "FeederInterface.hpp"
+#include "ffnn/serial/SerializableComponent.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 
 #include <string>
 #include <cstddef> // for NULL

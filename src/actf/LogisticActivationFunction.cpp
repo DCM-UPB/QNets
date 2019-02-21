@@ -1,4 +1,4 @@
-#include "LogisticActivationFunction.hpp"
+#include "ffnn/actf/LogisticActivationFunction.hpp"
 
 #include <math.h>
 

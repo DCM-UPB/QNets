@@ -1,5 +1,5 @@
-#include "FedUnit.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <string>
 #include <cstddef> // for NULL

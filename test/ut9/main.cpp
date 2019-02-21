@@ -3,8 +3,8 @@
 #include <cmath>
 #include <assert.h>
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "NNTrainerGSL.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/train/NNTrainerGSL.hpp"
 
 using namespace std;
 using namespace nn_trainer_gsl_details; // to access hidden NNTrainerGSL methods

@@ -1,8 +1,8 @@
 #ifndef SHIFTER_SCALER_UNIT
 #define SHIFTER_SCALER_UNIT
 
-#include "NetworkUnit.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <string>
 

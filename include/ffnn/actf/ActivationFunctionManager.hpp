@@ -2,16 +2,16 @@
 #define ACTIVATION_FUNCTION_MANAGER
 
 
-#include "ActivationFunctionInterface.hpp"
-#include "IdentityActivationFunction.hpp"
-#include "LogisticActivationFunction.hpp"
-#include "GaussianActivationFunction.hpp"
-#include "TanSigmoidActivationFunction.hpp"
-#include "ReLUActivationFunction.hpp"
-#include "SELUActivationFunction.hpp"
-#include "SRLUActivationFunction.hpp"
-#include "SineActivationFunction.hpp"
-#include "ExponentialActivationFunction.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/IdentityActivationFunction.hpp"
+#include "ffnn/actf/LogisticActivationFunction.hpp"
+#include "ffnn/actf/GaussianActivationFunction.hpp"
+#include "ffnn/actf/TanSigmoidActivationFunction.hpp"
+#include "ffnn/actf/ReLUActivationFunction.hpp"
+#include "ffnn/actf/SELUActivationFunction.hpp"
+#include "ffnn/actf/SRLUActivationFunction.hpp"
+#include "ffnn/actf/SineActivationFunction.hpp"
+#include "ffnn/actf/ExponentialActivationFunction.hpp"
 
 #include <string>
 #include <vector>

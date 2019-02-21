@@ -3,7 +3,7 @@
 
 
 #include <string>
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 
 class IdentityActivationFunction: public ActivationFunctionInterface
 {

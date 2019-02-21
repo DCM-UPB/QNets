@@ -1,4 +1,4 @@
-#include "SRLUActivationFunction.hpp"
+#include "ffnn/actf/SRLUActivationFunction.hpp"
 
 #include <cmath>
 

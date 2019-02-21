@@ -1,4 +1,4 @@
-#include "ActivationFunctionManager.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include <cstddef>
 

@@ -1,7 +1,7 @@
 #ifndef NN_TRAINING_CONFIG
 #define NN_TRAINING_CONFIG
 
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 // holds the required configuration parameters for the trainer
 struct NNTrainingConfig {

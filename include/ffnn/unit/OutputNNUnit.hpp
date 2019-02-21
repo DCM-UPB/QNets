@@ -1,9 +1,9 @@
 #ifndef OUTPUT_NN_UNIT
 #define OUTPUT_NN_UNIT
 
-#include "ShifterScalerNNUnit.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "NNRay.hpp"
+#include "ffnn/unit/ShifterScalerNNUnit.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 // Output Neural Network Unit
 class OutputNNUnit: public ShifterScalerNNUnit

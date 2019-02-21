@@ -15,21 +15,20 @@ Currently there are the following benchmarks:
 # Using the benchmarks
 
 Enter the desired benchmark's directory and execute:
-   `make run-benchmark`
+   `./run.sh`
 
-Instead you may also run all benchmarks together by calling from root or from top benchmark folder:
-   `make run-benchmarks`
-
-Each benchmark will write the result into a file `benchmark_new.out`. For visualization execute the plot script:
+Each benchmark will write the results to the command line output by default.
+If you save it into a file `benchmark_new.out` instead (e.g. via `./run.sh > benchmark_new.out`), you may visualize the result by using:
    `python plot.py benchmark_new.out`
 
 To let the plot compare the new result versus an older one, you have to provide the old output file like:
    `python plot.py benchmark_old.out benchmark_new.out`.
 
-You may also change new/old to more meaningful labels, anything like benchmark_*.out is allowed (except extra _ or . characters).
+You may also change new/old to more meaningful labels, anything like benchmark_*.out is allowed (except extra _ or . characters). The
+provided labels will be used automatically to create the plot legends.
 
 
-# Profiling
+# Profiling (currently unavailable)
 
 If you want to use the benchmarks for profiling, recompile the library and benchmarks after configuring
    `./configure --enable-profiling`

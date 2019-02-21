@@ -1,8 +1,8 @@
 #ifndef EUCLIDEAN_DISTANCE_MAP
 #define EUCLIDEAN_DISTANCE_MAP
 
-#include "MultiDimStaticMap.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/fmap/MultiDimStaticMap.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 #include <vector>
 #include <cstddef>

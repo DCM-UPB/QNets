@@ -1,7 +1,7 @@
 #ifndef SRLU_ACTIVATION_FUNCTION
 #define SRLU_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 // Smooth Rectified Linear Unit ( == ln(1+exp(x)) )

@@ -1,11 +1,11 @@
 #ifndef NN_UNIT
 #define NN_UNIT
 
-#include "FedActivationUnit.hpp"
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "FeederInterface.hpp"
-#include "NNRay.hpp"
+#include "ffnn/unit/FedActivationUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 #include <stdexcept>
 #include <string>

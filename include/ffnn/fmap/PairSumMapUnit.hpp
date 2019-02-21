@@ -1,8 +1,8 @@
 #ifndef PAIR_SUM_MAP_UNIT
 #define PAIR_SUM_MAP_UNIT
 
-#include "FeatureMapUnit.hpp"
-#include "PairSumMap.hpp"
+#include "ffnn/fmap/FeatureMapUnit.hpp"
+#include "ffnn/fmap/PairSumMap.hpp"
 
 #include <string>
 

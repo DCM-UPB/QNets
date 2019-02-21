@@ -1,4 +1,4 @@
-#include "VariableFeeder.hpp"
+#include "ffnn/feed/VariableFeeder.hpp"
 
 #include <string>
 

@@ -1,8 +1,8 @@
 #ifndef ACTIVATION_MAP_UNIT
 #define ACTIVATION_MAP_UNIT
 
-#include "FedActivationUnit.hpp"
-#include "FeederInterface.hpp"
+#include "ffnn/unit/FedActivationUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 
 #include <stdexcept>
 #include <string>

@@ -1,8 +1,8 @@
 #ifndef MULTI_DIM_STATIC_MAP
 #define MULTI_DIM_STATIC_MAP
 
-#include "StaticFeeder.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/feed/StaticFeeder.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 #include <vector>
 

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <random>
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
 #include "../common/checkDerivatives.hpp"
 #include "../common/checkStoreOnFile.hpp"
 

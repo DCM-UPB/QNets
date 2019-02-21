@@ -2,9 +2,9 @@
 
 Make sure the examples are compiled, by running `./build.sh` in the project root folder.
 Execute an example by switching into one of the example folders and running `./run.sh`.
-Note that the actual example executables reside inside the build/ folder, from project root.
-Some examples might also contain a `plot.py` script to show a plot.
-Run it after the executable has terminated, via `python plot.py` (requires matplotlib).
+Note that the actual example executables reside inside the build/ folder under the project's root.
+Some examples might also contain a `plot.py` script to show a plot. It gets called automatically
+by `./run.sh` after the executable has terminated, but requires python with matplotlib.
 
 
 ## Example 1

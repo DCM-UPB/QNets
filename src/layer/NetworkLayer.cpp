@@ -1,6 +1,6 @@
-#include "NetworkLayer.hpp"
-#include "OffsetUnit.hpp"
-#include "NetworkUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/OffsetUnit.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <vector>
 #include <string>

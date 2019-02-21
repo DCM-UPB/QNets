@@ -1,7 +1,7 @@
 #ifndef FEEDER_INTERFACE
 #define FEEDER_INTERFACE
 
-#include "SerializableComponent.hpp"
+#include "ffnn/serial/SerializableComponent.hpp"
 
 #include <string>
 #include <vector>

@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <cmath>
 
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 // expects a neural network without substrates but optionally with connection
 void checkStoreOnFile(FeedForwardNeuralNetwork * const ffnn, const bool isConnected = false)

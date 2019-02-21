@@ -1,10 +1,10 @@
 #ifndef NETWORK_LAYER
 #define NETWORK_LAYER
 
-#include "SerializableComponent.hpp"
-#include "StringCodeUtilities.hpp"
-#include "NetworkUnit.hpp"
-#include "OffsetUnit.hpp"
+#include "ffnn/serial/SerializableComponent.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/unit/OffsetUnit.hpp"
 
 #include <vector>
 #include <string>

@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "PrintUtilities.hpp"
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 

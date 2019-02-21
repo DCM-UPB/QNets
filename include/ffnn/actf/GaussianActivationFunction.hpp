@@ -1,7 +1,7 @@
 #ifndef GAUSSIAN_ACTIVATION_FUNCTION
 #define GAUSSIAN_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 

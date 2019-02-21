@@ -1,4 +1,4 @@
-#include "NNTrainerGSL.hpp"
+#include "ffnn/train/NNTrainerGSL.hpp"
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>

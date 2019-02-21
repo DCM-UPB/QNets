@@ -1,5 +1,5 @@
-#include "ActivationFunctionManager.hpp"
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 
 #include <iostream>
 #include <vector>

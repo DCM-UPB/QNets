@@ -1,8 +1,8 @@
 #ifndef INPUT_LAYER
 #define INPUT_LAYER
 
-#include "NetworkLayer.hpp"
-#include "InputUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/InputUnit.hpp"
 
 #include <vector>
 #include <string>

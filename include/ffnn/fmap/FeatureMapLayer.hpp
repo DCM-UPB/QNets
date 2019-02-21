@@ -1,15 +1,15 @@
 #ifndef FEATURE_MAP_LAYER
 #define FEATURE_MAP_LAYER
 
-#include "NetworkLayer.hpp"
-#include "FedLayer.hpp"
-#include "FedUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/unit/FedUnit.hpp"
 
-#include "PairSumMapUnit.hpp"
-#include "PairDifferenceMapUnit.hpp"
-#include "EuclideanDistanceMapUnit.hpp"
-#include "EuclideanPairDistanceMapUnit.hpp"
-#include "IdentityMapUnit.hpp"
+#include "ffnn/fmap/PairSumMapUnit.hpp"
+#include "ffnn/fmap/PairDifferenceMapUnit.hpp"
+#include "ffnn/fmap/EuclideanDistanceMapUnit.hpp"
+#include "ffnn/fmap/EuclideanPairDistanceMapUnit.hpp"
+#include "ffnn/fmap/IdentityMapUnit.hpp"
 
 class FeatureMapLayer: public FedLayer
 {

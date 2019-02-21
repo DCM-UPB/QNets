@@ -1,10 +1,10 @@
 #ifndef SMART_BETA_GENERATOR
 #define SMART_BETA_GENERATOR
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "FedLayer.hpp"
-#include "FeederInterface.hpp"
-#include "NNRay.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 
 namespace smart_beta {

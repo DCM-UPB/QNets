@@ -1,10 +1,10 @@
 #ifndef NN_TRAINER_GSL
 #define NN_TRAINER_GSL
 
-#include "NNTrainer.hpp"
-#include "NNTrainingData.hpp"
-#include "NNTrainingConfig.hpp"
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/train/NNTrainer.hpp"
+#include "ffnn/train/NNTrainingData.hpp"
+#include "ffnn/train/NNTrainingConfig.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 #include <gsl/gsl_multifit_nlinear.h>
 

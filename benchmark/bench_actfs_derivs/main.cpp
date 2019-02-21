@@ -2,8 +2,8 @@
 #include <random>
 #include <iomanip>
 
-#include "ActivationFunctionManager.hpp"
-#include "PrintUtilities.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
 
 #include "FFNNBenchmarks.cpp"
 

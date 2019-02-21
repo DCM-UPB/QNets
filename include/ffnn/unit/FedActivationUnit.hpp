@@ -1,11 +1,11 @@
 #ifndef FED_ACTIVATION_UNIT
 #define FED_ACTIVATION_UNIT
 
-#include "FedUnit.hpp"
-#include "ActivationUnit.hpp"
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "FeederInterface.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/unit/ActivationUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 
 #include <string>
 

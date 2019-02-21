@@ -1,8 +1,8 @@
 #ifndef FEATURE_MAP_UNIT
 #define FEATURE_MAP_UNIT
 
-#include "FedUnit.hpp"
-#include "FeederInterface.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 
 #include <stdexcept>
 #include <string>

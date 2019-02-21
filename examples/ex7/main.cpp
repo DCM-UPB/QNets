@@ -2,8 +2,8 @@
 #include <cmath>
 #include <fstream>
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
 
 
 

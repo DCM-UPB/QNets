@@ -1,10 +1,10 @@
 #ifndef OUTPUT_NN_LAYER
 #define OUTPUT_NN_LAYER
 
-#include "NNLayer.hpp"
-#include "OutputNNUnit.hpp"
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
+#include "ffnn/layer/NNLayer.hpp"
+#include "ffnn/unit/OutputNNUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include <vector>
 #include <string>

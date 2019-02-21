@@ -1,9 +1,9 @@
 #ifndef WEIGHTED_FEEDER
 #define WEIGHTED_FEEDER
 
-#include "VariableFeeder.hpp"
-#include "NetworkUnit.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/feed/VariableFeeder.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 #include <string>
 #include <vector>

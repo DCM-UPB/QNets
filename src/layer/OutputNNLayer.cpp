@@ -1,8 +1,8 @@
-#include "OutputNNLayer.hpp"
+#include "ffnn/layer/OutputNNLayer.hpp"
 
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "OutputNNUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/unit/OutputNNUnit.hpp"
 
 
 // --- Register Unit

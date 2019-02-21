@@ -1,5 +1,5 @@
-#include "PairDifferenceMap.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/fmap/PairDifferenceMap.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <vector>
 #include <string>

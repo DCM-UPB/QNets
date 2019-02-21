@@ -1,5 +1,5 @@
-#include "PairSumMap.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/fmap/PairSumMap.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <vector>
 #include <string>

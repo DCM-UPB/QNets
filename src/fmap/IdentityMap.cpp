@@ -1,5 +1,5 @@
-#include "IdentityMap.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/fmap/IdentityMap.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <vector>
 #include <string>

@@ -1,9 +1,9 @@
 #ifndef ACTIVATION_UNIT
 #define ACTIVATION_UNIT
 
-#include "NetworkUnit.hpp"
-#include "ActivationFunctionInterface.hpp"
-#include "ActivationFunctionManager.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include <stdexcept>
 #include <string>

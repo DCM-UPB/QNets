@@ -1,7 +1,7 @@
-#include "FeatureMapLayer.hpp"
-#include "NetworkLayer.hpp"
-#include "FedUnit.hpp"
-#include "FeederInterface.hpp"
+#include "ffnn/fmap/FeatureMapLayer.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 
 #include <iostream>
 

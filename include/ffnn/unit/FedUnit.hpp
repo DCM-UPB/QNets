@@ -1,8 +1,8 @@
 #ifndef FED_UNIT
 #define FED_UNIT
 
-#include "NetworkUnit.hpp"
-#include "FeederInterface.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 
 #include <string>
 #include <cstddef> // for NULL

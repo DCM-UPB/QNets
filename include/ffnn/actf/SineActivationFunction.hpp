@@ -1,7 +1,7 @@
 #ifndef SINE_ACTIVATION_FUNCTION
 #define SINE_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 

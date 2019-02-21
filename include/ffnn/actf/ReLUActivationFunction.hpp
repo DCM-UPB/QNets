@@ -1,7 +1,7 @@
 #ifndef RELU_ACTIVATION_FUNCTION
 #define RELU_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 

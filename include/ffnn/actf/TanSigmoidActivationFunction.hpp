@@ -1,7 +1,7 @@
 #ifndef TANSIGMOID_ACTIVATION_FUNCTION
 #define TANSIGMOID_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 

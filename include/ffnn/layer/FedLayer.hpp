@@ -1,8 +1,8 @@
 #ifndef FED_NETWORK_LAYER
 #define FED_NETWORK_LAYER
 
-#include "FedUnit.hpp"
-#include "NNRay.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/feed/NNRay.hpp"
 
 #include <vector>
 

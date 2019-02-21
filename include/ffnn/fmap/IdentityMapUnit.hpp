@@ -1,8 +1,8 @@
 #ifndef IDENTITY_MAP_UNIT
 #define IDENTITY_MAP_UNIT
 
-#include "FeatureMapUnit.hpp"
-#include "IdentityMap.hpp"
+#include "ffnn/fmap/FeatureMapUnit.hpp"
+#include "ffnn/fmap/IdentityMap.hpp"
 
 #include <string>
 

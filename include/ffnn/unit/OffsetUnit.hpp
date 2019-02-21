@@ -1,7 +1,7 @@
 #ifndef OFFSET_UNIT
 #define OFFSET_UNIT
 
-#include "NetworkUnit.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 // Offset Unit
 class OffsetUnit: public NetworkUnit

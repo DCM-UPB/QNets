@@ -1,4 +1,4 @@
-#include "ExponentialActivationFunction.hpp"
+#include "ffnn/actf/ExponentialActivationFunction.hpp"
 
 #include <math.h>
 

@@ -1,9 +1,9 @@
 #ifndef VARIABLE_FEEDER
 #define VARIABLE_FEEDER
 
-#include "FeederInterface.hpp"
-#include "NetworkUnit.hpp"
-#include "NetworkLayer.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 
 #include <string>
 #include <vector>

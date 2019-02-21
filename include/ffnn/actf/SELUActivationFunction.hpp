@@ -1,7 +1,7 @@
 #ifndef SELU_ACTIVATION_FUNCTION
 #define SELU_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 class SELUActivationFunction: public ActivationFunctionInterface

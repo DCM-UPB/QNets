@@ -1,10 +1,10 @@
 #ifndef NN_TRAINER
 #define NN_TRAINER
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "PrintUtilities.hpp"
-#include "NNTrainingData.hpp"
-#include "NNTrainingConfig.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/train/NNTrainingData.hpp"
+#include "ffnn/train/NNTrainingConfig.hpp"
 #include <sstream>
 #include <cstddef> // NULL
 

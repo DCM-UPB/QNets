@@ -2,9 +2,9 @@
 #include <random>
 #include <iomanip>
 
-#include "ActivationFunctionManager.hpp"
-#include "PrintUtilities.hpp"
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 #include "FFNNBenchmarks.cpp"
 

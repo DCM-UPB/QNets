@@ -1,7 +1,7 @@
-#include "FeederInterface.hpp"
-#include "NetworkLayer.hpp"
-#include "NetworkUnit.hpp"
-#include "FedUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/unit/FedUnit.hpp"
 #include <vector>
 
 // --- Base Destructor

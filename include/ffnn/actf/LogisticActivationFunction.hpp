@@ -1,7 +1,7 @@
 #ifndef LOGISTIC_ACTIVATION_FUNCTION
 #define LOGISTIC_ACTIVATION_FUNCTION
 
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
 
 class LogisticActivationFunction: public ActivationFunctionInterface
