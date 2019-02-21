@@ -1,0 +1,12 @@
+link_libraries(ffnn)
+
+add_executable(ex1.exe ex1/main.cpp)
+add_executable(ex2.exe ex2/main.cpp)
+add_executable(ex3.exe ex3/main.cpp)
+add_executable(ex4.exe ex4/main.cpp)
+add_executable(ex5.exe ex5/main.cpp)
+add_executable(ex6.exe ex6/main.cpp)
+add_executable(ex7.exe ex7/main.cpp)
+add_executable(ex8.exe ex8/main.cpp)
+add_executable(ex9.exe ex9/main.cpp)
+add_executable(ex10.exe ex10/main.cpp)

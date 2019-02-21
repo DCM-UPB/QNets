@@ -80,10 +80,9 @@ int main() {
     writePlotFile(ffnn, base_input, input_i, output_i, min, max, npoints, "getFirstDerivative", "v1d.txt");
     writePlotFile(ffnn, base_input, input_i, output_i, min, max, npoints, "getSecondDerivative", "v2d.txt");
 
+    cout << "Done! In the files v.txt, v1d.txt, and v2d.txt we stored the values, and you can use any software you like to plot them (perhaps gnuplot?)." << endl << endl;
 
-    cout << "Done! In the files v.txt, v1d.txt, and v2d.txt we stored the values, and you can use any software you like to plot them (perhaps gnuplot?).";
+    cout << "Note that the executable was run within the build/examples/ directory, so you have to look there to find the mentioned output files." << endl;
 
-
-    cout << endl << endl;
     return 0;
 }

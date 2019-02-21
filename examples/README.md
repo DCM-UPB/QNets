@@ -1,9 +1,10 @@
 # LEGEND OF THE EXAMPLES
 
-Make sure the examples are compiled, by running `make examples` in the project root folder.
-Execute an example by switching into one of the example folders and running `./exe`.
+Make sure the examples are compiled, by running `./build.sh` in the project root folder.
+Execute an example by switching into one of the example folders and running `./run.sh`.
+Note that the actual example executables reside inside the build/ folder, from project root.
 Some examples might also contain a `plot.py` script to show a plot.
-Run it after the exe by `python plot.py` (requires matplotlib).
+Run it after the executable has terminated, via `python plot.py` (requires matplotlib).
 
 
 ## Example 1
@@ -57,6 +58,7 @@ Run it after the exe by `python plot.py` (requires matplotlib).
 ## Example 9
 
 `ex9/`: use NNTrainer(GSL) to make FFNN fit a gaussian
+
 
 
 ## Example 10

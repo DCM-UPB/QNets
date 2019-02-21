@@ -3,11 +3,12 @@ from pylab import *
 gauss_a = 1.0
 gauss_b = 0
 
+prefix = '../../build/examples/'
 fnames = ['v_0_0','d1_0_0','d2_0_0']
 
 files = {}
 for fname in fnames:
-    files[fname + '_' + 'NN'] = './' + fname + '.txt'
+    files[fname + '_' + 'NN'] = prefix + fname + '.txt'
 
 data = {}
 for file in files:

@@ -54,3 +54,9 @@ Use `make check` either inside test directory (i.e. run all tests) or in a speci
 ## Unit Test 9
 
 `ut9/`: check that the trainers find perfect fits for a target function resembling a NN
+
+
+
+## Unit Test 10
+
+`ut10/`: check the derivatives and file storing when feature maps are used
