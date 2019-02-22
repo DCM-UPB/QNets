@@ -64,6 +64,8 @@ build
 config.sh
 vgcore*
 
+benchmark/*/*.out
+
 doc/*.aux
 doc/*.dvi
 doc/*.idx
