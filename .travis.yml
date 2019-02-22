@@ -83,8 +83,7 @@ script:
   cd build && make test && cd ..;
   elif [[ "$USE_GCOV" == "TRUE" ]]; then
   cd build && make test;
-  sudo pip install cpp-coveralls && coveralls --verbose -b ./ -r ../ -i include -i src -x .cpp -x .hpp --gcov-options '\-lp';
-  cd ..;
+  sudo pip install cpp-coveralls && coveralls --verbose -b ./ -r ../ -i include -i src -x .cpp -x .hpp --gcov-options '\-lp' && cd .. ;
   else
   cd test && ./run.sh && cd .. ;
   fi;
