@@ -62,9 +62,9 @@ public:
 
     // --- Values to compute
 
-    void addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp);
-    void addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp);
-    void addVariationalFirstDerivativeSubstrate(const int &nvp);
+    void addCrossSecondDerivativeSubstrate(const int &nx0);
+    void addCrossFirstDerivativeSubstrate(const int &nx0);
+    void addVariationalFirstDerivativeSubstrate();
     void addSecondDerivativeSubstrate(const int &nx0);
     void addFirstDerivativeSubstrate(const int &nx0);
 

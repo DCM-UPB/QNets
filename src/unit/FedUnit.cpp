@@ -4,11 +4,12 @@
 #include <string>
 #include <cstddef> // for NULL
 
-
 // --- Computation
 
 void FedUnit::computeFeed(){
     if (_feeder){
+        const int mynvp = _feeder->getMaxVariationalParameterIndex()+1;
+
         // unit value
         _pv = _feeder->getFeed();
 
@@ -22,17 +23,17 @@ void FedUnit::computeFeed(){
         }
 
         if (_first_var_der) {
-            for (int j=0; j<_nvp; ++j) _first_var_der[j] = _feeder->getVariationalFirstDerivativeFeed(j);
+            for (int j=0; j<mynvp; ++j) _first_var_der[j] = _feeder->getVariationalFirstDerivativeFeed(j);
         }
 
         if (_cross_first_der) {
-            for (int j=0; j<_nvp; ++j) {
+            for (int j=0; j<mynvp; ++j) {
                 for (int i=0; i<_nx0; ++i) _cross_first_der[i][j] = _feeder->getCrossFirstDerivativeFeed(i, j);
             }
         }
 
         if (_cross_second_der) {
-            for (int j=0; j<_nvp; ++j) {
+            for (int j=0; j<mynvp; ++j) {
                 for (int i=0; i<_nx0; ++i) _cross_second_der[i][j] = _feeder->getCrossSecondDerivativeFeed(i, j);
             }
         }
@@ -42,6 +43,8 @@ void FedUnit::computeFeed(){
 
 void FedUnit::computeDerivatives(){
     if (_feeder) {
+        const int mynvp = _feeder->getMaxVariationalParameterIndex()+1;
+
         // first derivative
         if (_v1d){
             for (int i=0; i<_nx0; ++i)
@@ -58,7 +61,7 @@ void FedUnit::computeDerivatives(){
         }
         // variational first derivative
         if (_v1vd){
-            for (int i=0; i<_nvp; ++i)
+            for (int i=0; i<mynvp; ++i)
                 {
                     _v1vd[i] = _a1d * _first_var_der[i];
                 }
@@ -66,7 +69,7 @@ void FedUnit::computeDerivatives(){
         // cross first derivative
         if (_v1d1vd){
             for (int i=0; i<_nx0; ++i){
-                for (int j=0; j<_nvp; ++j){
+                for (int j=0; j<mynvp; ++j){
                     _v1d1vd[i][j] = 0.;
                     _v1d1vd[i][j] += _a1d * _cross_first_der[i][j];
                     _v1d1vd[i][j] += _a2d * _first_der[i] * _first_var_der[j];
@@ -76,7 +79,7 @@ void FedUnit::computeDerivatives(){
         // cross second derivative
         if (_v2d1vd){
             for (int i=0; i<_nx0; ++i){
-                for (int j=0; j<_nvp; ++j){
+                for (int j=0; j<mynvp; ++j){
                     _v2d1vd[i][j] = 0.;
                     _v2d1vd[i][j] += _a1d * _cross_second_der[i][j];
                     _v2d1vd[i][j] += 2. * _a2d * _first_der[i] * _cross_first_der[i][j];

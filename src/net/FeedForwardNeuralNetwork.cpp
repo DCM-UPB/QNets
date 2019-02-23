@@ -418,7 +418,9 @@ void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double 
 
 void FeedForwardNeuralNetwork::FFPropagate()
 {
+    #ifdef OPENMP
     #pragma omp parallel default(none)
+    #endif
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
             _L[i]->computeValues();
@@ -459,7 +461,7 @@ void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
 
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i){
-            _L[i]->addCrossSecondDerivativeSubstrate(getNInput(), _nvp);
+            _L[i]->addCrossSecondDerivativeSubstrate(getNInput());
         }
 
     _flag_c2d = true;
@@ -479,7 +481,7 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            _L[i]->addCrossFirstDerivativeSubstrate(getNInput(), _nvp);
+            _L[i]->addCrossFirstDerivativeSubstrate(getNInput());
         }
 
     _flag_c1d = true;
@@ -493,7 +495,7 @@ void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
     // set the substrate in the units
     for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
-            _L[i]->addVariationalFirstDerivativeSubstrate(_nvp);
+            _L[i]->addVariationalFirstDerivativeSubstrate();
         }
 
     _flag_v1d = true;
