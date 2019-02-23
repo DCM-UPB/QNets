@@ -4,7 +4,7 @@
 class Timer
 {
 public:
-    explicit Timer(const double scale = 1.) : _beg(_clock::now()), _scale(scale) {}
+    explicit Timer(const double scale) : _beg(_clock::now()), _scale(scale) {}
     void reset() { _beg = _clock::now(); }
     double elapsed() const {
         return _scale * std::chrono::duration_cast<_second>(_clock::now() - _beg).count(); }

@@ -19,18 +19,19 @@ void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const 
 }
 
 int main (void) {
-    const int neval = 1000;
+    const int neval[3] = {50000, 1000, 20};
     const int nruns = 5;
 
-    const int xndim = 4, yndim = 1;
     const int nhl = 2;
-    const int nhu[nhl] = {9,5};
+    const int yndim = 1;
+    const int xndim[3] = {6, 24, 96}, nhu1[3] = {12, 48, 192}, nhu2[3] = {6, 24, 96};
 
-    const int nactfs = 8;
-    const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU", "SRLU"};
-
-    const int ndata = neval*xndim;
-    double * xdata = new double[ndata]; // xndim input data for propagate bench
+    int ndata[3], ndata_full = 0;
+    for (int i=0; i<3; ++i) {
+        ndata[i] = neval[i]*xndim[i];
+        ndata_full += ndata[i];
+    }
+    double * xdata = new double[ndata_full]; // xndim input data for propagate bench
 
     // generate some random input
     random_device rdev;
@@ -39,56 +40,47 @@ int main (void) {
     rgen = mt19937_64(rdev());
     rgen.seed(18984687);
     rd = uniform_real_distribution<double>(-sqrt(3.), sqrt(3.)); // uniform with variance 1
-    for (int i=0; i<ndata; ++i){
+    for (int i=0; i<ndata_full; ++i){
         xdata[i] = rd(rgen);
     }
 
     // FFPropagate benchmark
-    for (int iactf=0; iactf<nactfs; ++iactf) {
-        FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhu[0], yndim+1);
-        for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
+    int xoffset = 0; // used to shift current xdata pointer
+    for (int inet=0; inet<3; ++inet) {
+        FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim[inet]+1, nhu1[inet]+1, yndim+1);
+        for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu2[inet]);
         ffnn->connectFFNN();
         ffnn->assignVariationalParameters();
 
-        //Set ACTFs for hidden units
-        for (int i=0; i<nhl; ++i) {
-            for (int j=1; j<nhu[i]; ++j) {
-                ffnn->getNNLayer(i)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_ids[iactf]));
-            }
-        }
-
-        //Set ID ACTFs for output units
-        for (int j=1; j<yndim+1; ++j) {
-            ffnn->getNNLayer(nhl)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction("ID"));
-        }
-
-        cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
+        cout << "FFPropagate benchmark with " << nruns << " runs of " << neval[inet] << " FF-Propagations, for a FFNN of shape " << xndim[inet] << "x" << nhu1[inet] << "x" << nhu2[inet] << "x" << yndim  << " ." << endl;
         cout << "=========================================================================================" << endl << endl;
         cout << "NN structure looks like:" << endl << endl;
         printFFNNStructure(ffnn, true, 0);
         cout << endl;
         cout << "Benchmark results (time per propagation):" << endl;
 
-        run_single_benchmark("f", ffnn, xdata, neval, nruns);
+        run_single_benchmark("f", ffnn, xdata+xoffset, neval[inet], nruns);
 
         ffnn->addFirstDerivativeSubstrate();
-        run_single_benchmark("f+d1", ffnn, xdata, neval, nruns);
+        run_single_benchmark("f+d1", ffnn, xdata+xoffset, neval[inet], nruns);
 
         ffnn->addSecondDerivativeSubstrate();
-        run_single_benchmark("f+d1+d2", ffnn, xdata, neval, nruns);
+        run_single_benchmark("f+d1+d2", ffnn, xdata+xoffset, neval[inet], nruns);
 
         ffnn->addVariationalFirstDerivativeSubstrate();
-        run_single_benchmark("f+d1+d2+vd1", ffnn, xdata, neval, nruns);
+        run_single_benchmark("f+d1+d2+vd1", ffnn, xdata+xoffset, neval[inet], nruns);
 
-        ffnn->addCrossFirstDerivativeSubstrate();
-        run_single_benchmark("f+d1+d2+vd1+cd1", ffnn, xdata, neval, nruns);
+        /* these currently kill 16GB+ of memory on the largest nets */
+        //ffnn->addCrossFirstDerivativeSubstrate();
+        //run_single_benchmark("f+d1+d2+vd1+cd1", ffnn, xdata+xoffset, neval[inet], nruns);
 
-        ffnn->addCrossSecondDerivativeSubstrate();
-        run_single_benchmark("f+d1+d2+vd1+cd1+cd2", ffnn, xdata, neval, nruns);
+        //ffnn->addCrossSecondDerivativeSubstrate();
+        //run_single_benchmark("f+d1+d2+vd1+cd1+cd2", ffnn, xdata+xoffset, neval[inet], nruns);
 
         cout << "=========================================================================================" << endl << endl << endl;
 
         delete ffnn;
+        xoffset += ndata[inet];
     }
 
     delete [] xdata;

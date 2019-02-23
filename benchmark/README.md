@@ -11,11 +11,16 @@ Currently there are the following benchmarks:
 
    `bench_actfs_ffprop`: Benchmark of a FFNN's propagation for various hidden layer activation functions.
 
+   `bench_nunits_ffprop`: Benchmark of a FFNN's propagation for different sizes of input and hidden layers.
+
 
 # Using the benchmarks
 
 Just provide the script `run.sh` the desired benchmark's name, e.g.:
    `./run.sh bench_actfs_ffprop`
+
+Alternatively, you can run all benchmarks sequentially by calling:
+   `./run_all.sh`
 
 The benchmark results will be written to a file named `benchmark_new.out` under the respective benchmark folder.
 You may visualize the result by entering that directory and using:
