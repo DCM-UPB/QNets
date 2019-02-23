@@ -42,6 +42,9 @@ public:
     virtual FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) = 0; // should create and return the feeder for the given unit
     void connectOnTopOfLayer(NetworkLayer * nl);
     void disconnect();
+
+    // --- Computation 
+    void computeValues(); // overriding to add OMP pragma
 };
 
 #endif

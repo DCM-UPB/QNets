@@ -12,10 +12,6 @@
 #include <limits>
 #include <algorithm>
 
-#ifdef OPENMP
-#include <thread> //to detect the number of hardware threads on the system
-#endif
-
 
 // --- Beta
 
@@ -420,35 +416,13 @@ void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double 
     }
 }
 
-#ifdef OPENMP
-bool compare_NUnits(NetworkLayer * A, NetworkLayer * B) { return A->getNUnits()<B->getNUnits(); }
-#endif
-
 void FeedForwardNeuralNetwork::FFPropagate()
 {
-    _L_in->computeValues(); // OpenMP not worth for input layer
-
-#ifdef OPENMP
-// compile with -DOPENMP -fopenmp flags to use parallelization here
-
-    int nthreads = std::min( (int)std::thread::hardware_concurrency(), (*std::max_element(_L.begin()+1, _L.end(), compare_NUnits))->getNUnits() - 1 );
-    if (nthreads>1) {
-#pragma omp parallel num_threads(nthreads)
-        for (std::vector<NetworkLayer *>::size_type i=1; i<_L.size(); ++i)
-            {
-                _L[i]->computeValues(); // actual omp for inside computeValues
-#pragma omp barrier // just to be sure
-            }
-    }
-    else {
-#endif
-    for (std::vector<NetworkLayer *>::size_type i=1; i<_L.size(); ++i)
+    #pragma omp parallel default(none)
+    for (std::vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i)
         {
             _L[i]->computeValues();
         }
-#ifdef OPENMP
-    }
-#endif
 }
 
 

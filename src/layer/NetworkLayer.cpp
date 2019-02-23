@@ -109,8 +109,6 @@ void NetworkLayer::addFirstDerivativeSubstrate(const int &nx0)
 
 void NetworkLayer::computeValues()
 {
-#ifdef OPENMP
-#pragma omp for schedule(static, 1)
-#endif
+    #pragma omp single // per default (FedLayer overwrites this method with omp for instead)
     for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
 }

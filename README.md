@@ -45,11 +45,13 @@ Note that we build out-of-tree, so the compiled library and executable files can
 
 # First steps
 
-You may want to read `doc/user_manual.pdf` to get a quick overview of the libraries functionality. However, it is not guaranteed to be perfectly up-to-date and accurate. Therefore, the best way to get your own code started is by studying the examples in `examples/`. See `examples/README.md` for further guidance.
+You may want to read `doc/user_manual.pdf` to get a quick overview of the libraries functionality. However, it is not guaranteed to be perfectly up-to-date and accurate.
+Therefore, the best way to get your own code started is by studying the examples in `examples/`. See `examples/README.md` for further guidance.
 
 
 # Multi-threading: OpenMP
 
 This library supports multi-threading computation with a shared memory paradigm, thanks to OpenMP.
 
-To activate this feature, set `USE_OPENMP=1` inside your config.sh, before building. Currently it is not recommended to use this, in most cases.
+To activate this feature, set `USE_OPENMP=1` inside your config.sh, before building. It is recommended to use this only for larger networks.
+You can fine tune performance by setting the `OMP_NUM_THREADS` environment variable.

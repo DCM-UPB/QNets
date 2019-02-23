@@ -113,3 +113,26 @@ void FedLayer::disconnect()
             _U_fed[i]->setFeeder(NULL);
         }
 }
+
+
+// --- Compute Values (with OMP pragma)
+
+void FedLayer::computeValues()
+{
+#ifdef OPENMP
+    // compile with -DOPENMP -fopenmp flags to use parallelization here
+
+    if (this->getNUnits()>2) {
+#pragma omp for schedule(static, 1)
+        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
+    }
+    else {
+#pragma omp single
+#endif
+
+        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
+
+#ifdef OPENMP
+    }
+#endif
+}
