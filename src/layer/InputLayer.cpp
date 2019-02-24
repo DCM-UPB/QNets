@@ -1,5 +1,5 @@
-#include "InputLayer.hpp"
-#include "InputUnit.hpp"
+#include "ffnn/layer/InputLayer.hpp"
+#include "ffnn/unit/InputUnit.hpp"
 
 
 // --- Register Unit

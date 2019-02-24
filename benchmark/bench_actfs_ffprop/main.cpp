@@ -2,15 +2,15 @@
 #include <random>
 #include <iomanip>
 
-#include "ActivationFunctionManager.hpp"
-#include "PrintUtilities.hpp"
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
-#include "FFNNBenchmarks.cpp"
+#include "FFNNBenchmarks.hpp"
 
 using namespace std;
 
-void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const ffnn, const double * const * const xdata, const int neval, const int nruns) {
+void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval, const int nruns) {
     pair<double, double> result;
     const double time_scale = 1000000.; //microseconds
 
@@ -29,8 +29,8 @@ int main (void) {
     const int nactfs = 8;
     const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU", "SRLU"};
 
-    double ** const xdata = new double*[neval]; // xndim input data for propagate bench
-    for (int i=0; i<neval; ++i) xdata[i] = new double[xndim];
+    const int ndata = neval*xndim;
+    double * xdata = new double[ndata]; // xndim input data for propagate bench
 
     // generate some random input
     random_device rdev;
@@ -39,8 +39,8 @@ int main (void) {
     rgen = mt19937_64(rdev());
     rgen.seed(18984687);
     rd = uniform_real_distribution<double>(-sqrt(3.), sqrt(3.)); // uniform with variance 1
-    for (int i=0; i<neval; ++i){
-        for (int j=0; j<xndim; ++j) xdata[i][j] = rd(rgen);
+    for (int i=0; i<ndata; ++i){
+        xdata[i] = rd(rgen);
     }
 
     // FFPropagate benchmark
@@ -91,7 +91,6 @@ int main (void) {
         delete ffnn;
     }
 
-    for (int i=0; i<neval; ++i) delete [] xdata[i];
     delete [] xdata;
     return 0;
 }

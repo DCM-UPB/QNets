@@ -1,8 +1,8 @@
 #include <iostream>
 #include <random>
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
 #include "../common/checkDerivatives.hpp"
 #include "../common/checkStoreOnFile.hpp"
 
@@ -21,7 +21,8 @@ int main()
 
     ffnn->pushFeatureMapLayer(4);
     ffnn->getFeatureMapLayer(1)->setNMaps(1, 1, 0, 1, 0); // we specify only 3 units
-    ffnn->getFeatureMapLayer(1)->setSize(6); // now the other 2 should be defaulted to IDMU
+    ffnn->getFeatureMapLayer(1)->setSize(6); // now the other 2 should be defaulted to IDMU (generates warning)
+    ffnn->getFeatureMapLayer(1)->setNMaps(1, 1, 0, 1, 2); // to suppress further warning on copies
 
     //printFFNNStructure(ffnn);
 

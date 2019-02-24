@@ -1,4 +1,4 @@
-#include "TanSigmoidActivationFunction.hpp"
+#include "ffnn/actf/TanSigmoidActivationFunction.hpp"
 
 #include <math.h>
 

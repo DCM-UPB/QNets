@@ -22,11 +22,12 @@ def f_d1_2(y):
 def f_d2_2(y):
     return f_d1_2(y) * (2*(x0-y) - 2*y) - 4.0 * f_v_2(y)
 
+prefix = '../../build/examples/'
 fnames = ['v_0_0','v_1_0', 'd1_0_0', 'd1_1_0', 'd2_0_0', 'd2_1_0']
 
 files = {}
 for fname in fnames:
-    files[fname + '_' + 'NN'] = './' + fname + '.txt'
+    files[fname + '_' + 'NN'] = prefix + fname + '.txt'
 
 data = {}
 for file in files:

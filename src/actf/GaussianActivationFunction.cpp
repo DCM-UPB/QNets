@@ -1,4 +1,4 @@
-#include "GaussianActivationFunction.hpp"
+#include "ffnn/actf/GaussianActivationFunction.hpp"
 
 #include <math.h>
 

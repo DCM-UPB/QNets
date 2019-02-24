@@ -1,7 +1,7 @@
-#include "PrintUtilities.hpp"
-#include "FeederInterface.hpp"
-#include "FedUnit.hpp"
-#include "NNUnit.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/unit/NNUnit.hpp"
 
 #include <iostream>
 #include <iomanip>

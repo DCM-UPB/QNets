@@ -1,5 +1,5 @@
-#include "SELUActivationFunction.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/actf/SELUActivationFunction.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <math.h>
 #include <string>

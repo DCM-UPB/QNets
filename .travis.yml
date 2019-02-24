@@ -1,73 +1,93 @@
-sudo: required
-dist: trusty
+dist: xenial
 language: c++
 services:
 - docker
 
+addons:
+  apt:
+    packages:
+    - valgrind
+    - libgsl-dev
+
+  homebrew:
+    packages:
+    - valgrind
+    - gsl
+
 matrix:
   include:
-  #- os: linux
-  #  env:
-  #    - MATRIX_EVAL="wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.3.tar.gz && tar -xvf gsl-2.3.tar.gz && cd gsl-2.3 && ./configure && make -j2 && sudo make install && cd ../ && export LDFLAGS=-L/usr/local/lib && export CPPFLAGS=-I/usr/local/include"
-  #    - USE_DOCKER="FALSE"
-  #    - USE_GCOV="FALSE"
-
   - os: linux // arch linux docker
     env:
+    - MYCXX="g++"
     - USE_DOCKER="TRUE"
-    - USE_OPENMP="FALSE"
     - USE_GCOV="FALSE"
-
-  - os: linux // with enabled openmp
-    env:
-    - USE_DOCKER="TRUE"
     - USE_OPENMP="TRUE"
-    - USE_GCOV="FALSE"
 
   - os: osx
-    osx_image: xcode8
+    osx_image: xcode10.1
     env:
-    - MATRIX_EVAL="brew update && brew install gsl valgrind"
     - MYCXX="g++"
     - USE_DOCKER="FALSE"
-    - USE_GCOV="FALSE"
+    - USE_GCOV="TRUE"
+    - USE_OPENMP="FALSE"
 
   - os: osx
-    osx_image: xcode8
+    osx_image: xcode10.1
     env:
-    - MATRIX_EVAL="brew update && brew install gsl valgrind"
     - MYCXX="clang++"
     - USE_DOCKER="FALSE"
-    - USE_GCOV="TRUE"
+    - USE_GCOV="FALSE"
+    - USE_OPENMP="FALSE"
 
 before_install:
 - |
   if [[ "$USE_DOCKER" == "TRUE" ]]; then
   docker pull nnvmc/base;
-  local configopt="--enable-debug"
-  if [[ "$USE_OPENMP" == "TRUE" ]]; then configopt="${configopt} --enable-openmp"; fi;
-  if [[ "$USE_GCOV" == "TRUE" ]]; then configopt="${configopt} --enable-coverage"; fi;
-  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./autogen.sh && ./configure ${configopt}";
   else
-  eval "${MATRIX_EVAL}" && ${MYCXX} -v;
-  ./autogen.sh
-  local configopt="--enable-debug"
-  if [[ "$USE_GCOV" == "TRUE" ]]; then pip install cpp-coveralls; configopt="${configopt} --enable-coverage"; fi;
-  ./configure CXX=${MYCXX} ${configopt};
+  ${MYCXX} -v;
   fi;
+  echo "CXX_COMPILER=${MYCXX}" >> config.sh;
+  echo "CXX_FLAGS=\"-O0 -g -Wall -Wno-unused-function ${configopt}\"" >> config.sh;
+  if [[ "$USE_GCOV" == "TRUE" ]]; then
+  echo "USE_COVERAGE=1" >> config.sh;
+  else
+  echo "USE_COVERAGE=0" >> config.sh;
+  fi;
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  echo "USE_OPENMP=1" >> config.sh;
+  else
+  echo "USE_OPENMP=0" >> config.sh;
+  fi;
+  echo "GSL_ROOT=" >> config.sh;
 
 script:
 - |
   if [[ "$USE_DOCKER" == "TRUE" ]]; then
-  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && make check" || exit 1;
-  if [[ "$USE_GCOV" == "TRUE" ]]; then
-  docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "pip install cpp-coveralls && cd /root/repo && coveralls -b lib -e test -e benchmark -e include -e lib -e examples -e script -i src --gcov-options '\-lp'";
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo && ./build.sh" || exit 1;
+  else
+  ./build.sh || exit 1;
+  fi;
+
+- |
+  if [[ "$USE_DOCKER" == "TRUE" ]]; then
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/build && make test";
+  elif [[ "$USE_GCOV" == "TRUE" ]]; then
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/build && make test";
+  docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "pip install cpp-coveralls && cd /root/repo/build && coveralls --verbose -b ./ -r ../ -i include -i src -x .cpp -x .hpp --gcov-options '\-lp'";
+  else
+  docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/test && ./run.sh";
   fi;
   else
-  make check || exit 1;
-  if [[ "$USE_GCOV" == "TRUE" ]]; then coveralls -b lib -e test -e benchmark -e include -e lib -e examples -e script -i src --gcov-options '\-lp' ; fi;
+  if [[ "$USE_OPENMP" == "TRUE" ]]; then
+  cd build && make test && cd ..;
+  elif [[ "$USE_GCOV" == "TRUE" ]]; then
+  cd build && make test;
+  sudo pip install cpp-coveralls && coveralls --verbose -b ./ -r ../ -i include -i src -x .cpp -x .hpp --gcov-options '\-lp' && cd .. ;
+  else
+  cd test && ./run.sh && cd .. ;
   fi;
-- cat test/test-suite.log test/exe.log test/ut*/exe.log
+  fi;
 
 notifications:
   email:

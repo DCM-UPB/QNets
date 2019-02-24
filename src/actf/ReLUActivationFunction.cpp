@@ -1,5 +1,5 @@
-#include "ReLUActivationFunction.hpp"
-#include "StringCodeUtilities.hpp"
+#include "ffnn/actf/ReLUActivationFunction.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <string>
 #include <vector>

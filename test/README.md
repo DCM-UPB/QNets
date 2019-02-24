@@ -1,6 +1,7 @@
 # LEGEND OF THE UNIT TESTS
 
-Use `make check` either inside test directory (i.e. run all tests) or in a specific unittest folder. 
+Use `./run.sh` inside the test directory to run the check program and unit tests
+with valgrind or use `make test` inside the build directory, to run unit tests without valgrind.
 
 
 ## Unit Test 1
@@ -54,3 +55,9 @@ Use `make check` either inside test directory (i.e. run all tests) or in a speci
 ## Unit Test 9
 
 `ut9/`: check that the trainers find perfect fits for a target function resembling a NN
+
+
+
+## Unit Test 10
+
+`ut10/`: check the derivatives and file storing when feature maps are used

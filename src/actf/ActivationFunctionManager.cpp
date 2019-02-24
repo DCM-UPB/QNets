@@ -1,4 +1,4 @@
-#include "ActivationFunctionManager.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include <cstddef>
 
@@ -12,6 +12,7 @@ namespace std_actf{
     SELUActivationFunction selu_actf = SELUActivationFunction();
     SRLUActivationFunction srlu_actf = SRLUActivationFunction();
     SineActivationFunction sin_actf = SineActivationFunction();
+    ExponentialActivationFunction exp_actf = ExponentialActivationFunction();
 
     std::vector<ActivationFunctionInterface *> supported_actf = {
         &id_actf,
@@ -21,7 +22,8 @@ namespace std_actf{
         &relu_actf,
         &selu_actf,
         &srlu_actf,
-        &sin_actf
+        &sin_actf,
+        &exp_actf
     };
 
     ActivationFunctionInterface * provideActivationFunction(const std::string &idCode, const std::string &params){

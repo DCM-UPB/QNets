@@ -1,1 +1,0 @@
-../src/actf/IdentityActivationFunction.hpp

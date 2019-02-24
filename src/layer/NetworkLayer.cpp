@@ -1,6 +1,6 @@
-#include "NetworkLayer.hpp"
-#include "OffsetUnit.hpp"
-#include "NetworkUnit.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/OffsetUnit.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <vector>
 #include <string>
@@ -65,26 +65,35 @@ void NetworkLayer::setSize(const int &nunits)
 // --- Values to compute
 
 
-void NetworkLayer::addCrossSecondDerivativeSubstrate(const int &nx0, const int &nvp)
+void NetworkLayer::addCrossSecondDerivativeSubstrate(const int &nx0)
 {
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-        _U[i]->setCrossSecondDerivativeSubstrate(nx0, nvp);
+    const int nvp = this->getMaxVariationalParameterIndex()+1;
+    if (nvp > 0) {
+        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
+            _U[i]->setCrossSecondDerivativeSubstrate(nx0, nvp);
+        }
     }
 }
 
 
-void NetworkLayer::addCrossFirstDerivativeSubstrate(const int &nx0, const int &nvp)
+void NetworkLayer::addCrossFirstDerivativeSubstrate(const int &nx0)
 {
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-        _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
+    const int nvp = this->getMaxVariationalParameterIndex()+1;
+    if (nvp > 0) {
+        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
+            _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
+        }
     }
 }
 
 
-void NetworkLayer::addVariationalFirstDerivativeSubstrate(const int &nvp)
+void NetworkLayer::addVariationalFirstDerivativeSubstrate()
 {
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-        _U[i]->setVariationalFirstDerivativeSubstrate(nvp);
+    const int nvp = this->getMaxVariationalParameterIndex()+1;
+    if (nvp > 0) {
+        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
+            _U[i]->setVariationalFirstDerivativeSubstrate(nvp);
+        }
     }
 }
 
@@ -109,8 +118,8 @@ void NetworkLayer::addFirstDerivativeSubstrate(const int &nx0)
 
 void NetworkLayer::computeValues()
 {
-#ifdef OPENMP
-#pragma omp for schedule(static, 1)
-#endif
+    #ifdef OPENMP
+    #pragma omp single // per default (FedLayer overwrites this method with omp for instead)
+    #endif
     for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
 }

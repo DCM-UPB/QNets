@@ -5,12 +5,12 @@
 #include <cmath>
 #include <numeric>
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "SmartBetaGenerator.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "FedUnit.hpp"
-#include "FeederInterface.hpp"
-#include "PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/feed/SmartBetaGenerator.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
 
 
 int main(){

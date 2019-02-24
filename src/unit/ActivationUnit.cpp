@@ -1,6 +1,6 @@
-#include "ActivationUnit.hpp"
-#include "StringCodeUtilities.hpp"
-#include "ActivationFunctionManager.hpp"
+#include "ffnn/unit/ActivationUnit.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include <string>
 

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <random>
 
-#include "NNTrainerGSL.hpp"
+#include "ffnn/train/NNTrainerGSL.hpp"
 
 
 /*

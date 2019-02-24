@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <cmath>
 
-#include "FeedForwardNeuralNetwork.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 {

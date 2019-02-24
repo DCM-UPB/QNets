@@ -2,9 +2,9 @@
 #include <assert.h>
 #include <cmath>
 
-#include "FeedForwardNeuralNetwork.hpp"
-#include "ActivationFunctionManager.hpp"
-#include "PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/io/PrintUtilities.hpp"
 
 
 

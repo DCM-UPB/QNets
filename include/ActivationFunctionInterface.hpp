@@ -1,1 +1,0 @@
-../src/actf/ActivationFunctionInterface.hpp

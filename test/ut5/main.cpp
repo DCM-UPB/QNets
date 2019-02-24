@@ -1,5 +1,5 @@
-#include "ActivationFunctionManager.hpp"
-#include "ActivationFunctionInterface.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/actf/ActivationFunctionInterface.hpp"
 
 #include <iostream>
 #include <vector>
@@ -10,13 +10,15 @@
 int main(){
     using namespace std;
 
-    const double TINY = 0.0001;
+    const double TINY_DEFAULT = 0.0001;
     const double dx = 0.0001;
     vector<double> x_to_test = {-3., -2.5, -2., -1.5, -1.0, -0.5, -0.25, -0.001, 0.001, 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
 
     for (ActivationFunctionInterface * actf : std_actf::supported_actf){
-        // cout << "actf = " << actf->getIdCode() << endl;
+        const double TINY = actf->getIdCode() == "EXP" ? 0.002 : TINY_DEFAULT;
 
+        // cout << "actf = " << actf->getIdCode() << endl;
+ 
         for (double x : x_to_test){
             // cout << "    x = " << x << endl;
             const double f = actf->f(x);
@@ -54,7 +56,7 @@ int main(){
 
             // cout << "        f3d     = " << f3d << endl;
             // cout << "        num_f3d = " << num_f3d << endl;
-            assert( abs(num_f3d-f3d) < TINY*20. );
+            assert( abs(num_f3d-f3d) < TINY*20 );
 
 
             // -- check the fad function

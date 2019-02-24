@@ -1,4 +1,4 @@
-#include "StringCodeUtilities.hpp"
+#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <iostream>
 #include <vector>

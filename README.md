@@ -6,87 +6,52 @@
 
 # FeedForwardNeuralNetwork
 
-C++ Library for building and using a Feed Forward Neural Network.
-It includes first and second derivatives in respect to the input values, and first derivatives in respect to the variational parameters.
+C++ Library for building and using Feed Forward Neural Networks.
+It includes first and second derivatives with respect to the input values, first derivatives with respect to the variational parameters
+and mixed derivatives with respect to both input and variational parameters.
 
 To get you started, there is a user manual pdf in `doc/` and in `examples/` there are several basic examples.
 
-Most subdirectories come with a `README.md` file, explaining the purpose and what you need to know.
+In `test/` you can find the unit tests and benchmarking programs in `benchmark`.
 
+Some subdirectories come with an own `README.md` file which provides further information.
 
 
 # Supported Systems
 
 Currently, we automatically test the library on Arch Linux (GCC 8) and MacOS (with clang as well as brewed GCC 8).
-However, in principle any system with C++11 supporting compiler should work, at least if you manage to install all dependencies.
+However, in principle any system with C++11 supporting compiler should work.
 
+
+# Requirements
+
+- CMake, to use our build process
+- GNU Scientific Library (~2.3+)
+- (optional) OpenMP, to use parallelized propagation (make sure that it is beneficial in your case!)
+- (optional) valgrind, to run `./run.sh` in `test/`
+- (optional) gperftools, ro run `./run_prof.sh` in `benchmark/`
+- (optional) pdflatex, to compile the tex file in `doc/`
+- (optional) doxygen, to generate doxygen documentation in `doc/doxygen`
 
 
 # Build the library
 
-Make sure you have a reasonably recent development version (>=2.3?) of the GSL library on your system. Furthermore, we rely on the Autotools build system and libtool.
-Optionally, if you have valgrind installed on your system, it will be used to check for memory errors when running unittests.
+Copy the file `config_template.sh` to `config.sh`, edit it to your liking and then simply execute the command
 
-If you have the GSL librariy in non-standard paths or want to use custom compiler flags, copy a little script:
+   `./build.sh`
 
-   `cp script/config_template.sh config.sh`
-
-Now edit `config.sh` to your needs and before proceeding run:
-
-   `source config.sh`
-
-If you have the prerequisites, you may setup the build environment by using the following script in the top level directory:
-
-   `./autogen.sh`
-
-Now you want to configure the build process for your platform by invoking:
-
-   `./configure`
-
-Finally, you are ready to compile all the code files in our repository together, by:
-
-   `make` or `make -jN`
-
-where N is the number of parallel threads used by make. Alternatively, you may use the following make targets to build only subparts of the project:
-
-   `make lib`, `make test`, `make benchmark`, `make examples`
+Note that we build out-of-tree, so the compiled library and executable files can be found in the directories under `./build/`.
 
 
-As long as you changed, but didn't remove or add source files, it is sufficient to only run `make` again to rebuild.
+# First steps
 
-If you however removed old or added new code files under `src/`, you need to first update the source file lists and include links. Do so by invoking from root folder:
-
-   `make update-sources`
-
-NOTE: All the subdirectories of test, benchmark and examples support calling `make` inside them to recompile local changes.
+You may want to read `doc/user_manual.pdf` to get a quick overview of the libraries functionality. However, it is not guaranteed to be perfectly up-to-date and accurate.
+Therefore, the best way to get your own code started is by studying the examples in `examples/`. See `examples/README.md` for further guidance.
 
 
-
-# Installation
-
-To install the freshly built library and headers into the standard system paths, run (usually sudo is required):
-  `make install`
-
-If you however want to install the library under a custom path, before installing you have to use
-  `./configure --prefix=/your/absolute/path
-
-
-
-# Build options
-
-You may enable special compiler flags by using one or more of the following options after `configure`:
-
-   `--enable-debug` : Enables flags (like \-g and \-O0) suitable for debugging
-
-   `--enable-coverage` : Enables flags to generate test coverage reports via gcov
-
-   `--enable-profiling` : Enables flags to generate performance profiles for benchmarks
-
-
-
-
-## Multi-threading: OpenMP
+# Multi-threading: OpenMP
 
 This library supports multi-threading computation with a shared memory paradigm, thanks to OpenMP.
 
-To activate this feature use `--enable-openmp` at configuration. Currently it is not recommended to use this for most cases.
+To activate this feature, set `USE_OPENMP=1` inside your config.sh, before building. It is recommended to use this only for larger networks.
+You can fine tune performance by setting the `OMP_NUM_THREADS` environment variable.

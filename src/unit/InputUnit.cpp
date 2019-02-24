@@ -1,4 +1,4 @@
-#include "InputUnit.hpp"
+#include "ffnn/unit/InputUnit.hpp"
 
 // set input data mu and sigma, set shift/scale accordingly
 void InputUnit::setInputMu(const double &inputMu, const bool &doShift)

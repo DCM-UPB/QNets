@@ -1,4 +1,4 @@
-#include "NetworkUnit.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <cstddef> // for NULL
 

@@ -1,5 +1,5 @@
-#include "FeedForwardNeuralNetwork.hpp"
-#include "ActivationFunctionManager.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include "../common/checkStoreOnFile.hpp"
 
