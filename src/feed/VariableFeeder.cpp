@@ -85,9 +85,6 @@ bool VariableFeeder::getVariationalParameterValue(const int &id, double &value){
 
 bool VariableFeeder::isVPIndexUsedInFeeder(const int &id)
 {
-    if ( _vp_id_shift <= id && id <_vp_id_shift+(int)_vp.size()) {
-        return true;
-    }
-    else return false;
+    return ( _vp_id_shift <= id && id <_vp_id_shift+(int)_vp.size() );
 }
 

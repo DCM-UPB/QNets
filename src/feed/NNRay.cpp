@@ -107,61 +107,49 @@ double NNRay::getSecondDerivativeFeed(const int &i2d){
 
 
 double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d){
-    double feed = 0.;
-
-    if (iv1d < _vp_id_shift+(int)_vp.size()) {
+    if (iv1d >= _vp_id_shift) {
         // if the variational parameter with index iv1d is in the ray add the following element
-        if (iv1d >= _vp_id_shift) {
-            feed += _sources[ iv1d - _vp_id_shift ]->getValue();
-        }
-        else {
-            // add source components
-            for (size_t i=0; i<_map_index_to_sources[iv1d].size(); ++i) {
-                feed += _beta[_map_index_to_sources[iv1d][i]] * _sources[_map_index_to_sources[iv1d][i]]->getVariationalFirstDerivativeValue(iv1d);
-            }
-        }
+        return _sources[ iv1d - _vp_id_shift ]->getValue();
     }
-
-    return feed;
+    else {
+        // else add source components
+        double feed = 0.;
+        for (size_t i=0; i<_map_index_to_sources[iv1d].size(); ++i) {
+            feed += _beta[_map_index_to_sources[iv1d][i]] * _sources[_map_index_to_sources[iv1d][i]]->getVariationalFirstDerivativeValue(iv1d);
+        }
+        return feed;
+    }
 }
 
 
 double NNRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
-    double feed = 0.;
-
-    if (iv1d < _vp_id_shift+(int)_vp.size()) {
+    if (iv1d >= _vp_id_shift) {
         // if the variational parameter with index iv1d is in the ray add the following element
-        if (iv1d >= _vp_id_shift) {
-            feed += _sources[ iv1d - _vp_id_shift ]->getFirstDerivativeValue(i1d);
-        }
-        else {
-            // add source components
-            for (size_t i=0; i<_map_index_to_sources[iv1d].size(); ++i) {
-                feed += _beta[_map_index_to_sources[iv1d][i]] * _sources[_map_index_to_sources[iv1d][i]]->getCrossFirstDerivativeValue(i1d, iv1d);
-            }
-        }
+        return _sources[ iv1d - _vp_id_shift ]->getFirstDerivativeValue(i1d);
     }
-
-    return feed;
+    else {
+        // else add source components
+        double feed = 0.;
+        for (size_t i=0; i<_map_index_to_sources[iv1d].size(); ++i) {
+            feed += _beta[_map_index_to_sources[iv1d][i]] * _sources[_map_index_to_sources[iv1d][i]]->getCrossFirstDerivativeValue(i1d, iv1d);
+        }
+        return feed;
+    }
 }
 
 
 double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
-    double feed = 0.;
-
-    if (iv2d < _vp_id_shift+(int)_vp.size()) {
+    if (iv2d >= _vp_id_shift) {
         // if the variational parameter with index iv2d is in the ray add the following element
-        if (iv2d >= _vp_id_shift) {
-            feed += _sources[ iv2d - _vp_id_shift ]->getSecondDerivativeValue(i2d);
-        }
-        else {
-            // add source components
-            for (size_t i=0; i<_map_index_to_sources[iv2d].size(); ++i) {
-                feed += _beta[_map_index_to_sources[iv2d][i]] * _sources[_map_index_to_sources[iv2d][i]]->getCrossSecondDerivativeValue(i2d, iv2d);
-            }
-        }
+        return _sources[ iv2d - _vp_id_shift ]->getSecondDerivativeValue(i2d);
     }
-
-    return feed;
+    else {
+        // else add source components
+        double feed = 0.;
+        for (size_t i=0; i<_map_index_to_sources[iv2d].size(); ++i) {
+            feed += _beta[_map_index_to_sources[iv2d][i]] * _sources[_map_index_to_sources[iv2d][i]]->getCrossSecondDerivativeValue(i2d, iv2d);
+        }
+        return feed;
+    }
 }
 

@@ -108,8 +108,5 @@ bool FeederInterface::isVPIndexUsedInSources(const int &id)
 
 bool FeederInterface::isVPIndexUsedForFeeder(const int &id)
 {
-    if ( isVPIndexUsedInFeeder(id) || isVPIndexUsedInSources(id) ) {
-        return true;
-    }
-    else return false;
+    return ( isVPIndexUsedInFeeder(id) || isVPIndexUsedInSources(id) );
 }
