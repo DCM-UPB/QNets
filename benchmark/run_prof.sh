@@ -1,8 +1,8 @@
 #!/bin/sh
 
-if [ "$1" == "" ]; then
+if [ "$1" = "" ]; then
   echo "Expected the name of the benchmark to run as first argument."
-elif [ "$2" == "" ]; then
+elif [ "$2" = "" ]; then
   echo "Expected the path of libprofiler.so as second argument."
 else
   bench=$1

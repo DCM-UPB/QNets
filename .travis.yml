@@ -68,7 +68,7 @@ script:
   ./build.sh || exit 1;
   fi;
 
-- |  
+- |
   if [[ "$USE_DOCKER" == "TRUE" ]]; then
   if [[ "$USE_OPENMP" == "TRUE" ]]; then
   docker run -it -v $(pwd):/root/repo nnvmc/base /bin/bash -c "cd /root/repo/build && make test";
