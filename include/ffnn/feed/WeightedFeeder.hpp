@@ -1,9 +1,9 @@
-#ifndef WEIGHTED_FEEDER
-#define WEIGHTED_FEEDER
+#ifndef FFNN_FEED_WEIGHTEDFEEDER_HPP
+#define FFNN_FEED_WEIGHTEDFEEDER_HPP
 
 #include "ffnn/feed/VariableFeeder.hpp"
-#include "ffnn/unit/NetworkUnit.hpp"
 #include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <string>
 #include <vector>
@@ -14,30 +14,31 @@ protected:
     // beta
     std::vector<double> _beta;   // intensity of each sorgent unit, i.e. its weight
 
-    virtual void _clearSources(); // basically clear everything except sourcePool
+    void _clearSources() override; // basically clear everything except sourcePool
 
     // method to fill beta after source is filled
     // we provide a method to add one beta per selected source
     void _fillBeta();
 
 public:
-    virtual ~WeightedFeeder(){_beta.clear();}
+    ~WeightedFeeder() override{_beta.clear();}
 
     // set string codes
-    virtual std::string getParams();
-    virtual void setParams(const std::string &params);
+    std::string getParams() override;
+    void setParams(const std::string &params) override;
 
     // beta (meaning the individual factors directly multiplied to each used source output)
-    int getNBeta(){return _beta.size();}
-    double getBeta(const int &i){return _beta[i];}
-    void setBeta(const int &i, const double &b){_beta[i]=b;}
+    int getNBeta() override{return _beta.size();}
+    double getBeta(const int &i) override{return _beta[i];}
+    void setBeta(const int &i, const double &b) override{_beta[i]=b;}
 
     // provide default setVPIndexes for the case that all beta are added as vp
-    virtual int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = true);
+    int setVariationalParametersIndexes(const int &starting_index, bool flag_add_vp = true) override;
 
     // randomizers
     // we provide a default vp randomizer for the case that all beta are added as vp
-    virtual void randomizeVP(){if (_flag_vp) randomizeBeta();}
+    void randomizeVP() override{if (_flag_vp) { randomizeBeta();
+}}
 };
 
 #endif

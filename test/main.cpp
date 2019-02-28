@@ -1,6 +1,6 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
@@ -173,7 +173,7 @@ int main(){
 
     // create a new NN reading it from the file
     cout << endl << endl << "CREATE A COPY OF THE PREVIOUS FFNN USING THE FILE IN WHICH IT WAS STORED ..." << endl;
-    FeedForwardNeuralNetwork * ffnn_copy = new FeedForwardNeuralNetwork("FFNN.txt");
+    auto * ffnn_copy = new FeedForwardNeuralNetwork("FFNN.txt");
     x=3.;
     ffnn->setInput(&x);
     ffnn->FFPropagate();

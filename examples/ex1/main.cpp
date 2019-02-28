@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 int main() {
@@ -29,7 +29,7 @@ int main() {
     cin.ignore();
 
     // NON I/O CODE
-    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(n0,n1,n2);
+    auto * ffnn = new FeedForwardNeuralNetwork(n0,n1,n2);
     //
 
     cout << "Graphically it looks like this:" << endl;

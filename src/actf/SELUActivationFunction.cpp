@@ -1,7 +1,7 @@
 #include "ffnn/actf/SELUActivationFunction.hpp"
 #include "ffnn/serial/StringCodeUtilities.hpp"
 
-#include <math.h>
+#include <cmath>
 #include <string>
 #include <vector>
 

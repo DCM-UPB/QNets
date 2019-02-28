@@ -35,7 +35,7 @@ namespace std_actf{
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
-}
+} // namespace std_actf

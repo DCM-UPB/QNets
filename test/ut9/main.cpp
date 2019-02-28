@@ -1,7 +1,7 @@
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <random>
-#include <cmath>
-#include <assert.h>
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/train/NNTrainerGSL.hpp"
@@ -28,20 +28,22 @@ void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const b
     const bool case1 = abs(ffnn->getVariationalParameter(0) - beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) - beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) - beta[2]) < TINY;
     const bool case2 = abs(ffnn->getVariationalParameter(0) + beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) + beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) + beta[2]) < TINY;
     assert(case1 || case2); // symmetric gaussian allows both combinations
-    for (int i=3; i<ffnn->getNVariationalParameters(); ++i) assert(abs(ffnn->getVariationalParameter(i) - beta[i]) < TINY);
+    for (int i=3; i<ffnn->getNVariationalParameters(); ++i) { assert(abs(ffnn->getVariationalParameter(i) - beta[i]) < TINY);
+}
 }
 
-void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = false)
+void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = 0)
 {
     NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
-    if (flag_norm) trainer->setNormalization(ffnn); // NOTE: in most cases here we do not normalize, to keep known beta targets
+    if (flag_norm) { trainer->setNormalization(ffnn); // NOTE: in most cases here we do not normalize, to keep known beta targets
+}
     trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
     double resi = trainer->computeResidual(ffnn, false, flag_d);
     assert(resi <= TINY);
     delete trainer;
 }
 
-int main (void) {
+int main () {
     const int verbose = 0;
     const double TINY = 0.000001;
 
@@ -83,7 +85,7 @@ int main (void) {
     const int maxn_novali = 5;
     const int maxn_fits = 50;
     const double lambda_r = 0.000000001, lambda_d1 = 0.5, lambda_d2 = 0.5;
-    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL}; // we use tdata.allocate, so pass NULL for arrays
+    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, nullptr, nullptr, nullptr, nullptr, nullptr}; // we use tdata.allocate, so pass NULL for arrays
     NNTrainingConfig tconfig = {0., 0., 0., maxn_steps, maxn_novali}; // initially set all lambdas to 0, i.e. no regularization and derivative residuals
 
     // allocate data arrays

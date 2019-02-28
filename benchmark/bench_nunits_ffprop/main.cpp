@@ -1,6 +1,6 @@
+#include <iomanip>
 #include <iostream>
 #include <random>
-#include <iomanip>
 
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
@@ -15,10 +15,10 @@ void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const 
     const double time_scale = 1000000.; //microseconds
 
     result = sample_benchmark_FFPropagate(ffnn, xdata, neval, nruns);
-    cout << label << ":" << setw(max(1, 20-(int)label.length())) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " microseconds" << endl;
+    cout << label << ":" << setw(max(1, 20-static_cast<int>(label.length()))) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " microseconds" << endl;
 }
 
-int main (void) {
+int main () {
     const int neval[3] = {50000, 1000, 20};
     const int nruns = 5;
 
@@ -31,7 +31,7 @@ int main (void) {
         ndata[i] = neval[i]*xndim[i];
         ndata_full += ndata[i];
     }
-    double * xdata = new double[ndata_full]; // xndim input data for propagate bench
+    auto * xdata = new double[ndata_full]; // xndim input data for propagate bench
 
     // generate some random input
     random_device rdev;
@@ -48,7 +48,8 @@ int main (void) {
     int xoffset = 0; // used to shift current xdata pointer
     for (int inet=0; inet<3; ++inet) {
         FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim[inet]+1, nhu1[inet]+1, yndim+1);
-        for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu2[inet]);
+        for (int i=1; i<nhl; ++i) { ffnn->pushHiddenLayer(nhu2[inet]);
+}
         ffnn->connectFFNN();
         ffnn->assignVariationalParameters();
 

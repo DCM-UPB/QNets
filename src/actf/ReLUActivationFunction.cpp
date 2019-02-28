@@ -28,18 +28,18 @@ double ReLUActivationFunction::f1d(const double &in)
 }
 
 
-double ReLUActivationFunction::f2d(const double &in)
+double ReLUActivationFunction::f2d(const double & /*in*/)
 {
     return 0.0;
 }
 
 
-double ReLUActivationFunction::f3d(const double &in)
+double ReLUActivationFunction::f3d(const double & /*in*/)
 {
     return 0.0;
 }
 
-void ReLUActivationFunction::fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1, const bool flag_d2, const bool flag_d3)
+void ReLUActivationFunction::fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1, const bool  /*flag_d2*/, const bool  /*flag_d3*/)
 {
     if (in>0.0) {
         v = in;

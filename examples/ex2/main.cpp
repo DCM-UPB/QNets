@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 int main() {

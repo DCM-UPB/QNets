@@ -1,6 +1,6 @@
+#include <iomanip>
 #include <iostream>
 #include <random>
-#include <iomanip>
 
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
@@ -15,10 +15,10 @@ void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const 
     const double time_scale = 1000000.; //microseconds
 
     result = sample_benchmark_FFPropagate(ffnn, xdata, neval, nruns);
-    cout << label << ":" << setw(max(1, 20-(int)label.length())) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " microseconds" << endl;
+    cout << label << ":" << setw(max(1, 20-static_cast<int>(label.length()))) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " microseconds" << endl;
 }
 
-int main (void) {
+int main () {
     const int neval = 1000;
     const int nruns = 5;
 
@@ -30,7 +30,7 @@ int main (void) {
     const string actf_ids[nactfs] = {"LGS", "GSS", "ID", "TANS", "SIN", "RELU", "SELU", "SRLU"};
 
     const int ndata = neval*xndim;
-    double * xdata = new double[ndata]; // xndim input data for propagate bench
+    auto * xdata = new double[ndata]; // xndim input data for propagate bench
 
     // generate some random input
     random_device rdev;
@@ -44,16 +44,17 @@ int main (void) {
     }
 
     // FFPropagate benchmark
-    for (int iactf=0; iactf<nactfs; ++iactf) {
+    for (const auto & actf_id : actf_ids) {
         FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhu[0], yndim+1);
-        for (int i=1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
+        for (int i=1; i<nhl; ++i) { ffnn->pushHiddenLayer(nhu[i]);
+}
         ffnn->connectFFNN();
         ffnn->assignVariationalParameters();
 
         //Set ACTFs for hidden units
         for (int i=0; i<nhl; ++i) {
             for (int j=1; j<nhu[i]; ++j) {
-                ffnn->getNNLayer(i)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_ids[iactf]));
+                ffnn->getNNLayer(i)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction(actf_id));
             }
         }
 
@@ -62,7 +63,7 @@ int main (void) {
             ffnn->getNNLayer(nhl)->getNNUnit(j-1)->setActivationFunction(std_actf::provideActivationFunction("ID"));
         }
 
-        cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_ids[iactf] << " activation function." << endl;
+        cout << "FFPropagate benchmark with " << nruns << " runs of " << neval << " FF-Propagations for " << actf_id << " activation function." << endl;
         cout << "=========================================================================================" << endl << endl;
         cout << "NN structure looks like:" << endl << endl;
         printFFNNStructure(ffnn, true, 0);

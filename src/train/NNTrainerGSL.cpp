@@ -1,9 +1,9 @@
 #include "ffnn/train/NNTrainerGSL.hpp"
 
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multifit_nlinear.h>
+#include <gsl/gsl_vector.h>
 
 #include <cstddef> // NULL
 
@@ -75,7 +75,8 @@ namespace nn_trainer_gsl_details {
     void calcCosts(const gsl_vector * const f, double &chi, double &chisq, const gsl_vector * const fvali, double &chi_vali, double &chisq_vali)
     {
         calcRSS(f, chi, chisq);
-        if (fvali) calcRSS(fvali, chi_vali, chisq_vali);
+        if (fvali != nullptr) { calcRSS(fvali, chi_vali, chisq_vali);
+}
     };
 
     // calculate all costs (from workspace and vali vector)
@@ -115,7 +116,8 @@ namespace nn_trainer_gsl_details {
         double scale_now = 1./sqrt(tws->ntraining);
 
         setVP(ffnn, betas);
-        if (flag_vali) gsl_vector_set_zero(tws->fvali); // set fvali to zero
+        if (flag_vali) { gsl_vector_set_zero(tws->fvali); // set fvali to zero
+}
 
         int idx = 0;
         for (int i=0; i<n; ++i) {
@@ -148,7 +150,8 @@ namespace nn_trainer_gsl_details {
             int offr_vali = calcNData(tws->nvalidation, tws->yndim, 0, flag_d ? tws->xndim : 0, 2);
             for (int ib=0; ib<npar; ++ib) {
                 gsl_vector_set(f, offr_train + ib, lambda_r_red * gsl_vector_get(betas, ib));
-                if (flag_vali) gsl_vector_set(tws->fvali, offr_vali + ib, lambda_r_red * gsl_vector_get(betas, ib));
+                if (flag_vali) { gsl_vector_set(tws->fvali, offr_vali + ib, lambda_r_red * gsl_vector_get(betas, ib));
+}
             }
         }
 
@@ -170,14 +173,17 @@ namespace nn_trainer_gsl_details {
             ffnn->FFPropagate();
 
             for (int j=0; j<tws->yndim; ++j) {
-                for (int ib=0; ib<npar; ++ib) gsl_matrix_set(J, idx, ib, scale * tws->w[i][j] * ffnn->getVariationalFirstDerivative(j, ib)); // the "pure" gradient
+                for (int ib=0; ib<npar; ++ib) { gsl_matrix_set(J, idx, ib, scale * tws->w[i][j] * ffnn->getVariationalFirstDerivative(j, ib)); // the "pure" gradient
+}
                 ++idx;
 
                 if (flag_d) { // derivative residual gradient
                     for (int k=0; k<tws->xndim; ++k) {
-                        for (int ib=0; ib<npar; ++ib) gsl_matrix_set(J, idx, ib, tws->flag_d1? tws->w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ib) : 0.0);
+                        for (int ib=0; ib<npar; ++ib) { gsl_matrix_set(J, idx, ib, tws->flag_d1? tws->w[i][j] * lambda_d1_red * ffnn->getCrossFirstDerivative(j, k, ib) : 0.0);
+}
                         ++idx;
-                        for (int ib=0; ib<npar; ++ib) gsl_matrix_set(J, idx, ib, tws->flag_d2? tws->w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ib) : 0.0);
+                        for (int ib=0; ib<npar; ++ib) { gsl_matrix_set(J, idx, ib, tws->flag_d2? tws->w[i][j] * lambda_d2_red * ffnn->getCrossSecondDerivative(j, k, ib) : 0.0);
+}
                         ++idx;
                     }
                 }
@@ -251,8 +257,9 @@ namespace nn_trainer_gsl_details {
 
         // print
         fprintf(stderr, "status = %s\n", gsl_strerror(status));
-        fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.8f (train), %.8f (vali)\n", gsl_multifit_nlinear_niter(w), 1.0 / rcond, gsl_blas_dnrm2(f), (tws->fvali) ? gsl_blas_dnrm2(tws->fvali) : 0.);
-        for (size_t i=0; i<x->size; ++i) fprintf(stderr, "b%zu: %f, ", i,  gsl_vector_get(x, i));
+        fprintf(stderr, "iter %zu: cond(J) = %8.4f, |f(x)| = %.8f (train), %.8f (vali)\n", gsl_multifit_nlinear_niter(w), 1.0 / rcond, gsl_blas_dnrm2(f), (tws->fvali) != nullptr ? gsl_blas_dnrm2(tws->fvali) : 0.);
+        for (size_t i=0; i<x->size; ++i) { fprintf(stderr, "b%zu: %f, ", i,  gsl_vector_get(x, i));
+}
         fprintf(stderr, "\n");
     };
 
@@ -267,47 +274,53 @@ namespace nn_trainer_gsl_details {
 
         while (true) {
             status = gsl_multifit_nlinear_iterate(w); // iterate workspace
-            if (verbose > 1) printStepInfo(w, tws, status);
+            if (verbose > 1) { printStepInfo(w, tws, status);
+}
 
-            if (((int)gsl_multifit_nlinear_niter(w)) >= tws->maxn_steps) {  // check if we reached maxnsteps
+            if ((static_cast<int>(gsl_multifit_nlinear_niter(w))) >= tws->maxn_steps) {  // check if we reached maxnsteps
                 info = 0;
                 break;
             }
 
             if (tws->nvalidation > 0) {
                 // then check if validation residual went down (we ignore the regularization part for that)
-                for (int i=0; i<n; ++i) gsl_vector_set(fvali_noreg, i, gsl_vector_get(tws->fvali, i));
+                for (int i=0; i<n; ++i) { gsl_vector_set(fvali_noreg, i, gsl_vector_get(tws->fvali, i));
+}
                 double resih = gsl_blas_dnrm2(fvali_noreg);
 
                 if (resih == 0 || std::isnan(resih)) { // if it is 0 or nan, stop
                     info = 0;
-                    if (verbose>1) fprintf(stderr, "Unregularized validation residual reached 0 (or NaN). Stopping early.\n\n");
+                    if (verbose>1) { fprintf(stderr, "Unregularized validation residual reached 0 (or NaN). Stopping early.\n\n");
+}
                     break;
                 }
 
                 if (bestvali >= 0. && resih >= bestvali) { // count how long it didn't go down
-                    if (verbose>1) fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).\n\n", resih, bestvali, count_novali);
+                    if (verbose>1) { fprintf(stderr, "Unregularized validation residual %.4f did not decrease from previous minimum %.4f. No new minimum since %i iteration(s).\n\n", resih, bestvali, count_novali);
+}
 
                     ++count_novali;
-                    if (count_novali < tws->maxn_novali) continue;
-                    else { // if too long, break
+                    if (count_novali < tws->maxn_novali) { continue;
+                    } // if too long, break
                         info = 1;
-                        if (verbose>1) fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum. Stopping early.\n\n", count_novali);
+                        if (verbose>1) { fprintf(stderr, "Reached maximal number of iterations (%i) without new validation minimum. Stopping early.\n\n", count_novali);
+}
                         break;
-                    }
+                    
                 }
-                else { // new validation minimum found
+                // new validation minimum found
                     count_novali = 0;
                     bestvali = resih;
-                }
+                
             }
 
-            if (verbose>1) fprintf(stderr, "\n");
+            if (verbose>1) { fprintf(stderr, "\n");
+}
         }
 
         gsl_vector_free(fvali_noreg);
     };
-};
+}  // namespace nn_trainer_gsl_details
 
 // --- Class method implementation
 
@@ -341,7 +354,8 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     _configureFFNN(ffnn, false); // without vderiv substrates!
 
     // set fit to initial betas
-    for (int i=0; i<npar; ++i) fit[i] = ffnn->getVariationalParameter(i);
+    for (int i=0; i<npar; ++i) { fit[i] = ffnn->getVariationalParameter(i);
+}
 
     // configure training workspace
     training_workspace tws;
@@ -356,7 +370,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
     // first the pure fdf
     fdf_pure.f = ffnn_f_pure;
     fdf_pure.df = ffnn_df_pure;
-    fdf_pure.fvv = NULL;
+    fdf_pure.fvv = nullptr;
     fdf_pure.n = ntrain_pure;
     fdf_pure.p = npar;
     fdf_pure.params = &tws;
@@ -368,7 +382,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         // deriv fdf without regularization
         fdf_noreg.f = ffnn_f_deriv;
         fdf_noreg.df = ffnn_df_deriv;
-        fdf_noreg.fvv = NULL;
+        fdf_noreg.fvv = nullptr;
         fdf_noreg.n = ntrain_noreg;
         fdf_noreg.p = npar;
         fdf_noreg.params = &tws;
@@ -393,7 +407,7 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
             fdf_full.f = ffnn_f_pure_reg;
             fdf_full.df = ffnn_df_pure_reg;
         }
-        fdf_full.fvv = NULL;
+        fdf_full.fvv = nullptr;
         fdf_full.n = ntrain_full;
         fdf_full.p = npar;
         fdf_full.params = &tws;
@@ -412,8 +426,9 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         tws.fvali = gsl_vector_alloc(nvali_full);
     }
     else {
-        tws.fvali = NULL;
-        if (verbose > 1) fprintf(stderr, "[NNTrainerGSL] Warning: Validation residual calculation disabled, i.e. no early stopping.\n");
+        tws.fvali = nullptr;
+        if (verbose > 1) { fprintf(stderr, "[NNTrainerGSL] Warning: Validation residual calculation disabled, i.e. no early stopping.\n");
+}
     }
 
     // initialize solver with starting point and calculate initial cost
@@ -449,7 +464,8 @@ void NNTrainerGSL::findFit(FeedForwardNeuralNetwork * const ffnn, double * const
         fprintf(stderr, "pure    |f(x)| = %f (train), %f (vali)\n", resi_pure, resi_vali_pure);
         fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
-        for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, fit[i], err[i]);
+        for(int i=0; i<npar; ++i) { fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, fit[i], err[i]);
+}
         fprintf(stderr, "\n");
     }
 

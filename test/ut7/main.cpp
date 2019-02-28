@@ -1,16 +1,16 @@
-#include <iostream>
-#include <vector>
-#include <assert.h>
-#include <exception>
+#include <cassert>
 #include <cmath>
+#include <exception>
+#include <iostream>
 #include <numeric>
+#include <vector>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-#include "ffnn/feed/SmartBetaGenerator.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
-#include "ffnn/unit/FedUnit.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/feed/SmartBetaGenerator.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "ffnn/unit/FedUnit.hpp"
 
 
 int main(){
@@ -179,12 +179,14 @@ int main(){
         // cout << "layer " << il << endl;
         for (int iu1=0; iu1<ffnn->getFedLayer(il)->getNFedUnits(); ++iu1){
             betas.clear();
-            for (int ib=BETA_INDEX_OFFSET; ib<ffnn->getFedLayer(il)->getFedUnit(iu1)->getFeeder()->getNBeta(); ++ib)
+            for (int ib=BETA_INDEX_OFFSET; ib<ffnn->getFedLayer(il)->getFedUnit(iu1)->getFeeder()->getNBeta(); ++ib) {
                 betas.push_back(ffnn->getFedLayer(il)->getFedUnit(iu1)->getFeeder()->getBeta(ib));
+}
             for (int iu2=iu1+1; iu2<ffnn->getFedLayer(il)->getNFedUnits(); ++iu2){
                 betas2.clear();
-                for (int ib=BETA_INDEX_OFFSET; ib<ffnn->getFedLayer(il)->getFedUnit(iu2)->getFeeder()->getNBeta(); ++ib)
+                for (int ib=BETA_INDEX_OFFSET; ib<ffnn->getFedLayer(il)->getFedUnit(iu2)->getFeeder()->getNBeta(); ++ib) {
                     betas2.push_back(ffnn->getFedLayer(il)->getFedUnit(iu2)->getFeeder()->getBeta(ib));
+}
                 const double dot_product = inner_product(begin(betas), end(betas), begin(betas2), 0.0);
                 // cout << "    units " << iu1 << ", " << iu2 << "    ->    dot_product = " << dot_product << endl;
                 // cout << "        expected " << (((iu1>=ffnn->getLayer(il)->getNUnits()) || (iu2>=ffnn->getLayer(il)->getNUnits())) ? true : false) << endl;

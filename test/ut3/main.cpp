@@ -1,10 +1,10 @@
-#include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 
@@ -19,7 +19,7 @@ int main(){
     ffnn->getNNLayer(1)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
     ffnn->getNNLayer(2)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
 
-    FeedForwardNeuralNetwork * ffnn2 = new FeedForwardNeuralNetwork(ffnn);
+    auto * ffnn2 = new FeedForwardNeuralNetwork(ffnn);
 
     assert(ffnn->getNLayers() == ffnn2->getNLayers());
     assert(ffnn->getLayer(0)->getNUnits() == ffnn2->getLayer(0)->getNUnits());

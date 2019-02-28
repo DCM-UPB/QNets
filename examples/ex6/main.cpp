@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 
@@ -82,7 +82,7 @@ int main() {
     cin.ignore();
 
     int ninput = 2;
-    double * input = new double[ninput];
+    auto * input = new double[ninput];
     input[0] = -3.;
     input[1] = 0.5;
     cout << "The input we want to set is: " << input[0] << "    " << input[1];
@@ -129,7 +129,8 @@ int main() {
     cout << "1st output (unit 2 of the output layer): " << endl;
     for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
         for (int i2=0; i2<10; ++i2){
-            if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) cout << "+";
+            if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) { cout << "+";
+}
             cout << ffnn->getVariationalFirstDerivative(0, i1*10 + i2) << "    ";
         }
         cout << endl;
@@ -139,7 +140,8 @@ int main() {
     cout << "2nd output (unit 3 of the output layer): " << endl;
     for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
         for (int i2=0; i2<10; ++i2){
-            if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) cout << "+";
+            if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) { cout << "+";
+}
             cout << ffnn->getVariationalFirstDerivative(1, i1*10 + i2) << "    ";
         }
         cout << endl;
@@ -149,7 +151,8 @@ int main() {
     cout << "3rd output (unit 4 of the output layer): " << endl;
     for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
         for (int i2=0; i2<10; ++i2){
-            if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) cout << "+";
+            if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) { cout << "+";
+}
             cout << ffnn->getVariationalFirstDerivative(2, i1*10 + i2) << "    ";
         }
         cout << endl;

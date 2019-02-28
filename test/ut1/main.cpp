@@ -1,8 +1,8 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "../common/checkDerivatives.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 int main(){
     using namespace std;

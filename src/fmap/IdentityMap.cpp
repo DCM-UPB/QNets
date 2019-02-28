@@ -1,8 +1,8 @@
 #include "ffnn/fmap/IdentityMap.hpp"
 #include "ffnn/serial/StringCodeUtilities.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 // --- fill/clear sources
 
@@ -15,7 +15,7 @@ void IdentityMap::_fillSources(const std::vector<size_t> &source_ids)
 void IdentityMap::_clearSources()
 {
     OneDimStaticMap::_clearSources();
-    _src = NULL;
+    _src = nullptr;
 }
 
 
@@ -63,7 +63,8 @@ double IdentityMap::getVariationalFirstDerivativeFeed(const int &iv1d){
     if (iv1d < _vp_id_shift) {
         return _src->getVariationalFirstDerivativeValue(iv1d);
     }
-    else return 0.;
+     {return 0.;
+}
 }
 
 
@@ -71,7 +72,8 @@ double IdentityMap::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d)
     if (iv1d < _vp_id_shift) {
         return _src->getCrossFirstDerivativeValue(i1d, iv1d);
     }
-    else return 0.;
+     {return 0.;
+}
 }
 
 
@@ -79,5 +81,6 @@ double IdentityMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d
     if (iv2d < _vp_id_shift) {
         return _src->getCrossSecondDerivativeValue(i2d, iv2d);
     }
-    else return 0.;
+     {return 0.;
+}
 }

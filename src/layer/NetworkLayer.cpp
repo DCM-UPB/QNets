@@ -1,9 +1,9 @@
 #include "ffnn/layer/NetworkLayer.hpp"
-#include "ffnn/unit/OffsetUnit.hpp"
 #include "ffnn/unit/NetworkUnit.hpp"
+#include "ffnn/unit/OffsetUnit.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 // --- Constructor
 
@@ -18,8 +18,8 @@ NetworkLayer::NetworkLayer()
 
 NetworkLayer::~NetworkLayer()
 {
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-        delete _U[i];
+    for (auto & i : _U){
+        delete i;
     }
     _U.clear();
 }
@@ -40,7 +40,8 @@ void NetworkLayer::deconstruct()
 std::string NetworkLayer::getMemberTreeCode()
 {
     std::vector<std::string> unitCodes;
-    for (NetworkUnit * u : _U) unitCodes.push_back(u->getTreeCode());
+    for (NetworkUnit * u : _U) { unitCodes.push_back(u->getTreeCode());
+}
     return composeCodeList(unitCodes);
 }
 
@@ -69,8 +70,8 @@ void NetworkLayer::addCrossSecondDerivativeSubstrate(const int &nx0)
 {
     const int nvp = this->getMaxVariationalParameterIndex()+1;
     if (nvp > 0) {
-        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-            _U[i]->setCrossSecondDerivativeSubstrate(nx0, nvp);
+        for (auto & i : _U){
+            i->setCrossSecondDerivativeSubstrate(nx0, nvp);
         }
     }
 }
@@ -80,8 +81,8 @@ void NetworkLayer::addCrossFirstDerivativeSubstrate(const int &nx0)
 {
     const int nvp = this->getMaxVariationalParameterIndex()+1;
     if (nvp > 0) {
-        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-            _U[i]->setCrossFirstDerivativeSubstrate(nx0, nvp);
+        for (auto & i : _U){
+            i->setCrossFirstDerivativeSubstrate(nx0, nvp);
         }
     }
 }
@@ -91,8 +92,8 @@ void NetworkLayer::addVariationalFirstDerivativeSubstrate()
 {
     const int nvp = this->getMaxVariationalParameterIndex()+1;
     if (nvp > 0) {
-        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-            _U[i]->setVariationalFirstDerivativeSubstrate(nvp);
+        for (auto & i : _U){
+            i->setVariationalFirstDerivativeSubstrate(nvp);
         }
     }
 }
@@ -100,16 +101,16 @@ void NetworkLayer::addVariationalFirstDerivativeSubstrate()
 
 void NetworkLayer::addSecondDerivativeSubstrate(const int &nx0)
 {
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-        _U[i]->setSecondDerivativeSubstrate(nx0);
+    for (auto & i : _U){
+        i->setSecondDerivativeSubstrate(nx0);
     }
 }
 
 
 void NetworkLayer::addFirstDerivativeSubstrate(const int &nx0)
 {
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i){
-        _U[i]->setFirstDerivativeSubstrate(nx0);
+    for (auto & i : _U){
+        i->setFirstDerivativeSubstrate(nx0);
     }
 }
 
@@ -121,5 +122,6 @@ void NetworkLayer::computeValues()
     #ifdef OPENMP
     #pragma omp single // per default (FedLayer overwrites this method with omp for instead)
     #endif
-    for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
+    for (auto & i : _U) { i->computeValues();
+}
 }

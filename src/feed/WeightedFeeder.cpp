@@ -13,7 +13,8 @@ void WeightedFeeder::_clearSources()
 
 void WeightedFeeder::_fillBeta()
 {
-    for (size_t i=0; i<_sources.size(); ++i) _beta.push_back(0.);
+    for (size_t i=0; i<_sources.size(); ++i) { _beta.push_back(0.);
+}
     randomizeBeta();
 }
 
@@ -38,7 +39,8 @@ void WeightedFeeder::setParams(const std::string &params)
     double beta;
     for (std::vector<double>::size_type i=0; i<_beta.size(); ++i) {
         std::string str = readParamValue(params, "b"+std::to_string(i));
-        if (setParamValue(str, beta)) this->setBeta(i, beta);
+        if (setParamValue(str, beta)) { this->setBeta(i, beta);
+}
     }
 }
 
@@ -54,7 +56,7 @@ int WeightedFeeder::setVariationalParametersIndexes(const int &starting_index, c
         }
         return _vp_id_shift + _beta.size();
     }
-    else {
+    
         return idx_base;
-    }
+    
 }

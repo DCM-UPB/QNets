@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cmath>
+#include <iostream>
 #include <random>
 
 #include "ffnn/train/NNTrainerGSL.hpp"
@@ -38,7 +38,7 @@ double gaussian_d2dx(const double x, const double a = 1., const double b = 0.) {
 
 
 
-int main (void) {
+int main () {
     using namespace std;
 
     int nhl, nfits = 1;
@@ -64,11 +64,14 @@ int main (void) {
     cout << endl;
 
     int nl = nhl + 2;
-    if (flag_fm) nl += 1;
+    if (flag_fm) { nl += 1;
+}
 
     cout << "We generate a FFANN with " << nl << " layers and 3, ";
-    if (flag_fm) cout << "2, ";
-    for (int i=0; i<nhl; ++i) cout << nhu[i] << ", ";
+    if (flag_fm) { cout << "2, ";
+}
+    for (int i=0; i<nhl; ++i) { cout << nhu[i] << ", ";
+}
     cout << "2 units respectively" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
@@ -83,19 +86,22 @@ int main (void) {
     cout << "Please enter the the maximum tolerable fit residual. (0 to disable) ";
     cin >> maxchi;
     cout << "Please enter the ";
-    if (maxchi > 0) cout << "maximum ";
+    if (maxchi > 0) { cout << "maximum ";
+}
     cout << "number of fitting runs. (>0) ";
     cin >> nfits;
     cout << endl << endl;
     cout << "Now we find the best fit ... " << endl;
-    if (!verbose) cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
+    if (!verbose) { cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
+}
     cout << endl;
 
     // NON I/O CODE
 
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, nhu[0], 2);
-    for (int i = 1; i<nhl; ++i) ffnn->pushHiddenLayer(nhu[i]);
+    for (int i = 1; i<nhl; ++i) { ffnn->pushHiddenLayer(nhu[i]);
+}
 
     if (flag_fm) {
         ffnn->pushFeatureMapLayer(3);
@@ -123,7 +129,7 @@ int main (void) {
     const int xndim = 2;
     const int yndim = 1;
 
-    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL}; // we pass NULLs here, since we use tdata.allocate to allocate the data arrays. Alternatively, allocate manually and pass pointers here
+    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, nullptr, nullptr, nullptr, nullptr, nullptr}; // we pass NULLs here, since we use tdata.allocate to allocate the data arrays. Alternatively, allocate manually and pass pointers here
     NNTrainingConfig tconfig = {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // allocate data arrays
@@ -159,7 +165,8 @@ int main (void) {
                 + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_d2dx(tdata.x[i][1]);
         }
         tdata.w[i][0] = 1.0; // our data have no error, so set all weights to 1
-        if (verbose) printf ("data: %i %g %g\n", i, tdata.x[i][0]-tdata.x[i][1], tdata.y[i][0]);
+        if (verbose) { printf ("data: %i %g %g\n", i, tdata.x[i][0]-tdata.x[i][1], tdata.y[i][0]);
+}
     }
 
 

@@ -1,6 +1,6 @@
 #include "ffnn/actf/LogisticActivationFunction.hpp"
 
-#include <math.h>
+#include <cmath>
 
 
 // Activation Function Interface implementation

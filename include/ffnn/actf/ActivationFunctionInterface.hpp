@@ -1,10 +1,10 @@
-#ifndef ACTIVATION_FUNCTION_INTERFACE
-#define ACTIVATION_FUNCTION_INTERFACE
+#ifndef FFNN_ACTF_ACTIVATIONFUNCTIONINTERFACE_HPP
+#define FFNN_ACTF_ACTIVATIONFUNCTIONINTERFACE_HPP
 
 #include "ffnn/serial/SerializableComponent.hpp"
 
-#include <string>
 #include <cmath>
+#include <string>
 
 class ActivationFunctionInterface: public SerializableComponent
 {
@@ -21,13 +21,13 @@ public:
     //ActivationFunctionInterface(ActivationFunctionInterface * const actf){}
 
     // Destructor
-    virtual ~ActivationFunctionInterface(){}
+    ~ActivationFunctionInterface() override= default;
 
     // allocate a new copy of this to *actf
     virtual ActivationFunctionInterface * getCopy() = 0;
 
     // set class id code
-    std::string getClassIdCode(){return "ACTF";}
+    std::string getClassIdCode() override{return "ACTF";}
 
     // return the ideal input mean value (mu) and standard deviation (sigma)
     virtual double getIdealInputMu() = 0;

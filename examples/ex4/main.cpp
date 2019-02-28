@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 
@@ -58,7 +58,7 @@ int main() {
     cin.ignore();
 
     int ninput = 2;
-    double * input = new double[ninput];
+    auto * input = new double[ninput];
     input[0] = -3.;
     input[1] = 0.5;
     cout << "The input we want to set is: " << input[0] << "    " << input[1];

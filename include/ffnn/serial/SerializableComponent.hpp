@@ -1,5 +1,5 @@
-#ifndef SERIALIZABLE_COMPONENT
-#define SERIALIZABLE_COMPONENT
+#ifndef FFNN_SERIAL_SERIALIZABLECOMPONENT_HPP
+#define FFNN_SERIAL_SERIALIZABLECOMPONENT_HPP
 
 #include "ffnn/serial/StringCodeUtilities.hpp" // for functions on stringCodes, look there for documentation about stringCodes
 
@@ -11,7 +11,7 @@ class SerializableComponent
 public:
     // If possible, every SerializableComponent with params and/or members should implement a constructor which uses a string code as one of the arguments
 
-    virtual ~SerializableComponent(){};
+    virtual ~SerializableComponent()= default;;
 
     // virtual string code getters, to be extended by child
     // documentation on the code syntax is in StringCodeUtilities.hpp

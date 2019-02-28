@@ -53,9 +53,11 @@ int VariableFeeder::getMaxVariationalParameterIndex()
         if(_flag_vp) {
             return _vp_id_shift + _vp.size() - 1;
         }
-        else return _vp_id_shift;
+         {return _vp_id_shift;
+}
     }
-    else return -1; // vp not initialized
+    else { return -1; // vp not initialized
+}
 }
 
 bool VariableFeeder::setVariationalParameterValue(const int &id, const double &value){
@@ -85,6 +87,6 @@ bool VariableFeeder::getVariationalParameterValue(const int &id, double &value){
 
 bool VariableFeeder::isVPIndexUsedInFeeder(const int &id)
 {
-    return ( _vp_id_shift <= id && id <_vp_id_shift+(int)_vp.size() );
+    return ( _vp_id_shift <= id && id <_vp_id_shift+static_cast<int>(_vp.size()) );
 }
 

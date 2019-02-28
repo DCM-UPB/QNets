@@ -1,8 +1,8 @@
 #include "ffnn/serial/StringCodeUtilities.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <vector>
-#include <assert.h>
 
 
 int main(){
@@ -128,7 +128,7 @@ int main(){
     double f = 0., f_test = 1.;
     int i = 0, i_test = 2;
     bool b = false, b_test = true;
-    string s = "", s_test = "N";
+    string s, s_test = "N";
 
 
     // execute tests
@@ -231,7 +231,7 @@ int main(){
 
     //cout << composeCodes("", "") << endl;
     //cout << ""  << endl << endl;
-    assert(composeCodes("", "") == "");
+    assert(composeCodes("", "").empty());
 
     //cout << composeCodes(testIdCode[0], "") << endl;
     //cout << testIdCode[0] << endl << endl;
@@ -250,7 +250,7 @@ int main(){
 
     //cout << composeCodeList(empty_vec) << endl;
     //cout << "" << endl << endl;
-    assert(composeCodeList(empty_vec) == "");
+    assert(composeCodeList(empty_vec).empty());
 
     //cout << composeCodeList(single_vec) << endl;
     //cout << "A" << endl << endl;

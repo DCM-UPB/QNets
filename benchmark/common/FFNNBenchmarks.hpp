@@ -1,11 +1,11 @@
-#include <iostream>
 #include <cmath>
+#include <iostream>
 #include <tuple>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "Timer.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
-double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval) {
+inline double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval) {
     Timer timer(1.);
     const int ninput = ffnn->getNInput();
 
@@ -18,7 +18,7 @@ double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double
     return timer.elapsed();
 }
 
-std::pair<double, double> sample_benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval, const int nruns) {
+inline std::pair<double, double> sample_benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval, const int nruns) {
     double times[nruns];
     double mean = 0., err = 0.;
 
@@ -27,7 +27,8 @@ std::pair<double, double> sample_benchmark_FFPropagate(FeedForwardNeuralNetwork 
         mean += times[i];
     }
     mean /= nruns;
-    for (int i=0; i<nruns; ++i) err += pow(times[i]-mean, 2);
+    for (int i=0; i<nruns; ++i) { err += pow(times[i]-mean, 2);
+}
     err /= (nruns-1)*nruns; // variance of the mean
     err = sqrt(err); // standard error of the mean
 
@@ -35,7 +36,7 @@ std::pair<double, double> sample_benchmark_FFPropagate(FeedForwardNeuralNetwork 
     return result;
 }
 
-double benchmark_actf_derivs(ActivationFunctionInterface * const actf, const double * const xdata, const int neval, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true) {
+inline double benchmark_actf_derivs(ActivationFunctionInterface * const actf, const double * const xdata, const int neval, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true) {
     Timer timer(1.);
     double v=0., v1d=0., v2d=0., v3d=0.;
 
@@ -46,7 +47,7 @@ double benchmark_actf_derivs(ActivationFunctionInterface * const actf, const dou
         }
         return timer.elapsed();
     }
-    else {
+    
         timer.reset();
         for (int i=0; i<neval; ++i) {
             v = actf->f(xdata[i]);
@@ -55,10 +56,10 @@ double benchmark_actf_derivs(ActivationFunctionInterface * const actf, const dou
             v3d = flag_d3 ? actf->f3d(xdata[i]) : 0.0;
         }
         return timer.elapsed();
-    }
+    
 }
 
-std::pair<double, double> sample_benchmark_actf_derivs(ActivationFunctionInterface * const actf, const double * const xdata, const int neval, const int nruns, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true) {
+inline std::pair<double, double> sample_benchmark_actf_derivs(ActivationFunctionInterface * const actf, const double * const xdata, const int neval, const int nruns, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true) {
     double times[nruns];
     double mean = 0., err = 0.;
 
@@ -67,7 +68,8 @@ std::pair<double, double> sample_benchmark_actf_derivs(ActivationFunctionInterfa
         mean += times[i];
     }
     mean /= nruns;
-    for (int i=0; i<nruns; ++i) err += pow(times[i]-mean, 2);
+    for (int i=0; i<nruns; ++i) { err += pow(times[i]-mean, 2);
+}
     err /= (nruns-1)*nruns; // variance of the mean
     err = sqrt(err); // standard error of the mean
 

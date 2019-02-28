@@ -1,9 +1,9 @@
 #include "ffnn/fmap/PairDifferenceMap.hpp"
 #include "ffnn/serial/StringCodeUtilities.hpp"
 
-#include <vector>
-#include <string>
 #include <cmath>
+#include <string>
+#include <vector>
 
 // --- fill/clear sources
 
@@ -17,8 +17,8 @@ void PairDifferenceMap::_fillSources(const std::vector<size_t> &source_ids)
 void PairDifferenceMap::_clearSources()
 {
     OneDimStaticMap::_clearSources();
-    _src0 = NULL;
-    _src1 = NULL;
+    _src0 = nullptr;
+    _src1 = nullptr;
 }
 
 
@@ -64,19 +64,22 @@ double PairDifferenceMap::getVariationalFirstDerivativeFeed(const int &iv1d){
     if (iv1d < _vp_id_shift) {
         return _src0->getVariationalFirstDerivativeValue(iv1d) - _src1->getVariationalFirstDerivativeValue(iv1d);
     }
-    else return 0.;
+     {return 0.;
+}
 }
 
 double PairDifferenceMap::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
     if (iv1d < _vp_id_shift) {
         return _src0->getCrossFirstDerivativeValue(i1d, iv1d) - _src1->getCrossFirstDerivativeValue(i1d, iv1d);
     }
-    else return 0.;
+     {return 0.;
+}
 }
 
 double PairDifferenceMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
     if (iv2d < _vp_id_shift) {
         return _src0->getCrossSecondDerivativeValue(i2d, iv2d) - _src1->getCrossSecondDerivativeValue(i2d, iv2d);
     }
-    else return 0.;
+     {return 0.;
+}
 }

@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 
@@ -11,46 +11,46 @@ class MyActivationFunction: public ActivationFunctionInterface
 {
 public:
     // get copy method
-    ActivationFunctionInterface * getCopy(){
+    ActivationFunctionInterface * getCopy() override{
         return new MyActivationFunction();
     }
 
     // get identifier
-    std::string getIdCode(){
+    std::string getIdCode() override{
         return "MyA";
     }
 
     // range [-2 : 2]
-    double getIdealInputMu(){return 0.;};
-    double getIdealInputSigma(){return 1.154700538379252;};
+    double getIdealInputMu() override{return 0.;};
+    double getIdealInputSigma() override{return 1.154700538379252;};
 
     // since this is a monotonic activation function,
     // we can leave the default getOutputMu() and getOutputSigma()
 
 
     // computation
-    double f(const double &in){
+    double f(const double &in) override{
         // function
         return in*in*in;
     }
 
-    double f1d(const double &in){
+    double f1d(const double &in) override{
         // first derivative
         return 3.*in*in;
     }
 
-    double f2d(const double &in){
+    double f2d(const double &in) override{
         // second derivative
         return 6.*in;
     }
 
-    double f3d(const double &in){
+    double f3d(const double & /*in*/) override{
         // third derivative
         return 6.;
     }
 
     // this optional implementation allows to calculate all needed derivatives together, which is usually faster
-    void fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_d3 = false)
+    void fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_d3 = false) override
     {
         v = in*in*in;
         v1d = flag_d1 ? 3.*in*in : 0.;
@@ -98,9 +98,9 @@ int main() {
     cout << "Now we want to substitute it with our activation function (MyActivationFunction)" << endl;
     cin.ignore();
 
-    MyActivationFunction * myactf = new MyActivationFunction();
+    auto * myactf = new MyActivationFunction();
     ffnn->getNNLayer(1)->getNNUnit(1)->setActivationFunction(myactf);
-    myactf = NULL; // if you want to be sure
+    myactf = nullptr; // if you want to be sure
     cout << "Done! Note that the unit now has taken over the activation function allocation, so you must not delete it." << endl;
     cin.ignore();
 

@@ -1,10 +1,10 @@
-#ifndef SMART_BETA_GENERATOR
-#define SMART_BETA_GENERATOR
+#ifndef FFNN_FEED_SMARTBETAGENERATOR_HPP
+#define FFNN_FEED_SMARTBETAGENERATOR_HPP
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-#include "ffnn/layer/FedLayer.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
 #include "ffnn/feed/NNRay.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 namespace smart_beta {
@@ -16,18 +16,18 @@ namespace smart_beta {
         const int N_TRY_BEST_LD_BETA = 20; // how many tries to find best ld beta
         const int BETA_INDEX_OFFSET = 0; // leave out beta before index (experimental, don't use)
 
-        NNRay * _castFeederToRay(FeederInterface * const feeder);
+        NNRay * _castFeederToRay(FeederInterface * feeder);
         std::vector<int> _findIndexesOfUnitsWithRay(FedLayer * L);
         void _computeBetaMuAndSigma(FedUnit * U, double &mu, double &sigma);
         void _setRandomBeta(FeederInterface * ray, const double &mu, const double &sigma);
         void _makeBetaOrthogonal(FeederInterface * fixed_ray, FeederInterface * ray);
-    }
+    }  // namespace details
 
     // generate and set smart betas for the Layer L
     void generateSmartBeta(FeedForwardNeuralNetwork * ffnn);
     void generateSmartBeta(FedLayer * L);
 
-}
+}  // namespace smart_beta
 
 
 #endif

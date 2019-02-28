@@ -1,13 +1,13 @@
-#ifndef NETWORK_LAYER
-#define NETWORK_LAYER
+#ifndef FFNN_LAYER_NETWORKLAYER_HPP
+#define FFNN_LAYER_NETWORKLAYER_HPP
 
 #include "ffnn/serial/SerializableComponent.hpp"
 #include "ffnn/serial/StringCodeUtilities.hpp"
 #include "ffnn/unit/NetworkUnit.hpp"
 #include "ffnn/unit/OffsetUnit.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class NetworkLayer: public SerializableComponent
 {
@@ -25,18 +25,18 @@ public:
 
     // --- Destructor
 
-    virtual ~NetworkLayer();
+    ~NetworkLayer() override;
     virtual void deconstruct(); // should remove the non-offset units
 
 
     // --- Class String Code methods
 
-    std::string getClassIdCode(){return "LAYER";}
-    virtual std::string getParams(){return composeParamCode("nunits", _U.size());}
-    virtual std::string getMemberTreeCode();
+    std::string getClassIdCode() override{return "LAYER";}
+    std::string getParams() override{return composeParamCode("nunits", _U.size());}
+    std::string getMemberTreeCode() override;
 
-    virtual void setParams(const std::string &params){int n; setParamValue(params, "nunits", n); this->setSize(n);}
-    virtual void setMemberParams(const std::string &memberTreeCode);
+    void setParams(const std::string &params) override{int n; setParamValue(params, "nunits", n); this->setSize(n);}
+    void setMemberParams(const std::string &memberTreeCode) override;
 
 
     // --- Getters
@@ -53,8 +53,8 @@ public:
 
     // --- Variational Parameters
 
-    virtual bool setVariationalParameter(const int &id, const double &vp) {return false;}
-    virtual bool getVariationalParameter(const int &id, double &vp) {return false;}
+    virtual bool setVariationalParameter(const int & /*id*/, const double & /*vp*/) {return false;}
+    virtual bool getVariationalParameter(const int & /*id*/, double & /*vp*/) {return false;}
     virtual int getNVariationalParameters() {return 0;}
     virtual int getMaxVariationalParameterIndex(){return -1;} // return the max appearing variational parameter index in the layer and it's input
     virtual int setVariationalParametersID(const int &id_vp) { return id_vp;}

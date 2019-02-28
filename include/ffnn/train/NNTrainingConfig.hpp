@@ -1,5 +1,5 @@
-#ifndef NN_TRAINING_CONFIG
-#define NN_TRAINING_CONFIG
+#ifndef FFNN_TRAIN_NNTRAININGCONFIG_HPP
+#define FFNN_TRAIN_NNTRAININGCONFIG_HPP
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 

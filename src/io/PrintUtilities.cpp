@@ -3,11 +3,11 @@
 #include "ffnn/unit/FedUnit.hpp"
 #include "ffnn/unit/NNUnit.hpp"
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <stdexcept>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
 #include <string>
 
 void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params, const int &drop_member_lvl)
@@ -17,7 +17,7 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
     int maxLayerSize = 0;
     size_t maxStringLength[ffnn->getNLayers()];
 
-    std::string stringCode = "";
+    std::string stringCode;
 
     for (int l=0; l<ffnn->getNLayers(); ++l)
         {
@@ -30,8 +30,10 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
             for (int u = 0; u<ffnn->getLayerSize(l); ++u)
                 {
                     stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
-                    if (drop_member_lvl > 0) stringCode = dropMembers(stringCode, drop_member_lvl);
-                    if (drop_params) stringCode = dropParams(stringCode);
+                    if (drop_member_lvl > 0) { stringCode = dropMembers(stringCode, drop_member_lvl);
+}
+                    if (drop_params) { stringCode = dropParams(stringCode);
+}
 
                     if (stringCode.length() > maxStringLength[l])
                         {
@@ -50,8 +52,10 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
                     if (ffnn->getLayerSize(l) > u)
                         {
                             stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
-                            if (drop_member_lvl > 0) stringCode = dropMembers(stringCode, drop_member_lvl);
-                            if (drop_params) stringCode = dropParams(stringCode);
+                            if (drop_member_lvl > 0) { stringCode = dropMembers(stringCode, drop_member_lvl);
+}
+                            if (drop_params) { stringCode = dropParams(stringCode);
+}
 
                             cout << stringCode;
                             cout << string(maxStringLength[l]-stringCode.length(), ' ');
@@ -105,19 +109,19 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
         maxNBeta[u] = 0;
         for (int l=0; l<nlayers; ++l){
             index = u*nlayers+l;
-            feeder = NULL;
+            feeder = nullptr;
 
             if (u < ffnn->getLayer(l)->getNUnits()) {
-                if (FedUnit * fnu = dynamic_cast<FedUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                if (auto * fnu = dynamic_cast<FedUnit *>(ffnn->getLayer(l)->getUnit(u))) {
                     feeder = fnu->getFeeder();
-                    if (feeder){
+                    if (feeder != nullptr){
                         if (feeder->getNBeta() > maxNBeta[u]){
                             maxNBeta[u] = feeder->getNBeta();
                         }
                     }
                 }
 
-                if (NNUnit * nnu = dynamic_cast<NNUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                if (auto * nnu = dynamic_cast<NNUnit *>(ffnn->getLayer(l)->getUnit(u))) {
                     ids[index] = " " + nnu->getActivationFunction()->getIdCode() + " ";
                 }
                 else {
@@ -138,9 +142,10 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
             for (int l=0; l<nlayers; ++l) {
                 index = u*nlayers+l;
 
-                if (u < ffnn->getLayer(l)->getNUnits() && feeders[index]) {
+                if (u < ffnn->getLayer(l)->getNUnits() && (feeders[index] != nullptr)) {
                     if (b < feeders[index]->getNBeta()) {
-                        if (feeders[index]->getBeta(b) >= 0.) cout << "+";
+                        if (feeders[index]->getBeta(b) >= 0.) { cout << "+";
+}
                         cout << feeders[index]->getBeta(b);
                     }
                     else {
@@ -195,9 +200,11 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
     for (int u=0; u<maxNUnits; ++u){
         for (int l=0; l<ffnn->getNLayers(); ++l){
             if (u < ffnn->getLayerSize(l)){
-                if (ffnn->getLayer(l)->getUnit(u)->getProtoValue() >= 0.) cout << "+";
+                if (ffnn->getLayer(l)->getUnit(u)->getProtoValue() >= 0.) { cout << "+";
+}
                 cout << ffnn->getLayer(l)->getUnit(u)->getProtoValue() << " -> ";
-                if (ffnn->getLayer(l)->getUnit(u)->getValue() >= 0.) cout << "+";
+                if (ffnn->getLayer(l)->getUnit(u)->getValue() >= 0.) { cout << "+";
+}
                 cout << ffnn->getLayer(l)->getUnit(u)->getValue() << "    ";
             } else {
                 cout << emptySpaceForValue << emptySpaceBetweenProtovalueAndValue << emptySpaceForValue << emptySpaceAfterValue;
@@ -215,19 +222,20 @@ void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, c
     const double delta = (max-min)/(npoints-1);
 
     // compute the input points
-    double * x = new double[npoints];
+    auto * x = new double[npoints];
     x[0] = min;
     for (int i=1; i<npoints; ++i){
         x[i] = x[i-1] + delta;
     }
 
     // allocate the output variables
-    double * v = new double[npoints];      // NN output value
+    auto * v = new double[npoints];      // NN output value
 
     // compute the values
     const int ninput = ffnn->getNInput();
-    double * input = new double[ninput];
-    for (int i=0; i<ninput; ++i) input[i] = base_input[i];
+    auto * input = new double[ninput];
+    for (int i=0; i<ninput; ++i) { input[i] = base_input[i];
+}
     for (int i=0; i<npoints; ++i){
         input[input_i] = x[i];
         ffnn->setInput(input);

@@ -7,7 +7,7 @@
 void InputLayer::_registerUnit(NetworkUnit * newUnit)
 {
     NetworkLayer::_registerUnit(newUnit);
-    if(InputUnit * inu = dynamic_cast<InputUnit *>(newUnit)) {
+    if(auto * inu = dynamic_cast<InputUnit *>(newUnit)) {
         _U_in.push_back(inu);
     }
 }

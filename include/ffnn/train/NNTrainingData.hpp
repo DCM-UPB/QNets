@@ -1,5 +1,5 @@
-#ifndef NN_TRAINING_DATA
-#define NN_TRAINING_DATA
+#ifndef FFNN_TRAIN_NNTRAININGDATA_HPP
+#define FFNN_TRAIN_NNTRAININGDATA_HPP
 
 #include <cstddef> // NULL
 
@@ -23,17 +23,23 @@ struct NNTrainingData {
         x = new double*[ndata];
         y = new double*[ndata];
         w = new double*[ndata];
-        if (flag_d1) yd1 = new double**[ndata];
-        if (flag_d2) yd2 = new double**[ndata];
+        if (flag_d1) { yd1 = new double**[ndata];
+}
+        if (flag_d2) { yd2 = new double**[ndata];
+}
         for (int i=0; i<ndata; ++i) {
             x[i] = new double[xndim];
             y[i] = new double[yndim];
             w[i] = new double[yndim];
-            if (flag_d1) yd1[i] = new double*[yndim];
-            if (flag_d2) yd2[i] = new double*[yndim];
+            if (flag_d1) { yd1[i] = new double*[yndim];
+}
+            if (flag_d2) { yd2[i] = new double*[yndim];
+}
             for (int j=0; j<yndim; ++j) {
-                if (flag_d1) yd1[i][j] = new double[xndim];
-                if (flag_d2) yd2[i][j] = new double[xndim];
+                if (flag_d1) { yd1[i][j] = new double[xndim];
+}
+                if (flag_d2) { yd2[i][j] = new double[xndim];
+}
             }
         }
     }
@@ -41,27 +47,27 @@ struct NNTrainingData {
     void deallocate() // deallocate data arrays
     {
         for (int i = 0; i<ndata; ++i) {
-            if (x) delete [] x[i];
-            if (y) delete [] y[i];
-            if (w) delete [] w[i];
+            if (x != nullptr) { delete [] x[i]; }
+            if (y != nullptr) { delete [] y[i]; }
+            if (w != nullptr) { delete [] w[i]; }
             for (int j = 0; j<yndim; ++j) {
-                if (yd1) delete [] yd1[i][j];
-                if (yd2) delete [] yd2[i][j];
+                if (yd1 != nullptr) { delete [] yd1[i][j]; }
+                if (yd2 != nullptr) { delete [] yd2[i][j]; }
             }
-            if (yd1) delete [] yd1[i];
-            if (yd2) delete [] yd2[i];
+            if (yd1 != nullptr) { delete [] yd1[i]; }
+            if (yd2 != nullptr) { delete [] yd2[i]; }
         }
-        if (x) delete [] x;
-        if (y) delete [] y;
-        if (w) delete [] w;
-        if (yd1) delete [] yd1;
-        if (yd2) delete [] yd2;
+        delete [] x;
+        delete [] y;
+        delete [] w;
+        delete [] yd1;
+        delete [] yd2;
 
-        x = NULL;
-        y = NULL;
-        w = NULL;
-        yd1 = NULL;
-        yd2 = NULL;
+        x = nullptr;
+        y = nullptr;
+        w = nullptr;
+        yd1 = nullptr;
+        yd2 = nullptr;
     }
 };
 

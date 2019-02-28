@@ -1,15 +1,15 @@
 #include "ffnn/feed/SmartBetaGenerator.hpp"
 
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
-#include "ffnn/unit/NetworkUnit.hpp"
-#include "ffnn/unit/FedUnit.hpp"
-#include "ffnn/unit/NNUnit.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
 #include "ffnn/feed/NNRay.hpp"
+#include "ffnn/unit/FedUnit.hpp"
+#include "ffnn/unit/NNUnit.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
-#include <random>
-#include <numeric>
 #include <cmath>
+#include <numeric>
+#include <random>
 #include <stdexcept>
 
 
@@ -21,12 +21,12 @@ namespace smart_beta{
         // little internal cast helper
         NNRay * _castFeederToRay(FeederInterface * const feeder)
         {
-            if (NNRay * ray = dynamic_cast<NNRay *>(feeder)) {
+            if (auto * ray = dynamic_cast<NNRay *>(feeder)) {
                 return ray;
             }
-            else {
-                return NULL;
-            }
+            
+                return nullptr;
+            
         }
 
         std::vector<int> _findIndexesOfUnitsWithRay(FedLayer * L){
@@ -37,7 +37,7 @@ namespace smart_beta{
 
             vector<int> idx;
             for (int i=0; i<L->getNFedUnits(); ++i){
-                if (_castFeederToRay(L->getFedUnit(i)->getFeeder()) != 0){
+                if (_castFeederToRay(L->getFedUnit(i)->getFeeder()) != nullptr){
                     idx.push_back(i);
                 }
             }
@@ -53,7 +53,7 @@ namespace smart_beta{
             //   sigma_beta = sigma_actf_input / (sum_U_sources mu_actf_output)
             //
             FeederInterface * ray = U->getFeeder();
-            if ( ray == 0 ){
+            if ( ray == nullptr ){
                 throw std::runtime_error( "Provided unit does not have a ray, therefore it does not need beta" );
             }
 
@@ -124,7 +124,7 @@ namespace smart_beta{
                 ray->setBeta(i, u[i-BETA_INDEX_OFFSET]*sqrt(u_u/new_u_u));
             }
         }
-    }
+    }  // namespace details
 
     // --- External methods in smart_beta namespace
 
@@ -142,7 +142,7 @@ namespace smart_beta{
         // get the indexes of the units we are interested in
         vector<int> idx = _findIndexesOfUnitsWithRay(L);
 
-        if ( idx.size() >= 1 ){
+        if ( !idx.empty() ){
             // set the first unit beta
             FedUnit * u0 = L->getFedUnit(idx[0]);
             double mu, sigma;
@@ -181,28 +181,36 @@ namespace smart_beta{
                 _computeBetaMuAndSigma(u, mu, sigma);
                 double best_dot_product = -1.;
                 vector<double> best_beta;
-                for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) best_beta.push_back(0.);
+                for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) { best_beta.push_back(0.);
+}
                 for (int itry=0; itry<N_TRY_BEST_LD_BETA; ++itry){
                     _setRandomBeta(ray, mu, sigma);
                     vector<double> beta_u;
-                    for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) beta_u.push_back(ray->getBeta(ib));
+                    for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) { beta_u.push_back(ray->getBeta(ib));
+}
                     double min_dot_product = -1.;
                     for (int j=0; j<i; ++j){
                         vector<double> beta_v;
                         FeederInterface * rayj = L->getFedUnit(idx[j])->getFeeder();
-                        for (int ib=BETA_INDEX_OFFSET; ib<rayj->getNBeta(); ++ib) beta_v.push_back(rayj->getBeta(ib));
+                        for (int ib=BETA_INDEX_OFFSET; ib<rayj->getNBeta(); ++ib) { beta_v.push_back(rayj->getBeta(ib));
+}
                         const double dot_product = fabs(inner_product(begin(beta_u), end(beta_u), begin(beta_v), 0.0))/inner_product(begin(beta_u), end(beta_u), begin(beta_u), 0.0);
-                        if (min_dot_product < 0.) min_dot_product = dot_product;
-                        if (dot_product < min_dot_product) min_dot_product = dot_product;
+                        if (min_dot_product < 0.) { min_dot_product = dot_product;
+}
+                        if (dot_product < min_dot_product) { min_dot_product = dot_product;
+}
                     }
-                    if (best_dot_product < 0.) best_dot_product = min_dot_product;
+                    if (best_dot_product < 0.) { best_dot_product = min_dot_product;
+}
                     if (min_dot_product < best_dot_product){
                         best_dot_product = min_dot_product;
-                        for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) best_beta[ib-BETA_INDEX_OFFSET] = beta_u[ib-BETA_INDEX_OFFSET];
+                        for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) { best_beta[ib-BETA_INDEX_OFFSET] = beta_u[ib-BETA_INDEX_OFFSET];
+}
                     }
                 }
-                for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) ray->setBeta(ib, best_beta[ib-BETA_INDEX_OFFSET]);
+                for (int ib=BETA_INDEX_OFFSET; ib<ray->getNBeta(); ++ib) { ray->setBeta(ib, best_beta[ib-BETA_INDEX_OFFSET]);
+}
             }
         }
     }
-}
+} // namespace smart_beta

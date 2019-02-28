@@ -1,10 +1,10 @@
-#include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 
@@ -24,45 +24,51 @@ int main(){
     // --- create two set of variables that will be compared.
 
     // the first variable set will be used with FFPropagate and then all the get...
-    double * out_1 = new double[ffnn->getNOutput()];
+    auto * out_1 = new double[ffnn->getNOutput()];
 
-    double ** d1_1 = new double*[ffnn->getNOutput()];
+    auto ** d1_1 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
         d1_1[i] = new double[ffnn->getNInput()];
-        for (int j=0; j<ffnn->getNInput(); ++j) d1_1[i][j] = -6.66;
+        for (int j=0; j<ffnn->getNInput(); ++j) { d1_1[i][j] = -6.66;
+}
     }
 
-    double ** d2_1 = new double*[ffnn->getNOutput()];
+    auto ** d2_1 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
         d2_1[i] = new double[ffnn->getNInput()];
-        for (int j=0; j<ffnn->getNInput(); ++j) d2_1[i][j] = -6.66;
+        for (int j=0; j<ffnn->getNInput(); ++j) { d2_1[i][j] = -6.66;
+}
     }
 
-    double ** vd1_1 = new double*[ffnn->getNOutput()];
+    auto ** vd1_1 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
         vd1_1[i] = new double[ffnn->getNVariationalParameters()];
-        for (int j=0; j<ffnn->getNVariationalParameters(); ++j) vd1_1[i][j] = -6.66;
+        for (int j=0; j<ffnn->getNVariationalParameters(); ++j) { vd1_1[i][j] = -6.66;
+}
     }
 
     // the second variable set will be used with the evaluate function
-    double * out_2 = new double[ffnn->getNOutput()];
+    auto * out_2 = new double[ffnn->getNOutput()];
 
-    double ** d1_2 = new double*[ffnn->getNOutput()];
+    auto ** d1_2 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
         d1_2[i] = new double[ffnn->getNInput()];
-        for (int j=0; j<ffnn->getNInput(); ++j) d1_2[i][j] = -6.66;
+        for (int j=0; j<ffnn->getNInput(); ++j) { d1_2[i][j] = -6.66;
+}
     }
 
-    double ** d2_2 = new double*[ffnn->getNOutput()];
+    auto ** d2_2 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
         d2_2[i] = new double[ffnn->getNInput()];
-        for (int j=0; j<ffnn->getNInput(); ++j) d2_2[i][j] = -6.66;
+        for (int j=0; j<ffnn->getNInput(); ++j) { d2_2[i][j] = -6.66;
+}
     }
 
-    double ** vd1_2 = new double*[ffnn->getNOutput()];
+    auto ** vd1_2 = new double*[ffnn->getNOutput()];
     for (int i=0; i<ffnn->getNOutput(); ++i){
         vd1_2[i] = new double[ffnn->getNVariationalParameters()];
-        for (int j=0; j<ffnn->getNVariationalParameters(); ++j) vd1_2[i][j] = -6.66;
+        for (int j=0; j<ffnn->getNVariationalParameters(); ++j) { vd1_2[i][j] = -6.66;
+}
     }
 
 
@@ -135,24 +141,30 @@ int main(){
 
 
     // --- free resources
-    for (int i=0; i<ffnn->getNOutput(); ++i) delete[] vd1_2[i];
+    for (int i=0; i<ffnn->getNOutput(); ++i) { delete[] vd1_2[i];
+}
     delete[] vd1_2;
 
-    for (int i=0; i<ffnn->getNOutput(); ++i) delete[] d2_2[i];
+    for (int i=0; i<ffnn->getNOutput(); ++i) { delete[] d2_2[i];
+}
     delete[] d2_2;
 
-    for (int i=0; i<ffnn->getNOutput(); ++i) delete[] d1_2[i];
+    for (int i=0; i<ffnn->getNOutput(); ++i) { delete[] d1_2[i];
+}
     delete[] d1_2;
 
     delete[] out_2;
 
-    for (int i=0; i<ffnn->getNOutput(); ++i) delete[] vd1_1[i];
+    for (int i=0; i<ffnn->getNOutput(); ++i) { delete[] vd1_1[i];
+}
     delete[] vd1_1;
 
-    for (int i=0; i<ffnn->getNOutput(); ++i) delete[] d2_1[i];
+    for (int i=0; i<ffnn->getNOutput(); ++i) { delete[] d2_1[i];
+}
     delete[] d2_1;
 
-    for (int i=0; i<ffnn->getNOutput(); ++i) delete[] d1_1[i];
+    for (int i=0; i<ffnn->getNOutput(); ++i) { delete[] d1_1[i];
+}
     delete[] d1_1;
 
     delete[] out_1;

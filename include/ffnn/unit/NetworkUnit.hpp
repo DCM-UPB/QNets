@@ -1,11 +1,11 @@
-#ifndef NETWORK_UNIT
-#define NETWORK_UNIT
+#ifndef FFNN_UNIT_NETWORKUNIT_HPP
+#define FFNN_UNIT_NETWORKUNIT_HPP
 
-#include "ffnn/serial/SerializableComponent.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/serial/SerializableComponent.hpp"
 
-#include <string>
 #include <cstddef> // for NULL
+#include <string>
 
 // Generalized Network Unit
 class NetworkUnit: public SerializableComponent
@@ -41,7 +41,7 @@ protected:
 public:
     // Constructor and destructor
     NetworkUnit();
-    virtual ~NetworkUnit();
+    ~NetworkUnit() override;
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
     // (if the derived unit applies e.g. an activation function to the pv, overwrite this accordingly)
@@ -54,8 +54,8 @@ public:
     virtual double getOutputSigma(){return 0;}
 
     // BaseComponent IdCodes
-    std::string getClassIdCode(){return "UNIT";}
-    virtual std::string getIdCode() = 0; // virtual class
+    std::string getClassIdCode() override{return "UNIT";}
+    std::string getIdCode() override = 0; // virtual class
 
     // Setters
     void setProtoValue(const double &pv){_pv=pv;}

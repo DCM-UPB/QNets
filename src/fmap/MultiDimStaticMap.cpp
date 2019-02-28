@@ -2,8 +2,8 @@
 #include "ffnn/serial/StringCodeUtilities.hpp"
 #include "ffnn/unit/NetworkUnit.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 // --- Constructor
 
@@ -35,7 +35,8 @@ void MultiDimStaticMap::setParams(const std::string &params)
         size_t id;
         str = readParamValue(params, "source_id" + std::to_string(i));
         setParamValue(str, id);
-        for (size_t j=0; j<_ndim; ++j) source_ids.push_back(id+j);
+        for (size_t j=0; j<_ndim; ++j) { source_ids.push_back(id+j);
+}
     }
 
     _fillSources(source_ids);
@@ -45,7 +46,7 @@ void MultiDimStaticMap::setParams(const std::string &params)
 
 // --- Parameter manipulation
 
-void MultiDimStaticMap::setParameters(const size_t &ndim, const std::vector<size_t> &source_id0s, const std::vector<double> &extra_params)
+void MultiDimStaticMap::setParameters(const size_t &ndim, const std::vector<size_t> &source_id0s, const std::vector<double> & /*extra_params*/)
 {
     std::vector<size_t> source_ids;
 
@@ -60,5 +61,6 @@ void MultiDimStaticMap::setParameters(const size_t &ndim, const std::vector<size
     }
 
     _fillSources(source_ids);
-    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+    if (_vp_id_shift > -1) { this->setVariationalParametersIndexes(_vp_id_shift, false);
+}
 }

@@ -1,6 +1,6 @@
 #include "ffnn/actf/SineActivationFunction.hpp"
 
-#include <math.h>
+#include <cmath>
 
 // Activation Function Interface implementation
 

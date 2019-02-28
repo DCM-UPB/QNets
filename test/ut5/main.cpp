@@ -1,10 +1,10 @@
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
 
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <vector>
-#include <assert.h>
-#include <cmath>
 
 
 int main(){

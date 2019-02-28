@@ -1,5 +1,5 @@
-#ifndef NN_RAY
-#define NN_RAY
+#ifndef FFNN_FEED_NNRAY_HPP
+#define FFNN_FEED_NNRAY_HPP
 
 #include "ffnn/feed/WeightedFeeder.hpp"
 #include "ffnn/layer/NetworkLayer.hpp"
@@ -10,29 +10,29 @@ class NNRay: public WeightedFeeder
 {
 public:
     explicit NNRay(NetworkLayer * nl);
-    ~NNRay(){}
+    ~NNRay() override= default;
 
     // string code methods
-    std::string getIdCode(){return "RAY";} // return an identification string
-    void setParams(const std::string &params);
+    std::string getIdCode() override{return "RAY";} // return an identification string
+    void setParams(const std::string &params) override;
 
     // variational parameters
-    int setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp = true);
+    int setVariationalParametersIndexes(const int &starting_index, bool flag_add_vp = true) override;
 
     // return the feed mean value (mu) and standard deviation (sigma)
-    double getFeedMu();
-    double getFeedSigma();
+    double getFeedMu() override;
+    double getFeedSigma() override;
 
     // Computation
-    double getFeed();
-    double getFirstDerivativeFeed(const int &i1d);
-    double getSecondDerivativeFeed(const int &i2d);
-    double getVariationalFirstDerivativeFeed(const int &iv1d);
-    double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d);
-    double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d);
+    double getFeed() override;
+    double getFirstDerivativeFeed(const int &i1d) override;
+    double getSecondDerivativeFeed(const int &i2d) override;
+    double getVariationalFirstDerivativeFeed(const int &iv1d) override;
+    double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d) override;
+    double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d) override;
 
     // randomizer implementations
-    void randomizeBeta();
+    void randomizeBeta() override;
 };
 
 #endif

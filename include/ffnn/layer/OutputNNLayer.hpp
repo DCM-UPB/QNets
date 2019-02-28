@@ -1,13 +1,13 @@
-#ifndef OUTPUT_NN_LAYER
-#define OUTPUT_NN_LAYER
+#ifndef FFNN_LAYER_OUTPUTNNLAYER_HPP
+#define FFNN_LAYER_OUTPUTNNLAYER_HPP
 
-#include "ffnn/layer/NNLayer.hpp"
-#include "ffnn/unit/OutputNNUnit.hpp"
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/layer/NNLayer.hpp"
+#include "ffnn/unit/OutputNNUnit.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class OutputNNLayer: public NNLayer
 {
@@ -19,17 +19,18 @@ protected:
 public:
     // --- Constructor
 
-    OutputNNLayer(const int &nunits = 1, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): NNLayer(0, actf) {if (nunits>1) construct(nunits, actf);}
-    virtual void construct(const int &nunits, ActivationFunctionInterface * actf);
+    explicit OutputNNLayer(const int &nunits = 1, ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): NNLayer(0, actf) {if (nunits>1) { construct(nunits, actf);
+}}
+    void construct(const int &nunits, ActivationFunctionInterface * actf) override;
 
     // --- Destructor
 
-    virtual ~OutputNNLayer(){_U_out.clear();}
-    virtual void deconstruct(){NNLayer::deconstruct(); _U_out.clear();}
+    ~OutputNNLayer() override{_U_out.clear();}
+    void deconstruct() override{NNLayer::deconstruct(); _U_out.clear();}
 
     // --- String Codes
 
-    virtual std::string getIdCode(){return "OUTL";}
+    std::string getIdCode() override{return "OUTL";}
 
     // --- Getters
 

@@ -1,9 +1,9 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
+#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
 
@@ -67,7 +67,7 @@ int main() {
     cout << "Write plot files" << endl;
     cout << "================" << endl;
 
-    double * base_input = new double[ffnn->getNInput()]; // no need to set it, since it is 1-dim
+    auto * base_input = new double[ffnn->getNInput()]; // no need to set it, since it is 1-dim
     const int input_i = 0;
     const int output_i = 0;
     const double min = -5;

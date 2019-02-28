@@ -1,8 +1,8 @@
-#ifndef FED_NETWORK_LAYER
-#define FED_NETWORK_LAYER
+#ifndef FFNN_LAYER_FEDLAYER_HPP
+#define FFNN_LAYER_FEDLAYER_HPP
 
-#include "ffnn/unit/FedUnit.hpp"
 #include "ffnn/feed/NNRay.hpp"
+#include "ffnn/unit/FedUnit.hpp"
 
 #include <vector>
 
@@ -16,9 +16,9 @@ protected:
 public:
     // --- Destructor
 
-    virtual ~FedLayer() {_U_fed.clear();}
+    ~FedLayer() override {_U_fed.clear();}
 
-    virtual void deconstruct(){NetworkLayer::deconstruct(); _U_fed.clear();}
+    void deconstruct() override{NetworkLayer::deconstruct(); _U_fed.clear();}
 
     // --- Getters
 
@@ -28,14 +28,14 @@ public:
 
     // --- Variational Parameters
 
-    bool setVariationalParameter(const int &id, const double &vp);
-    bool getVariationalParameter(const int &id, double &vp);
-    int getNVariationalParameters();
-    int getMaxVariationalParameterIndex();
+    bool setVariationalParameter(const int &id, const double &vp) override;
+    bool getVariationalParameter(const int &id, double &vp) override;
+    int getNVariationalParameters() override;
+    int getMaxVariationalParameterIndex() override;
 
     // --- Values to compute
 
-    int setVariationalParametersID(const int &id_vp);
+    int setVariationalParametersID(const int &id_vp) override;
 
     // --- Connection
 
@@ -44,7 +44,7 @@ public:
     void disconnect();
 
     // --- Computation 
-    void computeValues(); // overriding to add OMP pragma
+    void computeValues() override; // overriding to add OMP pragma
 };
 
 #endif

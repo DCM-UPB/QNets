@@ -1,8 +1,8 @@
-#ifndef FEATURE_MAP_UNIT
-#define FEATURE_MAP_UNIT
+#ifndef FFNN_FMAP_FEATUREMAPUNIT_HPP
+#define FFNN_FMAP_FEATUREMAPUNIT_HPP
 
-#include "ffnn/unit/FedUnit.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
+#include "ffnn/unit/FedUnit.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -20,11 +20,11 @@ class FeatureMapUnit: public FedUnit
 {
 public:
     // Constructor and destructor
-    explicit FeatureMapUnit(FM * fmap = NULL) : FedUnit(static_cast<FeederInterface *>(fmap)) {}
-    ~FeatureMapUnit(){}
+    explicit FeatureMapUnit(FM * fmap = nullptr) : FedUnit(static_cast<FeederInterface *>(fmap)) {}
+    ~FeatureMapUnit() override= default;
 
     // restrict feeder to FM
-    void setFeeder(FeederInterface * feeder){
+    void setFeeder(FeederInterface * feeder) override{
         if (FM * fmap = dynamic_cast<FM *>(feeder)) {
             FedUnit::setFeeder(fmap);
         }
@@ -36,8 +36,8 @@ public:
     FM * getMap(){return static_cast<FM *>(_feeder);}
 
     // devirtualize
-    void computeOutput(){FedUnit::computeOutput();}
-    void computeValues(){FedUnit::computeValues();}
+    void computeOutput() override{FedUnit::computeOutput();}
+    void computeValues() override{FedUnit::computeValues();}
 };
 
 #endif

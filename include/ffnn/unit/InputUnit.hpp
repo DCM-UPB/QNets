@@ -1,5 +1,5 @@
-#ifndef INPUT_UNIT
-#define INPUT_UNIT
+#ifndef FFNN_UNIT_INPUTUNIT_HPP
+#define FFNN_UNIT_INPUTUNIT_HPP
 
 #include "ffnn/unit/ShifterScalerUnit.hpp"
 #include <string>
@@ -13,14 +13,14 @@ protected:
 
 public:
     explicit InputUnit(const int &index, const double inputMu = 0., const double inputSigma = 1.): _index(index) {_inputMu = inputMu; _inputSigma = inputSigma;} // the index of the input unit, i.e. d/dx_index f(_pv) = 1
-    virtual ~InputUnit(){}
+    ~InputUnit() override= default;
 
     // string code methods
-    virtual std::string getIdCode(){return "IN";} // return identifier for unit type
+    std::string getIdCode() override{return "IN";} // return identifier for unit type
 
     // return the output mean value (mu) and standard deviation (sigma)
-    virtual double getOutputMu(){return (_inputMu + _shift ) * _scale;}
-    virtual double getOutputSigma(){return _inputSigma * _scale;}
+    double getOutputMu() override{return (_inputMu + _shift ) * _scale;}
+    double getOutputSigma() override{return _inputSigma * _scale;}
 
     // set input data mu and sigma, set shift/scale accordingly
     void setInputMu(const double &inputMu, const bool &doShift = true);
@@ -31,11 +31,12 @@ public:
     double getInputSigma(){return _inputSigma;}
 
     // Computation
-    void computeFeed(){}
+    void computeFeed() override{}
     void computeActivation(){}
-    void computeDerivatives(){}
+    void computeDerivatives() override{}
 
-    void computeValues() {_v = _pv; if (_v1d) _v1d[_index] = 1.;}
+    void computeValues() override {_v = _pv; if (_v1d != nullptr) { _v1d[_index] = 1.;
+}}
 };
 
 

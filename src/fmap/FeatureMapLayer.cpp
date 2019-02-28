@@ -1,7 +1,7 @@
 #include "ffnn/fmap/FeatureMapLayer.hpp"
+#include "ffnn/feed/FeederInterface.hpp"
 #include "ffnn/layer/NetworkLayer.hpp"
 #include "ffnn/unit/FedUnit.hpp"
-#include "ffnn/feed/FeederInterface.hpp"
 
 #include <iostream>
 
@@ -10,19 +10,19 @@
 void FeatureMapLayer::_registerUnit(NetworkUnit * newUnit)
 {
     FedLayer::_registerUnit(newUnit);
-    if(PairSumMapUnit * psmu = dynamic_cast<PairSumMapUnit *>(newUnit)) {
+    if(auto * psmu = dynamic_cast<PairSumMapUnit *>(newUnit)) {
         _U_psm.push_back(psmu);
     }
-    else if(PairDifferenceMapUnit * pdmu = dynamic_cast<PairDifferenceMapUnit *>(newUnit)) {
+    else if(auto * pdmu = dynamic_cast<PairDifferenceMapUnit *>(newUnit)) {
         _U_pdm.push_back(pdmu);
     }
-    else if(EuclideanDistanceMapUnit * edmu = dynamic_cast<EuclideanDistanceMapUnit *>(newUnit)) {
+    else if(auto * edmu = dynamic_cast<EuclideanDistanceMapUnit *>(newUnit)) {
         _U_edm.push_back(edmu);
     }
-    else if(EuclideanPairDistanceMapUnit * epdmu = dynamic_cast<EuclideanPairDistanceMapUnit *>(newUnit)) {
+    else if(auto * epdmu = dynamic_cast<EuclideanPairDistanceMapUnit *>(newUnit)) {
         _U_epdm.push_back(epdmu);
     }
-    else if(IdentityMapUnit * idmu = dynamic_cast<IdentityMapUnit *>(newUnit)) {
+    else if(auto * idmu = dynamic_cast<IdentityMapUnit *>(newUnit)) {
         _U_idm.push_back(idmu);
     }
 }
@@ -84,9 +84,10 @@ FeederInterface * FeatureMapLayer::_newFMF(NetworkLayer * nl, const int &i)
 // --- Constructor / Destructor
 
 FeatureMapLayer::FeatureMapLayer(const int &nunits)
-    : _npsmaps(0), _npdmaps(0), _nedmaps(0), _nepdmaps(0), _nidmaps(nunits-1) // minimal initialization with ID maps
+    :  _nidmaps(nunits-1) // minimal initialization with ID maps
 {
-    if (nunits>1) construct(nunits);
+    if (nunits>1) { construct(nunits);
+}
 }
 
 FeatureMapLayer::FeatureMapLayer(const int &npsmaps, const int &npdmaps, const int &nedmaps, const int &nepdmaps, const int &nidmaps, const int &nunits)
@@ -94,7 +95,8 @@ FeatureMapLayer::FeatureMapLayer(const int &npsmaps, const int &npdmaps, const i
 {
     // if the user did specify nunits, don't calculate it
     int true_nunits = nunits < 0 ? 1 + _npsmaps + _npdmaps +_nedmaps + _nepdmaps + _nidmaps : nunits;
-    if (true_nunits>1) construct(true_nunits);
+    if (true_nunits>1) { construct(true_nunits);
+}
 }
 
 

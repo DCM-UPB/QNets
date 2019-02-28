@@ -1,12 +1,12 @@
-#ifndef PAIR_DIFFERENCE_MAP
-#define PAIR_DIFFERENCE_MAP
+#ifndef FFNN_FMAP_PAIRDIFFERENCEMAP_HPP
+#define FFNN_FMAP_PAIRDIFFERENCEMAP_HPP
 
 #include "ffnn/fmap/OneDimStaticMap.hpp"
-#include "ffnn/unit/NetworkUnit.hpp"
 #include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
-#include <string>
 #include <cstddef> // NULL
+#include <string>
 
 class PairDifferenceMap: public OneDimStaticMap
 {
@@ -15,32 +15,32 @@ protected:
     NetworkUnit * _src0;
     NetworkUnit * _src1;
 
-    void _fillSources(const std::vector<size_t> &source_ids); // we extend this to maintain _src1/2
-    void _clearSources();
+    void _fillSources(const std::vector<size_t> &source_ids) override; // we extend this to maintain _src1/2
+    void _clearSources() override;
 
 public:
     PairDifferenceMap(NetworkLayer * nl, const size_t &source_id0, const size_t &source_id1)
-        : OneDimStaticMap(nl, 2), _src0(NULL), _src1(NULL) {setParameters(source_id0, source_id1);} // full initialization
+        : OneDimStaticMap(nl, 2), _src0(nullptr), _src1(nullptr) {setParameters(source_id0, source_id1);} // full initialization
     explicit PairDifferenceMap(NetworkLayer * nl): PairDifferenceMap(nl, 0, 0) {} // minimal default initialization
-    ~PairDifferenceMap(){}
+    ~PairDifferenceMap() override= default;
 
     // string code methods
-    std::string getIdCode(){return "PDM";} // return an identification string
+    std::string getIdCode() override{return "PDM";} // return an identification string
 
     // parameter manipulation
     void setParameters(const size_t &source_id0, const size_t &source_id1); // calls base setParameters with vectorized argument
 
     // return the feed mean value (mu) and standard deviation (sigma)
-    double getFeedMu();
-    double getFeedSigma();
+    double getFeedMu() override;
+    double getFeedSigma() override;
 
     // Computation
-    double getFeed();
-    double getFirstDerivativeFeed(const int &i1d);
-    double getSecondDerivativeFeed(const int &i2d);
-    double getVariationalFirstDerivativeFeed(const int &iv1d);
-    double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d);
-    double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d);
+    double getFeed() override;
+    double getFirstDerivativeFeed(const int &i1d) override;
+    double getSecondDerivativeFeed(const int &i2d) override;
+    double getVariationalFirstDerivativeFeed(const int &iv1d) override;
+    double getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d) override;
+    double getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d) override;
 };
 
 #endif

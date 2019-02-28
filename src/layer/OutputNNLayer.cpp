@@ -10,7 +10,7 @@
 void OutputNNLayer::_registerUnit(NetworkUnit * newUnit)
 {
     NNLayer::_registerUnit(newUnit);
-    if(OutputNNUnit * outu = dynamic_cast<OutputNNUnit *>(newUnit)) {
+    if(auto * outu = dynamic_cast<OutputNNUnit *>(newUnit)) {
         _U_out.push_back(outu);
     }
 }
@@ -22,7 +22,7 @@ void OutputNNLayer::construct(const int &nunits, ActivationFunctionInterface * a
 {
     for (int i=1; i<nunits; ++i)
         {
-            OutputNNUnit * newUnit = new OutputNNUnit(actf->getCopy());
+            auto * newUnit = new OutputNNUnit(actf->getCopy());
             _registerUnit(newUnit);
         }
     delete actf;

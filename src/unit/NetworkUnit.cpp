@@ -30,7 +30,7 @@ void NetworkUnit::setFirstDerivativeSubstrate(const int &nx0)
             _v1d[i]=0.;
         }
 
-    if (!_first_der){
+    if (_first_der == nullptr){
         _first_der = new double[nx0];
     }
 }
@@ -45,11 +45,11 @@ void NetworkUnit::setSecondDerivativeSubstrate(const int &nx0)
             _v2d[i]=0.;
         }
 
-    if (!_first_der){
+    if (_first_der == nullptr){
         _first_der = new double[nx0];
     }
 
-    if (!_second_der){
+    if (_second_der == nullptr){
         _second_der = new double[nx0];
     }
 }
@@ -66,7 +66,7 @@ void NetworkUnit::setVariationalFirstDerivativeSubstrate(const int &nvp)
             _v1vd[i]=0.;
         }
 
-    if (!_first_var_der){
+    if (_first_var_der == nullptr){
         _first_var_der = new double[nvp];
     }
 }
@@ -85,13 +85,14 @@ void NetworkUnit::setCrossFirstDerivativeSubstrate(const int &nx0, const int &nv
         }
     }
 
-    if (!_first_var_der){
+    if (_first_var_der == nullptr){
         _first_var_der = new double[nvp];
     }
 
-    if (!_cross_first_der){
+    if (_cross_first_der == nullptr){
         _cross_first_der = new double*[nx0];
-        for (int i=0; i<nx0; ++i) _cross_first_der[i] = new double[nvp];
+        for (int i=0; i<nx0; ++i) { _cross_first_der[i] = new double[nvp];
+}
     }
 }
 
@@ -107,22 +108,24 @@ void NetworkUnit::setCrossSecondDerivativeSubstrate(const int &nx0, const int &n
         }
     }
 
-    if (!_first_var_der){
+    if (_first_var_der == nullptr){
         _first_var_der = new double[nvp];
     }
 
-    if (!_cross_first_der){
+    if (_cross_first_der == nullptr){
         _cross_first_der = new double*[nx0];
-        for (int i=0; i<nx0; ++i) _cross_first_der[i] = new double[nvp];
+        for (int i=0; i<nx0; ++i) { _cross_first_der[i] = new double[nvp];
+}
     }
 
-    if (!_second_der){
+    if (_second_der == nullptr){
         _second_der = new double[nx0];
     }
 
-    if (!_cross_second_der){
+    if (_cross_second_der == nullptr){
         _cross_second_der = new double*[nx0];
-        for (int i=0; i<nx0; ++i) _cross_second_der[i] = new double[nvp];
+        for (int i=0; i<nx0; ++i) { _cross_second_der[i] = new double[nvp];
+}
     }
 }
 
@@ -137,45 +140,46 @@ NetworkUnit::NetworkUnit(){
     _a1d = 0.;
     _a2d = 0.;
     _a3d = 0.;
-    _v1d = NULL;
-    _v2d = NULL;
-    _first_der = NULL;
-    _second_der = NULL;
-    _first_var_der = NULL;
-    _cross_first_der = NULL;
-    _cross_second_der = NULL;
-    _v1vd = NULL;
-    _v1d1vd = NULL;
-    _v2d1vd = NULL;
+    _v1d = nullptr;
+    _v2d = nullptr;
+    _first_der = nullptr;
+    _second_der = nullptr;
+    _first_var_der = nullptr;
+    _cross_first_der = nullptr;
+    _cross_second_der = nullptr;
+    _v1vd = nullptr;
+    _v1d1vd = nullptr;
+    _v2d1vd = nullptr;
 }
 
 // --- Destructor
 
 NetworkUnit::~NetworkUnit(){
-    if (_v1d) delete[] _v1d;
-    if (_v2d) delete[] _v2d;
-    if (_first_der) delete[] _first_der;
-    if (_second_der) delete[] _second_der;
-    if (_first_var_der) delete[] _first_var_der;
-    if (_v1vd) delete[] _v1vd;
-    if (_v1d1vd){
+    delete[] _v1d;
+    delete[] _v2d;
+    delete[] _first_der;
+    delete[] _second_der;
+    delete[] _first_var_der;
+    delete[] _v1vd;
+
+    if (_v1d1vd != nullptr){
         for (int i=0; i<_nx0; ++i){
             delete[] _v1d1vd[i];
         }
         delete[] _v1d1vd;
     }
-    if (_v2d1vd){
+    if (_v2d1vd != nullptr){
         for (int i=0; i<_nx0; ++i){
             delete[] _v2d1vd[i];
         }
         delete[] _v2d1vd;
     }
-    if (_cross_first_der){
-        for (int i=0; i<_nx0; ++i) delete[] _cross_first_der[i];
+    if (_cross_first_der != nullptr){
+        for (int i=0; i<_nx0; ++i) { delete[] _cross_first_der[i]; }
         delete[] _cross_first_der;
     }
-    if (_cross_second_der){
-        for (int i=0; i<_nx0; ++i) delete[] _cross_second_der[i];
+    if (_cross_second_der != nullptr){
+        for (int i=0; i<_nx0; ++i) { delete[] _cross_second_der[i]; }
         delete[] _cross_second_der;
     }
 }

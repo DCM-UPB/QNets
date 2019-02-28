@@ -1,8 +1,8 @@
 #include "ffnn/train/NNTrainer.hpp"
 #include "ffnn/feed/SmartBetaGenerator.hpp"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <random>
 
 // --- Helpers
@@ -10,14 +10,16 @@
 inline double computeMu(const double * const * const array, const int &len, const int &index)
 {
     double mean = 0.;
-    for (int i=0; i<len; ++i) mean += array[i][index];
+    for (int i=0; i<len; ++i) { mean += array[i][index];
+}
     return mean/len;
 }
 
 inline double computeSigma(const double * const * const array, const int &len, const int &index, const double &mean)
 {
     double std = 0.;
-    for (int i=0; i<len; ++i) std += pow(array[i][index] - mean , 2);
+    for (int i=0; i<len; ++i) { std += pow(array[i][index] - mean , 2);
+}
     return sqrt(std/(len-1));
 }
 
@@ -31,8 +33,9 @@ inline void computeBounds(const double * const * const array, const int &len, co
     lbound = array[0][index];
     ubound = array[0][index];
     for (int i=1; i<len; ++i) {
-        if (array[i][index] < lbound) lbound = array[i][index];
-        else if (array[i][index] > ubound) ubound = array[i][index];
+        if (array[i][index] < lbound) { lbound = array[i][index];
+        } else if (array[i][index] > ubound) { ubound = array[i][index];
+}
     }
 }
 
@@ -41,7 +44,7 @@ inline void computeBounds(const double * const * const array, const int &len, co
 
 FeedForwardNeuralNetwork * NNTrainer::_createVDerivFFNN(FeedForwardNeuralNetwork * const ffnn)
 {
-    FeedForwardNeuralNetwork * ffnn_vderiv = new FeedForwardNeuralNetwork(ffnn);
+    auto * ffnn_vderiv = new FeedForwardNeuralNetwork(ffnn);
     _configureFFNN(ffnn_vderiv, true);
 
     return ffnn_vderiv;
@@ -54,8 +57,9 @@ void NNTrainer::_configureFFNN(FeedForwardNeuralNetwork * const ffnn, const bool
         ffnn->assignVariationalParameters();
     }
     const bool flag_cd1 = _flag_d1 || _flag_d2; // second cross derivative also needs first one
-    if (flag_vderiv) ffnn->addSubstrates(flag_cd1, _flag_d2, true, flag_cd1, _flag_d2);
-    else ffnn->addSubstrates(flag_cd1, _flag_d2, false, false, false);
+    if (flag_vderiv) { ffnn->addSubstrates(flag_cd1, _flag_d2, true, flag_cd1, _flag_d2);
+    } else { ffnn->addSubstrates(flag_cd1, _flag_d2, false, false, false);
+}
 }
 
 
@@ -107,8 +111,10 @@ double NNTrainer::computeResidual(FeedForwardNeuralNetwork * const ffnn, const b
 
             if (flag_d) { // add derivative residuals
                 for (int k=0; k<_tdata.xndim; ++k) {
-                    if (_flag_d1) resi += lambda_d1_fac * pow(_tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - _tdata.yd1[i][j][k]), 2);
-                    if (_flag_d2) resi += lambda_d2_fac * pow(_tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - _tdata.yd2[i][j][k]), 2);
+                    if (_flag_d1) { resi += lambda_d1_fac * pow(_tdata.w[i][j] * (ffnn->getFirstDerivative(j, k) - _tdata.yd1[i][j][k]), 2);
+}
+                    if (_flag_d2) { resi += lambda_d2_fac * pow(_tdata.w[i][j] * (ffnn->getSecondDerivative(j, k) - _tdata.yd2[i][j][k]), 2);
+}
                 }
             }
         }
@@ -122,21 +128,24 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
     double fit[npar], err[npar];
     double bestresi_pure = -1.0, bestresi_noreg = -1.0, bestresi_full = -1.0;
 
-    if (!_flag_test && verbose > 0) fprintf(stderr, "[NNTrainer] Warning: Testing residual calculation disabled, i.e. testing is based on training+validation data.\n");
+    if (!_flag_test && verbose > 0) { fprintf(stderr, "[NNTrainer] Warning: Testing residual calculation disabled, i.e. testing is based on training+validation data.\n");
+}
 
     _configureFFNN(ffnn, false); // set non-vderiv substrates (the child implementation may use a copy FFNN with variational substrates)
 
     int ifit = 0;
     while(true) {
         // initial parameters
-        if (flag_smart_beta) smart_beta::generateSmartBeta(ffnn);
-        else if (ffnn->getNFeatureMapLayers() > 0) { // hack because of fitting problems when using FMLs
+        if (flag_smart_beta) { smart_beta::generateSmartBeta(ffnn);
+        } else if (ffnn->getNFeatureMapLayers() > 0) { // hack because of fitting problems when using FMLs
             random_device rdev;
             mt19937_64 rgen = std::mt19937_64(rdev());
             uniform_real_distribution<double> rd(-0.1,0.1);
-            for (int i=0; i<ffnn->getNBeta(); ++i) ffnn->setBeta(i, rd(rgen));
+            for (int i=0; i<ffnn->getNBeta(); ++i) { ffnn->setBeta(i, rd(rgen));
+}
         }
-        else ffnn->randomizeBetas();
+        else { ffnn->randomizeBetas();
+}
 
         findFit(ffnn, fit, err, verbose); // try new fit
         ffnn->setVariationalParameter(fit); // make sure ffnn is set to fit betas
@@ -160,21 +169,26 @@ void NNTrainer::bestFit(FeedForwardNeuralNetwork * const ffnn, double * bestfit,
 
         // check break conditions
         if (bestresi_noreg <= resi_target) {
-            if (verbose > 0) fprintf(stderr, "Unregularized testing residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", bestresi_noreg, bestresi_full, bestresi_pure, resi_target);
+            if (verbose > 0) { fprintf(stderr, "Unregularized testing residual %f (full: %f, pure: %f) meets tolerance %f. Exiting with good fit.\n\n", bestresi_noreg, bestresi_full, bestresi_pure, resi_target);
+}
             break;
-        } else {
-            if (verbose > 0) fprintf(stderr, "Unregularized testing residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, resi_target);
+        } 
+            if (verbose > 0) { fprintf(stderr, "Unregularized testing residual %f (full: %f, pure: %f) above tolerance %f.\n", resi_noreg, resi_full, resi_pure, resi_target);
+}
             if (ifit >= nfits) {
-                if (verbose > 0) fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized testing residual %f.\n\n", nfits, bestresi_noreg);
+                if (verbose > 0) { fprintf(stderr, "Maximum number of fits reached (%i). Exiting with best unregularized testing residual %f.\n\n", nfits, bestresi_noreg);
+}
                 break;
             }
-            if (verbose > 0) fprintf(stderr, "Let's try again.\n");
-        }
+            if (verbose > 0) { fprintf(stderr, "Let's try again.\n");
+}
+        
     }
 
     if (verbose > 0) { // print summary
         fprintf(stderr, "best fit summary:\n");
-        for(int i=0; i<npar; ++i) fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, bestfit[i], bestfit_err[i]);
+        for(int i=0; i<npar; ++i) { fprintf(stderr, "b%i      = %.5f +/- %.5f\n", i, bestfit[i], bestfit_err[i]);
+}
         fprintf(stderr, "|f(x)| = %f (w/o reg: %f, pure: %f)\n\n", bestresi_full, bestresi_noreg, bestresi_pure);
     }
 
@@ -194,20 +208,25 @@ void NNTrainer::printFitOutput(FeedForwardNeuralNetwork * const ffnn, const doub
     using namespace std;
     const double default_base_input = 0.;
     const double * my_base_input;
-    if (base_input) my_base_input = base_input;
-    else my_base_input = &default_base_input;
+    if (base_input != nullptr) { my_base_input = base_input;
+    } else { my_base_input = &default_base_input;
+}
 
     // add required substrates if necessary
-    if ((print_d1 || print_d2) && !ffnn->hasFirstDerivativeSubstrate()) ffnn->addFirstDerivativeSubstrate();
-    if (print_d2 && !ffnn->hasSecondDerivativeSubstrate()) ffnn->addSecondDerivativeSubstrate();
+    if ((print_d1 || print_d2) && !ffnn->hasFirstDerivativeSubstrate()) { ffnn->addFirstDerivativeSubstrate();
+}
+    if (print_d2 && !ffnn->hasSecondDerivativeSubstrate()) { ffnn->addSecondDerivativeSubstrate();
+}
 
     for (int i = 0; i<_tdata.xndim; ++i) {
         for (int j = 0; j<_tdata.yndim; ++j) {
             stringstream ss;
             ss << i << "_" << j << ".txt";
             writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getOutput", "v_" + ss.str());
-            if (print_d1) writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str());
-            if (print_d2) writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str());
+            if (print_d1) { writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getFirstDerivative", "d1_" + ss.str());
+}
+            if (print_d2) { writePlotFile(ffnn, my_base_input, i, j, min, max, npoints, "getSecondDerivative", "d2_" + ss.str());
+}
         }
     }
 }

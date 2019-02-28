@@ -1,18 +1,19 @@
-#include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 // expects a neural network without substrates but optionally with connection
-void checkStoreOnFile(FeedForwardNeuralNetwork * const ffnn, const bool isConnected = false)
+inline void checkStoreOnFile(FeedForwardNeuralNetwork * const ffnn, const bool isConnected = false)
 {
     ffnn->storeOnFile("ffnn_stage1.txt");
 
-    FeedForwardNeuralNetwork * ffnn2 = new FeedForwardNeuralNetwork("ffnn_stage1.txt");
+    auto * ffnn2 = new FeedForwardNeuralNetwork("ffnn_stage1.txt");
 
-    if (isConnected) assert(ffnn2->isConnected());
-    else assert(!ffnn2->isConnected());
+    if (isConnected) { assert(ffnn2->isConnected());
+    } else { assert(!ffnn2->isConnected());
+}
     assert(!ffnn2->hasFirstDerivativeSubstrate());
     assert(!ffnn2->hasSecondDerivativeSubstrate());
     assert(!ffnn2->hasVariationalFirstDerivativeSubstrate());
@@ -36,7 +37,8 @@ void checkStoreOnFile(FeedForwardNeuralNetwork * const ffnn, const bool isConnec
 
 
     // connect the FFNN and make a check
-    if (!isConnected) ffnn->connectFFNN();
+    if (!isConnected) { ffnn->connectFFNN();
+}
     ffnn->assignVariationalParameters();
     ffnn->storeOnFile("ffnn_stage2.txt");
 

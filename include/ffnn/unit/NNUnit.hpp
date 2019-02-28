@@ -1,11 +1,11 @@
-#ifndef NN_UNIT
-#define NN_UNIT
+#ifndef FFNN_UNIT_NNUNIT_HPP
+#define FFNN_UNIT_NNUNIT_HPP
 
-#include "ffnn/unit/FedActivationUnit.hpp"
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
 #include "ffnn/feed/NNRay.hpp"
+#include "ffnn/unit/FedActivationUnit.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -15,16 +15,16 @@ class NNUnit: public FedActivationUnit
 {
 public:
     // Constructor and destructor
-    NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NNRay * ray = NULL) : FedActivationUnit(actf, static_cast<FeederInterface *>(ray)) {}
-    NNUnit(const std::string &actf_id, NNRay * ray = NULL) : NNUnit(std_actf::provideActivationFunction(actf_id), ray) {}
-    virtual ~NNUnit(){}
+    explicit NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NNRay * ray = nullptr) : FedActivationUnit(actf, static_cast<FeederInterface *>(ray)) {}
+    explicit NNUnit(const std::string &actf_id, NNRay * ray = nullptr) : NNUnit(std_actf::provideActivationFunction(actf_id), ray) {}
+    ~NNUnit() override= default;
 
     // string code id
-    virtual std::string getIdCode(){return "NNU";} // return identifier for unit type
+    std::string getIdCode() override{return "NNU";} // return identifier for unit type
 
     // restrict feeder to ray type
-    void setFeeder(FeederInterface * feeder){
-        if (NNRay * ray = dynamic_cast<NNRay *>(feeder)) {
+    void setFeeder(FeederInterface * feeder) override{
+        if (auto * ray = dynamic_cast<NNRay *>(feeder)) {
             FedUnit::setFeeder(ray);
         }
         else {
@@ -32,7 +32,7 @@ public:
         }
     }
 
-    NNRay * getRay(){return static_cast<NNRay *>(_feeder);}
+    NNRay * getRay(){return dynamic_cast<NNRay *>(_feeder);}
 };
 
 

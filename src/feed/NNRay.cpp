@@ -1,11 +1,11 @@
 #include "ffnn/feed/NNRay.hpp"
-#include "ffnn/unit/NetworkUnit.hpp"
 #include "ffnn/serial/StringCodeUtilities.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
-#include <vector>
-#include <string>
 #include <cmath>
 #include <random>
+#include <string>
+#include <vector>
 
 // --- Constructor
 
@@ -21,7 +21,8 @@ NNRay::NNRay(NetworkLayer * nl)
 
 void NNRay::setParams(const std::string &params){
     WeightedFeeder::setParams(params); // we don't need more to init vp system
-    if (_vp_id_shift > -1) setVariationalParametersIndexes(_vp_id_shift, _flag_vp);
+    if (_vp_id_shift > -1) { setVariationalParametersIndexes(_vp_id_shift, _flag_vp);
+}
 }
 
 int NNRay::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp)
@@ -111,14 +112,14 @@ double NNRay::getVariationalFirstDerivativeFeed(const int &iv1d){
         // if the variational parameter with index iv1d is in the ray add the following element
         return _sources[ iv1d - _vp_id_shift ]->getValue();
     }
-    else {
+    
         // else add source components
         double feed = 0.;
         for (size_t i=0; i<_map_index_to_sources[iv1d].size(); ++i) {
             feed += _beta[_map_index_to_sources[iv1d][i]] * _sources[_map_index_to_sources[iv1d][i]]->getVariationalFirstDerivativeValue(iv1d);
         }
         return feed;
-    }
+    
 }
 
 
@@ -127,14 +128,14 @@ double NNRay::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
         // if the variational parameter with index iv1d is in the ray add the following element
         return _sources[ iv1d - _vp_id_shift ]->getFirstDerivativeValue(i1d);
     }
-    else {
+    
         // else add source components
         double feed = 0.;
         for (size_t i=0; i<_map_index_to_sources[iv1d].size(); ++i) {
             feed += _beta[_map_index_to_sources[iv1d][i]] * _sources[_map_index_to_sources[iv1d][i]]->getCrossFirstDerivativeValue(i1d, iv1d);
         }
         return feed;
-    }
+    
 }
 
 
@@ -143,13 +144,13 @@ double NNRay::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
         // if the variational parameter with index iv2d is in the ray add the following element
         return _sources[ iv2d - _vp_id_shift ]->getSecondDerivativeValue(i2d);
     }
-    else {
+    
         // else add source components
         double feed = 0.;
         for (size_t i=0; i<_map_index_to_sources[iv2d].size(); ++i) {
             feed += _beta[_map_index_to_sources[iv2d][i]] * _sources[_map_index_to_sources[iv2d][i]]->getCrossSecondDerivativeValue(i2d, iv2d);
         }
         return feed;
-    }
+    
 }
 

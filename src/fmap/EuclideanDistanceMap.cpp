@@ -2,9 +2,9 @@
 #include "ffnn/serial/StringCodeUtilities.hpp"
 #include "ffnn/unit/NetworkUnit.hpp"
 
-#include <vector>
-#include <string>
 #include <cmath>
+#include <string>
+#include <vector>
 
 #include <stdexcept>
 
@@ -74,8 +74,8 @@ void EuclideanDistanceMap::setParameters(const size_t &ndim, const vector<size_t
 double EuclideanDistanceMap::getFeedMu()
 {
     std::vector<double> srcv;
-    for (size_t i=0; i<_sources.size(); ++i) {
-        srcv.push_back(_sources[i]->getOutputMu());
+    for (auto & _source : _sources) {
+        srcv.push_back(_source->getOutputMu());
     }
     return calcDistHelper(srcv, _fixedPoint, _ndim);
 }
@@ -84,8 +84,8 @@ double EuclideanDistanceMap::getFeedMu()
 double EuclideanDistanceMap::getFeedSigma()
 {
     std::vector<double> srcv;
-    for (size_t i=0; i<_sources.size(); ++i) {
-        srcv.push_back(_sources[i]->getOutputMu());
+    for (auto & _source : _sources) {
+        srcv.push_back(_source->getOutputMu());
     }
 
     double sigma = 0.;
@@ -168,7 +168,8 @@ double EuclideanDistanceMap::getCrossFirstDerivativeFeed(const int &i1d, const i
         return 2.0 * cd1;
     }
 
-    else return 0.;
+     {return 0.;
+}
 }
 
 
@@ -190,5 +191,6 @@ double EuclideanDistanceMap::getCrossSecondDerivativeFeed(const int &i2d, const 
         return 2.0 * cd2;
     }
 
-    else return 0.;
+     {return 0.;
+}
 }

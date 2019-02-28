@@ -1,15 +1,15 @@
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/train/NNTrainerGSL.hpp"
 
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multifit_nlinear.h>
+#include <gsl/gsl_vector.h>
 
+#include <cassert>
 #include <cstddef> // NULL
-#include <assert.h>
-#include <random>
 #include <iostream>
+#include <random>
 
 using namespace std;
 using namespace nn_trainer_gsl_details;
@@ -22,14 +22,15 @@ void validateJacobian(training_workspace &tws, const double &TINY = 0.00001, con
     gsl_multifit_nlinear_workspace *w, *w_fd;
     const gsl_multifit_nlinear_parameters gsl_params = gsl_multifit_nlinear_default_parameters();
 
-    double * const fit = new double[npar];
+    auto * const fit = new double[npar];
     gsl_vector_view gx = gsl_vector_view_array (fit, npar);
 
     const bool flag_d = tws.flag_d1 || tws.flag_d2;
     const bool flag_r = tws.flag_r;
     int nresi = 0;
 
-    for (int i=0; i<npar; ++i) fit[i] = tws.ffnn->getVariationalParameter(i);
+    for (int i=0; i<npar; ++i) { fit[i] = tws.ffnn->getVariationalParameter(i);
+}
 
     // configure fdf object
 
@@ -54,13 +55,13 @@ void validateJacobian(training_workspace &tws, const double &TINY = 0.00001, con
         fdf.df = ffnn_df_deriv_reg;
     }
 
-    fdf.fvv = NULL;
+    fdf.fvv = nullptr;
     fdf.n = nresi;
     fdf.p = npar;
     fdf.params = &tws;
 
     fdf_fd = fdf;
-    fdf_fd.df = NULL; // disable jacobian to use GSL internal finite difference method instead
+    fdf_fd.df = nullptr; // disable jacobian to use GSL internal finite difference method instead
 
 
     // allocate workspace with default parameters, also allocate space for validation
@@ -76,9 +77,11 @@ void validateJacobian(training_workspace &tws, const double &TINY = 0.00001, con
     const gsl_matrix * const J_fd = gsl_multifit_nlinear_jac(w_fd);
 
     for (int i=0; i<nresi; ++i) {
-        if (verbose) cout << "i=" << i << ": f=" << gsl_vector_get(f, i) << endl;
+        if (verbose) { cout << "i=" << i << ": f=" << gsl_vector_get(f, i) << endl;
+}
         for (int j=0; j<npar; ++j) {
-            if (verbose) cout << "j=" << j << ": J=" << gsl_matrix_get(J, i, j) << ", J_fd=" << gsl_matrix_get(J_fd, i, j) << " -> diff=" << abs(gsl_matrix_get(J, i, j) - gsl_matrix_get(J_fd, i, j)) << endl;
+            if (verbose) { cout << "j=" << j << ": J=" << gsl_matrix_get(J, i, j) << ", J_fd=" << gsl_matrix_get(J_fd, i, j) << " -> diff=" << abs(gsl_matrix_get(J, i, j) - gsl_matrix_get(J_fd, i, j)) << endl;
+}
             assert(abs(gsl_matrix_get(J, i, j) - gsl_matrix_get(J_fd, i, j)) < TINY);
         }
     }
@@ -104,18 +107,19 @@ int main(){
     ffnn->addSecondDerivativeSubstrate();
 
     double fixed_beta[7] = {0.6, -1.1, 0.4, -0.55, 0.45, 1.2, -0.75}; // just some betas
-    for (int i=0; i<7; ++i) ffnn->setBeta(i, fixed_beta[i]);
+    for (int i=0; i<7; ++i) { ffnn->setBeta(i, fixed_beta[i]);
+}
 
     // allocate data arrays
     const int ntraining = 20;
     const int nvalidation = 20;
     const int ntesting = 20;
     const int ndata = ntraining + nvalidation + ntesting;
-    double ** xdata = new double*[ndata];
-    double ** ydata = new double*[ndata];
-    double *** d1data = new double**[ndata];
-    double *** d2data = new double**[ndata];
-    double ** weights = new double*[ndata];
+    auto ** xdata = new double*[ndata];
+    auto ** ydata = new double*[ndata];
+    auto *** d1data = new double**[ndata];
+    auto *** d2data = new double**[ndata];
+    auto ** weights = new double*[ndata];
     for (int i = 0; i<ndata; ++i) {
         xdata[i] = new double[xndim];
         ydata[i] = new double[yndim];

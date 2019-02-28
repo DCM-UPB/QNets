@@ -10,7 +10,7 @@
 void FedLayer::_registerUnit(NetworkUnit * newUnit)
 {
     NetworkLayer::_registerUnit(newUnit);
-    if(FedUnit * fu = dynamic_cast<FedUnit *>(newUnit)) {
+    if(auto * fu = dynamic_cast<FedUnit *>(newUnit)) {
         _U_fed.push_back(fu);
     }
 }
@@ -25,7 +25,7 @@ bool FedLayer::setVariationalParameter(const int &id, const double &vp)
     while ( (!flag) && (i<_U_fed.size()) )
         {
             FeederInterface * feeder = _U_fed[i]->getFeeder();
-            if (feeder) {
+            if (feeder != nullptr) {
                 flag = feeder->setVariationalParameterValue(id,vp);
             }
             i++;
@@ -41,7 +41,7 @@ bool FedLayer::getVariationalParameter(const int &id, double &vp)
     while ( (!flag) && (i<_U_fed.size()) )
         {
             FeederInterface * feeder = _U_fed[i]->getFeeder();
-            if (feeder) {
+            if (feeder != nullptr) {
                 flag = feeder->getVariationalParameterValue(id, vp);
             }
             i++;
@@ -53,10 +53,10 @@ bool FedLayer::getVariationalParameter(const int &id, double &vp)
 int FedLayer::getNVariationalParameters()
 {
     int nvp=0;
-    for (std::vector<FedUnit *>::size_type i=0; i<_U_fed.size(); ++i)
+    for (auto & i : _U_fed)
         {
-            FeederInterface * feeder = _U_fed[i]->getFeeder();
-            if (feeder) {
+            FeederInterface * feeder = i->getFeeder();
+            if (feeder != nullptr) {
                 nvp += feeder->getNVariationalParameters();
             }
         }
@@ -66,12 +66,13 @@ int FedLayer::getNVariationalParameters()
 int FedLayer::getMaxVariationalParameterIndex()
 {
     int max_index = -1;
-    for (std::vector<FedUnit *>::size_type i=0; i<_U_fed.size(); ++i)
+    for (auto & i : _U_fed)
         {
-            FeederInterface * feeder = _U_fed[i]->getFeeder();
-            if (feeder) {
+            FeederInterface * feeder = i->getFeeder();
+            if (feeder != nullptr) {
                 int index = feeder->getMaxVariationalParameterIndex();
-                if (index > max_index) max_index = index;
+                if (index > max_index) { max_index = index;
+}
             }
         }
     return max_index;
@@ -83,11 +84,11 @@ int FedLayer::getMaxVariationalParameterIndex()
 int FedLayer::setVariationalParametersID(const int &id_vp)
 {
     int id = id_vp;
-    for (std::vector<FedUnit *>::size_type i=0; i<_U_fed.size(); ++i)
+    for (auto & i : _U_fed)
         {
-            FeederInterface * feeder = _U_fed[i]->getFeeder();
-            if (feeder) {
-                id = _U_fed[i]->getFeeder()->setVariationalParametersIndexes(id);
+            FeederInterface * feeder = i->getFeeder();
+            if (feeder != nullptr) {
+                id = i->getFeeder()->setVariationalParametersIndexes(id);
             }
         }
     return id;
@@ -101,16 +102,17 @@ void FedLayer::connectOnTopOfLayer(NetworkLayer * nl)
     for (std::vector<FedUnit *>::size_type i=0; i<_U_fed.size(); ++i)
         {
             FeederInterface * feeder = this->connectUnitOnTopOfLayer(nl, i); // note that i==0 means the first non-offset unit
-            if (feeder) _U_fed[i]->setFeeder(feeder);
+            if (feeder != nullptr) { _U_fed[i]->setFeeder(feeder);
+}
         }
 }
 
 void FedLayer::disconnect()
 {
-    for (std::vector<FedUnit *>::size_type i=0; i<_U_fed.size(); ++i)
+    for (auto & i : _U_fed)
         {
-            delete _U_fed[i]->getFeeder();
-            _U_fed[i]->setFeeder(NULL);
+            delete i->getFeeder();
+            i->setFeeder(nullptr);
         }
 }
 
@@ -130,7 +132,8 @@ void FedLayer::computeValues()
 #pragma omp single
 #endif
 
-        for (std::vector<NetworkUnit *>::size_type i=0; i<_U.size(); ++i) _U[i]->computeValues();
+        for (auto & i : _U) { i->computeValues();
+}
 
 #ifdef OPENMP
     }

@@ -1,18 +1,18 @@
-#ifndef FEED_FORWARD_NEURAL_NETWORK
-#define FEED_FORWARD_NEURAL_NETWORK
+#ifndef FFNN_NET_FEEDFORWARDNEURALNETWORK_HPP
+#define FFNN_NET_FEEDFORWARDNEURALNETWORK_HPP
 
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
-#include "ffnn/layer/NetworkLayer.hpp"
-#include "ffnn/layer/InputLayer.hpp"
-#include "ffnn/layer/FedLayer.hpp"
-#include "ffnn/layer/NNLayer.hpp"
-#include "ffnn/layer/OutputNNLayer.hpp"
 #include "ffnn/fmap/FeatureMapLayer.hpp"
+#include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/layer/InputLayer.hpp"
+#include "ffnn/layer/NNLayer.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
+#include "ffnn/layer/OutputNNLayer.hpp"
 #include "ffnn/unit/NetworkUnit.hpp"
 
-#include <vector>
-#include <string>
 #include <cstddef>
+#include <string>
+#include <vector>
 
 class FeedForwardNeuralNetwork
 {
@@ -27,8 +27,8 @@ protected:
     std::vector<FedLayer *> _L_fed; // contains layers with feeder
     std::vector<NNLayer *> _L_nn; // contains neural layers
     std::vector<FeatureMapLayer *> _L_fm; // contains feature map layers
-    InputLayer * _L_in = NULL; // input layer
-    OutputNNLayer * _L_out = NULL; // output layer
+    InputLayer * _L_in = nullptr; // input layer
+    OutputNNLayer * _L_out = nullptr; // output layer
 
     bool _flag_connected = false;  // flag that tells if the FFNN has been connected or not
     bool _flag_1d = false, _flag_2d = false, _flag_v1d = false, _flag_c1d = false, _flag_c2d = false;  // flag that indicates if the substrates for the derivatives have been activated or not
@@ -110,8 +110,8 @@ public:
     void addCrossSecondDerivativeSubstrate();  // cross second derivatives
 
     // shortcut for (connecting and) adding substrates
-    void addSubstrates(const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_vd1 = false, const bool flag_c1d = false, const bool flag_c2d = false);
-    void connectAndAddSubstrates(const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_vd1 = false, const bool flag_c1d = false, const bool flag_c2d = false);
+    void addSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false, bool flag_c1d = false, bool flag_c2d = false);
+    void connectAndAddSubstrates(bool flag_d1 = false, bool flag_d2 = false, bool flag_vd1 = false, bool flag_c1d = false, bool flag_c2d = false);
 
 
     // Set initial parameters
@@ -123,7 +123,7 @@ public:
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
     // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
-    void evaluate(const double * in, double * out = NULL, double ** d1 = NULL, double ** d2 = NULL, double ** vd1 = NULL);
+    void evaluate(const double * in, double * out = nullptr, double ** d1 = nullptr, double ** d2 = nullptr, double ** vd1 = nullptr);
 
 
     // --- Get outputs
@@ -148,11 +148,11 @@ public:
 
     void getCrossSecondDerivative(double *** d1vd1);
     void getCrossSecondDerivative(const int &i, double ** d1vd1);  // i is the output index
-    double getCrossSecondDerivative(const int &i, const int &i2d, const int &iv1d);  // i is the index of the output element, i2d, of the input element, iv1d the index of the beta element
+    double getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d);  // i is the index of the output element, i2d, of the input element, iv1d the index of the beta element
 
 
     // --- Store FFNN on file
-    void storeOnFile(const char * filename, const bool store_betas = true);
+    void storeOnFile(const char * filename, bool store_betas = true);
 };
 
 

@@ -1,6 +1,6 @@
-#include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -12,7 +12,7 @@
 int main() {
     using namespace std;
 
-    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork("stored_ffnn.txt");
+    auto * ffnn = new FeedForwardNeuralNetwork("stored_ffnn.txt");
 
     cout << "The FFNN read from the file looks like this:" << endl << endl;
 

@@ -1,10 +1,10 @@
-#include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
-void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
+inline void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 {
     double x[2] = {1.7, -0.2};
     const double dx = 0.0005;
@@ -133,8 +133,8 @@ void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 
     // --- variational derivative
 
-    double * anal_dfxdbeta = new double[ffnn->getNBeta()];
-    double * anal_dfydbeta = new double[ffnn->getNBeta()];
+    auto * anal_dfxdbeta = new double[ffnn->getNBeta()];
+    auto * anal_dfydbeta = new double[ffnn->getNBeta()];
 
     if (ffnn->hasVariationalFirstDerivativeSubstrate()) {
         ffnn->setInput(x);
@@ -173,11 +173,11 @@ void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 
     // --- cross first derivatives
 
-    double ** anal_dfxdxdbeta = new double*[ffnn->getNInput()];
+    auto ** anal_dfxdxdbeta = new double*[ffnn->getNInput()];
     for (int i=0; i<ffnn->getNInput(); ++i){
         anal_dfxdxdbeta[i] = new double[ffnn->getNBeta()];
     }
-    double ** anal_dfydxdbeta = new double*[ffnn->getNInput()];
+    auto ** anal_dfydxdbeta = new double*[ffnn->getNInput()];
     for (int i=0; i<ffnn->getNInput(); ++i){
         anal_dfydxdbeta[i] = new double[ffnn->getNBeta()];
     }
@@ -230,11 +230,11 @@ void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 
     // --- cross second derivatives
 
-    double ** anal_dfxdx2dbeta = new double*[ffnn->getNInput()];
+    auto ** anal_dfxdx2dbeta = new double*[ffnn->getNInput()];
     for (int i=0; i<ffnn->getNInput(); ++i){
         anal_dfxdx2dbeta[i] = new double[ffnn->getNBeta()];
     }
-    double ** anal_dfydx2dbeta = new double*[ffnn->getNInput()];
+    auto ** anal_dfydx2dbeta = new double*[ffnn->getNInput()];
     for (int i=0; i<ffnn->getNInput(); ++i){
         anal_dfydx2dbeta[i] = new double[ffnn->getNBeta()];
     }

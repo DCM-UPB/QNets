@@ -2,8 +2,8 @@
 #include "ffnn/serial/StringCodeUtilities.hpp"
 #include "ffnn/unit/NetworkUnit.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 // --- Constructor
 
@@ -42,7 +42,7 @@ void OneDimStaticMap::setParams(const std::string &params)
 
 // --- Parameter manipulation
 
-void OneDimStaticMap::setParameters(const std::vector<size_t> &source_id0s, const std::vector<double> &extra_params)
+void OneDimStaticMap::setParameters(const std::vector<size_t> &source_id0s, const std::vector<double> & /*extra_params*/)
 {
     std::vector<size_t> source_ids;
 
@@ -51,5 +51,6 @@ void OneDimStaticMap::setParameters(const std::vector<size_t> &source_id0s, cons
     }
 
     _fillSources(source_ids);
-    if (_vp_id_shift > -1) this->setVariationalParametersIndexes(_vp_id_shift, false);
+    if (_vp_id_shift > -1) { this->setVariationalParametersIndexes(_vp_id_shift, false);
+}
 }

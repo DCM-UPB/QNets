@@ -1,5 +1,5 @@
-#ifndef PRINT_UTILITIES
-#define PRINT_UTILITIES
+#ifndef FFNN_IO_PRINTUTILITIES_HPP
+#define FFNN_IO_PRINTUTILITIES_HPP
 
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
