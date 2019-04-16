@@ -7,60 +7,60 @@ Some examples might also contain a `plot.py` script to show a plot. It gets call
 by `./run.sh` after the executable has terminated, but requires python with matplotlib.
 
 
-## Example 1
+## Basic Example
 
-`ex1/`: construct and modify the geometry of a FFNN (i.e. number of layers and units)
-
-
-
-## Example 2
-
-`ex2/`: access and modify the beta of a FFNN (i.e. the variational parameters)
+`ex_basic/`: construct and modify the geometry of a FFNN (i.e. number of layers and units)
 
 
 
-## Example 3
+## Network weights (beta)
 
-`ex3/`: manage the activation functions
-
-
-
-## Example 4
-
-`ex4/`: compute the output of a FFNN
+`ex_beta/`: access and modify the beta of a FFNN (i.e. the variational parameters)
 
 
 
-## Example 5
+## Activation Functions
 
-`ex5/`: compute first and second derivative of the NN output in respect to input
-
-
-
-## Example 6
-
-`ex6/`: compute first derivative of the NN in respect to the variational parameters (betas)
+`ex_actf/`: manage the activation functions
 
 
 
-## Example 7
+## NN Propagation
 
-`ex7/`: write files for plotting the values and its first and second derivatives of a NN:R->R (1-dimensional function)
-
-
-
-## Example 8
-
-`ex8/`: read FFNN structure from a file
+`ex_propagate/`: compute the output of a FFNN
 
 
 
-## Example 9
+## Input Derivative
 
-`ex9/`: use NNTrainer(GSL) to make FFNN fit a gaussian
+`ex_xderiv/`: compute first and second derivative of the NN output in respect to input
 
 
 
-## Example 10
+## Variational Derivative
 
-`ex10/`: use a FeatureMapLayer to fit more easily a gaussian of x-y-distance
+`ex_vderiv/`: compute first derivative of the NN in respect to the variational parameters (betas)
+
+
+
+## Printing and Plotting
+
+`ex_plot/`: write files for plotting the values and its first and second derivatives of a NN:R->R (1-dimensional function)
+
+
+
+## Load NN from file
+
+`ex_loadfile/`: read FFNN structure from a file
+
+
+
+## Fit NN function to data
+
+`ex_fit/`: use NNTrainer(GSL) to make FFNN fit a gaussian
+
+
+
+## Fit a NN with feature map layer
+
+`ex_features/`: use a FeatureMapLayer to fit more easily a gaussian of x-y-distance

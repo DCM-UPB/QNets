@@ -3,7 +3,7 @@
 if [ "$1" = "" ]; then
   echo "Expected the name of the benchmark to run as first argument."
 else
-  bench=$1
+  bench=${1%"/"} # remove any trailing /
   outfile="$(pwd)/${bench}/benchmark_new.out"
   cd ../build/benchmark/
   echo

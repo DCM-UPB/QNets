@@ -1,6 +1,6 @@
 #!/bin/sh
 (
 cd ../../build/examples
-./ex9.exe
+./ex_features.exe
 )
 python plot.py

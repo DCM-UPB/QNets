@@ -1,3 +1,6 @@
 #!/bin/sh
+(
 cd ../../build/examples
-./ex4.exe
+./ex_fit.exe
+)
+python plot.py
