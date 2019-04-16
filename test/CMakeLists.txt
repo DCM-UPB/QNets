@@ -12,6 +12,7 @@ add_executable(ut7.exe ut7/main.cpp)
 add_executable(ut8.exe ut8/main.cpp)
 add_executable(ut9.exe ut9/main.cpp)
 add_executable(ut10.exe ut10/main.cpp)
+add_executable(ut11.exe ut11/main.cpp)
 
 add_test(ut1 ut1.exe)
 add_test(ut2 ut2.exe)
