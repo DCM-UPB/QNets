@@ -31,13 +31,13 @@ public:
     ~FeederInterface() override;
 
     // set string codes
-    std::string getClassIdCode() override {return "feeder";}
+    std::string getClassIdCode() override { return "feeder"; }
     std::string getParams() override;
     void setParams(const std::string &params) override;
 
     // sources, i.e. the units from which the values are taken from
-    int getNSources(){return _sources.size();}
-    NetworkUnit * getSource(const int &i){return _sources[i];}
+    int getNSources() { return _sources.size(); }
+    NetworkUnit * getSource(const int &i) { return _sources[i]; }
 
     // return the feed mean value (mu) and standard deviation (sigma)
     virtual double getFeedMu() = 0;
@@ -57,30 +57,35 @@ public:
 
 
     // beta (meaning the individual factors directly multiplied to each used source output)
-    virtual int getNBeta(){return 0;}
-    virtual double getBeta(const int & /*i*/){throw std::runtime_error("FeederInterface::getBeta called, but the base interface defaults to no beta. Derive from WeightedFeederInterface to use beta.");}
-    virtual void setBeta(const int & /*i*/, const double & /*b*/){throw std::runtime_error("FeederInterface::setBeta called, but the base interface defaults to no beta. Derive from WeightedFeederInterface to use beta.");}
+    virtual int getNBeta() { return 0; }
+    virtual double getBeta(const int & /*i*/) { throw std::runtime_error("FeederInterface::getBeta called, but the base interface defaults to no beta. Derive from WeightedFeederInterface to use beta."); }
+    virtual void setBeta(const int & /*i*/, const double & /*b*/) { throw std::runtime_error("FeederInterface::setBeta called, but the base interface defaults to no beta. Derive from WeightedFeederInterface to use beta."); }
 
     // variational parameters
     virtual int setVariationalParametersIndexes(const int &starting_index, bool flag_add_vp = true);  // set the index of each variational parameter starting from starting_index  and create vp pointer vector
 
-    virtual int getNVariationalParameters(){return 0;}  // return the number of variational parameters involved
-    virtual int getMaxVariationalParameterIndex(){return _vp_id_shift > 0 ? _vp_id_shift-1 : -1;} // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
+    virtual int getNVariationalParameters() { return 0; }  // return the number of variational parameters involved
+    virtual int getMaxVariationalParameterIndex()
+    {
+        return _vp_id_shift > 0
+               ? _vp_id_shift - 1
+               : -1;
+    } // return the highest appearing variational parameter index from the whole feed (including self). If none, return -1;
     // return the index that the next feeder might take as input
-    virtual bool getVariationalParameterValue(const int & /*id*/, double & /*value*/){return false;} // get the variational parameter with identification index id and store it in value
+    virtual bool getVariationalParameterValue(const int & /*id*/, double & /*value*/) { return false; } // get the variational parameter with identification index id and store it in value
     // return true if the parameters has been found, false otherwise
-    virtual bool setVariationalParameterValue(const int & /*id*/, const double & /*value*/){return false;} // set the variational parameter with identification index id with the number stored in value
+    virtual bool setVariationalParameterValue(const int & /*id*/, const double & /*value*/) { return false; } // set the variational parameter with identification index id with the number stored in value
 
     // IsVPIndexUsed methods
     // return true if the parameters has been found, false otherwise
-    virtual bool isVPIndexUsedInFeeder(const int & /*id*/){return false;}  // variational parameter is directly used?
+    virtual bool isVPIndexUsedInFeeder(const int & /*id*/) { return false; }  // variational parameter is directly used?
     bool isVPIndexUsedInSources(const int &id);         // variational parameter is indirectly used?
     virtual bool isVPIndexUsedForFeeder(const int &id); // variational parameter is used directly or indirectly?
 
     // Randomizers
-    virtual void randomizeBeta(){}; // randomize beta intensities, do nothing since we default to no betas
-    virtual void randomizeParams(){}; // randomize extra parameters, again do nothing by default
-    virtual void randomizeVP(){}; // randomize all assigned variational parameters
+    virtual void randomizeBeta() {}; // randomize beta intensities, do nothing since we default to no betas
+    virtual void randomizeParams() {}; // randomize extra parameters, again do nothing by default
+    virtual void randomizeVP() {}; // randomize all assigned variational parameters
 };
 
 #endif

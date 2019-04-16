@@ -3,11 +3,10 @@
 #include <iostream>
 
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
-
-int main() {
+int main()
+{
     using namespace std;
 
 
@@ -59,7 +58,6 @@ int main() {
     cout << endl << endl;
 
 
-
     cout << "Add derivatives substrates" << endl;
     cout << "==========================" << endl;
     cin.ignore();
@@ -74,7 +72,6 @@ int main() {
     cout << "Done! We informed all the units that they need to compute the variational first derivatives.";
     cin.ignore();
     cout << endl << endl;
-
 
 
     cout << "Set the input" << endl;
@@ -98,7 +95,6 @@ int main() {
 
     cin.ignore();
     cout << endl << endl;
-
 
 
     cout << "Propagate" << endl;
@@ -127,10 +123,11 @@ int main() {
     cin.ignore();
 
     cout << "1st output (unit 2 of the output layer): " << endl;
-    for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
-        for (int i2=0; i2<10; ++i2){
-            if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) { cout << "+";
-}
+    for (int i1 = 0; i1 < ffnn->getNVariationalParameters()/10; ++i1) {
+        for (int i2 = 0; i2 < 10; ++i2) {
+            if (ffnn->getVariationalFirstDerivative(0, i1*10 + i2) >= 0.) {
+                cout << "+";
+            }
             cout << ffnn->getVariationalFirstDerivative(0, i1*10 + i2) << "    ";
         }
         cout << endl;
@@ -138,10 +135,11 @@ int main() {
     cin.ignore();
 
     cout << "2nd output (unit 3 of the output layer): " << endl;
-    for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
-        for (int i2=0; i2<10; ++i2){
-            if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) { cout << "+";
-}
+    for (int i1 = 0; i1 < ffnn->getNVariationalParameters()/10; ++i1) {
+        for (int i2 = 0; i2 < 10; ++i2) {
+            if (ffnn->getVariationalFirstDerivative(1, i1*10 + i2) >= 0.) {
+                cout << "+";
+            }
             cout << ffnn->getVariationalFirstDerivative(1, i1*10 + i2) << "    ";
         }
         cout << endl;
@@ -149,10 +147,11 @@ int main() {
     cin.ignore();
 
     cout << "3rd output (unit 4 of the output layer): " << endl;
-    for (int i1=0; i1<ffnn->getNVariationalParameters()/10; ++i1){
-        for (int i2=0; i2<10; ++i2){
-            if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) { cout << "+";
-}
+    for (int i1 = 0; i1 < ffnn->getNVariationalParameters()/10; ++i1) {
+        for (int i2 = 0; i2 < 10; ++i2) {
+            if (ffnn->getVariationalFirstDerivative(2, i1*10 + i2) >= 0.) {
+                cout << "+";
+            }
             cout << ffnn->getVariationalFirstDerivative(2, i1*10 + i2) << "    ";
         }
         cout << endl;

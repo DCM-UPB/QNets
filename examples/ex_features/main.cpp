@@ -22,23 +22,26 @@
         contiously feeding randomly generated data (that you would have to process), the feature-map feature can be very convenient.
 */
 
-double gaussian(const double x, const double a = 1., const double b = 0.) {
-    return exp(-a*pow(x-b, 2));
+double gaussian(const double x, const double a = 1., const double b = 0.)
+{
+    return exp(-a*pow(x - b, 2));
 };
 
 // first derivative of gaussian
-double gaussian_ddx(const double x, const double a = 1., const double b = 0.) {
-    return 2.0*a*(b-x) * exp(-a*pow(x-b, 2));
+double gaussian_ddx(const double x, const double a = 1., const double b = 0.)
+{
+    return 2.0*a*(b - x)*exp(-a*pow(x - b, 2));
 };
 
 // first derivative of gaussian
-double gaussian_d2dx(const double x, const double a = 1., const double b = 0.) {
-    return (pow(2.0*a*(b-x), 2) - 2.0*a) * exp(-a*pow(x-b, 2));
+double gaussian_d2dx(const double x, const double a = 1., const double b = 0.)
+{
+    return (pow(2.0*a*(b - x), 2) - 2.0*a)*exp(-a*pow(x - b, 2));
 };
 
 
-
-int main () {
+int main()
+{
     using namespace std;
 
     int nhl, nfits = 1;
@@ -53,8 +56,8 @@ int main () {
     cin >> nhl;
 
     int nhu[nhl];
-    for (int i=0; i<nhl; ++i) {
-        cout << "How many units should hidden layer " << i+1 << " have? (>1) ";
+    for (int i = 0; i < nhl; ++i) {
+        cout << "How many units should hidden layer " << i + 1 << " have? (>1) ";
         cin >> nhu[i];
     }
     cout << endl;
@@ -64,14 +67,17 @@ int main () {
     cout << endl;
 
     int nl = nhl + 2;
-    if (flag_fm) { nl += 1;
-}
+    if (flag_fm) {
+        nl += 1;
+    }
 
     cout << "We generate a FFANN with " << nl << " layers and 3, ";
-    if (flag_fm) { cout << "2, ";
-}
-    for (int i=0; i<nhl; ++i) { cout << nhu[i] << ", ";
-}
+    if (flag_fm) {
+        cout << "2, ";
+    }
+    for (int i = 0; i < nhl; ++i) {
+        cout << nhu[i] << ", ";
+    }
     cout << "2 units respectively" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
@@ -86,22 +92,25 @@ int main () {
     cout << "Please enter the the maximum tolerable fit residual. (0 to disable) ";
     cin >> maxchi;
     cout << "Please enter the ";
-    if (maxchi > 0) { cout << "maximum ";
-}
+    if (maxchi > 0) {
+        cout << "maximum ";
+    }
     cout << "number of fitting runs. (>0) ";
     cin >> nfits;
     cout << endl << endl;
     cout << "Now we find the best fit ... " << endl;
-    if (!verbose) { cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
-}
+    if (!verbose) {
+        cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
+    }
     cout << endl;
 
     // NON I/O CODE
 
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, nhu[0], 2);
-    for (int i = 1; i<nhl; ++i) { ffnn->pushHiddenLayer(nhu[i]);
-}
+    for (int i = 1; i < nhl; ++i) {
+        ffnn->pushHiddenLayer(nhu[i]);
+    }
 
     if (flag_fm) {
         ffnn->pushFeatureMapLayer(3);
@@ -111,7 +120,7 @@ int main () {
     ffnn->connectFFNN();
 
     if (flag_fm) {
-        std::vector<double> origin {0., 0.};
+        std::vector<double> origin{0., 0.};
         ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getMap()->setParameters(2, 1, origin); // length of (x,y) vec
         ffnn->getFeatureMapLayer(0)->getEPDMapUnit(0)->getMap()->setParameters(1, 1, 2); // sqrt((x-y)²) a.k.a abs(x-y)
     }
@@ -133,8 +142,8 @@ int main () {
     NNTrainingConfig tconfig = {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // allocate data arrays
-    const bool flag_d1 = lambda_d1>0;
-    const bool flag_d2 = lambda_d2>0;
+    const bool flag_d1 = lambda_d1 > 0;
+    const bool flag_d2 = lambda_d2 > 0;
     tdata.allocate(flag_d1, flag_d2);
 
     // generate the data to be fitted
@@ -143,30 +152,31 @@ int main () {
     random_device rdev;
 
     mt19937_64 rgen = std::mt19937_64(rdev());
-    uniform_real_distribution<double> rd(lb,ub);
+    uniform_real_distribution<double> rd(lb, ub);
     for (int i = 0; i < ndata; ++i) {
         tdata.x[i][0] = rd(rgen);
         tdata.x[i][1] = rd(rgen);
-        tdata.y[i][0] = gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
+        tdata.y[i][0] = gaussian(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian(tdata.x[i][1]);
         if (flag_d1) {
-            tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
-                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
-            tdata.yd1[i][0][1] = -gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
-                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1]);
+            tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian(tdata.x[i][1])
+                                 + gaussian(tdata.x[i][0] - tdata.x[i][1])*gaussian_ddx(tdata.x[i][0])*gaussian(tdata.x[i][1]);
+            tdata.yd1[i][0][1] = -gaussian_ddx(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian(tdata.x[i][1])
+                                 + gaussian(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian_ddx(tdata.x[i][1]);
         }
         if (flag_d2) {
-            tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
-                + gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1])
-                + gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian_ddx(tdata.x[i][0]) * gaussian(tdata.x[i][1])
-                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian_d2dx(tdata.x[i][0]) * gaussian(tdata.x[i][1]);
-            tdata.yd2[i][0][1] = gaussian_d2dx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian(tdata.x[i][1])
-                - gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1])
-                - gaussian_ddx(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_ddx(tdata.x[i][1])
-                + gaussian(tdata.x[i][0]-tdata.x[i][1]) * gaussian(tdata.x[i][0]) * gaussian_d2dx(tdata.x[i][1]);
+            tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian(tdata.x[i][1])
+                                 + gaussian_ddx(tdata.x[i][0] - tdata.x[i][1])*gaussian_ddx(tdata.x[i][0])*gaussian(tdata.x[i][1])
+                                 + gaussian_ddx(tdata.x[i][0] - tdata.x[i][1])*gaussian_ddx(tdata.x[i][0])*gaussian(tdata.x[i][1])
+                                 + gaussian(tdata.x[i][0] - tdata.x[i][1])*gaussian_d2dx(tdata.x[i][0])*gaussian(tdata.x[i][1]);
+            tdata.yd2[i][0][1] = gaussian_d2dx(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian(tdata.x[i][1])
+                                 - gaussian_ddx(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian_ddx(tdata.x[i][1])
+                                 - gaussian_ddx(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian_ddx(tdata.x[i][1])
+                                 + gaussian(tdata.x[i][0] - tdata.x[i][1])*gaussian(tdata.x[i][0])*gaussian_d2dx(tdata.x[i][1]);
         }
         tdata.w[i][0] = 1.0; // our data have no error, so set all weights to 1
-        if (verbose) { printf ("data: %i %g %g\n", i, tdata.x[i][0]-tdata.x[i][1], tdata.y[i][0]);
-}
+        if (verbose) {
+            printf("data: %i %g %g\n", i, tdata.x[i][0] - tdata.x[i][1], tdata.y[i][0]);
+        }
     }
 
 
@@ -186,7 +196,7 @@ int main () {
     cout << "      The files with 1_0 however go along they y-axis, with x=0.5." << endl;
     cout << endl;
     cout << "NOTE 2: Since higher dimensional data is hard to visualize, it is recommended to look more at the resulintg overall residual values." << endl;
-    cout << "        Also remember that there is a bit of luck involved in finding really optimal best fits, especially with low number of fits."<< endl;
+    cout << "        Also remember that there is a bit of luck involved in finding really optimal best fits, especially with low number of fits." << endl;
 
     // NON I/O CODE
     double base_input[2]; // while one variable is varied, the other will be set to this

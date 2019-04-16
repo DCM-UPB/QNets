@@ -13,13 +13,13 @@ class VariableFeeder: public FeederInterface
 {
 protected:
     // variational parameters
-    std::vector<double*> _vp; // store pointers to beta/params used as variational parameters
+    std::vector<double *> _vp; // store pointers to beta/params used as variational parameters
     bool _flag_vp = false; // do we add own vp?
 
     void _clearSources() override; // basically clear everything except sourcePool
 
 public:
-    ~VariableFeeder() override{_vp.clear();}
+    ~VariableFeeder() override { _vp.clear(); }
 
     // set string codes
     std::string getParams() override;
@@ -34,7 +34,7 @@ public:
 
     // final IsVPIndexUsed methods
     bool isVPIndexUsedInFeeder(const int &id) override;
-    bool isVPIndexUsedForFeeder(const int &id) override{return FeederInterface::isVPIndexUsedForFeeder(id);}
+    bool isVPIndexUsedForFeeder(const int &id) override { return FeederInterface::isVPIndexUsedForFeeder(id); }
 };
 
 #endif

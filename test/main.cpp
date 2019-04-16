@@ -9,10 +9,9 @@ void printNNStructure(FeedForwardNeuralNetwork &nn)
 {
     using namespace std;
 
-    for (int i=0; i<nn.getNLayers(); ++i)
-        {
-            cout << "Layer " << i << " has " << nn.getLayerSize(i) << " units" << endl;
-        }
+    for (int i = 0; i < nn.getNLayers(); ++i) {
+        cout << "Layer " << i << " has " << nn.getLayerSize(i) << " units" << endl;
+    }
     cout << endl;
 }
 
@@ -20,37 +19,34 @@ void printNNValues(FeedForwardNeuralNetwork &nn)
 {
     using namespace std;
 
-    for (int i=0; i<nn.getNLayers(); ++i)
-        {
-            cout << "--- Layer " << i << endl;
-            cout << "Value:              ";
-            for (int j=0; j<nn.getLayer(i)->getNUnits(); ++j)
-                {
-                    cout << nn.getLayer(i)->getUnit(j)->getValue() << "   ";
-                }
-            cout << endl;
-            cout << "First Derivative:   ";
-            for (int j=0; j<nn.getLayer(i)->getNUnits(); ++j)
-                {
-                    cout << nn.getLayer(i)->getUnit(j)->getFirstDerivativeValue(0) << "   ";
-                }
-            cout << endl << endl;
+    for (int i = 0; i < nn.getNLayers(); ++i) {
+        cout << "--- Layer " << i << endl;
+        cout << "Value:              ";
+        for (int j = 0; j < nn.getLayer(i)->getNUnits(); ++j) {
+            cout << nn.getLayer(i)->getUnit(j)->getValue() << "   ";
         }
+        cout << endl;
+        cout << "First Derivative:   ";
+        for (int j = 0; j < nn.getLayer(i)->getNUnits(); ++j) {
+            cout << nn.getLayer(i)->getUnit(j)->getFirstDerivativeValue(0) << "   ";
+        }
+        cout << endl << endl;
+    }
 
     cout << "Variational parameters:   ";
-    for (int j=0; j<nn.getNBeta(); ++j)
-        {
-            cout << nn.getBeta(j) << "   ";
-        }
+    for (int j = 0; j < nn.getNBeta(); ++j) {
+        cout << nn.getBeta(j) << "   ";
+    }
     cout << endl << endl;
 }
 
 
-int main(){
+int main()
+{
     using namespace std;
 
     cout << "Declare the FFANN" << endl;
-    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(4,6,2);
+    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(4, 6, 2);
     printNNStructure(*ffnn);
 
     cout << "Change size of Layer 0 to 2" << endl;
@@ -82,17 +78,17 @@ int main(){
     cout << " -> Number of variational parameters: " << ffnn->getNBeta() << endl;
     cout << endl;
 
-    double x=3.;
+    double x = 3.;
     ffnn->setInput(&x);
     ffnn->FFPropagate();
     printNNValues(*ffnn);
 
     // Plot of the 1-dimensional function
-    const double L=10.;
-    const int N=150;
-    double dL=L/N;
-    const double h=0.00001;
-    const int ivar=2;
+    const double L = 10.;
+    const int N = 150;
+    double dL = L/N;
+    const double h = 0.00001;
+    const int ivar = 2;
     // nn value
     ofstream file;
     file.open("randomNN.txt");
@@ -114,52 +110,51 @@ int main(){
     // numerical variational first derivative
     ofstream filenv1d;
     filenv1d.open("randomNN-nv1d.txt");
-    x=-L*0.5;
-    for (int i=0; i<N; ++i)
-        {
-            x+=dL;
-            ffnn->setInput(&x);
-            ffnn->FFPropagate();
-            double z=ffnn->getOutput(0);
-            file << x << "   " << z << endl;
+    x = -L*0.5;
+    for (int i = 0; i < N; ++i) {
+        x += dL;
+        ffnn->setInput(&x);
+        ffnn->FFPropagate();
+        double z = ffnn->getOutput(0);
+        file << x << "   " << z << endl;
 
-            // first derivative
-            double z1d=ffnn->getFirstDerivative(0,0);
-            file1d << x << "   " << z1d << endl;
+        // first derivative
+        double z1d = ffnn->getFirstDerivative(0, 0);
+        file1d << x << "   " << z1d << endl;
 
-            // second derivative
-            double z2d=ffnn->getSecondDerivative(0,0);
-            file2d << x << "   " << z2d << endl;
+        // second derivative
+        double z2d = ffnn->getSecondDerivative(0, 0);
+        file2d << x << "   " << z2d << endl;
 
-            // variational first derivative
-            double zv1d=ffnn->getVariationalFirstDerivative(0,ivar);
-            filev1d << x << "   " << zv1d << endl;
+        // variational first derivative
+        double zv1d = ffnn->getVariationalFirstDerivative(0, ivar);
+        filev1d << x << "   " << zv1d << endl;
 
-            // numerical first derivative
-            double xu=x+h;
-            ffnn->setInput(&xu);
-            ffnn->FFPropagate();
-            double zh=ffnn->getOutput(0);
-            filen1d << x << "   " << (zh-z)/h << endl;
-            ffnn->setInput(&x);
+        // numerical first derivative
+        double xu = x + h;
+        ffnn->setInput(&xu);
+        ffnn->FFPropagate();
+        double zh = ffnn->getOutput(0);
+        filen1d << x << "   " << (zh - z)/h << endl;
+        ffnn->setInput(&x);
 
-            // numerical second derivative
-            double xl=x-h;
-            ffnn->setInput(&xl);
-            ffnn->FFPropagate();
-            double zmh=ffnn->getOutput(0);
-            filen2d << x << "   " << (zh-2.*z+zmh)/(h*h) << endl;
-            ffnn->setInput(&x);
+        // numerical second derivative
+        double xl = x - h;
+        ffnn->setInput(&xl);
+        ffnn->FFPropagate();
+        double zmh = ffnn->getOutput(0);
+        filen2d << x << "   " << (zh - 2.*z + zmh)/(h*h) << endl;
+        ffnn->setInput(&x);
 
-            // numerical variational first derivative
-            double vp=ffnn->getBeta(ivar);
-            double vph=vp+h;
-            ffnn->setBeta(ivar,vph);
-            ffnn->FFPropagate();
-            double zvh=ffnn->getOutput(0);
-            filenv1d << x << "   " << (zvh-z)/h << endl;
-            ffnn->setBeta(ivar,vp);
-        }
+        // numerical variational first derivative
+        double vp = ffnn->getBeta(ivar);
+        double vph = vp + h;
+        ffnn->setBeta(ivar, vph);
+        ffnn->FFPropagate();
+        double zvh = ffnn->getOutput(0);
+        filenv1d << x << "   " << (zvh - z)/h << endl;
+        ffnn->setBeta(ivar, vp);
+    }
     file.close();
     file1d.close();
     file2d.close();
@@ -174,7 +169,7 @@ int main(){
     // create a new NN reading it from the file
     cout << endl << endl << "CREATE A COPY OF THE PREVIOUS FFNN USING THE FILE IN WHICH IT WAS STORED ..." << endl;
     auto * ffnn_copy = new FeedForwardNeuralNetwork("FFNN.txt");
-    x=3.;
+    x = 3.;
     ffnn->setInput(&x);
     ffnn->FFPropagate();
     printNNValues(*ffnn);

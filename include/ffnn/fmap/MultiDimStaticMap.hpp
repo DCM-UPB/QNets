@@ -14,7 +14,7 @@ protected:
 
 public:
     MultiDimStaticMap(NetworkLayer * nl, const size_t &ndim, const size_t &nsrc);
-    ~MultiDimStaticMap() override= default;
+    ~MultiDimStaticMap() override = default;
 
     // string code methods
     std::string getParams() override;

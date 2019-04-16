@@ -10,10 +10,10 @@ class NNRay: public WeightedFeeder
 {
 public:
     explicit NNRay(NetworkLayer * nl);
-    ~NNRay() override= default;
+    ~NNRay() override = default;
 
     // string code methods
-    std::string getIdCode() override{return "RAY";} // return an identification string
+    std::string getIdCode() override { return "RAY"; } // return an identification string
     void setParams(const std::string &params) override;
 
     // variational parameters

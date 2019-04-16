@@ -18,12 +18,12 @@ protected:
 
 public:
     IdentityMap(NetworkLayer * nl, const size_t &source_id)
-        : OneDimStaticMap(nl, 1), _src(nullptr) {setParameters(source_id);} // full initialization
+            : OneDimStaticMap(nl, 1), _src(nullptr) { setParameters(source_id); } // full initialization
     explicit IdentityMap(NetworkLayer * nl): IdentityMap(nl, 0) {} // minimal default initialization
-    ~IdentityMap() override= default;
+    ~IdentityMap() override = default;
 
     // string code methods
-    std::string getIdCode() override{return "IDM";} // return an identification string
+    std::string getIdCode() override { return "IDM"; } // return an identification string
 
     // parameter manipulation
     void setParameters(const size_t &source_id); // calls base setParameters with vectorized argument

@@ -45,7 +45,7 @@ public:
 
     // --- String Codes
 
-    std::string getIdCode() override{return "FML";}
+    std::string getIdCode() override { return "FML"; }
     std::string getParams() override;
     void setParams(const std::string &params) override;
 
@@ -54,17 +54,17 @@ public:
     void setNMaps(const int &npsmaps, const int &npdmaps, const int &nedmaps, const int &nepdmaps, const int &nidmaps);
 
     // --- FeatureMapUnit getters
-    int getNPSMapUnits(){return _U_psm.size();}
-    int getNPDMapUnits(){return _U_pdm.size();}
-    int getNEDMapUnits(){return _U_edm.size();}
-    int getNEPDMapUnits(){return _U_epdm.size();}
-    int getNIdMapUnits(){return _U_idm.size();}
+    int getNPSMapUnits() { return _U_psm.size(); }
+    int getNPDMapUnits() { return _U_pdm.size(); }
+    int getNEDMapUnits() { return _U_edm.size(); }
+    int getNEPDMapUnits() { return _U_epdm.size(); }
+    int getNIdMapUnits() { return _U_idm.size(); }
 
-    PairSumMapUnit * getPSMapUnit(const int &i){return _U_psm[i];}
-    PairDifferenceMapUnit * getPDMapUnit(const int &i){return _U_pdm[i];}
-    EuclideanDistanceMapUnit * getEDMapUnit(const int &i){return _U_edm[i];}
-    EuclideanPairDistanceMapUnit * getEPDMapUnit(const int &i){return _U_epdm[i];}
-    IdentityMapUnit * getIdMapUnit(const int &i){return _U_idm[i];}
+    PairSumMapUnit * getPSMapUnit(const int &i) { return _U_psm[i]; }
+    PairDifferenceMapUnit * getPDMapUnit(const int &i) { return _U_pdm[i]; }
+    EuclideanDistanceMapUnit * getEDMapUnit(const int &i) { return _U_edm[i]; }
+    EuclideanPairDistanceMapUnit * getEPDMapUnit(const int &i) { return _U_epdm[i]; }
+    IdentityMapUnit * getIdMapUnit(const int &i) { return _U_idm[i]; }
 
     // --- Connection
 

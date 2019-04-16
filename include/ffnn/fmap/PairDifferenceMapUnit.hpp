@@ -10,7 +10,7 @@ class PairDifferenceMapUnit: public FeatureMapUnit<PairDifferenceMap>
 {
 public:
     // string code id
-    std::string getIdCode() override{return "PDMU";} // return identifier for unit type
+    std::string getIdCode() override { return "PDMU"; } // return identifier for unit type
 };
 
 #endif

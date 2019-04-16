@@ -15,15 +15,18 @@ class NNUnit: public FedActivationUnit
 {
 public:
     // Constructor and destructor
-    explicit NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NNRay * ray = nullptr) : FedActivationUnit(actf, static_cast<FeederInterface *>(ray)) {}
-    explicit NNUnit(const std::string &actf_id, NNRay * ray = nullptr) : NNUnit(std_actf::provideActivationFunction(actf_id), ray) {}
-    ~NNUnit() override= default;
+    explicit NNUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction(), NNRay * ray = nullptr):
+            FedActivationUnit(actf, static_cast<FeederInterface *>(ray)) {}
+    explicit NNUnit(const std::string &actf_id, NNRay * ray = nullptr):
+            NNUnit(std_actf::provideActivationFunction(actf_id), ray) {}
+    ~NNUnit() override = default;
 
     // string code id
-    std::string getIdCode() override{return "NNU";} // return identifier for unit type
+    std::string getIdCode() override { return "NNU"; } // return identifier for unit type
 
     // restrict feeder to ray type
-    void setFeeder(FeederInterface * feeder) override{
+    void setFeeder(FeederInterface * feeder) override
+    {
         if (auto * ray = dynamic_cast<NNRay *>(feeder)) {
             FedUnit::setFeeder(ray);
         }
@@ -32,7 +35,7 @@ public:
         }
     }
 
-    NNRay * getRay(){return dynamic_cast<NNRay *>(_feeder);}
+    NNRay * getRay() { return dynamic_cast<NNRay *>(_feeder); }
 };
 
 

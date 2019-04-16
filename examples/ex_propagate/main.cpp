@@ -3,11 +3,10 @@
 #include <iostream>
 
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
-
-int main() {
+int main()
+{
     using namespace std;
 
 
@@ -31,7 +30,6 @@ int main() {
     cin.ignore();
 
 
-
     cout << "Connect the FFNN" << endl;
     cout << "================" << endl;
     cin.ignore();
@@ -44,7 +42,6 @@ int main() {
     //
 
     cout << endl << endl << endl;
-
 
 
     cout << "Set the input" << endl;
@@ -91,7 +88,6 @@ int main() {
     cout << endl << endl;
 
 
-
     cout << "Propagate" << endl;
     cout << "=========" << endl;
     cin.ignore();
@@ -113,8 +109,6 @@ int main() {
     cout << "The output is 3-dimensional, as the first unit of the output layer is an offset." << endl << "The output values are ";
     cout << ffnn->getOutput(0) << "    " << ffnn->getOutput(1) << "    " << ffnn->getOutput(2);
     cout << endl;
-
-
 
 
     cout << endl << endl;

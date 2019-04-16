@@ -20,12 +20,13 @@ protected:
 
 public:
     PairDifferenceMap(NetworkLayer * nl, const size_t &source_id0, const size_t &source_id1)
-        : OneDimStaticMap(nl, 2), _src0(nullptr), _src1(nullptr) {setParameters(source_id0, source_id1);} // full initialization
+            :
+            OneDimStaticMap(nl, 2), _src0(nullptr), _src1(nullptr) { setParameters(source_id0, source_id1); } // full initialization
     explicit PairDifferenceMap(NetworkLayer * nl): PairDifferenceMap(nl, 0, 0) {} // minimal default initialization
-    ~PairDifferenceMap() override= default;
+    ~PairDifferenceMap() override = default;
 
     // string code methods
-    std::string getIdCode() override{return "PDM";} // return an identification string
+    std::string getIdCode() override { return "PDM"; } // return an identification string
 
     // parameter manipulation
     void setParameters(const size_t &source_id0, const size_t &source_id1); // calls base setParameters with vectorized argument

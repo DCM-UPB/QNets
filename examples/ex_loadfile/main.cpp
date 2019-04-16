@@ -1,15 +1,12 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <string>
-#include <vector>
 
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
-
-int main() {
+int main()
+{
     using namespace std;
 
     auto * ffnn = new FeedForwardNeuralNetwork("stored_ffnn.txt");

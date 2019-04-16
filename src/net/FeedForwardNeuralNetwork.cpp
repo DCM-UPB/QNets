@@ -1,16 +1,9 @@
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
-#include "ffnn/actf/ActivationFunctionManager.hpp"
-#include "ffnn/serial/StringCodeUtilities.hpp"
-#include "ffnn/unit/NNUnit.hpp"
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <limits>
 #include <random>
-#include <sstream>
-#include <stdexcept>
 
 
 // --- Beta
@@ -18,17 +11,14 @@
 int FeedForwardNeuralNetwork::getNBeta()
 {
     using namespace std;
-    int nbeta=0;
-    for (auto & i : _L_fed)
-        {
-            for (int j=0; j<i->getNFedUnits(); ++j)
-                {
-                    if (i->getFedUnit(j)->getFeeder() != nullptr)
-                        {
-                            nbeta += i->getFedUnit(j)->getFeeder()->getNBeta();
-                        }
-                }
+    int nbeta = 0;
+    for (auto &i : _L_fed) {
+        for (int j = 0; j < i->getNFedUnits(); ++j) {
+            if (i->getFedUnit(j)->getFeeder() != nullptr) {
+                nbeta += i->getFedUnit(j)->getFeeder()->getNBeta();
+            }
         }
+    }
     return nbeta;
 }
 
@@ -36,105 +26,87 @@ int FeedForwardNeuralNetwork::getNBeta()
 double FeedForwardNeuralNetwork::getBeta(const int &ib)
 {
     using namespace std;
-    if ( ib<0 || ib >= getNBeta() )
-        {
-            cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index out of boundaries" << endl;
-            cout << ib << " against the maximum allowed " << this->getNBeta()-1 << endl << endl;
-        }
-    else
-        {
-            int idx=0;
-            for (auto & i : _L_fed)
-                {
-                    for (int j=0; j<i->getNFedUnits(); ++j)
-                        {
-                            if (i->getFedUnit(j)->getFeeder() != nullptr)
-                                {
-                                    for (int k=0; k<i->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
-                                        {
-                                            if (idx==ib) { return i->getFedUnit(j)->getFeeder()->getBeta(k);
-}
-                                            idx++;
-                                        }
-                                }
+    if (ib < 0 || ib >= getNBeta()) {
+        cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index out of boundaries" << endl;
+        cout << ib << " against the maximum allowed " << this->getNBeta() - 1 << endl << endl;
+    }
+    else {
+        int idx = 0;
+        for (auto &i : _L_fed) {
+            for (int j = 0; j < i->getNFedUnits(); ++j) {
+                if (i->getFedUnit(j)->getFeeder() != nullptr) {
+                    for (int k = 0; k < i->getFedUnit(j)->getFeeder()->getNBeta(); ++k) {
+                        if (idx == ib) {
+                            return i->getFedUnit(j)->getFeeder()->getBeta(k);
                         }
+                        idx++;
+                    }
                 }
+            }
         }
+    }
     cout << endl << "ERROR FeedForwardNeuralNetwork::getBeta : index " << ib << " not found" << endl << endl;
     return -666.;
 }
 
 
-void FeedForwardNeuralNetwork::getBeta(double * beta){
+void FeedForwardNeuralNetwork::getBeta(double * beta)
+{
     using namespace std;
-    int idx=0;
-    for (auto & i : _L_fed)
-        {
-            for (int j=0; j<i->getNFedUnits(); ++j)
-                {
-                    if (i->getFedUnit(j)->getFeeder() != nullptr)
-                        {
-                            for (int k=0; k<i->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
-                                {
-                                    beta[idx] = i->getFedUnit(j)->getFeeder()->getBeta(k);
-                                    idx++;
-                                }
-                        }
+    int idx = 0;
+    for (auto &i : _L_fed) {
+        for (int j = 0; j < i->getNFedUnits(); ++j) {
+            if (i->getFedUnit(j)->getFeeder() != nullptr) {
+                for (int k = 0; k < i->getFedUnit(j)->getFeeder()->getNBeta(); ++k) {
+                    beta[idx] = i->getFedUnit(j)->getFeeder()->getBeta(k);
+                    idx++;
                 }
+            }
         }
+    }
 }
 
 
 void FeedForwardNeuralNetwork::setBeta(const int &ib, const double &beta)
 {
     using namespace std;
-    if ( ib<0 || ib >= this->getNBeta() )
-        {
-            cout << endl << "ERROR FeedForwardNeuralNetwork::setBeta : index out of boundaries" << endl;
-            cout << ib << " against the maximum allowed " << this->getNBeta()-1 << endl << endl;
-        }
-    else
-        {
-            int idx=0;
-            for (auto & i : _L_fed)
-                {
-                    for (int j=0; j<i->getNFedUnits(); ++j)
-                        {
-                            if (i->getFedUnit(j)->getFeeder() != nullptr)
-                                {
-                                    for (int k=0; k<i->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
-                                        {
-                                            if (idx==ib) {
-                                                i->getFedUnit(j)->getFeeder()->setBeta(k, beta);
-                                                return;
-                                            }
-                                            idx++;
-                                        }
-                                }
+    if (ib < 0 || ib >= this->getNBeta()) {
+        cout << endl << "ERROR FeedForwardNeuralNetwork::setBeta : index out of boundaries" << endl;
+        cout << ib << " against the maximum allowed " << this->getNBeta() - 1 << endl << endl;
+    }
+    else {
+        int idx = 0;
+        for (auto &i : _L_fed) {
+            for (int j = 0; j < i->getNFedUnits(); ++j) {
+                if (i->getFedUnit(j)->getFeeder() != nullptr) {
+                    for (int k = 0; k < i->getFedUnit(j)->getFeeder()->getNBeta(); ++k) {
+                        if (idx == ib) {
+                            i->getFedUnit(j)->getFeeder()->setBeta(k, beta);
+                            return;
                         }
+                        idx++;
+                    }
                 }
+            }
         }
+    }
 }
 
 
 void FeedForwardNeuralNetwork::setBeta(const double * beta)
 {
     using namespace std;
-    int idx=0;
-    for (auto & i : _L_fed)
-        {
-            for (int j=0; j<i->getNFedUnits(); ++j)
-                {
-                    if (i->getFedUnit(j)->getFeeder() != nullptr)
-                        {
-                            for (int k=0; k<i->getFedUnit(j)->getFeeder()->getNBeta(); ++k)
-                                {
-                                    i->getFedUnit(j)->getFeeder()->setBeta(k, beta[idx]);
-                                    idx++;
-                                }
-                        }
+    int idx = 0;
+    for (auto &i : _L_fed) {
+        for (int j = 0; j < i->getNFedUnits(); ++j) {
+            if (i->getFedUnit(j)->getFeeder() != nullptr) {
+                for (int k = 0; k < i->getFedUnit(j)->getFeeder()->getNBeta(); ++k) {
+                    i->getFedUnit(j)->getFeeder()->setBeta(k, beta[idx]);
+                    idx++;
                 }
+            }
         }
+    }
 }
 
 
@@ -149,25 +121,21 @@ void FeedForwardNeuralNetwork::randomizeBetas()
     int nsource;
     double bah;
 
-    for (auto & i : _L_fed)
-        {
-            for (int j=0; j<i->getNFedUnits(); ++j)
-                {
-                    if (i->getFedUnit(j)->getFeeder() != nullptr)
-                        {
-                            nsource = i->getFedUnit(j)->getFeeder()->getNBeta();
-                            // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
-                            // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * n^(1/2) , where n is nsource
-                            bah = 4 * pow(nsource, -0.5); // (b-a)/2
-                            rd = uniform_real_distribution<double>(-bah,bah);
+    for (auto &i : _L_fed) {
+        for (int j = 0; j < i->getNFedUnits(); ++j) {
+            if (i->getFedUnit(j)->getFeeder() != nullptr) {
+                nsource = i->getFedUnit(j)->getFeeder()->getNBeta();
+                // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
+                // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * n^(1/2) , where n is nsource
+                bah = 4*pow(nsource, -0.5); // (b-a)/2
+                rd = uniform_real_distribution<double>(-bah, bah);
 
-                            for (int k=0; k<nsource; ++k)
-                                {
-                                    i->getFedUnit(j)->getFeeder()->setBeta(k, rd(rgen));
-                                }
-                        }
+                for (int k = 0; k < nsource; ++k) {
+                    i->getFedUnit(j)->getFeeder()->setBeta(k, rd(rgen));
                 }
+            }
         }
+    }
 }
 
 
@@ -176,22 +144,20 @@ void FeedForwardNeuralNetwork::randomizeBetas()
 void FeedForwardNeuralNetwork::_updateNVP()
 {
     // count the total number of variational parameters
-    _nvp=0;
-    for (auto & i : _L)
-        {
-            _nvp += i->getNVariationalParameters();
-        }
+    _nvp = 0;
+    for (auto &i : _L) {
+        _nvp += i->getNVariationalParameters();
+    }
 }
 
 
 void FeedForwardNeuralNetwork::assignVariationalParameters(const int &starting_layer_index)
 {
     // make betas variational parameters, starting from starting_layer
-    int id_vp=0;
-    for (std::vector<NetworkLayer *>::size_type i=starting_layer_index; i<_L.size(); ++i)
-        {
-            id_vp = _L[i]->setVariationalParametersID(id_vp);
-        }
+    int id_vp = 0;
+    for (std::vector<NetworkLayer *>::size_type i = starting_layer_index; i < _L.size(); ++i) {
+        id_vp = _L[i]->setVariationalParametersID(id_vp);
+    }
     _updateNVP();
 }
 
@@ -200,17 +166,20 @@ double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp)
 {
     using namespace std;
 
-    if (ivp<0 || ivp >= getNVariationalParameters()) {
+    if (ivp < 0 || ivp >= getNVariationalParameters()) {
         cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index out of boundaries" << endl;
-        cout << ivp << " against the maximum allowed " << this->getNVariationalParameters()-1 << endl << endl;
+        cout << ivp << " against the maximum allowed " << this->getNVariationalParameters() - 1 << endl << endl;
     }
-    for (auto & i : _L) {
-        if (ivp<=i->getMaxVariationalParameterIndex()) {
+    for (auto &i : _L) {
+        if (ivp <= i->getMaxVariationalParameterIndex()) {
             double result;
             bool status = i->getVariationalParameter(ivp, result);
-            if (status) { return result;
-            }  {break;
-}
+            if (status) {
+                return result;
+            }
+            {
+                break;
+            }
         }
     }
     cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found" << endl << endl;
@@ -223,9 +192,9 @@ void FeedForwardNeuralNetwork::getVariationalParameter(double * vp)
     using namespace std;
 
     int ivp = 0;
-    for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
+    for (vector<NetworkLayer *>::size_type i = 0; i < _L.size(); ++i) {
         int idmax = _L[i]->getMaxVariationalParameterIndex();
-        for ( ; ivp<=idmax; ++ivp) {
+        for (; ivp <= idmax; ++ivp) {
             bool status = _L[i]->getVariationalParameter(ivp, vp[ivp]);
             if (!status) {
                 cout << endl << "ERROR FeedForwardNeuralNetwork::getVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
@@ -237,16 +206,19 @@ void FeedForwardNeuralNetwork::getVariationalParameter(double * vp)
 
 void FeedForwardNeuralNetwork::setVariationalParameter(const int &ivp, const double &vp)
 {
-    if (ivp<0 || ivp >= getNVariationalParameters()) {
+    if (ivp < 0 || ivp >= getNVariationalParameters()) {
         cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index out of boundaries" << endl << endl;
-        cout << ivp << " against the maximum allowed " << this->getNVariationalParameters()-1 << endl << endl;
+        cout << ivp << " against the maximum allowed " << this->getNVariationalParameters() - 1 << endl << endl;
     }
-    for (auto & i : _L) {
-        if (ivp<=i->getMaxVariationalParameterIndex()) {
+    for (auto &i : _L) {
+        if (ivp <= i->getMaxVariationalParameterIndex()) {
             bool status = i->setVariationalParameter(ivp, vp);
-            if (status) { return;
-            }  {break;
-}
+            if (status) {
+                return;
+            }
+            {
+                break;
+            }
         }
     }
     cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found" << endl << endl;
@@ -258,9 +230,9 @@ void FeedForwardNeuralNetwork::setVariationalParameter(const double * vp)
     using namespace std;
 
     int ivp = 0;
-    for (vector<NetworkLayer *>::size_type i=0; i<_L.size(); ++i) {
+    for (vector<NetworkLayer *>::size_type i = 0; i < _L.size(); ++i) {
         int idmax = _L[i]->getMaxVariationalParameterIndex();
-        for ( ; ivp<=idmax; ++ivp) {
+        for (; ivp <= idmax; ++ivp) {
             bool status = _L[i]->setVariationalParameter(ivp, vp[ivp]);
             if (!status) {
                 cout << endl << "ERROR FeedForwardNeuralNetwork::setVariationalParameter : index " << ivp << " not found in layer " << i << " with max index " << idmax << endl << endl;
@@ -273,58 +245,63 @@ void FeedForwardNeuralNetwork::setVariationalParameter(const double * vp)
 // --- Computation
 
 
-double FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d){
-    return _L_out->getUnit(i+1)->getCrossSecondDerivativeValue(i1d, iv1d);
+double FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d)
+{
+    return _L_out->getUnit(i + 1)->getCrossSecondDerivativeValue(i1d, iv1d);
 }
 
 
-void FeedForwardNeuralNetwork::getCrossSecondDerivative(double *** d1vd1){
-    for (int i=0; i<getNOutput(); ++i){
+void FeedForwardNeuralNetwork::getCrossSecondDerivative(double *** d1vd1)
+{
+    for (int i = 0; i < getNOutput(); ++i) {
         getCrossSecondDerivative(i, d1vd1[i]);
     }
 }
 
 
-void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, double ** d1vd1){
-    for (int i1d=0; i1d<getNInput(); ++i1d){
-        for (int iv1d=0; iv1d<getNVariationalParameters(); ++iv1d){
+void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, double ** d1vd1)
+{
+    for (int i1d = 0; i1d < getNInput(); ++i1d) {
+        for (int iv1d = 0; iv1d < getNVariationalParameters(); ++iv1d) {
             d1vd1[i1d][iv1d] = getCrossSecondDerivative(i, i1d, iv1d);
         }
     }
 }
 
 
-double FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d){
-    return _L_out->getUnit(i+1)->getCrossFirstDerivativeValue(i1d, iv1d);
+double FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d)
+{
+    return _L_out->getUnit(i + 1)->getCrossFirstDerivativeValue(i1d, iv1d);
 }
 
 
-void FeedForwardNeuralNetwork::getCrossFirstDerivative(double *** d1vd1){
-    for (int i=0; i<getNOutput(); ++i){
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(double *** d1vd1)
+{
+    for (int i = 0; i < getNOutput(); ++i) {
         getCrossFirstDerivative(i, d1vd1[i]);
     }
 }
 
 
-void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d1vd1){
-    for (int i1d=0; i1d<getNInput(); ++i1d){
-        for (int iv1d=0; iv1d<getNBeta(); ++iv1d){
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d1vd1)
+{
+    for (int i1d = 0; i1d < getNInput(); ++i1d) {
+        for (int iv1d = 0; iv1d < getNBeta(); ++iv1d) {
             d1vd1[i1d][iv1d] = getCrossFirstDerivative(i, i1d, iv1d);
         }
     }
 }
 
 
-
 double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, const int &iv1d)
 {
-    return _L_out->getUnit(i+1)->getVariationalFirstDerivativeValue(iv1d);
+    return _L_out->getUnit(i + 1)->getVariationalFirstDerivativeValue(iv1d);
 }
 
 
 void FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, double * vd1)
 {
-    for (int iv1d=0; iv1d<getNInput(); ++iv1d){
+    for (int iv1d = 0; iv1d < getNInput(); ++iv1d) {
         vd1[iv1d] = getVariationalFirstDerivative(i, iv1d);
     }
 }
@@ -332,8 +309,8 @@ void FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, doubl
 
 void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
 {
-    for (int i=0; i<getNOutput(); ++i){
-        for (int iv1d=0; iv1d<getNBeta(); ++iv1d){
+    for (int i = 0; i < getNOutput(); ++i) {
+        for (int iv1d = 0; iv1d < getNBeta(); ++iv1d) {
             vd1[i][iv1d] = getVariationalFirstDerivative(i, iv1d);
         }
     }
@@ -342,13 +319,13 @@ void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
 
 double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2d)
 {
-    return ( _L_out->getUnit(i+1)->getSecondDerivativeValue(i2d) );
+    return (_L_out->getUnit(i + 1)->getSecondDerivativeValue(i2d));
 }
 
 
 void FeedForwardNeuralNetwork::getSecondDerivative(const int &i, double * d2)
 {
-    for (int i2d=0; i2d<getNInput(); ++i2d){
+    for (int i2d = 0; i2d < getNInput(); ++i2d) {
         d2[i2d] = getSecondDerivative(i, i2d);
     }
 }
@@ -356,8 +333,8 @@ void FeedForwardNeuralNetwork::getSecondDerivative(const int &i, double * d2)
 
 void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
 {
-    for (int i=0; i<getNOutput(); ++i){
-        for (int i2d=0; i2d<getNInput(); ++i2d){
+    for (int i = 0; i < getNOutput(); ++i) {
+        for (int i2d = 0; i2d < getNInput(); ++i2d) {
             d2[i][i2d] = getSecondDerivative(i, i2d);
         }
     }
@@ -366,13 +343,13 @@ void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
 
 double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
 {
-    return ( _L_out->getUnit(i+1)->getFirstDerivativeValue(i1d) );
+    return (_L_out->getUnit(i + 1)->getFirstDerivativeValue(i1d));
 }
 
 
 void FeedForwardNeuralNetwork::getFirstDerivative(const int &i, double * d1)
 {
-    for (int i1d=0; i1d<getNInput(); ++i1d){
+    for (int i1d = 0; i1d < getNInput(); ++i1d) {
         d1[i1d] = getFirstDerivative(i, i1d);
     }
 }
@@ -380,8 +357,8 @@ void FeedForwardNeuralNetwork::getFirstDerivative(const int &i, double * d1)
 
 void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1)
 {
-    for (int i=0; i<getNOutput(); ++i){
-        for (int i1d=0; i1d<getNInput(); ++i1d){
+    for (int i = 0; i < getNOutput(); ++i) {
+        for (int i1d = 0; i1d < getNInput(); ++i1d) {
             d1[i][i1d] = getFirstDerivative(i, i1d);
         }
     }
@@ -390,54 +367,53 @@ void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1)
 
 double FeedForwardNeuralNetwork::getOutput(const int &i)
 {
-    return _L_out->getUnit(i+1)->getValue();
+    return _L_out->getUnit(i + 1)->getValue();
 }
 
 
 void FeedForwardNeuralNetwork::getOutput(double * out)
 {
-    for (int i=1; i<_L_out->getNUnits(); ++i){
-        out[i-1] = _L_out->getUnit(i)->getValue();
+    for (int i = 1; i < _L_out->getNUnits(); ++i) {
+        out[i - 1] = _L_out->getUnit(i)->getValue();
     }
 }
 
 
-void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1){
+void FeedForwardNeuralNetwork::evaluate(const double * in, double * out, double ** d1, double ** d2, double ** vd1)
+{
     setInput(in);
     FFPropagate();
-    if (out!=nullptr) {
+    if (out != nullptr) {
         getOutput(out);
     }
-    if (hasFirstDerivativeSubstrate() && d1!=nullptr){
+    if (hasFirstDerivativeSubstrate() && d1 != nullptr) {
         getFirstDerivative(d1);
     }
-    if (hasSecondDerivativeSubstrate() && d2!=nullptr){
+    if (hasSecondDerivativeSubstrate() && d2 != nullptr) {
         getSecondDerivative(d2);
     }
-    if (hasVariationalFirstDerivativeSubstrate() && vd1!=nullptr){
+    if (hasVariationalFirstDerivativeSubstrate() && vd1 != nullptr) {
         getVariationalFirstDerivative(vd1);
     }
 }
 
 void FeedForwardNeuralNetwork::FFPropagate()
 {
-    #ifdef OPENMP
-    #pragma omp parallel default(none)
-    #endif
-    for (auto & i : _L)
-        {
-            i->computeValues();
-        }
+#ifdef OPENMP
+#pragma omp parallel default(none)
+#endif
+    for (auto &i : _L) {
+        i->computeValues();
+    }
 }
 
 
-void FeedForwardNeuralNetwork::setInput(const double *in)
+void FeedForwardNeuralNetwork::setInput(const double * in)
 {
     // set the protovalues of the first layer units
-    for (int i=0; i<_L_in->getNInputUnits(); ++i)
-        {
-            _L_in->getInputUnit(i)->setProtoValue(in[i]);
-        }
+    for (int i = 0; i < _L_in->getNInputUnits(); ++i) {
+        _L_in->getInputUnit(i)->setProtoValue(in[i]);
+    }
 }
 
 
@@ -456,19 +432,22 @@ void FeedForwardNeuralNetwork::addCrossSecondDerivativeSubstrate()
 {
     using namespace std;
 
-    if (_flag_c2d) { return; // nothing to do
-}
+    if (_flag_c2d) {
+        return; // nothing to do
+    }
 
     // add dependencies (which themselves add all other required substrates)
-    if (!_flag_2d) { addSecondDerivativeSubstrate();
-}
-    if (!_flag_c1d) { addCrossFirstDerivativeSubstrate();
-}
+    if (!_flag_2d) {
+        addSecondDerivativeSubstrate();
+    }
+    if (!_flag_c1d) {
+        addCrossFirstDerivativeSubstrate();
+    }
 
     // set the substrate in the units
-    for (auto & i : _L){
-            i->addCrossSecondDerivativeSubstrate(getNInput());
-        }
+    for (auto &i : _L) {
+        i->addCrossSecondDerivativeSubstrate(getNInput());
+    }
 
     _flag_c2d = true;
 }
@@ -478,20 +457,22 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 {
     using namespace std;
 
-    if (_flag_c1d) { return; // nothing to do
-}
+    if (_flag_c1d) {
+        return; // nothing to do
+    }
 
     // add dependencies
-    if (!_flag_1d) { addFirstDerivativeSubstrate();
-}
-    if (!_flag_v1d) { addVariationalFirstDerivativeSubstrate();
-}
+    if (!_flag_1d) {
+        addFirstDerivativeSubstrate();
+    }
+    if (!_flag_v1d) {
+        addVariationalFirstDerivativeSubstrate();
+    }
 
     // set the substrate in the units
-    for (auto & i : _L)
-        {
-            i->addCrossFirstDerivativeSubstrate(getNInput());
-        }
+    for (auto &i : _L) {
+        i->addCrossFirstDerivativeSubstrate(getNInput());
+    }
 
     _flag_c1d = true;
 }
@@ -499,14 +480,14 @@ void FeedForwardNeuralNetwork::addCrossFirstDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 {
-    if (_flag_v1d) { return; // nothing to do
-}
+    if (_flag_v1d) {
+        return; // nothing to do
+    }
 
     // set the substrate in the units
-    for (auto & i : _L)
-        {
-            i->addVariationalFirstDerivativeSubstrate();
-        }
+    for (auto &i : _L) {
+        i->addVariationalFirstDerivativeSubstrate();
+    }
 
     _flag_v1d = true;
 }
@@ -514,16 +495,17 @@ void FeedForwardNeuralNetwork::addVariationalFirstDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::addSecondDerivativeSubstrate()
 {
-    if (_flag_2d) { return; // nothing to do
-}
-    if (!_flag_1d) { addFirstDerivativeSubstrate();
-}
+    if (_flag_2d) {
+        return; // nothing to do
+    }
+    if (!_flag_1d) {
+        addFirstDerivativeSubstrate();
+    }
 
     // add the second derivative substrate to all the layers
-    for (auto & i : _L)
-        {
-            i->addSecondDerivativeSubstrate(getNInput());
-        }
+    for (auto &i : _L) {
+        i->addSecondDerivativeSubstrate(getNInput());
+    }
 
     _flag_2d = true;
 }
@@ -531,58 +513,62 @@ void FeedForwardNeuralNetwork::addSecondDerivativeSubstrate()
 
 void FeedForwardNeuralNetwork::addFirstDerivativeSubstrate()
 {
-    if (_flag_1d) { return; // nothing to do
-}
+    if (_flag_1d) {
+        return; // nothing to do
+    }
 
     // add the first derivative substrate to all the layers
-    for (auto & i : _L)
-        {
-            i->addFirstDerivativeSubstrate(getNInput());
-        }
+    for (auto &i : _L) {
+        i->addFirstDerivativeSubstrate(getNInput());
+    }
 
     _flag_1d = true;
 }
 
 void FeedForwardNeuralNetwork::addSubstrates(const bool flag_d1, const bool flag_d2, const bool flag_vd1, const bool flag_c1d, const bool flag_c2d)
 {
-    if (flag_d1) { addFirstDerivativeSubstrate();
-}
-    if (flag_d2) { addSecondDerivativeSubstrate();
-}
-    if (flag_vd1) { addVariationalFirstDerivativeSubstrate();
-}
-    if (flag_c1d) { addCrossFirstDerivativeSubstrate();
-}
-    if (flag_c2d) { addCrossSecondDerivativeSubstrate();
-}
+    if (flag_d1) {
+        addFirstDerivativeSubstrate();
+    }
+    if (flag_d2) {
+        addSecondDerivativeSubstrate();
+    }
+    if (flag_vd1) {
+        addVariationalFirstDerivativeSubstrate();
+    }
+    if (flag_c1d) {
+        addCrossFirstDerivativeSubstrate();
+    }
+    if (flag_c2d) {
+        addCrossSecondDerivativeSubstrate();
+    }
 }
 
 // --- Connect the neural network
 
 void FeedForwardNeuralNetwork::connectFFNN()
 {
-    if(_flag_connected) { this->disconnectFFNN();
-}
+    if (_flag_connected) {
+        this->disconnectFFNN();
+    }
 
     _L_fed[0]->connectOnTopOfLayer(_L_in); // connect the first fed layer to the input layer
-    for (std::vector<FedLayer *>::size_type i=1; i<_L_fed.size(); ++i) // connect the rest
-        {
-            _L_fed[i]->connectOnTopOfLayer(_L_fed[i-1]);
-        }
+    for (std::vector<FedLayer *>::size_type i = 1; i < _L_fed.size(); ++i) // connect the rest
+    {
+        _L_fed[i]->connectOnTopOfLayer(_L_fed[i - 1]);
+    }
     _flag_connected = true;
 }
 
 
 void FeedForwardNeuralNetwork::disconnectFFNN()
 {
-    if ( !_flag_connected )
-    {
+    if (!_flag_connected) {
         using namespace std;
         cout << "ERROR: FeedForwardNeuralNetwork::disconnectFFNN() : trying to disconnect an already disconnected FFNN" << endl << endl;
     }
 
-    for (auto & i : _L_fed)
-    {
+    for (auto &i : _L_fed) {
         i->disconnect();
     }
     _flag_connected = false;
@@ -593,77 +579,67 @@ void FeedForwardNeuralNetwork::disconnectFFNN()
 
 void FeedForwardNeuralNetwork::setGlobalActivationFunctions(ActivationFunctionInterface * actf)
 {
-    for (auto & i : _L_nn)
-        {
-            i->setActivationFunction(actf);
-        }
+    for (auto &i : _L_nn) {
+        i->setActivationFunction(actf);
+    }
 }
 
 
 void FeedForwardNeuralNetwork::pushHiddenLayer(const int &size)
 {
-    if (_flag_connected)
-        {
-            using namespace std;
-            // count the number of beta before the last (output) layer
-            int nbeta = 0;
-            for (vector<FedLayer *>::size_type i=0; i<_L_fed.size()-1; ++i)
-                {
-                    for (int j=0; j<_L_fed[i]->getNFedUnits(); ++j)
-                        {
-                            if (_L_fed[i]->getFedUnit(j)->getFeeder() != nullptr)
-                                {
-                                    nbeta += _L_fed[i]->getFedUnit(j)->getFeeder()->getNBeta();
-                                }
-                        }
+    if (_flag_connected) {
+        using namespace std;
+        // count the number of beta before the last (output) layer
+        int nbeta = 0;
+        for (vector<FedLayer *>::size_type i = 0; i < _L_fed.size() - 1; ++i) {
+            for (int j = 0; j < _L_fed[i]->getNFedUnits(); ++j) {
+                if (_L_fed[i]->getFedUnit(j)->getFeeder() != nullptr) {
+                    nbeta += _L_fed[i]->getFedUnit(j)->getFeeder()->getNBeta();
                 }
-            int total_nbeta = this->getNBeta();
-            // store the beta for the output
-            auto * old_beta = new double[total_nbeta-nbeta];
-            for (int i=nbeta; i<total_nbeta; ++i)
-                {
-                    old_beta[i-nbeta] = getBeta(i);
-                }
-
-            // disconnect last layer
-            _L_out->disconnect();  // disconnect the last (output) layer
-            // insert new layer
-            _addNewLayer("NNL", size, 1);
-            // reconnect the layers
-            _L_nn[_L_nn.size()-2]->connectOnTopOfLayer(_L[_L.size()-3]);
-            _L_nn[_L_nn.size()-1]->connectOnTopOfLayer(_L[_L.size()-2]);
-
-            // restore the old beta
-            for (int i=nbeta; i<total_nbeta; ++i)
-                {
-                    this->setBeta(i,old_beta[i-nbeta]);
-                }
-            // set all the other beta to zero
-            for (int i=total_nbeta; i<this->getNBeta(); ++i)
-                {
-                    this->setBeta(i,0.);
-                }
-            for (int i=0; i<_L_fed[_L_fed.size()-1]->getNFedUnits(); ++i)
-                {
-                    _L_fed[_L_fed.size()-1]->getFedUnit(i)->getFeeder()->setBeta(i,1.);
-                }
-            // free memory
-            delete[] old_beta;
+            }
         }
-    else
-        {
-            _addNewLayer("NNL", size, 1);
+        int total_nbeta = this->getNBeta();
+        // store the beta for the output
+        auto * old_beta = new double[total_nbeta - nbeta];
+        for (int i = nbeta; i < total_nbeta; ++i) {
+            old_beta[i - nbeta] = getBeta(i);
         }
+
+        // disconnect last layer
+        _L_out->disconnect();  // disconnect the last (output) layer
+        // insert new layer
+        _addNewLayer("NNL", size, 1);
+        // reconnect the layers
+        _L_nn[_L_nn.size() - 2]->connectOnTopOfLayer(_L[_L.size() - 3]);
+        _L_nn[_L_nn.size() - 1]->connectOnTopOfLayer(_L[_L.size() - 2]);
+
+        // restore the old beta
+        for (int i = nbeta; i < total_nbeta; ++i) {
+            this->setBeta(i, old_beta[i - nbeta]);
+        }
+        // set all the other beta to zero
+        for (int i = total_nbeta; i < this->getNBeta(); ++i) {
+            this->setBeta(i, 0.);
+        }
+        for (int i = 0; i < _L_fed[_L_fed.size() - 1]->getNFedUnits(); ++i) {
+            _L_fed[_L_fed.size() - 1]->getFedUnit(i)->getFeeder()->setBeta(i, 1.);
+        }
+        // free memory
+        delete[] old_beta;
+    }
+    else {
+        _addNewLayer("NNL", size, 1);
+    }
 }
 
 
 void FeedForwardNeuralNetwork::popHiddenLayer()
 {
-    delete _L[_L.size()-2];
+    delete _L[_L.size() - 2];
 
-    auto it = _L.end()-2;
-    auto it_fed = _L_fed.end()-2;
-    auto it_nn = _L_nn.end()-2;
+    auto it = _L.end() - 2;
+    auto it_fed = _L_fed.end() - 2;
+    auto it_nn = _L_nn.end() - 2;
 
     _L.erase(it);
     _L_fed.erase(it_fed);
@@ -677,8 +653,8 @@ void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::s
         using namespace std;
         // count the number of beta up to and including the last feature map layer
         int nbeta = 0;
-        for (auto & i : _L_fm) {
-            for (int j=0; j<i->getNFedUnits(); ++j) {
+        for (auto &i : _L_fm) {
+            for (int j = 0; j < i->getNFedUnits(); ++j) {
                 if (i->getFedUnit(j)->getFeeder() != nullptr) {
                     nbeta += i->getFedUnit(j)->getFeeder()->getNBeta();
                 }
@@ -686,9 +662,9 @@ void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::s
         }
         int total_nbeta = this->getNBeta();
         // store the beta for the output
-        auto * old_beta = new double[total_nbeta-nbeta];
-        for (int i=nbeta; i<total_nbeta; ++i) {
-            old_beta[i-nbeta] = getBeta(i);
+        auto * old_beta = new double[total_nbeta - nbeta];
+        for (int i = nbeta; i < total_nbeta; ++i) {
+            old_beta[i - nbeta] = getBeta(i);
         }
 
         // disconnect the layer after the last feature map layer
@@ -696,19 +672,19 @@ void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::s
         // insert new layer
         _addNewLayer("FML", size, _L_nn.size(), params);
         // reconnect the layers
-        _L_fm[_L_fm.size()-1]->connectOnTopOfLayer(_L[_L_fm.size()-1]);
-        _L_fed[_L_fm.size()]->connectOnTopOfLayer(_L_fm[_L_fm.size()-1]);
+        _L_fm[_L_fm.size() - 1]->connectOnTopOfLayer(_L[_L_fm.size() - 1]);
+        _L_fed[_L_fm.size()]->connectOnTopOfLayer(_L_fm[_L_fm.size() - 1]);
 
         // restore the old beta
-        for (int i=nbeta; i<total_nbeta; ++i) {
-            this->setBeta(i,old_beta[i-nbeta]);
+        for (int i = nbeta; i < total_nbeta; ++i) {
+            this->setBeta(i, old_beta[i - nbeta]);
         }
         // set all the other beta to zero
-        for (int i=total_nbeta; i<this->getNBeta(); ++i) {
-            this->setBeta(i,0.);
+        for (int i = total_nbeta; i < this->getNBeta(); ++i) {
+            this->setBeta(i, 0.);
         }
-        for (int i=0; i<_L_fed[_L_fed.size()-1]->getNFedUnits(); ++i) {
-            _L_fed[_L_fed.size()-1]->getFedUnit(i)->getFeeder()->setBeta(i,1.);
+        for (int i = 0; i < _L_fed[_L_fed.size() - 1]->getNFedUnits(); ++i) {
+            _L_fed[_L_fed.size() - 1]->getFedUnit(i)->getFeeder()->setBeta(i, 1.);
         }
         // free memory
         delete[] old_beta;
@@ -731,23 +707,26 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool sto
     // store the number of layers
     file << getNLayers() << endl;
     // store the tree code of each layer
-    for (int i=0; i<getNLayers(); ++i) {
+    for (int i = 0; i < getNLayers(); ++i) {
         string word, treeCode = getLayer(i)->getTreeCode();
 
         if (!store_betas) { // cut out betas
             bool skip = false;
             istringstream iss(treeCode);
             treeCode = ""; // reset
-            while(iss >> word){
+            while (iss >> word) {
                 if (!skip) {
-                    if (!treeCode.empty()) { treeCode += " ";
-}
+                    if (!treeCode.empty()) {
+                        treeCode += " ";
+                    }
                     treeCode += word;
                 }
-                if (word == "RAY") { skip = true;
-}
-                if (word == ")") { skip = false;
-}
+                if (word == "RAY") {
+                    skip = true;
+                }
+                if (word == ")") {
+                    skip = false;
+                }
             }
         }
 
@@ -763,7 +742,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool sto
 
 // --- Constructor
 
-FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
+FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char * filename)
 {
     // open file
     using namespace std;
@@ -779,28 +758,32 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 
     int il = 0;
     while (std::getline(file, line)) {
-        if (line.empty()) { continue; // idk why I get an empty line here in the first iteration
-}
+        if (line.empty()) {
+            continue; // idk why I get an empty line here in the first iteration
+        }
         id = readIdCode(line);
         params = readParams(line);
         layerMemberCodes.push_back(readMemberTreeCode(line));
         _addNewLayer(id, params);
 
         ++il;
-        if (il==nlayers) { break;
-}
+        if (il == nlayers) {
+            break;
+        }
     }
-    if (il!=nlayers) { throw std::invalid_argument("Stored FFNN file declares to have more layers than it has layer codes.");
-}
+    if (il != nlayers) {
+        throw std::invalid_argument("Stored FFNN file declares to have more layers than it has layer codes.");
+    }
 
     // connect the NN, if connected is found true
     bool connected;
     file >> connected;
-    if (connected) { connectFFNN();
-}
+    if (connected) {
+        connectFFNN();
+    }
 
     // set betas and all other params/actf
-    for (int i=0; i<getNLayers(); ++i) {
+    for (int i = 0; i < getNLayers(); ++i) {
         getLayer(i)->setMemberParams(layerMemberCodes[i]);
     }
     _updateNVP();
@@ -808,20 +791,25 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
     // read and set the substrates
     bool flag_1d = 0, flag_2d = 0, flag_v1d = 0, flag_c1d = 0, flag_c2d = 0;
     file >> flag_1d;
-    if (flag_1d) { addFirstDerivativeSubstrate();
-}
+    if (flag_1d) {
+        addFirstDerivativeSubstrate();
+    }
     file >> flag_2d;
-    if (flag_2d) { addSecondDerivativeSubstrate();
-}
+    if (flag_2d) {
+        addSecondDerivativeSubstrate();
+    }
     file >> flag_v1d;
-    if (flag_v1d) { addVariationalFirstDerivativeSubstrate();
-}
+    if (flag_v1d) {
+        addVariationalFirstDerivativeSubstrate();
+    }
     file >> flag_c1d;
-    if (flag_c1d) { addCrossFirstDerivativeSubstrate();
-}
+    if (flag_c1d) {
+        addCrossFirstDerivativeSubstrate();
+    }
     file >> flag_c2d;
-    if (flag_c2d) { addCrossSecondDerivativeSubstrate();
-}
+    if (flag_c2d) {
+        addCrossSecondDerivativeSubstrate();
+    }
 
     file.close();
 }
@@ -830,29 +818,36 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char *filename)
 FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn)
 {
     // copy layer structure
-    for (int i=0; i<ffnn->getNLayers(); ++i) { _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getParams());
-}
+    for (int i = 0; i < ffnn->getNLayers(); ++i) {
+        _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getParams());
+    }
 
-     // read and set the substrates
-    if (ffnn->isConnected()) { connectFFNN();
-}
+    // read and set the substrates
+    if (ffnn->isConnected()) {
+        connectFFNN();
+    }
 
     // now copy the parameter tree (incl. betas) for all layers
-    for (int i=0; i<ffnn->getNLayers(); ++i) {
+    for (int i = 0; i < ffnn->getNLayers(); ++i) {
         _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
     }
     _updateNVP();
 
-    if (ffnn->hasFirstDerivativeSubstrate()) { addFirstDerivativeSubstrate();
-}
-    if (ffnn->hasSecondDerivativeSubstrate()) { addSecondDerivativeSubstrate();
-}
-    if (ffnn->hasVariationalFirstDerivativeSubstrate()) { addVariationalFirstDerivativeSubstrate();
-}
-    if (ffnn->hasCrossFirstDerivativeSubstrate()) { addCrossFirstDerivativeSubstrate();
-}
-    if (ffnn->hasCrossSecondDerivativeSubstrate()) { addCrossSecondDerivativeSubstrate();
-}
+    if (ffnn->hasFirstDerivativeSubstrate()) {
+        addFirstDerivativeSubstrate();
+    }
+    if (ffnn->hasSecondDerivativeSubstrate()) {
+        addSecondDerivativeSubstrate();
+    }
+    if (ffnn->hasVariationalFirstDerivativeSubstrate()) {
+        addVariationalFirstDerivativeSubstrate();
+    }
+    if (ffnn->hasCrossFirstDerivativeSubstrate()) {
+        addCrossFirstDerivativeSubstrate();
+    }
+    if (ffnn->hasCrossSecondDerivativeSubstrate()) {
+        addCrossSecondDerivativeSubstrate();
+    }
 }
 
 
@@ -861,7 +856,8 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const int &insize, const int 
     _construct(insize, hidlaysize, outsize);
 }
 
-void FeedForwardNeuralNetwork::_construct(const int &insize, const int &hidlaysize, const int &outsize){
+void FeedForwardNeuralNetwork::_construct(const int &insize, const int &hidlaysize, const int &outsize)
+{
     _addNewLayer("INL", insize);
     _addNewLayer("NNL", hidlaysize);
     _addNewLayer("OUTL", outsize);
@@ -872,20 +868,23 @@ void FeedForwardNeuralNetwork::_construct(const int &insize, const int &hidlaysi
 
 void FeedForwardNeuralNetwork::_registerLayer(NetworkLayer * newLayer, const int &indexFromBack)
 {
-    _L.insert(_L.end()-indexFromBack, newLayer);
+    _L.insert(_L.end() - indexFromBack, newLayer);
 
-    if(auto * fnl = dynamic_cast<FedLayer *>(newLayer)) {
-        _L_fed.insert(_L_fed.end()-indexFromBack, fnl);
+    if (auto * fnl = dynamic_cast<FedLayer *>(newLayer)) {
+        _L_fed.insert(_L_fed.end() - indexFromBack, fnl);
     }
 
-    if(auto * nnl = dynamic_cast<NNLayer *>(newLayer)) {
-        _L_nn.insert(_L_nn.end()-indexFromBack, nnl);
+    if (auto * nnl = dynamic_cast<NNLayer *>(newLayer)) {
+        _L_nn.insert(_L_nn.end() - indexFromBack, nnl);
     }
 
-    if(auto * fml = dynamic_cast<FeatureMapLayer *>(newLayer)) {
-        if (indexFromBack>static_cast<int>(_L_nn.size())) { _L_fm.insert(_L_fm.end()-(indexFromBack-_L_nn.size()), fml);
-        } else { _L_fm.insert(_L_fm.end(), fml);
-}
+    if (auto * fml = dynamic_cast<FeatureMapLayer *>(newLayer)) {
+        if (indexFromBack > static_cast<int>(_L_nn.size())) {
+            _L_fm.insert(_L_fm.end() - (indexFromBack - _L_nn.size()), fml);
+        }
+        else {
+            _L_fm.insert(_L_fm.end(), fml);
+        }
     }
 }
 
@@ -907,9 +906,9 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int
     else if (idCode == "OUTL") {
         if (_L_out != nullptr) {
             delete _L_out;
-            _L.erase(_L.end()-1);
-            _L_fed.erase(_L_fed.end()-1);
-            _L_nn.erase(_L_nn.end()-1);
+            _L.erase(_L.end() - 1);
+            _L_fed.erase(_L_fed.end() - 1);
+            _L_nn.erase(_L_nn.end() - 1);
         }
         _L_out = new OutputNNLayer(nunits);
         _registerLayer(_L_out, indexFromBack);
@@ -917,8 +916,9 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int
     else if (idCode == "FML") {
         auto * fml = new FeatureMapLayer(nunits);
         _registerLayer(fml, indexFromBack);
-        if (!params.empty()) { fml->setParams(params);
-}
+        if (!params.empty()) {
+            fml->setParams(params);
+        }
     }
     else {
         throw std::invalid_argument("FFNN::_addNewLayer: Unknown layer identifier '" + idCode + "' passed.");
@@ -929,11 +929,15 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const int
 void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const std::string &params, const int &indexFromBack)
 {
     int nunits;
-    if (!setParamValue(params, "nunits", nunits)) { nunits = 1; // if params has no information about nunits
-}
-    if (countNParams(params) > 1) { _addNewLayer(idCode, nunits, indexFromBack, params);
-    } else { _addNewLayer(idCode, nunits, indexFromBack, "");
-}
+    if (!setParamValue(params, "nunits", nunits)) {
+        nunits = 1; // if params has no information about nunits
+    }
+    if (countNParams(params) > 1) {
+        _addNewLayer(idCode, nunits, indexFromBack, params);
+    }
+    else {
+        _addNewLayer(idCode, nunits, indexFromBack, "");
+    }
 }
 
 
@@ -941,10 +945,9 @@ void FeedForwardNeuralNetwork::_addNewLayer(const std::string &idCode, const std
 
 FeedForwardNeuralNetwork::~FeedForwardNeuralNetwork()
 {
-    for (auto & i : _L)
-        {
-            delete i;
-        }
+    for (auto &i : _L) {
+        delete i;
+    }
 
     _L.clear();
     _L_fed.clear();
@@ -960,5 +963,5 @@ FeedForwardNeuralNetwork::~FeedForwardNeuralNetwork()
     _flag_c1d = false;
     _flag_c2d = false;
 
-    _nvp=0;
+    _nvp = 0;
 }

@@ -21,24 +21,28 @@ protected:
     void _fillBeta();
 
 public:
-    ~WeightedFeeder() override{_beta.clear();}
+    ~WeightedFeeder() override { _beta.clear(); }
 
     // set string codes
     std::string getParams() override;
     void setParams(const std::string &params) override;
 
     // beta (meaning the individual factors directly multiplied to each used source output)
-    int getNBeta() override{return _beta.size();}
-    double getBeta(const int &i) override{return _beta[i];}
-    void setBeta(const int &i, const double &b) override{_beta[i]=b;}
+    int getNBeta() override { return _beta.size(); }
+    double getBeta(const int &i) override { return _beta[i]; }
+    void setBeta(const int &i, const double &b) override { _beta[i] = b; }
 
     // provide default setVPIndexes for the case that all beta are added as vp
     int setVariationalParametersIndexes(const int &starting_index, bool flag_add_vp = true) override;
 
     // randomizers
     // we provide a default vp randomizer for the case that all beta are added as vp
-    void randomizeVP() override{if (_flag_vp) { randomizeBeta();
-}}
+    void randomizeVP() override
+    {
+        if (_flag_vp) {
+            randomizeBeta();
+        }
+    }
 };
 
 #endif

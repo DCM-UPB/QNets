@@ -3,11 +3,10 @@
 #include <iostream>
 
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
-
-int main() {
+int main()
+{
     using namespace std;
 
 
@@ -45,7 +44,6 @@ int main() {
     cout << endl << endl << endl;
 
 
-
     cout << "Add derivatives substrates" << endl;
     cout << "==========================" << endl;
     cin.ignore();
@@ -61,7 +59,6 @@ int main() {
     cout << "Done! We informed all the units that they need to compute also first and second derivatives.";
     cin.ignore();
     cout << endl << endl;
-
 
 
     cout << "Set the input" << endl;
@@ -85,7 +82,6 @@ int main() {
 
     cin.ignore();
     cout << endl << endl;
-
 
 
     cout << "Propagate" << endl;

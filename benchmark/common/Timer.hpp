@@ -4,11 +4,12 @@
 class Timer
 {
 public:
-    explicit Timer(const double scale) : _beg(_clock::now()), _scale(scale) {}
+    explicit Timer(const double scale): _beg(_clock::now()), _scale(scale) {}
     void reset() { _beg = _clock::now(); }
-    double elapsed() const {
+    double elapsed() const
+    {
         using second = std::chrono::duration<double, std::ratio<1>>;
-        return _scale * std::chrono::duration_cast<second>(_clock::now() - _beg).count();
+        return _scale*std::chrono::duration_cast<second>(_clock::now() - _beg).count();
     }
 
 private:

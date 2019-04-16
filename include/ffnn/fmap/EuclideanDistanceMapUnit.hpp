@@ -10,7 +10,7 @@ class EuclideanDistanceMapUnit: public FeatureMapUnit<EuclideanDistanceMap>
 {
 public:
     // string code id
-    std::string getIdCode() override{return "EDMU";} // return identifier for unit type
+    std::string getIdCode() override { return "EDMU"; } // return identifier for unit type
 };
 
 #endif

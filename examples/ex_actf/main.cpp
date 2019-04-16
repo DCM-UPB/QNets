@@ -3,48 +3,52 @@
 #include <iostream>
 
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-
 
 
 class MyActivationFunction: public ActivationFunctionInterface
 {
 public:
     // get copy method
-    ActivationFunctionInterface * getCopy() override{
+    ActivationFunctionInterface * getCopy() override
+    {
         return new MyActivationFunction();
     }
 
     // get identifier
-    std::string getIdCode() override{
+    std::string getIdCode() override
+    {
         return "MyA";
     }
 
     // range [-2 : 2]
-    double getIdealInputMu() override{return 0.;};
-    double getIdealInputSigma() override{return 1.154700538379252;};
+    double getIdealInputMu() override { return 0.; };
+    double getIdealInputSigma() override { return 1.154700538379252; };
 
     // since this is a monotonic activation function,
     // we can leave the default getOutputMu() and getOutputSigma()
 
 
     // computation
-    double f(const double &in) override{
+    double f(const double &in) override
+    {
         // function
         return in*in*in;
     }
 
-    double f1d(const double &in) override{
+    double f1d(const double &in) override
+    {
         // first derivative
         return 3.*in*in;
     }
 
-    double f2d(const double &in) override{
+    double f2d(const double &in) override
+    {
         // second derivative
         return 6.*in;
     }
 
-    double f3d(const double & /*in*/) override{
+    double f3d(const double & /*in*/) override
+    {
         // third derivative
         return 6.;
     }
@@ -54,14 +58,14 @@ public:
     {
         v = in*in*in;
         v1d = flag_d1 ? 3.*in*in : 0.;
-        v2d = flag_d2 ? 6.*in    : 0.;
-        v3d = flag_d3 ? 6.       : 0.;
+        v2d = flag_d2 ? 6.*in : 0.;
+        v3d = flag_d3 ? 6. : 0.;
     }
 };
 
 
-
-int main() {
+int main()
+{
     using namespace std;
 
 

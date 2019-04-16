@@ -1,22 +1,19 @@
 #include "ffnn/unit/ActivationUnit.hpp"
-#include "ffnn/actf/ActivationFunctionManager.hpp"
-#include "ffnn/serial/StringCodeUtilities.hpp"
-
-#include <string>
 
 // --- String Code
 
 void ActivationUnit::setMemberParams(const std::string &memberTreeCode)
 {
     using namespace std;
-    std::string actfCode = readTreeCode(memberTreeCode, countNMembers(memberTreeCode)>1 ? 1 : 0); // atm using index
+    std::string actfCode = readTreeCode(memberTreeCode, countNMembers(memberTreeCode) > 1 ? 1 : 0); // atm using index
     this->setActivationFunction(std_actf::provideActivationFunction(readIdCode(actfCode)));
     _actf->setTreeParams(actfCode);
 }
 
 // --- Computation
 
-void ActivationUnit::computeOutput(){
+void ActivationUnit::computeOutput()
+{
     const bool flag_d1 = (_v1d != nullptr) || (_v2d != nullptr) || (_v1vd != nullptr) || (_v1d1vd != nullptr);
     const bool flag_d2 = (_v2d != nullptr) || (_v1vd != nullptr);
     const bool flag_d3 = _v2d1vd != nullptr;

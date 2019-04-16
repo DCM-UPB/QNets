@@ -20,11 +20,12 @@ class FeatureMapUnit: public FedUnit
 {
 public:
     // Constructor and destructor
-    explicit FeatureMapUnit(FM * fmap = nullptr) : FedUnit(static_cast<FeederInterface *>(fmap)) {}
-    ~FeatureMapUnit() override= default;
+    explicit FeatureMapUnit(FM * fmap = nullptr): FedUnit(static_cast<FeederInterface *>(fmap)) {}
+    ~FeatureMapUnit() override = default;
 
     // restrict feeder to FM
-    void setFeeder(FeederInterface * feeder) override{
+    void setFeeder(FeederInterface * feeder) override
+    {
         if (FM * fmap = dynamic_cast<FM *>(feeder)) {
             FedUnit::setFeeder(fmap);
         }
@@ -33,11 +34,11 @@ public:
         }
     }
 
-    FM * getMap(){return static_cast<FM *>(_feeder);}
+    FM * getMap() { return static_cast<FM *>(_feeder); }
 
     // devirtualize
-    void computeOutput() override{FedUnit::computeOutput();}
-    void computeValues() override{FedUnit::computeValues();}
+    void computeOutput() override { FedUnit::computeOutput(); }
+    void computeValues() override { FedUnit::computeValues(); }
 };
 
 #endif

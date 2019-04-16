@@ -1,9 +1,6 @@
 #include "ffnn/fmap/PairSumMap.hpp"
-#include "ffnn/serial/StringCodeUtilities.hpp"
 
 #include <cmath>
-#include <string>
-#include <vector>
 
 // --- fill/clear sources
 
@@ -26,7 +23,7 @@ void PairSumMap::_clearSources()
 
 void PairSumMap::setParameters(const size_t &source_id0, const size_t &source_id1)
 {
-    std::vector<size_t> source_ids { source_id0 , source_id1};
+    std::vector<size_t> source_ids{source_id0, source_id1};
     OneDimStaticMap::setParameters(source_ids);
 }
 
@@ -39,45 +36,54 @@ double PairSumMap::getFeedMu()
 
 double PairSumMap::getFeedSigma()
 {
-    return sqrt(pow(_src0->getOutputSigma(),2) + pow(_src1->getOutputSigma(),2));
+    return sqrt(pow(_src0->getOutputSigma(), 2) + pow(_src1->getOutputSigma(), 2));
 }
 
 // --- Computation
 
 
-double PairSumMap::getFeed(){
+double PairSumMap::getFeed()
+{
     return _src0->getValue() + _src1->getValue();
 }
 
-double PairSumMap::getFirstDerivativeFeed(const int &i1d){
+double PairSumMap::getFirstDerivativeFeed(const int &i1d)
+{
     return _src0->getFirstDerivativeValue(i1d) + _src1->getFirstDerivativeValue(i1d);
 }
 
-double PairSumMap::getSecondDerivativeFeed(const int &i2d){
+double PairSumMap::getSecondDerivativeFeed(const int &i2d)
+{
     return _src0->getSecondDerivativeValue(i2d) + _src1->getSecondDerivativeValue(i2d);
 }
 
 
-double PairSumMap::getVariationalFirstDerivativeFeed(const int &iv1d){
+double PairSumMap::getVariationalFirstDerivativeFeed(const int &iv1d)
+{
     if (iv1d < _vp_id_shift) {
         return _src0->getVariationalFirstDerivativeValue(iv1d) + _src1->getVariationalFirstDerivativeValue(iv1d);
     }
-     {return 0.;
-}
+    {
+        return 0.;
+    }
 }
 
-double PairSumMap::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
+double PairSumMap::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d)
+{
     if (iv1d < _vp_id_shift) {
         return _src0->getCrossFirstDerivativeValue(i1d, iv1d) + _src1->getCrossFirstDerivativeValue(i1d, iv1d);
     }
-     {return 0.;
-}
+    {
+        return 0.;
+    }
 }
 
-double PairSumMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
+double PairSumMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d)
+{
     if (iv2d < _vp_id_shift) {
         return _src0->getCrossSecondDerivativeValue(i2d, iv2d) + _src1->getCrossSecondDerivativeValue(i2d, iv2d);
     }
-     {return 0.;
-}
+    {
+        return 0.;
+    }
 }

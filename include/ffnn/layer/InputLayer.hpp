@@ -17,23 +17,31 @@ protected:
 public:
     // --- Constructor / Destructor
 
-    explicit InputLayer(const int &nunits = 1){if (nunits > 1) { construct(nunits);
-}};
+    explicit InputLayer(const int &nunits = 1)
+    {
+        if (nunits > 1) {
+            construct(nunits);
+        }
+    };
     void construct(const int &nunits) override;
 
     // --- Destructor
 
-    ~InputLayer() override{_U_in.clear();}
-    void deconstruct() override{NetworkLayer::deconstruct(); _U_in.clear();}
+    ~InputLayer() override { _U_in.clear(); }
+    void deconstruct() override
+    {
+        NetworkLayer::deconstruct();
+        _U_in.clear();
+    }
 
     // --- String Codes
 
-    std::string getIdCode() override{return "INL";}
+    std::string getIdCode() override { return "INL"; }
 
     // --- Getters
 
-    int getNInputUnits() {return _U_in.size();}
-    InputUnit * getInputUnit(const int &i) {return _U_in[i];}
+    int getNInputUnits() { return _U_in.size(); }
+    InputUnit * getInputUnit(const int &i) { return _U_in[i]; }
 };
 
 #endif

@@ -8,12 +8,12 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 {
 public:
     // getters
-    ActivationFunctionInterface * getCopy() override{return new LogisticActivationFunction();}
-    std::string getIdCode() override{return "LGS";}
+    ActivationFunctionInterface * getCopy() override { return new LogisticActivationFunction(); }
+    std::string getIdCode() override { return "LGS"; }
 
     // input should be in the rage [-5 : 5] -> mu=0   sigma=10/sqrt(12)
-    double getIdealInputMu() override{return 0.;}
-    double getIdealInputSigma() override{return 2.886751345948129;}
+    double getIdealInputMu() override { return 0.; }
+    double getIdealInputSigma() override { return 2.886751345948129; }
 
     // we can use default implementation for output mu/sigma
 

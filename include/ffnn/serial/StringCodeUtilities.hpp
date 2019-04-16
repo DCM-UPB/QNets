@@ -70,9 +70,13 @@ string composeTreeCode(const string &fullcode, const string &memberTreeCode); //
 template <typename T>
 bool setParamValue(const string &paramValue, T &var)
 {
-    if (!paramValue.empty()) {istringstream iss(paramValue); return !(iss >> var).fail();}
-     {return false;
-}
+    if (!paramValue.empty()) {
+        istringstream iss(paramValue);
+        return !(iss >> var).fail();
+    }
+    {
+        return false;
+    }
 }
 
 // for applying parameter value string to actual parameter, from full params list
@@ -89,9 +93,12 @@ string composeParamValue(const T &var)
     ostringstream oss;
     int p = numeric_limits<T>::max_digits10;
     oss.precision(p);
-    if (!(oss << var).fail()) { return oss.str();
-    }  {return "";
-}
+    if (!(oss << var).fail()) {
+        return oss.str();
+    }
+    {
+        return "";
+    }
 }
 
 // for creating "name value" string from identifier and actual parameter
@@ -99,9 +106,12 @@ template <typename T>
 string composeParamCode(const string &paramIdCode, const T &var)
 {
     string value = composeParamValue(var);
-    if (!value.empty()) { return paramIdCode + " " + value;
-    }  {return "";
-}
+    if (!value.empty()) {
+        return paramIdCode + " " + value;
+    }
+    {
+        return "";
+    }
 }
 
 #endif

@@ -10,7 +10,7 @@ class PairSumMapUnit: public FeatureMapUnit<PairSumMap>
 {
 public:
     // string code id
-    std::string getIdCode() override{return "PSMU";} // return identifier for unit type
+    std::string getIdCode() override { return "PSMU"; } // return identifier for unit type
 };
 
 #endif

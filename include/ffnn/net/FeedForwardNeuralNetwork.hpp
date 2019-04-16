@@ -19,8 +19,8 @@ class FeedForwardNeuralNetwork
 private:
     void _construct(const int &insize, const int &hidlaysize, const int &outsize); // construct from minimal set of unit numbers
     void _registerLayer(NetworkLayer * newLayer, const int &indexFromBack = 0); // register layers to correct vectors, position controlled by indexFromBack
-    void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0, const std::string &params=""); // creates and registers a new layer according to idCode and nunits
-    void _addNewLayer(const std::string &idCode, const std::string &params="", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
+    void _addNewLayer(const std::string &idCode, const int &nunits, const int &indexFromBack = 0, const std::string &params = ""); // creates and registers a new layer according to idCode and nunits
+    void _addNewLayer(const std::string &idCode, const std::string &params = "", const int &indexFromBack = 0); // creates and registers a new layer according to idCode and params code (without it the layer will only have an offset unit)
     void _updateNVP(); // internal method to update _nvp member, call it after you changed/created variational parameter assignment
 protected:
     std::vector<NetworkLayer *> _L; // contains all kinds of layers
@@ -43,36 +43,36 @@ public:
 
 
     // --- Get information about the NN structure
-    int getNLayers(){return _L.size();}
-    int getNFedLayers(){return _L_fed.size();}
-    int getNNeuralLayers(){return _L_nn.size();}
-    int getNFeatureMapLayers(){return _L_fm.size();}
-    int getNHiddenLayers(){return _L_nn.size()-1;}
+    int getNLayers() { return _L.size(); }
+    int getNFedLayers() { return _L_fed.size(); }
+    int getNNeuralLayers() { return _L_nn.size(); }
+    int getNFeatureMapLayers() { return _L_fm.size(); }
+    int getNHiddenLayers() { return _L_nn.size() - 1; }
 
-    int getNInput(){return _L_in->getNInputUnits();}
-    int getNOutput(){return _L_out->getNOutputNNUnits();}
-    int getLayerSize(const int &li){return _L[li]->getNUnits();}
+    int getNInput() { return _L_in->getNInputUnits(); }
+    int getNOutput() { return _L_out->getNOutputNNUnits(); }
+    int getLayerSize(const int &li) { return _L[li]->getNUnits(); }
 
-    NetworkLayer * getLayer(const int &li){return _L[li];}
-    FedLayer * getFedLayer(const int &li){return _L_fed[li];}
-    NNLayer * getNNLayer(const int &li){return _L_nn[li];}
-    FeatureMapLayer * getFeatureMapLayer(const int &li){return _L_fm[li];}
-    InputLayer * getInputLayer(){return _L_in;}
-    OutputNNLayer * getOutputLayer(){return _L_out;}
+    NetworkLayer * getLayer(const int &li) { return _L[li]; }
+    FedLayer * getFedLayer(const int &li) { return _L_fed[li]; }
+    NNLayer * getNNLayer(const int &li) { return _L_nn[li]; }
+    FeatureMapLayer * getFeatureMapLayer(const int &li) { return _L_fm[li]; }
+    InputLayer * getInputLayer() { return _L_in; }
+    OutputNNLayer * getOutputLayer() { return _L_out; }
 
-    bool isConnected(){return _flag_connected;}
-    bool hasFirstDerivativeSubstrate(){return _flag_1d;}
-    bool hasSecondDerivativeSubstrate(){return _flag_2d;}
-    bool hasVariationalFirstDerivativeSubstrate(){return _flag_v1d;}
-    bool hasCrossFirstDerivativeSubstrate(){return _flag_c1d;}
-    bool hasCrossSecondDerivativeSubstrate(){return _flag_c2d;}
+    bool isConnected() { return _flag_connected; }
+    bool hasFirstDerivativeSubstrate() { return _flag_1d; }
+    bool hasSecondDerivativeSubstrate() { return _flag_2d; }
+    bool hasVariationalFirstDerivativeSubstrate() { return _flag_v1d; }
+    bool hasCrossFirstDerivativeSubstrate() { return _flag_c1d; }
+    bool hasCrossSecondDerivativeSubstrate() { return _flag_c2d; }
 
 
     // --- Modify NN structure
     void setGlobalActivationFunctions(ActivationFunctionInterface * actf);
     void pushHiddenLayer(const int &size);
     void popHiddenLayer();
-    void pushFeatureMapLayer(const int &size, const std::string &params="");
+    void pushFeatureMapLayer(const int &size, const std::string &params = "");
 
 
     // --- Connect the neural network
@@ -91,7 +91,7 @@ public:
     // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters),
     //     which exist only after that they are assigned to actual parameters in the network (e.g. betas)
     void assignVariationalParameters(const int &starting_layer_index = 0); // make betas variational parameters, starting from starting_layer
-    int getNVariationalParameters(){return _nvp;}
+    int getNVariationalParameters() { return _nvp; }
     double getVariationalParameter(const int &ivp);
     void getVariationalParameter(double * vp);
     void setVariationalParameter(const int &ivp, const double &vp);

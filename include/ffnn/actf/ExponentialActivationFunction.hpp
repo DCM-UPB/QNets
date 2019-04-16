@@ -8,12 +8,12 @@ class ExponentialActivationFunction: public ActivationFunctionInterface
 {
 public:
     // getters
-    ActivationFunctionInterface * getCopy() override{return new ExponentialActivationFunction();}
-    std::string getIdCode() override{return "EXP";}
+    ActivationFunctionInterface * getCopy() override { return new ExponentialActivationFunction(); }
+    std::string getIdCode() override { return "EXP"; }
 
     // input should be in the range [-1 : 1] -> mu=0   sigma=1/sqrt(3)
-    double getIdealInputMu() override{return 0.;}
-    double getIdealInputSigma() override{return 0.577350269189626;}
+    double getIdealInputMu() override { return 0.; }
+    double getIdealInputSigma() override { return 0.577350269189626; }
 
     // we can use default implementation for output mu/sigma
 

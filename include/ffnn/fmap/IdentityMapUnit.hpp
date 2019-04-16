@@ -10,7 +10,7 @@ class IdentityMapUnit: public FeatureMapUnit<IdentityMap>
 {
 public:
     // string code id
-    std::string getIdCode() override{return "IDMU";} // return identifier for unit type
+    std::string getIdCode() override { return "IDMU"; } // return identifier for unit type
 };
 
 #endif

@@ -14,23 +14,26 @@
   Hence, we have to create the NN and target data (a gaussian), and then let the trainer class do the rest.
 */
 
-double gaussian(const double x, const double a, const double b) {
-    return exp(-a*pow(x-b, 2));
+double gaussian(const double x, const double a, const double b)
+{
+    return exp(-a*pow(x - b, 2));
 };
 
 // first derivative of gaussian
-double gaussian_ddx(const double x, const double a, const double b) {
-    return 2.0*a*(b-x) * exp(-a*pow(x-b, 2));
+double gaussian_ddx(const double x, const double a, const double b)
+{
+    return 2.0*a*(b - x)*exp(-a*pow(x - b, 2));
 };
 
 // first derivative of gaussian
-double gaussian_d2dx(const double x, const double a, const double b) {
-    return (pow(2.0*a*(b-x), 2) - 2.0*a) * exp(-a*pow(x-b, 2));
+double gaussian_d2dx(const double x, const double a, const double b)
+{
+    return (pow(2.0*a*(b - x), 2) - 2.0*a)*exp(-a*pow(x - b, 2));
 };
 
 
-
-int main () {
+int main()
+{
     using namespace std;
 
     int nhl, nfits = 1;
@@ -44,16 +47,17 @@ int main () {
     cin >> nhl;
 
     int nhu[nhl];
-    for (int i=0; i<nhl; ++i) {
-        cout << "How many units should hidden layer " << i+1 << " have? (>1) ";
+    for (int i = 0; i < nhl; ++i) {
+        cout << "How many units should hidden layer " << i + 1 << " have? (>1) ";
         cin >> nhu[i];
     }
     cout << endl;
 
     int nl = nhl + 2;
     cout << "We generate a FFANN with " << nl << " layers and 2, ";
-    for (int i=0; i<nhl; ++i) { cout << nhu[i] << ", ";
-}
+    for (int i = 0; i < nhl; ++i) {
+        cout << nhu[i] << ", ";
+    }
     cout << "2 units respectively" << endl;
     cout << "========================================================================" << endl;
     cout << endl;
@@ -68,22 +72,25 @@ int main () {
     cout << "Please enter the the maximum tolerable fit residual. (0 to disable) ";
     cin >> maxchi;
     cout << "Please enter the ";
-    if (maxchi > 0) { cout << "maximum ";
-}
+    if (maxchi > 0) {
+        cout << "maximum ";
+    }
     cout << "number of fitting runs. (>0) ";
     cin >> nfits;
     cout << endl << endl;
     cout << "Now we find the best fit ... " << endl;
-    if (!verbose) { cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
-}
+    if (!verbose) {
+        cout << "NOTE: You may increase the amount of displayed information by setting verbose to true in the head of main." << endl;
+    }
     cout << endl;
 
     // NON I/O CODE
 
     // create FFNN
     FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(2, nhu[0], 2);
-    for (int i = 1; i<nhl; ++i) { ffnn->pushHiddenLayer(nhu[i]);
-}
+    for (int i = 1; i < nhl; ++i) {
+        ffnn->pushHiddenLayer(nhu[i]);
+    }
     ffnn->connectFFNN();
     ffnn->assignVariationalParameters(); // since the trainer works on variational parameter interface, we need to make all betas variational parameters
     //ffnn->assignVariationalParameters(starting_layer_index); // allows you to exclude all betas from layers<starting_layer
@@ -104,8 +111,8 @@ int main () {
     NNTrainingConfig tconfig = {lambda_r, lambda_d1, lambda_d2, maxn_steps, maxn_novali};
 
     // allocate data arrays
-    const bool flag_d1 = lambda_d1>0;
-    const bool flag_d2 = lambda_d2>0;
+    const bool flag_d1 = lambda_d1 > 0;
+    const bool flag_d2 = lambda_d2 > 0;
     tdata.allocate(flag_d1, flag_d2);
 
     // generate the data to be fitted
@@ -113,17 +120,20 @@ int main () {
     const double ub = 10; // upper input boundary for data
     random_device rdev;
     mt19937_64 rgen = std::mt19937_64(rdev());
-    uniform_real_distribution<double> rd(lb,ub);
+    uniform_real_distribution<double> rd(lb, ub);
     for (int i = 0; i < ndata; ++i) {
         tdata.x[i][0] = rd(rgen);
         tdata.y[i][0] = gaussian(tdata.x[i][0], 1, 0);
-        if (flag_d1) { tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0], 1, 0);
-}
-        if (flag_d2) { tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0], 1, 0);
-}
+        if (flag_d1) {
+            tdata.yd1[i][0][0] = gaussian_ddx(tdata.x[i][0], 1, 0);
+        }
+        if (flag_d2) {
+            tdata.yd2[i][0][0] = gaussian_d2dx(tdata.x[i][0], 1, 0);
+        }
         tdata.w[i][0] = 1.0; // our data have no error, so set all weights to 1
-        if (verbose) { printf ("data: %i %g %g\n", i, tdata.x[i][0], tdata.y[i][0]);
-}
+        if (verbose) {
+            printf("data: %i %g %g\n", i, tdata.x[i][0], tdata.y[i][0]);
+        }
     }
 
 

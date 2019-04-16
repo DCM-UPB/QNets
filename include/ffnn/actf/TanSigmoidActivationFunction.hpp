@@ -9,12 +9,12 @@ class TanSigmoidActivationFunction: public ActivationFunctionInterface
 {
 public:
     // getters
-    ActivationFunctionInterface * getCopy() override{return new TanSigmoidActivationFunction();}
-    std::string getIdCode() override{return "TANS";}
+    ActivationFunctionInterface * getCopy() override { return new TanSigmoidActivationFunction(); }
+    std::string getIdCode() override { return "TANS"; }
 
     // input can be assumed to be in the rage [-1 : 1] -> mu=0   sigma=1/sqrt(3)
-    double getIdealInputMu() override{return 0.;}
-    double getIdealInputSigma() override{return 0.577350269189626;}
+    double getIdealInputMu() override { return 0.; }
+    double getIdealInputSigma() override { return 0.577350269189626; }
 
     // we can use default implementation for output mu/sigma
 

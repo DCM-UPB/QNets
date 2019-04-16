@@ -15,7 +15,7 @@ protected:
     OffsetUnit * _U_off;
     std::vector<NetworkUnit *> _U; // this vector stores units of all derived types
 
-    void _registerUnit(NetworkUnit * newUnit){_U.push_back(newUnit);} // every derived type with extra unit vector should implement a registerUnit and call the registerUnit of its parent within
+    void _registerUnit(NetworkUnit * newUnit) { _U.push_back(newUnit); } // every derived type with extra unit vector should implement a registerUnit and call the registerUnit of its parent within
 
 public:
     // --- Constructor
@@ -31,19 +31,24 @@ public:
 
     // --- Class String Code methods
 
-    std::string getClassIdCode() override{return "LAYER";}
-    std::string getParams() override{return composeParamCode("nunits", _U.size());}
+    std::string getClassIdCode() override { return "LAYER"; }
+    std::string getParams() override { return composeParamCode("nunits", _U.size()); }
     std::string getMemberTreeCode() override;
 
-    void setParams(const std::string &params) override{int n; setParamValue(params, "nunits", n); this->setSize(n);}
+    void setParams(const std::string &params) override
+    {
+        int n;
+        setParamValue(params, "nunits", n);
+        this->setSize(n);
+    }
     void setMemberParams(const std::string &memberTreeCode) override;
 
 
     // --- Getters
 
-    int getNUnits(){return _U.size();}
-    NetworkUnit * getUnit(const int & i){return _U[i];}
-    OffsetUnit * getOffsetUnit(){return _U_off;}
+    int getNUnits() { return _U.size(); }
+    NetworkUnit * getUnit(const int &i) { return _U[i]; }
+    OffsetUnit * getOffsetUnit() { return _U_off; }
 
 
     // --- Modify structure
@@ -53,11 +58,11 @@ public:
 
     // --- Variational Parameters
 
-    virtual bool setVariationalParameter(const int & /*id*/, const double & /*vp*/) {return false;}
-    virtual bool getVariationalParameter(const int & /*id*/, double & /*vp*/) {return false;}
-    virtual int getNVariationalParameters() {return 0;}
-    virtual int getMaxVariationalParameterIndex(){return -1;} // return the max appearing variational parameter index in the layer and it's input
-    virtual int setVariationalParametersID(const int &id_vp) { return id_vp;}
+    virtual bool setVariationalParameter(const int & /*id*/, const double & /*vp*/) { return false; }
+    virtual bool getVariationalParameter(const int & /*id*/, double & /*vp*/) { return false; }
+    virtual int getNVariationalParameters() { return 0; }
+    virtual int getMaxVariationalParameterIndex() { return -1; } // return the max appearing variational parameter index in the layer and it's input
+    virtual int setVariationalParametersID(const int &id_vp) { return id_vp; }
 
 
     // --- Values to compute

@@ -16,14 +16,18 @@ protected:
 public:
     // --- Destructor
 
-    ~FedLayer() override {_U_fed.clear();}
+    ~FedLayer() override { _U_fed.clear(); }
 
-    void deconstruct() override{NetworkLayer::deconstruct(); _U_fed.clear();}
+    void deconstruct() override
+    {
+        NetworkLayer::deconstruct();
+        _U_fed.clear();
+    }
 
     // --- Getters
 
-    int getNFedUnits() {return _U_fed.size();}
-    FedUnit * getFedUnit(const int &i) {return _U_fed[i];}
+    int getNFedUnits() { return _U_fed.size(); }
+    FedUnit * getFedUnit(const int &i) { return _U_fed[i]; }
 
 
     // --- Variational Parameters

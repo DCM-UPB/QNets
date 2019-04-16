@@ -8,12 +8,10 @@
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/feed/FeederInterface.hpp"
 #include "ffnn/feed/SmartBetaGenerator.hpp"
-#include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-#include "ffnn/unit/FedUnit.hpp"
 
 
-int main(){
+int main()
+{
     using namespace std;
 
     double mu, sigma;
@@ -26,7 +24,8 @@ int main(){
     try {
         smart_beta::details::_computeBetaMuAndSigma(ffnn->getFedLayer(0)->getFedUnit(0), mu, sigma);
         throw_exception = false;
-    } catch (exception &e) {
+    }
+    catch (exception &e) {
         throw_exception = true;
     }
     assert(throw_exception);
@@ -41,52 +40,60 @@ int main(){
     // --- _findIndexesOfUnitsWithRay
     vector<int> idx;
     idx = smart_beta::details::_findIndexesOfUnitsWithRay(ffnn->getFedLayer(0));
-    assert( idx.size() == 4);
-    assert( idx[0] == 0 );
-    assert( idx[1] == 1 );
-    assert( idx[2] == 2 );
-    assert( idx[3] == 3 );
+    assert(idx.size() == 4);
+    assert(idx[0] == 0);
+    assert(idx[1] == 1);
+    assert(idx[2] == 2);
+    assert(idx[3] == 3);
     idx = smart_beta::details::_findIndexesOfUnitsWithRay(ffnn->getFedLayer(1));
-    assert( idx.size() == 2);
-    assert( idx[0] == 0 );
-    assert( idx[1] == 1 );
+    assert(idx.size() == 2);
+    assert(idx[0] == 0);
+    assert(idx[1] == 1);
 
 
     // --- _computeBetaMuAndSigma
 
     // 4 units
-    for (int il=0; il<ffnn->getFedLayer(0)->getNFedUnits(); ++il){
+    for (int il = 0; il < ffnn->getFedLayer(0)->getNFedUnits(); ++il) {
         smart_beta::details::_computeBetaMuAndSigma(ffnn->getFedLayer(0)->getFedUnit(il), mu, sigma);
         double mu_source = 0.;
-        for (int j=BETA_INDEX_OFFSET; j<ffnn->getLayer(0)->getNUnits(); ++j){
+        for (int j = BETA_INDEX_OFFSET; j < ffnn->getLayer(0)->getNUnits(); ++j) {
             mu_source += ffnn->getLayer(0)->getUnit(j)->getOutputMu();
         }
-        const double mu_check = (mu_source != 0) ? ffnn->getFedLayer(0)->getFedUnit(il)->getIdealProtoMu() / mu_source : 0;
+        const double mu_check = (mu_source != 0)
+                                ? ffnn->getFedLayer(0)->getFedUnit(il)->getIdealProtoMu()/mu_source
+                                : 0;
         double sigma_source = 0.;
-        for (int j=BETA_INDEX_OFFSET; j<ffnn->getLayer(0)->getNUnits(); ++j){
+        for (int j = BETA_INDEX_OFFSET; j < ffnn->getLayer(0)->getNUnits(); ++j) {
             sigma_source += ffnn->getLayer(0)->getUnit(j)->getOutputSigma();
         }
-        const double sigma_check = (sigma_source != 0) ? ffnn->getFedLayer(0)->getFedUnit(il)->getIdealProtoSigma() / sigma_source : 1;
-        assert( mu == mu_check );
-        assert( sigma == sigma_check );
+        const double sigma_check = (sigma_source != 0)
+                                   ? ffnn->getFedLayer(0)->getFedUnit(il)->getIdealProtoSigma()/sigma_source
+                                   : 1;
+        assert(mu == mu_check);
+        assert(sigma == sigma_check);
     }
 
     // output layer
     // 2 output units
-    for (int il=0; il<ffnn->getFedLayer(1)->getNFedUnits(); ++il){
+    for (int il = 0; il < ffnn->getFedLayer(1)->getNFedUnits(); ++il) {
         smart_beta::details::_computeBetaMuAndSigma(ffnn->getFedLayer(1)->getFedUnit(il), mu, sigma);
         double mu_source = 0.;
-        for (int j=BETA_INDEX_OFFSET; j<ffnn->getLayer(1)->getNUnits(); ++j){
+        for (int j = BETA_INDEX_OFFSET; j < ffnn->getLayer(1)->getNUnits(); ++j) {
             mu_source += ffnn->getLayer(1)->getUnit(j)->getOutputMu();
         }
-        const double mu_check = (mu_source != 0) ? ffnn->getFedLayer(1)->getFedUnit(il)->getIdealProtoMu() / mu_source : 0;
+        const double mu_check = (mu_source != 0)
+                                ? ffnn->getFedLayer(1)->getFedUnit(il)->getIdealProtoMu()/mu_source
+                                : 0;
         double sigma_source = 0.;
-        for (int j=BETA_INDEX_OFFSET; j<ffnn->getLayer(1)->getNUnits(); ++j){
+        for (int j = BETA_INDEX_OFFSET; j < ffnn->getLayer(1)->getNUnits(); ++j) {
             sigma_source += ffnn->getLayer(1)->getUnit(j)->getOutputSigma();
         }
-        const double sigma_check = (sigma_source != 0) ? ffnn->getFedLayer(1)->getFedUnit(il)->getIdealProtoSigma() / sigma_source : 1;
-        assert( mu == mu_check );
-        assert( sigma == sigma_check );
+        const double sigma_check = (sigma_source != 0)
+                                   ? ffnn->getFedLayer(1)->getFedUnit(il)->getIdealProtoSigma()/sigma_source
+                                   : 1;
+        assert(mu == mu_check);
+        assert(sigma == sigma_check);
     }
 
 
@@ -98,27 +105,27 @@ int main(){
     // sample N times the beta
     const int N = 10000;
     vector<double> betas;
-    for (int i=0; i<N; ++i){
+    for (int i = 0; i < N; ++i) {
         smart_beta::details::_setRandomBeta(feeder, mu, sigma);
-        for (int ib=BETA_INDEX_OFFSET; ib<feeder->getNBeta(); ++ib){
+        for (int ib = BETA_INDEX_OFFSET; ib < feeder->getNBeta(); ++ib) {
             betas.push_back(feeder->getBeta(ib));
         }
     }
     // compute the mean value of the betas and check that is equal to mu
     double mean = 0.;
-    for (double b : betas){
+    for (double b : betas) {
         mean += b;
     }
-    mean /= (N*(feeder->getNBeta()-BETA_INDEX_OFFSET));
+    mean /= (N*(feeder->getNBeta() - BETA_INDEX_OFFSET));
     // compute the standard deviation of the betas and check that is equal to mu
     double std_dev = 0.;
-    for (double b : betas){
-        std_dev += pow(b-mean, 2);
+    for (double b : betas) {
+        std_dev += pow(b - mean, 2);
     }
-    std_dev = sqrt(std_dev/(N*(feeder->getNBeta()-BETA_INDEX_OFFSET)-1));
+    std_dev = sqrt(std_dev/(N*(feeder->getNBeta() - BETA_INDEX_OFFSET) - 1));
     // assertions
-    assert( abs(mu-mean) < 0.1 );
-    assert( abs(sigma-std_dev) < 0.05 );
+    assert(abs(mu - mean) < 0.1);
+    assert(abs(sigma - std_dev) < 0.05);
 
 
     // --- _makeBetaOrthogonal
@@ -134,11 +141,11 @@ int main(){
     smart_beta::details::_makeBetaOrthogonal(fixed_feeder, feeder);
     // compute the dot product and check that it is almost zero
     double dot_product = 0.;
-    for (int i=BETA_INDEX_OFFSET; i<feeder->getNBeta(); ++i){
-        dot_product += feeder->getBeta(i) * fixed_feeder->getBeta(i);
+    for (int i = BETA_INDEX_OFFSET; i < feeder->getNBeta(); ++i) {
+        dot_product += feeder->getBeta(i)*fixed_feeder->getBeta(i);
     }
     //cout << "_makeBetaOrthogonal (pair of feeders): " << dot_product << endl;
-    assert( abs(dot_product) < 0.000000001);
+    assert(abs(dot_product) < 0.000000001);
 
     // now check that the norm is preserved by applying the orthogonality procedure
 
@@ -146,28 +153,28 @@ int main(){
     smart_beta::details::_computeBetaMuAndSigma(u, mu, sigma);
     // sample N times the beta
     betas.clear();
-    for (int i=0; i<N; ++i){
+    for (int i = 0; i < N; ++i) {
         smart_beta::details::_setRandomBeta(feeder, mu, sigma);
         smart_beta::details::_makeBetaOrthogonal(fixed_feeder, feeder);
-        for (int ib=BETA_INDEX_OFFSET; ib<feeder->getNBeta(); ++ib){
+        for (int ib = BETA_INDEX_OFFSET; ib < feeder->getNBeta(); ++ib) {
             betas.push_back(feeder->getBeta(ib));
         }
     }
     // compute the mean value of the betas and check that is equal to mu
     mean = 0.;
-    for (double b : betas){
+    for (double b : betas) {
         mean += b;
     }
-    mean /= (N*(feeder->getNBeta()-BETA_INDEX_OFFSET));
+    mean /= (N*(feeder->getNBeta() - BETA_INDEX_OFFSET));
     // compute the standard deviation of the betas and check that is equal to mu
     std_dev = 0.;
-    for (double b : betas){
-        std_dev += pow(b-mean, 2);
+    for (double b : betas) {
+        std_dev += pow(b - mean, 2);
     }
-    std_dev = sqrt(std_dev/(N*(feeder->getNBeta()-BETA_INDEX_OFFSET)-1));
+    std_dev = sqrt(std_dev/(N*(feeder->getNBeta() - BETA_INDEX_OFFSET) - 1));
     // assertions
-    assert( abs(mu-mean) < 0.1 );
-    assert( abs(sigma-std_dev) < 0.05 );
+    assert(abs(mu - mean) < 0.1);
+    assert(abs(sigma - std_dev) < 0.05);
 
 
     // --- generateSmartBeta
@@ -175,25 +182,25 @@ int main(){
     smart_beta::generateSmartBeta(ffnn);
     // check the orthogonality relations
     vector<double> betas2;
-    for (int il=0; il<ffnn->getNFedLayers(); ++il){
+    for (int il = 0; il < ffnn->getNFedLayers(); ++il) {
         // cout << "layer " << il << endl;
-        for (int iu1=0; iu1<ffnn->getFedLayer(il)->getNFedUnits(); ++iu1){
+        for (int iu1 = 0; iu1 < ffnn->getFedLayer(il)->getNFedUnits(); ++iu1) {
             betas.clear();
-            for (int ib=BETA_INDEX_OFFSET; ib<ffnn->getFedLayer(il)->getFedUnit(iu1)->getFeeder()->getNBeta(); ++ib) {
+            for (int ib = BETA_INDEX_OFFSET; ib < ffnn->getFedLayer(il)->getFedUnit(iu1)->getFeeder()->getNBeta(); ++ib) {
                 betas.push_back(ffnn->getFedLayer(il)->getFedUnit(iu1)->getFeeder()->getBeta(ib));
-}
-            for (int iu2=iu1+1; iu2<ffnn->getFedLayer(il)->getNFedUnits(); ++iu2){
+            }
+            for (int iu2 = iu1 + 1; iu2 < ffnn->getFedLayer(il)->getNFedUnits(); ++iu2) {
                 betas2.clear();
-                for (int ib=BETA_INDEX_OFFSET; ib<ffnn->getFedLayer(il)->getFedUnit(iu2)->getFeeder()->getNBeta(); ++ib) {
+                for (int ib = BETA_INDEX_OFFSET; ib < ffnn->getFedLayer(il)->getFedUnit(iu2)->getFeeder()->getNBeta(); ++ib) {
                     betas2.push_back(ffnn->getFedLayer(il)->getFedUnit(iu2)->getFeeder()->getBeta(ib));
-}
+                }
                 const double dot_product = inner_product(begin(betas), end(betas), begin(betas2), 0.0);
                 // cout << "    units " << iu1 << ", " << iu2 << "    ->    dot_product = " << dot_product << endl;
                 // cout << "        expected " << (((iu1>=ffnn->getLayer(il)->getNUnits()) || (iu2>=ffnn->getLayer(il)->getNUnits())) ? true : false) << endl;
                 // cout << endl;
-                if ( !( (iu1>=ffnn->getLayer(il)->getNUnits()) || (iu2>=ffnn->getLayer(il)->getNUnits()) ) ){
+                if (!((iu1 >= ffnn->getLayer(il)->getNUnits()) || (iu2 >= ffnn->getLayer(il)->getNUnits()))) {
                     //cout << "_generateSmartBeta (ffnn, u" << iu1 << " u" << iu2 << "): " <<  dot_product << endl;
-                    assert( abs(dot_product) < 0.000000001 );
+                    assert(abs(dot_product) < 0.000000001);
                 }
             }
         }

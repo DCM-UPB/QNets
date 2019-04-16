@@ -3,10 +3,10 @@
 #include <iostream>
 
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 
 
-int main() {
+int main()
+{
     using namespace std;
 
 
@@ -79,7 +79,6 @@ int main() {
     cin.ignore();
 
 
-
     cout << "Setting a specific beta" << endl;
     cout << "=======================" << endl;
     cin.ignore();
@@ -97,7 +96,6 @@ int main() {
     cin.ignore();
 
 
-
     cout << "Accessing all the variational parameters at once" << endl;
     cout << "================================================" << endl;
     cin.ignore();
@@ -109,7 +107,7 @@ int main() {
     cout << "The betas are: ";
     cin.ignore();
 
-    for (int i=0; i<ffnn->getNBeta(); ++i){
+    for (int i = 0; i < ffnn->getNBeta(); ++i) {
         cout << ffnn->getBeta(i) << "    ";
     }
     cin.ignore();
@@ -118,10 +116,9 @@ int main() {
     cin.ignore();
     ffnn->setBeta(3, -4.44);
     cout << "Done! The betas are now:" << endl;
-    for (int i=0; i<ffnn->getNBeta(); ++i){
+    for (int i = 0; i < ffnn->getNBeta(); ++i) {
         cout << ffnn->getBeta(i) << "    ";
     }
-
 
 
     cout << endl << endl;

@@ -12,12 +12,13 @@ protected:
 
 public:
     EuclideanPairDistanceMap(NetworkLayer * nl, const size_t ndim, const size_t &source_id0, const size_t &source_id1)
-        : MultiDimStaticMap(nl, ndim, 2) {setParameters(ndim, source_id0, source_id1);} // full initialization;
-    explicit EuclideanPairDistanceMap(NetworkLayer * nl): EuclideanPairDistanceMap(nl, 0, 0, 0) {} // minimal default initialization
-    ~EuclideanPairDistanceMap() override= default;
+            : MultiDimStaticMap(nl, ndim, 2) { setParameters(ndim, source_id0, source_id1); } // full initialization;
+    explicit EuclideanPairDistanceMap(NetworkLayer * nl):
+            EuclideanPairDistanceMap(nl, 0, 0, 0) {} // minimal default initialization
+    ~EuclideanPairDistanceMap() override = default;
 
     // string code methods
-    std::string getIdCode() override{return "EPDM";} // return an identification string
+    std::string getIdCode() override { return "EPDM"; } // return an identification string
 
     // parameter manipulation
     void setParameters(const size_t &ndim, const size_t &source_id0, const size_t &source_id1);

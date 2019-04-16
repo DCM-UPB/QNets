@@ -28,10 +28,11 @@ protected:
 public:
     // construct from individual structures / ffnn
     NNTrainer(const NNTrainingData &tdata, const NNTrainingConfig &tconfig)
-        : _tdata(tdata), _tconfig(tconfig), _flag_vali(tdata.nvalidation > 0), _flag_test((tdata.ntraining + tdata.nvalidation) < tdata.ndata),
-          _flag_r(tconfig.lambda_r > 0), _flag_d1(tconfig.lambda_d1 > 0), _flag_d2(tconfig.lambda_d2 > 0) {}
+            :
+            _tdata(tdata), _tconfig(tconfig), _flag_vali(tdata.nvalidation > 0), _flag_test((tdata.ntraining + tdata.nvalidation) < tdata.ndata),
+            _flag_r(tconfig.lambda_r > 0), _flag_d1(tconfig.lambda_d1 > 0), _flag_d2(tconfig.lambda_d2 > 0) {}
 
-    virtual ~NNTrainer()= default;
+    virtual ~NNTrainer() = default;
 
     // set shift/scale parameters of NN units, to achieve proper normalization with respect to tdata
     void setNormalization(FeedForwardNeuralNetwork * ffnn);

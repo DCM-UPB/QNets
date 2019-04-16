@@ -1,7 +1,5 @@
 #include "ffnn/actf/ExponentialActivationFunction.hpp"
 
-#include <cmath>
-
 
 // Activation Function Interface implementation
 

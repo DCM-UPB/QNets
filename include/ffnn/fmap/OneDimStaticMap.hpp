@@ -13,7 +13,7 @@ protected:
 
 public:
     OneDimStaticMap(NetworkLayer * nl, const size_t &nsrc); // full initialization
-    ~OneDimStaticMap() override= default;
+    ~OneDimStaticMap() override = default;
 
     // string code methods
     std::string getParams() override;
