@@ -1,14 +1,13 @@
-#include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
 #include "ffnn/io/PrintUtilities.hpp"
 
 
-
-int main(){
+int main()
+{
     using namespace std;
 
     // make a check while the FFNN is not connected yet
@@ -19,7 +18,7 @@ int main(){
     ffnn->getNNLayer(1)->getNNUnit(0)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
     ffnn->getNNLayer(2)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("GSS"));
 
-    FeedForwardNeuralNetwork * ffnn2 = new FeedForwardNeuralNetwork(ffnn);
+    auto * ffnn2 = new FeedForwardNeuralNetwork(ffnn);
 
     assert(ffnn->getNLayers() == ffnn2->getNLayers());
     assert(ffnn->getLayer(0)->getNUnits() == ffnn2->getLayer(0)->getNUnits());
@@ -62,12 +61,12 @@ int main(){
     assert(!ffnn2->hasCrossSecondDerivativeSubstrate());
 
     assert(ffnn->getNBeta() == ffnn2->getNBeta());
-    for (int i=0; i<ffnn2->getNBeta(); ++i){
+    for (int i = 0; i < ffnn2->getNBeta(); ++i) {
         assert(ffnn->getBeta(i) == ffnn2->getBeta(i));
     }
 
     assert(ffnn->getNVariationalParameters() == ffnn2->getNVariationalParameters());
-    for (int i=0; i<ffnn2->getNVariationalParameters(); ++i){
+    for (int i = 0; i < ffnn2->getNVariationalParameters(); ++i) {
         assert(ffnn->getVariationalParameter(i) == ffnn2->getVariationalParameter(i));
     }
 
@@ -155,20 +154,20 @@ int main(){
     ffnn2->setInput(input);
     ffnn2->FFPropagate();
 
-    for (int i=0; i<2; ++i) {
+    for (int i = 0; i < 2; ++i) {
         assert(ffnn->getOutput(i) == ffnn2->getOutput(i));
 
-        for (int j=0; j<2; ++j) {
+        for (int j = 0; j < 2; ++j) {
             assert(ffnn->getFirstDerivative(i, j) == ffnn2->getFirstDerivative(i, j));
             assert(ffnn->getSecondDerivative(i, j) == ffnn2->getSecondDerivative(i, j));
 
-            for (int k=0; k<ffnn->getNVariationalParameters(); ++k){
+            for (int k = 0; k < ffnn->getNVariationalParameters(); ++k) {
                 assert(ffnn->getCrossFirstDerivative(i, j, k) == ffnn2->getCrossFirstDerivative(i, j, k));
                 assert(ffnn->getCrossSecondDerivative(i, j, k) == ffnn2->getCrossSecondDerivative(i, j, k));
             }
         }
 
-        for (int k=0; k<ffnn->getNVariationalParameters(); ++k){
+        for (int k = 0; k < ffnn->getNVariationalParameters(); ++k) {
             assert(ffnn->getVariationalFirstDerivative(i, k) == ffnn2->getVariationalFirstDerivative(i, k));
         }
     }

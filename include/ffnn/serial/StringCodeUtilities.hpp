@@ -1,10 +1,10 @@
-#ifndef STRING_CODE_UTILITIES
-#define STRING_CODE_UTILITIES
+#ifndef FFNN_SERIAL_STRINGCODEUTILITIES_HPP
+#define FFNN_SERIAL_STRINGCODEUTILITIES_HPP
 
-#include <string>
-#include <sstream>
-#include <vector>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -70,8 +70,13 @@ string composeTreeCode(const string &fullcode, const string &memberTreeCode); //
 template <typename T>
 bool setParamValue(const string &paramValue, T &var)
 {
-    if (paramValue != "") {istringstream iss(paramValue); return !(iss >> var).fail();}
-    else return false;
+    if (!paramValue.empty()) {
+        istringstream iss(paramValue);
+        return !(iss >> var).fail();
+    }
+    {
+        return false;
+    }
 }
 
 // for applying parameter value string to actual parameter, from full params list
@@ -88,8 +93,12 @@ string composeParamValue(const T &var)
     ostringstream oss;
     int p = numeric_limits<T>::max_digits10;
     oss.precision(p);
-    if (!(oss << var).fail()) return oss.str();
-    else return "";
+    if (!(oss << var).fail()) {
+        return oss.str();
+    }
+    {
+        return "";
+    }
 }
 
 // for creating "name value" string from identifier and actual parameter
@@ -97,8 +106,12 @@ template <typename T>
 string composeParamCode(const string &paramIdCode, const T &var)
 {
     string value = composeParamValue(var);
-    if (value != "") return paramIdCode + " " + value;
-    else return "";
+    if (!value.empty()) {
+        return paramIdCode + " " + value;
+    }
+    {
+        return "";
+    }
 }
 
 #endif

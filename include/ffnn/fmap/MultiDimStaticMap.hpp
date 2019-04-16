@@ -1,5 +1,5 @@
-#ifndef MULTI_DIM_STATIC_MAP
-#define MULTI_DIM_STATIC_MAP
+#ifndef FFNN_FMAP_MULTIDIMSTATICMAP_HPP
+#define FFNN_FMAP_MULTIDIMSTATICMAP_HPP
 
 #include "ffnn/feed/StaticFeeder.hpp"
 #include "ffnn/layer/NetworkLayer.hpp"
@@ -14,11 +14,11 @@ protected:
 
 public:
     MultiDimStaticMap(NetworkLayer * nl, const size_t &ndim, const size_t &nsrc);
-    virtual ~MultiDimStaticMap(){}
+    ~MultiDimStaticMap() override = default;
 
     // string code methods
-    virtual std::string getParams();
-    virtual void setParams(const std::string &params);
+    std::string getParams() override;
+    void setParams(const std::string &params) override;
 
     // parameter manipulation (child classes can use extra_params for extension)
     virtual void setParameters(const size_t &ndim, const std::vector<size_t> &source_id0s, const std::vector<double> &extra_params = {});

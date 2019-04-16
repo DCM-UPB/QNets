@@ -1,9 +1,9 @@
-#ifndef ACTIVATION_UNIT
-#define ACTIVATION_UNIT
+#ifndef FFNN_UNIT_ACTIVATIONUNIT_HPP
+#define FFNN_UNIT_ACTIVATIONUNIT_HPP
 
-#include "ffnn/unit/NetworkUnit.hpp"
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "ffnn/unit/NetworkUnit.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -18,33 +18,45 @@ protected:
 
 public:
     // Constructor and destructor
-    ActivationUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): _actf(actf) {if (!_actf) throw std::invalid_argument("ActivationUnit(): Passed pointer 'actf' was NULL.");}
-    ActivationUnit(const std::string &actf_id): _actf(std_actf::provideActivationFunction(actf_id)) {}
-    virtual ~ActivationUnit(){ delete _actf; }
+    explicit ActivationUnit(ActivationFunctionInterface * actf = std_actf::provideActivationFunction()): _actf(actf)
+    {
+        if (_actf == nullptr) {
+            throw std::invalid_argument("ActivationUnit(): Passed pointer 'actf' was NULL.");
+        }
+    }
+    explicit ActivationUnit(const std::string &actf_id): _actf(std_actf::provideActivationFunction(actf_id)) {}
+    ~ActivationUnit() override { delete _actf; }
 
     // return the ideal mean value (mu) and standard deviation (sigma) of the proto value (pv)
     // (here the ideal values are determined by the actfs active range)
-    virtual double getIdealProtoMu(){return _actf->getIdealInputMu();}
-    virtual double getIdealProtoSigma(){return _actf->getIdealInputSigma();}
+    double getIdealProtoMu() override { return _actf->getIdealInputMu(); }
+    double getIdealProtoSigma() override { return _actf->getIdealInputSigma(); }
 
     // return the output mean value (mu) and standard deviation (sigma), assuming a constant input value
-    virtual double getOutputMu(){return _actf->getOutputMu(_pv, 0);}
-    virtual double getOutputSigma(){return _actf->getOutputMu(_pv, 0);}
+    double getOutputMu() override { return _actf->getOutputMu(_pv, 0); }
+    double getOutputSigma() override { return _actf->getOutputMu(_pv, 0); }
 
     // string code getters / setter
-    virtual std::string getMemberTreeCode(){return _actf->getTreeCode();}
-    virtual void setMemberParams(const std::string &memberTreeCode);
-    virtual std::string getIdCode() = 0; // virtual class
+    std::string getMemberTreeCode() override { return _actf->getTreeCode(); }
+    void setMemberParams(const std::string &memberTreeCode) override;
+    std::string getIdCode() override = 0; // virtual class
 
     // Setters
-    void setActivationFunction(ActivationFunctionInterface * actf){delete _actf; if (actf) _actf=actf; else throw std::invalid_argument("ActivationUnit::setActivationFunction(): Passed pointer 'actf' was NULL.");}
-    void setActivationFunction(const std::string &actf_id, const std::string &params = ""){this->setActivationFunction(std_actf::provideActivationFunction(actf_id, params));}
+    void setActivationFunction(ActivationFunctionInterface * actf)
+    {
+        delete _actf;
+        if (actf != nullptr) { _actf = actf; }
+        else {
+            throw std::invalid_argument("ActivationUnit::setActivationFunction(): Passed pointer 'actf' was NULL.");
+        }
+    }
+    void setActivationFunction(const std::string &actf_id, const std::string &params = "") { this->setActivationFunction(std_actf::provideActivationFunction(actf_id, params)); }
 
     // Getters
-    ActivationFunctionInterface * getActivationFunction(){return _actf;}
+    ActivationFunctionInterface * getActivationFunction() { return _actf; }
 
     // Computation
-    void computeOutput();
+    void computeOutput() override;
 };
 
 

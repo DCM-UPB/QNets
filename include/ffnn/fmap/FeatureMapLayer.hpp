@@ -1,25 +1,25 @@
-#ifndef FEATURE_MAP_LAYER
-#define FEATURE_MAP_LAYER
+#ifndef FFNN_FMAP_FEATUREMAPLAYER_HPP
+#define FFNN_FMAP_FEATUREMAPLAYER_HPP
 
-#include "ffnn/layer/NetworkLayer.hpp"
 #include "ffnn/layer/FedLayer.hpp"
+#include "ffnn/layer/NetworkLayer.hpp"
 #include "ffnn/unit/FedUnit.hpp"
 
-#include "ffnn/fmap/PairSumMapUnit.hpp"
-#include "ffnn/fmap/PairDifferenceMapUnit.hpp"
 #include "ffnn/fmap/EuclideanDistanceMapUnit.hpp"
 #include "ffnn/fmap/EuclideanPairDistanceMapUnit.hpp"
 #include "ffnn/fmap/IdentityMapUnit.hpp"
+#include "ffnn/fmap/PairDifferenceMapUnit.hpp"
+#include "ffnn/fmap/PairSumMapUnit.hpp"
 
 class FeatureMapLayer: public FedLayer
 {
 protected:
     // currently we control the feature map unit creation by these integers
-    int _npsmaps; // DESIRED number of pair sum maps
-    int _npdmaps; // DESIRED number of pair difference maps
-    int _nedmaps; // DESIRED number of euclidean distance maps
-    int _nepdmaps; // DESIRED number of euclidean pair distance maps
-    int _nidmaps; // DESIRED number of identity maps
+    int _npsmaps{}; // DESIRED number of pair sum maps
+    int _npdmaps{}; // DESIRED number of pair difference maps
+    int _nedmaps{}; // DESIRED number of euclidean distance maps
+    int _nepdmaps{}; // DESIRED number of euclidean pair distance maps
+    int _nidmaps{}; // DESIRED number of identity maps
 
     std::vector<PairSumMapUnit *> _U_psm; // stores pointers to all pair sum map units
     std::vector<PairDifferenceMapUnit *> _U_pdm; // stores pointers to all pair difference map units
@@ -36,39 +36,39 @@ public:
     explicit FeatureMapLayer(const int &nunits); // "default" constructor with minimal information
     FeatureMapLayer(const int &npsmaps, const int &npdmaps, const int &nedmaps, const int &nepdmaps, const int &nidmaps, const int &nunits = -1);
     explicit FeatureMapLayer(const std::string &params);
-    ~FeatureMapLayer();
+    ~FeatureMapLayer() override;
 
     // --- construct / deconstruct methods
 
-    void construct(const int &nunits);
-    void deconstruct();
+    void construct(const int &nunits) override;
+    void deconstruct() override;
 
     // --- String Codes
 
-    std::string getIdCode(){return "FML";}
-    std::string getParams();
-    void setParams(const std::string &params);
+    std::string getIdCode() override { return "FML"; }
+    std::string getParams() override;
+    void setParams(const std::string &params) override;
 
     // --- Modify structure
 
     void setNMaps(const int &npsmaps, const int &npdmaps, const int &nedmaps, const int &nepdmaps, const int &nidmaps);
 
     // --- FeatureMapUnit getters
-    int getNPSMapUnits(){return _U_psm.size();}
-    int getNPDMapUnits(){return _U_pdm.size();}
-    int getNEDMapUnits(){return _U_edm.size();}
-    int getNEPDMapUnits(){return _U_epdm.size();}
-    int getNIdMapUnits(){return _U_idm.size();}
+    int getNPSMapUnits() { return _U_psm.size(); }
+    int getNPDMapUnits() { return _U_pdm.size(); }
+    int getNEDMapUnits() { return _U_edm.size(); }
+    int getNEPDMapUnits() { return _U_epdm.size(); }
+    int getNIdMapUnits() { return _U_idm.size(); }
 
-    PairSumMapUnit * getPSMapUnit(const int &i){return _U_psm[i];}
-    PairDifferenceMapUnit * getPDMapUnit(const int &i){return _U_pdm[i];}
-    EuclideanDistanceMapUnit * getEDMapUnit(const int &i){return _U_edm[i];}
-    EuclideanPairDistanceMapUnit * getEPDMapUnit(const int &i){return _U_epdm[i];}
-    IdentityMapUnit * getIdMapUnit(const int &i){return _U_idm[i];}
+    PairSumMapUnit * getPSMapUnit(const int &i) { return _U_psm[i]; }
+    PairDifferenceMapUnit * getPDMapUnit(const int &i) { return _U_pdm[i]; }
+    EuclideanDistanceMapUnit * getEDMapUnit(const int &i) { return _U_edm[i]; }
+    EuclideanPairDistanceMapUnit * getEPDMapUnit(const int &i) { return _U_epdm[i]; }
+    IdentityMapUnit * getIdMapUnit(const int &i) { return _U_idm[i]; }
 
     // --- Connection
 
-    FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i);
+    FeederInterface * connectUnitOnTopOfLayer(NetworkLayer * nl, const int &i) override;
 };
 
 #endif

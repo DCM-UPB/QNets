@@ -1,8 +1,5 @@
 #include "ffnn/fmap/PairDifferenceMap.hpp"
-#include "ffnn/serial/StringCodeUtilities.hpp"
 
-#include <vector>
-#include <string>
 #include <cmath>
 
 // --- fill/clear sources
@@ -17,8 +14,8 @@ void PairDifferenceMap::_fillSources(const std::vector<size_t> &source_ids)
 void PairDifferenceMap::_clearSources()
 {
     OneDimStaticMap::_clearSources();
-    _src0 = NULL;
-    _src1 = NULL;
+    _src0 = nullptr;
+    _src1 = nullptr;
 }
 
 
@@ -26,7 +23,7 @@ void PairDifferenceMap::_clearSources()
 
 void PairDifferenceMap::setParameters(const size_t &source_id0, const size_t &source_id1)
 {
-    std::vector<size_t> source_ids { source_id0 , source_id1};
+    std::vector<size_t> source_ids{source_id0, source_id1};
     OneDimStaticMap::setParameters(source_ids);
 }
 
@@ -40,43 +37,55 @@ double PairDifferenceMap::getFeedMu()
 
 double PairDifferenceMap::getFeedSigma()
 {
-    return sqrt(pow(_src0->getOutputSigma(),2) + pow(_src1->getOutputSigma(),2));
+    return sqrt(pow(_src0->getOutputSigma(), 2) + pow(_src1->getOutputSigma(), 2));
 }
 
 
 // --- Computation
 
 
-double PairDifferenceMap::getFeed(){
+double PairDifferenceMap::getFeed()
+{
     return _src0->getValue() - _src1->getValue();
 }
 
-double PairDifferenceMap::getFirstDerivativeFeed(const int &i1d){
+double PairDifferenceMap::getFirstDerivativeFeed(const int &i1d)
+{
     return _src0->getFirstDerivativeValue(i1d) - _src1->getFirstDerivativeValue(i1d);
 }
 
-double PairDifferenceMap::getSecondDerivativeFeed(const int &i2d){
+double PairDifferenceMap::getSecondDerivativeFeed(const int &i2d)
+{
     return _src0->getSecondDerivativeValue(i2d) - _src1->getSecondDerivativeValue(i2d);
 }
 
 
-double PairDifferenceMap::getVariationalFirstDerivativeFeed(const int &iv1d){
+double PairDifferenceMap::getVariationalFirstDerivativeFeed(const int &iv1d)
+{
     if (iv1d < _vp_id_shift) {
         return _src0->getVariationalFirstDerivativeValue(iv1d) - _src1->getVariationalFirstDerivativeValue(iv1d);
     }
-    else return 0.;
+    {
+        return 0.;
+    }
 }
 
-double PairDifferenceMap::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d){
+double PairDifferenceMap::getCrossFirstDerivativeFeed(const int &i1d, const int &iv1d)
+{
     if (iv1d < _vp_id_shift) {
         return _src0->getCrossFirstDerivativeValue(i1d, iv1d) - _src1->getCrossFirstDerivativeValue(i1d, iv1d);
     }
-    else return 0.;
+    {
+        return 0.;
+    }
 }
 
-double PairDifferenceMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d){
+double PairDifferenceMap::getCrossSecondDerivativeFeed(const int &i2d, const int &iv2d)
+{
     if (iv2d < _vp_id_shift) {
         return _src0->getCrossSecondDerivativeValue(i2d, iv2d) - _src1->getCrossSecondDerivativeValue(i2d, iv2d);
     }
-    else return 0.;
+    {
+        return 0.;
+    }
 }

@@ -1,8 +1,6 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-#include "ffnn/io/PrintUtilities.hpp"
 #include "../common/checkDerivatives.hpp"
 #include "../common/checkStoreOnFile.hpp"
 
@@ -29,7 +27,7 @@ int main()
     ffnn->connectFFNN();
 
     // first feature map layer
-    ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getMap()->setParameters(2, 1, vector<double> {-1., 1.}); // 2D distance of previous 1&2 vs fixed (-1,1) vector
+    ffnn->getFeatureMapLayer(0)->getEDMapUnit(0)->getMap()->setParameters(2, 1, vector<double>{-1., 1.}); // 2D distance of previous 1&2 vs fixed (-1,1) vector
     ffnn->getFeatureMapLayer(0)->getEPDMapUnit(0)->getMap()->setParameters(1, 1, 2); // 1D distance of previous units (1 vs. 2)
     ffnn->getFeatureMapLayer(0)->getIdMapUnit(0)->getMap()->setParameters(1); // set first identity to first non-offset unit
     ffnn->getFeatureMapLayer(0)->getIdMapUnit(1)->getMap()->setParameters(2); // set second identity to second non-offset unit
@@ -48,7 +46,7 @@ int main()
     rgen = mt19937_64(rdev());
     rgen.seed(18984687);
     rd = uniform_real_distribution<double>(-2., 2.);
-    for (int i=0; i<ffnn->getNBeta(); ++i){
+    for (int i = 0; i < ffnn->getNBeta(); ++i) {
         ffnn->setBeta(i, rd(rgen));
     }
 

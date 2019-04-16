@@ -1,10 +1,10 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "../common/checkDerivatives.hpp"
 
-int main(){
+int main()
+{
     using namespace std;
 
     const double TINY = 0.0001;
@@ -21,7 +21,7 @@ int main(){
     rgen = mt19937_64(rdev());
     rgen.seed(18984687);
     rd = uniform_real_distribution<double>(-2., 2.);
-    for (int i=0; i<ffnn->getNBeta(); ++i){
+    for (int i = 0; i < ffnn->getNBeta(); ++i) {
         ffnn->setBeta(i, rd(rgen));
     }
 

@@ -1,7 +1,7 @@
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <random>
-#include <cmath>
-#include <assert.h>
 
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
 #include "ffnn/train/NNTrainerGSL.hpp"
@@ -9,18 +9,21 @@
 using namespace std;
 using namespace nn_trainer_gsl_details; // to access hidden NNTrainerGSL methods
 
-double gaussian(const double x) {
+double gaussian(const double x)
+{
     return exp(-x*x);
 };
 
 // first derivative of gaussian
-double gaussian_ddx(const double x) {
-    return -2.*x * exp(-x*x);
+double gaussian_ddx(const double x)
+{
+    return -2.*x*exp(-x*x);
 };
 
 // first derivative of gaussian
-double gaussian_d2dx(const double x) {
-    return (4.*x*x - 2.) * exp(-x*x);
+double gaussian_d2dx(const double x)
+{
+    return (4.*x*x - 2.)*exp(-x*x);
 };
 
 void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const beta, const double &TINY = 0.000001)
@@ -28,20 +31,25 @@ void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const b
     const bool case1 = abs(ffnn->getVariationalParameter(0) - beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) - beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) - beta[2]) < TINY;
     const bool case2 = abs(ffnn->getVariationalParameter(0) + beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) + beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) + beta[2]) < TINY;
     assert(case1 || case2); // symmetric gaussian allows both combinations
-    for (int i=3; i<ffnn->getNVariationalParameters(); ++i) assert(abs(ffnn->getVariationalParameter(i) - beta[i]) < TINY);
+    for (int i = 3; i < ffnn->getNVariationalParameters(); ++i) {
+        assert(abs(ffnn->getVariationalParameter(i) - beta[i]) < TINY);
+    }
 }
 
-void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = false)
+void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardNeuralNetwork * const ffnn, const int &maxn_fits, const bool &flag_d = false, const bool &flag_norm = false, const double &TINY = 0.000001, const int &verbose = 0)
 {
     NNTrainerGSL * trainer = new NNTrainerGSL(tdata, tconfig);
-    if (flag_norm) trainer->setNormalization(ffnn); // NOTE: in most cases here we do not normalize, to keep known beta targets
+    if (flag_norm) {
+        trainer->setNormalization(ffnn); // NOTE: in most cases here we do not normalize, to keep known beta targets
+    }
     trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
     double resi = trainer->computeResidual(ffnn, false, flag_d);
     assert(resi <= TINY);
     delete trainer;
 }
 
-int main (void) {
+int main()
+{
     const int verbose = 0;
     const double TINY = 0.000001;
 
@@ -51,7 +59,7 @@ int main (void) {
     const int yndim = ndim;
 
     // create FFNN
-    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim+1, nhid, yndim+1);
+    FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(xndim + 1, nhid, yndim + 1);
     ffnn->connectFFNN();
 
     // set gaussian activation function on the single hidden neuron, id activation on output
@@ -60,13 +68,13 @@ int main (void) {
     ffnn->getNNLayer(1)->getNNUnit(1)->setActivationFunction(std_actf::provideActivationFunction("ID"));
 
     // the variational parameters of our model (ffnn beta should be equal to beta array after fitting)
-    const double nbeta = (nhid-1) * (xndim+1) + yndim * nhid;
+    const double nbeta = (nhid - 1)*(xndim + 1) + yndim*nhid;
     const double beta[7] = {0.2, -1.1, 0.9, 1., -1., 0., 0.5};
 
     // check basic things
-    assert(ffnn->getLayer(0)->getNUnits() == xndim+1);
+    assert(ffnn->getLayer(0)->getNUnits() == xndim + 1);
     assert(ffnn->getLayer(1)->getNUnits() == nhid);
-    assert(ffnn->getLayer(2)->getNUnits() == yndim+1);
+    assert(ffnn->getLayer(2)->getNUnits() == yndim + 1);
     assert(ffnn->getNBeta() == nbeta);
 
 
@@ -83,7 +91,7 @@ int main (void) {
     const int maxn_novali = 5;
     const int maxn_fits = 50;
     const double lambda_r = 0.000000001, lambda_d1 = 0.5, lambda_d2 = 0.5;
-    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, NULL, NULL, NULL, NULL, NULL}; // we use tdata.allocate, so pass NULL for arrays
+    NNTrainingData tdata = {ndata, ntraining, nvalidation, xndim, yndim, nullptr, nullptr, nullptr, nullptr, nullptr}; // we use tdata.allocate, so pass NULL for arrays
     NNTrainingConfig tconfig = {0., 0., 0., maxn_steps, maxn_novali}; // initially set all lambdas to 0, i.e. no regularization and derivative residuals
 
     // allocate data arrays
@@ -94,28 +102,28 @@ int main (void) {
     const double ub = 2;
     random_device rdev;
     mt19937_64 rgen = std::mt19937_64(rdev());
-    uniform_real_distribution<double> rd(lb,ub);
-    for (int i=0; i<ndata; ++i) {
-        for (int j=0; j<xndim; ++j) {
+    uniform_real_distribution<double> rd(lb, ub);
+    for (int i = 0; i < ndata; ++i) {
+        for (int j = 0; j < xndim; ++j) {
             tdata.x[i][j] = rd(rgen);
         }
-        const double feed = beta[0] + beta[1] * tdata.x[i][0] + beta[2] * tdata.x[i][1];
+        const double feed = beta[0] + beta[1]*tdata.x[i][0] + beta[2]*tdata.x[i][1];
         const double hnv = gaussian(feed);
-        tdata.y[i][0] = beta[3] + beta[4] * hnv;
-        tdata.y[i][1] = beta[5] + beta[6] * hnv;
+        tdata.y[i][0] = beta[3] + beta[4]*hnv;
+        tdata.y[i][1] = beta[5] + beta[6]*hnv;
 
         const double d1feed = gaussian_ddx(feed);
         const double d2feed = gaussian_d2dx(feed);
 
-        tdata.yd1[i][0][0] = (beta[4] * d1feed * beta[1]);
-        tdata.yd1[i][0][1] = (beta[4] * d1feed * beta[2]);
-        tdata.yd1[i][1][0] = (beta[6] * d1feed * beta[1]);
-        tdata.yd1[i][1][1] = (beta[6] * d1feed * beta[2]);
+        tdata.yd1[i][0][0] = (beta[4]*d1feed*beta[1]);
+        tdata.yd1[i][0][1] = (beta[4]*d1feed*beta[2]);
+        tdata.yd1[i][1][0] = (beta[6]*d1feed*beta[1]);
+        tdata.yd1[i][1][1] = (beta[6]*d1feed*beta[2]);
 
-        tdata.yd2[i][0][0] = (beta[4] * d2feed * pow(beta[1], 2));
-        tdata.yd2[i][0][1] = (beta[4] * d2feed * pow(beta[2], 2));
-        tdata.yd2[i][1][0] = (beta[6] * d2feed * pow(beta[1], 2));
-        tdata.yd2[i][1][1] = (beta[6] * d2feed * pow(beta[2], 2));
+        tdata.yd2[i][0][0] = (beta[4]*d2feed*pow(beta[1], 2));
+        tdata.yd2[i][0][1] = (beta[4]*d2feed*pow(beta[2], 2));
+        tdata.yd2[i][1][0] = (beta[6]*d2feed*pow(beta[1], 2));
+        tdata.yd2[i][1][1] = (beta[6]*d2feed*pow(beta[2], 2));
 
         tdata.w[i][0] = 1.0;
         tdata.w[i][1] = 1.0;

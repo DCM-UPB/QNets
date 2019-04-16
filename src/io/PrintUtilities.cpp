@@ -1,14 +1,8 @@
 #include "ffnn/io/PrintUtilities.hpp"
-#include "ffnn/feed/FeederInterface.hpp"
-#include "ffnn/unit/FedUnit.hpp"
-#include "ffnn/unit/NNUnit.hpp"
 
-#include <iostream>
-#include <iomanip>
 #include <fstream>
-#include <stdexcept>
-#include <cmath>
-#include <string>
+#include <iomanip>
+#include <iostream>
 
 void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params, const int &drop_member_lvl)
 {
@@ -17,55 +11,54 @@ void printFFNNStructure(FeedForwardNeuralNetwork * ffnn, const bool &drop_params
     int maxLayerSize = 0;
     size_t maxStringLength[ffnn->getNLayers()];
 
-    std::string stringCode = "";
+    std::string stringCode;
 
-    for (int l=0; l<ffnn->getNLayers(); ++l)
-        {
-            if (ffnn->getLayerSize(l) > maxLayerSize)
-                {
-                    maxLayerSize = ffnn->getLayerSize(l);
-                }
-
-            maxStringLength[l] = 0;
-            for (int u = 0; u<ffnn->getLayerSize(l); ++u)
-                {
-                    stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
-                    if (drop_member_lvl > 0) stringCode = dropMembers(stringCode, drop_member_lvl);
-                    if (drop_params) stringCode = dropParams(stringCode);
-
-                    if (stringCode.length() > maxStringLength[l])
-                        {
-                            maxStringLength[l] = stringCode.length();
-                        }
-                }
-            stringCode = ffnn->getLayer(l)->getIdCode() + " " + readParamValue(ffnn->getLayer(l)->getParams(), "nunits") + "U"; // print layer identifiers
-            cout << stringCode << string(maxStringLength[l]-stringCode.length()+8, ' ');
+    for (int l = 0; l < ffnn->getNLayers(); ++l) {
+        if (ffnn->getLayerSize(l) > maxLayerSize) {
+            maxLayerSize = ffnn->getLayerSize(l);
         }
+
+        maxStringLength[l] = 0;
+        for (int u = 0; u < ffnn->getLayerSize(l); ++u) {
+            stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
+            if (drop_member_lvl > 0) {
+                stringCode = dropMembers(stringCode, drop_member_lvl);
+            }
+            if (drop_params) {
+                stringCode = dropParams(stringCode);
+            }
+
+            if (stringCode.length() > maxStringLength[l]) {
+                maxStringLength[l] = stringCode.length();
+            }
+        }
+        stringCode = ffnn->getLayer(l)->getIdCode() + " " + readParamValue(ffnn->getLayer(l)->getParams(), "nunits") + "U"; // print layer identifiers
+        cout << stringCode << string(maxStringLength[l] - stringCode.length() + 8, ' ');
+    }
     cout << endl << endl;
 
-    for (int u=0; u<maxLayerSize; ++u)
-        {
-            for (int l=0; l<ffnn->getNLayers(); ++l)
-                {
-                    if (ffnn->getLayerSize(l) > u)
-                        {
-                            stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
-                            if (drop_member_lvl > 0) stringCode = dropMembers(stringCode, drop_member_lvl);
-                            if (drop_params) stringCode = dropParams(stringCode);
-
-                            cout << stringCode;
-                            cout << string(maxStringLength[l]-stringCode.length(), ' ');
-                        }
-                    else
-                        {
-                            cout << string(maxStringLength[l], ' ');
-                        }
-                    cout << "        ";
+    for (int u = 0; u < maxLayerSize; ++u) {
+        for (int l = 0; l < ffnn->getNLayers(); ++l) {
+            if (ffnn->getLayerSize(l) > u) {
+                stringCode = ffnn->getLayer(l)->getUnit(u)->getTreeCode();
+                if (drop_member_lvl > 0) {
+                    stringCode = dropMembers(stringCode, drop_member_lvl);
                 }
-            cout << endl;
-        }
-}
+                if (drop_params) {
+                    stringCode = dropParams(stringCode);
+                }
 
+                cout << stringCode;
+                cout << string(maxStringLength[l] - stringCode.length(), ' ');
+            }
+            else {
+                cout << string(maxStringLength[l], ' ');
+            }
+            cout << "        ";
+        }
+        cout << endl;
+    }
+}
 
 
 void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
@@ -90,8 +83,8 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 
     // max number of units over all layers
     maxNUnits = 0;
-    for (int l=0; l<nlayers; ++l){
-        if (ffnn->getLayer(l)->getNUnits() > maxNUnits){
+    for (int l = 0; l < nlayers; ++l) {
+        if (ffnn->getLayer(l)->getNUnits() > maxNUnits) {
             maxNUnits = ffnn->getLayer(l)->getNUnits();
         }
         maxIdLength[l] = 0;
@@ -99,32 +92,32 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 
     // max number of beta for the units with index u over all layers
     maxNBeta = new int[maxNUnits];
-    feeders = new FeederInterface*[nlayers*maxNUnits];
+    feeders = new FeederInterface * [nlayers*maxNUnits];
     ids = new string[nlayers*maxNUnits];
-    for (int u=0; u<maxNUnits; ++u){
+    for (int u = 0; u < maxNUnits; ++u) {
         maxNBeta[u] = 0;
-        for (int l=0; l<nlayers; ++l){
-            index = u*nlayers+l;
-            feeder = NULL;
+        for (int l = 0; l < nlayers; ++l) {
+            index = u*nlayers + l;
+            feeder = nullptr;
 
             if (u < ffnn->getLayer(l)->getNUnits()) {
-                if (FedUnit * fnu = dynamic_cast<FedUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                if (auto * fnu = dynamic_cast<FedUnit *>(ffnn->getLayer(l)->getUnit(u))) {
                     feeder = fnu->getFeeder();
-                    if (feeder){
-                        if (feeder->getNBeta() > maxNBeta[u]){
+                    if (feeder != nullptr) {
+                        if (feeder->getNBeta() > maxNBeta[u]) {
                             maxNBeta[u] = feeder->getNBeta();
                         }
                     }
                 }
 
-                if (NNUnit * nnu = dynamic_cast<NNUnit *>(ffnn->getLayer(l)->getUnit(u))) {
+                if (auto * nnu = dynamic_cast<NNUnit *>(ffnn->getLayer(l)->getUnit(u))) {
                     ids[index] = " " + nnu->getActivationFunction()->getIdCode() + " ";
                 }
                 else {
                     ids[index] = "(" + ffnn->getLayer(l)->getUnit(u)->getIdCode() + ")"; // put placeholder unit identifiers in brackets
                 }
 
-                if (ids[index].length() > maxIdLength[l]){
+                if (ids[index].length() > maxIdLength[l]) {
                     maxIdLength[l] = ids[index].length();
                 }
             }
@@ -133,14 +126,16 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
     }
 
     // now we are ready to print
-    for (int u=0; u<maxNUnits; ++u) {
-        for (int b=0; b<max(1, maxNBeta[u]); ++b) {
-            for (int l=0; l<nlayers; ++l) {
-                index = u*nlayers+l;
+    for (int u = 0; u < maxNUnits; ++u) {
+        for (int b = 0; b < max(1, maxNBeta[u]); ++b) {
+            for (int l = 0; l < nlayers; ++l) {
+                index = u*nlayers + l;
 
-                if (u < ffnn->getLayer(l)->getNUnits() && feeders[index]) {
+                if (u < ffnn->getLayer(l)->getNUnits() && (feeders[index] != nullptr)) {
                     if (b < feeders[index]->getNBeta()) {
-                        if (feeders[index]->getBeta(b) >= 0.) cout << "+";
+                        if (feeders[index]->getBeta(b) >= 0.) {
+                            cout << "+";
+                        }
                         cout << feeders[index]->getBeta(b);
                     }
                     else {
@@ -152,9 +147,9 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
                     cout << emptySpaceForBeta << emptySpaceAfterBeta;
                 }
 
-                if (b==0) {
+                if (b == 0) {
                     cout << ids[index];
-                    cout << string(maxIdLength[l]-ids[index].length(), ' ');
+                    cout << string(maxIdLength[l] - ids[index].length(), ' ');
                 }
                 else {
                     cout << string(maxIdLength[l], ' ');
@@ -173,7 +168,6 @@ void printFFNNStructureWithBeta(FeedForwardNeuralNetwork * ffnn)
 }
 
 
-
 void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
 {
     using namespace std;
@@ -186,20 +180,25 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
     string emptySpaceAfterValue = "    ";
 
     int maxNUnits = 0;
-    for (int l=0; l<ffnn->getNLayers(); ++l){
-        if (ffnn->getLayer(l)->getNUnits() > maxNUnits){
+    for (int l = 0; l < ffnn->getNLayers(); ++l) {
+        if (ffnn->getLayer(l)->getNUnits() > maxNUnits) {
             maxNUnits = ffnn->getLayer(l)->getNUnits();
         }
     }
 
-    for (int u=0; u<maxNUnits; ++u){
-        for (int l=0; l<ffnn->getNLayers(); ++l){
-            if (u < ffnn->getLayerSize(l)){
-                if (ffnn->getLayer(l)->getUnit(u)->getProtoValue() >= 0.) cout << "+";
+    for (int u = 0; u < maxNUnits; ++u) {
+        for (int l = 0; l < ffnn->getNLayers(); ++l) {
+            if (u < ffnn->getLayerSize(l)) {
+                if (ffnn->getLayer(l)->getUnit(u)->getProtoValue() >= 0.) {
+                    cout << "+";
+                }
                 cout << ffnn->getLayer(l)->getUnit(u)->getProtoValue() << " -> ";
-                if (ffnn->getLayer(l)->getUnit(u)->getValue() >= 0.) cout << "+";
+                if (ffnn->getLayer(l)->getUnit(u)->getValue() >= 0.) {
+                    cout << "+";
+                }
                 cout << ffnn->getLayer(l)->getUnit(u)->getValue() << "    ";
-            } else {
+            }
+            else {
                 cout << emptySpaceForValue << emptySpaceBetweenProtovalueAndValue << emptySpaceForValue << emptySpaceAfterValue;
             }
         }
@@ -208,51 +207,57 @@ void printFFNNValues(FeedForwardNeuralNetwork * ffnn)
 }
 
 
-
-void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, const std::string &what, const std::string &filename){
+void writePlotFile(FeedForwardNeuralNetwork * ffnn, const double * base_input, const int &input_i, const int &output_i, const double &min, const double &max, const int &npoints, const std::string &what, const std::string &filename)
+{
     using namespace std;
 
-    const double delta = (max-min)/(npoints-1);
+    const double delta = (max - min)/(npoints - 1);
 
     // compute the input points
-    double * x = new double[npoints];
+    auto * x = new double[npoints];
     x[0] = min;
-    for (int i=1; i<npoints; ++i){
-        x[i] = x[i-1] + delta;
+    for (int i = 1; i < npoints; ++i) {
+        x[i] = x[i - 1] + delta;
     }
 
     // allocate the output variables
-    double * v = new double[npoints];      // NN output value
+    auto * v = new double[npoints];      // NN output value
 
     // compute the values
     const int ninput = ffnn->getNInput();
-    double * input = new double[ninput];
-    for (int i=0; i<ninput; ++i) input[i] = base_input[i];
-    for (int i=0; i<npoints; ++i){
+    auto * input = new double[ninput];
+    for (int i = 0; i < ninput; ++i) {
+        input[i] = base_input[i];
+    }
+    for (int i = 0; i < npoints; ++i) {
         input[input_i] = x[i];
         ffnn->setInput(input);
         ffnn->FFPropagate();
 
-        if (what == "getOutput"){
+        if (what == "getOutput") {
             v[i] = ffnn->getOutput(output_i);
-        } else if (what == "getFirstDerivative"){
+        }
+        else if (what == "getFirstDerivative") {
             v[i] = ffnn->getFirstDerivative(output_i, input_i);
-        } else if (what == "getSecondDerivative"){
+        }
+        else if (what == "getSecondDerivative") {
             v[i] = ffnn->getSecondDerivative(output_i, input_i);
-        } else if (what == "getVariationalFirstDerivative"){
+        }
+        else if (what == "getVariationalFirstDerivative") {
             v[i] = ffnn->getVariationalFirstDerivative(output_i, input_i);
-        } else {
+        }
+        else {
             delete[] x;
             delete[] v;
             delete[] input;
-            throw std::invalid_argument( "writePlotFile(): the parameter 'what' was not valid" );
+            throw std::invalid_argument("writePlotFile(): the parameter 'what' was not valid");
         }
     }
 
     // write the results on files
     ofstream vFile;
     vFile.open(filename);
-    for (int i=0; i<npoints; ++i){
+    for (int i = 0; i < npoints; ++i) {
         vFile << x[i] << "    " << v[i] << endl;
     }
     vFile.close();

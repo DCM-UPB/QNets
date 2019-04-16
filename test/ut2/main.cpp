@@ -1,9 +1,9 @@
 #include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-#include "ffnn/actf/ActivationFunctionManager.hpp"
 
 #include "../common/checkStoreOnFile.hpp"
 
-int main(){
+int main()
+{
     using namespace std;
 
     // make a check while the FFNN is not connected yet

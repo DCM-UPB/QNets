@@ -1,8 +1,4 @@
 #include "ffnn/actf/ReLUActivationFunction.hpp"
-#include "ffnn/serial/StringCodeUtilities.hpp"
-
-#include <string>
-#include <vector>
 
 // Activation Function Interface implementation
 
@@ -18,30 +14,30 @@ void ReLUActivationFunction::setParams(const std::string &params)
 
 double ReLUActivationFunction::f(const double &in)
 {
-    return in>0.0 ? in : _alpha*in;
+    return in > 0.0 ? in : _alpha*in;
 }
 
 
 double ReLUActivationFunction::f1d(const double &in)
 {
-    return in>0.0 ? 1.0 : _alpha;
+    return in > 0.0 ? 1.0 : _alpha;
 }
 
 
-double ReLUActivationFunction::f2d(const double &in)
+double ReLUActivationFunction::f2d(const double & /*in*/)
 {
     return 0.0;
 }
 
 
-double ReLUActivationFunction::f3d(const double &in)
+double ReLUActivationFunction::f3d(const double & /*in*/)
 {
     return 0.0;
 }
 
-void ReLUActivationFunction::fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1, const bool flag_d2, const bool flag_d3)
+void ReLUActivationFunction::fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1, const bool  /*flag_d2*/, const bool  /*flag_d3*/)
 {
-    if (in>0.0) {
+    if (in > 0.0) {
         v = in;
         v1d = flag_d1 ? 1.0 : 0.0;
     }

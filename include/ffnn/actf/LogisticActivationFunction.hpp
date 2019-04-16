@@ -1,5 +1,5 @@
-#ifndef LOGISTIC_ACTIVATION_FUNCTION
-#define LOGISTIC_ACTIVATION_FUNCTION
+#ifndef FFNN_ACTF_LOGISTICACTIVATIONFUNCTION_HPP
+#define FFNN_ACTF_LOGISTICACTIVATIONFUNCTION_HPP
 
 #include "ffnn/actf/ActivationFunctionInterface.hpp"
 #include <string>
@@ -8,25 +8,25 @@ class LogisticActivationFunction: public ActivationFunctionInterface
 {
 public:
     // getters
-    ActivationFunctionInterface * getCopy(){return new LogisticActivationFunction();}
-    std::string getIdCode(){return "LGS";}
+    ActivationFunctionInterface * getCopy() final { return new LogisticActivationFunction(); }
+    std::string getIdCode() final { return "LGS"; }
 
     // input should be in the rage [-5 : 5] -> mu=0   sigma=10/sqrt(12)
-    double getIdealInputMu(){return 0.;}
-    double getIdealInputSigma(){return 2.886751345948129;}
+    double getIdealInputMu() final { return 0.; }
+    double getIdealInputSigma() final { return 2.886751345948129; }
 
     // we can use default implementation for output mu/sigma
 
     // computation
-    double f(const double &in);
+    double f(const double &in) final;
 
-    double f1d(const double &in);
+    double f1d(const double &in) final;
 
-    double f2d(const double &in);
+    double f2d(const double &in) final;
 
-    double f3d(const double &in);
+    double f3d(const double &in) final;
 
-    void fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, const bool flag_d1 = false, const bool flag_d2 = false, const bool flag_d3 = false);
+    void fad(const double &in, double &v, double &v1d, double &v2d, double &v3d, bool flag_d1 = false, bool flag_d2 = false, bool flag_d3 = false) final;
 };
 
 

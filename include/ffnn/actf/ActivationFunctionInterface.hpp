@@ -1,10 +1,10 @@
-#ifndef ACTIVATION_FUNCTION_INTERFACE
-#define ACTIVATION_FUNCTION_INTERFACE
+#ifndef FFNN_ACTF_ACTIVATIONFUNCTIONINTERFACE_HPP
+#define FFNN_ACTF_ACTIVATIONFUNCTIONINTERFACE_HPP
 
 #include "ffnn/serial/SerializableComponent.hpp"
 
-#include <string>
 #include <cmath>
+#include <string>
 
 class ActivationFunctionInterface: public SerializableComponent
 {
@@ -20,14 +20,11 @@ public:
     // Construct from passed activation function
     //ActivationFunctionInterface(ActivationFunctionInterface * const actf){}
 
-    // Destructor
-    virtual ~ActivationFunctionInterface(){}
-
     // allocate a new copy of this to *actf
     virtual ActivationFunctionInterface * getCopy() = 0;
 
     // set class id code
-    std::string getClassIdCode(){return "ACTF";}
+    std::string getClassIdCode() final { return "ACTF"; }
 
     // return the ideal input mean value (mu) and standard deviation (sigma)
     virtual double getIdealInputMu() = 0;
@@ -37,14 +34,14 @@ public:
     // (standard implementation pretending flat distribution, for monotonic actf)
     virtual double getOutputMu(const double &inputMu = 0., const double &inputSigma = 1.)
     {
-        double bah = 0.5 * inputSigma * sqrt(12);
-        return 0.5*(this->f(inputMu+bah) + this->f(inputMu-bah));
+        double bah = 0.5*inputSigma*sqrt(12);
+        return 0.5*(this->f(inputMu + bah) + this->f(inputMu - bah));
     }
 
     virtual double getOutputSigma(const double &inputMu = 0., const double &inputSigma = 1.)
     {
-            double bah = 0.5 * inputSigma * sqrt(12);
-            return (this->f(inputMu+bah) - this->f(inputMu-bah)) / sqrt(12);
+        double bah = 0.5*inputSigma*sqrt(12);
+        return (this->f(inputMu + bah) - this->f(inputMu - bah))/sqrt(12);
     }
 
     // compute the activation function value

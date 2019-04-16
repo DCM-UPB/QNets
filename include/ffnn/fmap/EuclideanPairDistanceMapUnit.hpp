@@ -1,8 +1,8 @@
-#ifndef EUCLIDEAN_PAIR_DISTANCE_MAP_UNIT
-#define EUCLIDEAN_PAIR_DISTANCE_MAP_UNIT
+#ifndef FFNN_FMAP_EUCLIDEANPAIRDISTANCEMAPUNIT_HPP
+#define FFNN_FMAP_EUCLIDEANPAIRDISTANCEMAPUNIT_HPP
 
-#include "ffnn/fmap/FeatureMapUnit.hpp"
 #include "ffnn/fmap/EuclideanPairDistanceMap.hpp"
+#include "ffnn/fmap/FeatureMapUnit.hpp"
 
 #include <string>
 
@@ -10,7 +10,7 @@ class EuclideanPairDistanceMapUnit: public FeatureMapUnit<EuclideanPairDistanceM
 {
 public:
     // string code id
-    std::string getIdCode(){return "EPDMU";} // return identifier for unit type
+    std::string getIdCode() override { return "EPDMU"; } // return identifier for unit type
 };
 
 #endif

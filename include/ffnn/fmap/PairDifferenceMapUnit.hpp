@@ -1,5 +1,5 @@
-#ifndef PAIR_DIFFERENCE_MAP_UNIT
-#define PAIR_DIFFERENCE_MAP_UNIT
+#ifndef FFNN_FMAP_PAIRDIFFERENCEMAPUNIT_HPP
+#define FFNN_FMAP_PAIRDIFFERENCEMAPUNIT_HPP
 
 #include "ffnn/fmap/FeatureMapUnit.hpp"
 #include "ffnn/fmap/PairDifferenceMap.hpp"
@@ -10,7 +10,7 @@ class PairDifferenceMapUnit: public FeatureMapUnit<PairDifferenceMap>
 {
 public:
     // string code id
-    std::string getIdCode(){return "PDMU";} // return identifier for unit type
+    std::string getIdCode() override { return "PDMU"; } // return identifier for unit type
 };
 
 #endif

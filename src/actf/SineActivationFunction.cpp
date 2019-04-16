@@ -1,7 +1,5 @@
 #include "ffnn/actf/SineActivationFunction.hpp"
 
-#include <math.h>
-
 // Activation Function Interface implementation
 
 double SineActivationFunction::f(const double &in)

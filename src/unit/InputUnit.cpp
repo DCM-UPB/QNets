@@ -4,7 +4,9 @@
 void InputUnit::setInputMu(const double &inputMu, const bool &doShift)
 {
     _inputMu = inputMu;
-    if (doShift) _shift = -inputMu;
+    if (doShift) {
+        _shift = -inputMu;
+    }
 }
 
 void InputUnit::setInputSigma(const double &inputSigma, const bool &doScale)

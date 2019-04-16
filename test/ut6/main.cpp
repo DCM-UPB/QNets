@@ -1,11 +1,10 @@
 #include "ffnn/serial/StringCodeUtilities.hpp"
 
-#include <iostream>
-#include <vector>
-#include <assert.h>
+#include <cassert>
 
 
-int main(){
+int main()
+{
     using namespace std;
 
     const int ncodes = 4;
@@ -13,9 +12,9 @@ int main(){
     // These codes will be used as test input for string code methods
 
     const string testTreeCode[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C { M ( b 1 ) { M , N } , N , M ( b 0 ) }", "D ( s N , i 1 ) { M }"};
-    const string testTreeCode_empty_brackets1[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( ) { M ( b 1 ) { M ( ) , N ( ) } , N ( ) , M ( b 0 ) }", "D ( s N , i 1 ) { M ( ) }"};
-    const string testTreeCode_empty_brackets2[ncodes] = {"A { }" , "B ( f 0.1 , i 2 ) { }" , "C { M ( b 1 ) { M { } , N { } } , N { } , M ( b 0 ) { } }", "D ( s N , i 1 ) { M { } }"};
-    const string testTreeCode_empty_brackets3[ncodes] = {"A ( ) { }" , "B ( f 0.1 , i 2 ) { }" , "C ( ) { M ( b 1 ) { M ( ) { } , N ( ) { } } , N ( ) { } , M ( b 0 ) { } }", "D ( s N , i 1 ) { M ( ) { } }"};
+    const string testTreeCode_empty_brackets1[ncodes] = {"A ( )", "B ( f 0.1 , i 2 )", "C ( ) { M ( b 1 ) { M ( ) , N ( ) } , N ( ) , M ( b 0 ) }", "D ( s N , i 1 ) { M ( ) }"};
+    const string testTreeCode_empty_brackets2[ncodes] = {"A { }", "B ( f 0.1 , i 2 ) { }", "C { M ( b 1 ) { M { } , N { } } , N { } , M ( b 0 ) { } }", "D ( s N , i 1 ) { M { } }"};
+    const string testTreeCode_empty_brackets3[ncodes] = {"A ( ) { }", "B ( f 0.1 , i 2 ) { }", "C ( ) { M ( b 1 ) { M ( ) { } , N ( ) { } } , N ( ) { } , M ( b 0 ) { } }", "D ( s N , i 1 ) { M ( ) { } }"};
 
     // these codes will be used as comparison (and in the end as input as well)
 
@@ -48,12 +47,12 @@ int main(){
     const string testDropParams_empty_brackets[ncodes] = {"A { }", "B { }", "C { M { M { } , N { } } , N { } , M { } }", "D { M { } }"};
 
     const string testDropMembers[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C", "D ( s N , i 1 )"};
-    const string testDropMembers_empty_brackets[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( )", "D ( s N , i 1 )"};
+    const string testDropMembers_empty_brackets[ncodes] = {"A ( )", "B ( f 0.1 , i 2 )", "C ( )", "D ( s N , i 1 )"};
 
     const string testDropMembers_lvl2[ncodes] = {"A", "B ( f 0.1 , i 2 )", "C { M ( b 1 ) , N , M ( b 0 ) }", "D ( s N , i 1 ) { M }"};
-    const string testDropMembers_lvl2_empty_brackets1[ncodes] = {"A ( )" , "B ( f 0.1 , i 2 )" , "C ( ) { M ( b 1 ) , N ( ) , M ( b 0 ) }", "D ( s N , i 1 ) { M ( ) }"};
-    const string testDropMembers_lvl2_empty_brackets2[ncodes] = {"A { }" , "B ( f 0.1 , i 2 ) { }" , "C { M ( b 1 ) , N , M ( b 0 ) }", "D ( s N , i 1 ) { M }"};
-    const string testDropMembers_lvl2_empty_brackets3[ncodes] = {"A ( ) { }" , "B ( f 0.1 , i 2 ) { }" , "C ( ) { M ( b 1 ) , N ( ) , M ( b 0 ) }", "D ( s N , i 1 ) { M ( ) }"};
+    const string testDropMembers_lvl2_empty_brackets1[ncodes] = {"A ( )", "B ( f 0.1 , i 2 )", "C ( ) { M ( b 1 ) , N ( ) , M ( b 0 ) }", "D ( s N , i 1 ) { M ( ) }"};
+    const string testDropMembers_lvl2_empty_brackets2[ncodes] = {"A { }", "B ( f 0.1 , i 2 ) { }", "C { M ( b 1 ) , N , M ( b 0 ) }", "D ( s N , i 1 ) { M }"};
+    const string testDropMembers_lvl2_empty_brackets3[ncodes] = {"A ( ) { }", "B ( f 0.1 , i 2 ) { }", "C ( ) { M ( b 1 ) , N ( ) , M ( b 0 ) }", "D ( s N , i 1 ) { M ( ) }"};
 
 
     // create input treecode vectors
@@ -128,7 +127,7 @@ int main(){
     double f = 0., f_test = 1.;
     int i = 0, i_test = 2;
     bool b = false, b_test = true;
-    string s = "", s_test = "N";
+    string s, s_test = "N";
 
 
     // execute tests
@@ -136,10 +135,10 @@ int main(){
     string str; // for storing strings
     int counter; // for storing counters
     int it = 0;
-    for ( const string * testArray : testTreeCode_vec ) {
+    for (const string * testArray : testTreeCode_vec) {
         // go through different levels of useless brackets use
 
-        for (int j=0; j<ncodes; ++j) {
+        for (int j = 0; j < ncodes; ++j) {
             // and through different codes
 
             // --- READERS
@@ -231,7 +230,7 @@ int main(){
 
     //cout << composeCodes("", "") << endl;
     //cout << ""  << endl << endl;
-    assert(composeCodes("", "") == "");
+    assert(composeCodes("", "").empty());
 
     //cout << composeCodes(testIdCode[0], "") << endl;
     //cout << testIdCode[0] << endl << endl;
@@ -250,7 +249,7 @@ int main(){
 
     //cout << composeCodeList(empty_vec) << endl;
     //cout << "" << endl << endl;
-    assert(composeCodeList(empty_vec) == "");
+    assert(composeCodeList(empty_vec).empty());
 
     //cout << composeCodeList(single_vec) << endl;
     //cout << "A" << endl << endl;

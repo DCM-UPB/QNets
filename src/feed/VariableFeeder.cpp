@@ -1,7 +1,5 @@
 #include "ffnn/feed/VariableFeeder.hpp"
 
-#include <string>
-
 // --- clear method
 
 void VariableFeeder::_clearSources()
@@ -29,7 +27,8 @@ void VariableFeeder::setParams(const std::string &params)
 
 // set VP Indexes default version
 
-int VariableFeeder::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp){
+int VariableFeeder::setVariationalParametersIndexes(const int &starting_index, const bool flag_add_vp)
+{
     // NOTE: Extend this to actually add variational parameters
 
     FeederInterface::setVariationalParametersIndexes(starting_index, flag_add_vp);
@@ -50,18 +49,23 @@ int VariableFeeder::getNVariationalParameters()
 int VariableFeeder::getMaxVariationalParameterIndex()
 {
     if (_vp_id_shift > -1) {
-        if(_flag_vp) {
+        if (_flag_vp) {
             return _vp_id_shift + _vp.size() - 1;
         }
-        else return _vp_id_shift;
+        {
+            return _vp_id_shift;
+        }
     }
-    else return -1; // vp not initialized
+    else {
+        return -1; // vp not initialized
+    }
 }
 
-bool VariableFeeder::setVariationalParameterValue(const int &id, const double &value){
+bool VariableFeeder::setVariationalParameterValue(const int &id, const double &value)
+{
     if (_flag_vp) {
-        if ( isVPIndexUsedInFeeder(id) ){
-            *_vp[ id - _vp_id_shift ] = value;
+        if (isVPIndexUsedInFeeder(id)) {
+            *_vp[id - _vp_id_shift] = value;
             return true;
         }
     }
@@ -69,10 +73,11 @@ bool VariableFeeder::setVariationalParameterValue(const int &id, const double &v
 }
 
 
-bool VariableFeeder::getVariationalParameterValue(const int &id, double &value){
+bool VariableFeeder::getVariationalParameterValue(const int &id, double &value)
+{
     if (_flag_vp) {
-        if ( isVPIndexUsedInFeeder(id) ){
-            value = *_vp[ id - _vp_id_shift ];
+        if (isVPIndexUsedInFeeder(id)) {
+            value = *_vp[id - _vp_id_shift];
             return true;
         }
     }
@@ -85,6 +90,6 @@ bool VariableFeeder::getVariationalParameterValue(const int &id, double &value){
 
 bool VariableFeeder::isVPIndexUsedInFeeder(const int &id)
 {
-    return ( _vp_id_shift <= id && id <_vp_id_shift+(int)_vp.size() );
+    return (_vp_id_shift <= id && id < _vp_id_shift + static_cast<int>(_vp.size()));
 }
 
