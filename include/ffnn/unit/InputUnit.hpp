@@ -18,14 +18,14 @@ public:
         _inputMu = inputMu;
         _inputSigma = inputSigma;
     } // the index of the input unit, i.e. d/dx_index f(_pv) = 1
-    ~InputUnit() override = default;
+    ~InputUnit() final = default;
 
     // string code methods
-    std::string getIdCode() override { return "IN"; } // return identifier for unit type
+    std::string getIdCode() final { return "IN"; } // return identifier for unit type
 
     // return the output mean value (mu) and standard deviation (sigma)
-    double getOutputMu() override { return (_inputMu + _shift)*_scale; }
-    double getOutputSigma() override { return _inputSigma*_scale; }
+    double getOutputMu() final { return (_inputMu + _shift)*_scale; }
+    double getOutputSigma() final { return _inputSigma*_scale; }
 
     // set input data mu and sigma, set shift/scale accordingly
     void setInputMu(const double &inputMu, const bool &doShift = true);
@@ -36,11 +36,11 @@ public:
     double getInputSigma() { return _inputSigma; }
 
     // Computation
-    void computeFeed() override {}
+    void computeFeed() final {}
     void computeActivation() {}
-    void computeDerivatives() override {}
+    void computeDerivatives() final {}
 
-    void computeValues() override
+    void computeValues() final
     {
         _v = _pv;
         if (_v1d != nullptr) {

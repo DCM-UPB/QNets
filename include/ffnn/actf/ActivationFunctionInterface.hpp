@@ -20,14 +20,11 @@ public:
     // Construct from passed activation function
     //ActivationFunctionInterface(ActivationFunctionInterface * const actf){}
 
-    // Destructor
-    ~ActivationFunctionInterface() override = default;
-
     // allocate a new copy of this to *actf
     virtual ActivationFunctionInterface * getCopy() = 0;
 
     // set class id code
-    std::string getClassIdCode() override { return "ACTF"; }
+    std::string getClassIdCode() final { return "ACTF"; }
 
     // return the ideal input mean value (mu) and standard deviation (sigma)
     virtual double getIdealInputMu() = 0;

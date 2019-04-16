@@ -14,22 +14,22 @@ public:
     }
 
     // there is no real ideal mu / sigma for offset, we return the closest thing
-    double getIdealProtoMu() override { return 1.; }
-    double getIdealProtoSigma() override { return 0.; }
+    double getIdealProtoMu() final { return 1.; }
+    double getIdealProtoSigma() final { return 0.; }
 
     // there is no variation in the offset
-    double getOutputMu() override { return _v; }
-    double getOutputSigma() override { return 0.; }
+    double getOutputMu() final { return _v; }
+    double getOutputSigma() final { return 0.; }
 
     // string code methods
-    std::string getIdCode() override { return "OFF"; } // return identifier for unit type
+    std::string getIdCode() final { return "OFF"; } // return identifier for unit type
 
     // Computation
-    void computeFeed() override {}
+    void computeFeed() final {}
     void computeActivation() {}
-    void computeDerivatives() override {}
+    void computeDerivatives() final {}
 
-    void computeValues() override { _v = _pv; }
+    void computeValues() final { _v = _pv; }
 };
 
 #endif

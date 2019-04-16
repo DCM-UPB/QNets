@@ -25,7 +25,7 @@ public:
     std::string getIdCode() override { return "NNU"; } // return identifier for unit type
 
     // restrict feeder to ray type
-    void setFeeder(FeederInterface * feeder) override
+    void setFeeder(FeederInterface * feeder) final
     {
         if (auto * ray = dynamic_cast<NNRay *>(feeder)) {
             FedUnit::setFeeder(ray);
