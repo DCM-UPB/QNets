@@ -1,7 +1,7 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/net/TemplNet.hpp"
+#include "qnets/net/TemplNet.hpp"
 
 int main()
 {
