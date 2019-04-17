@@ -1,4 +1,4 @@
-#include "ffnn/actf/LogisticActivationFunction.hpp"
+#include "qnets/actf/LogisticActivationFunction.hpp"
 
 
 // Activation Function Interface implementation

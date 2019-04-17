@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "qnets/actf/ActivationFunctionManager.hpp"
 
 #include "FFNNBenchmarks.hpp"
 

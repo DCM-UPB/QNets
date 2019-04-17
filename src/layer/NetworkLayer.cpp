@@ -1,4 +1,4 @@
-#include "ffnn/layer/NetworkLayer.hpp"
+#include "qnets/layer/NetworkLayer.hpp"
 
 // --- Constructor
 

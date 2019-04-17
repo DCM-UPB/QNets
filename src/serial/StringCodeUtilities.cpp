@@ -1,4 +1,4 @@
-#include "ffnn/serial/StringCodeUtilities.hpp"
+#include "qnets/serial/StringCodeUtilities.hpp"
 
 using namespace std;
 

@@ -1,6 +1,6 @@
-#include "ffnn/feed/FeederInterface.hpp"
-#include "ffnn/layer/NetworkLayer.hpp"
-#include "ffnn/unit/FedUnit.hpp"
+#include "qnets/feed/FeederInterface.hpp"
+#include "qnets/layer/NetworkLayer.hpp"
+#include "qnets/unit/FedUnit.hpp"
 
 // --- Base Destructor
 

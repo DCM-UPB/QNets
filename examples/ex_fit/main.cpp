@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/train/NNTrainerGSL.hpp"
+#include "qnets/train/NNTrainerGSL.hpp"
 
 
 /*

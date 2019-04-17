@@ -1,4 +1,4 @@
-#include "ffnn/actf/SELUActivationFunction.hpp"
+#include "qnets/actf/SELUActivationFunction.hpp"
 
 
 std::string SELUActivationFunction::getParams()

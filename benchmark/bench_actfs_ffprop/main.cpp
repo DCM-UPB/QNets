@@ -2,8 +2,8 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/actf/ActivationFunctionManager.hpp"
-#include "ffnn/io/PrintUtilities.hpp"
+#include "qnets/actf/ActivationFunctionManager.hpp"
+#include "qnets/io/PrintUtilities.hpp"
 
 #include "FFNNBenchmarks.hpp"
 

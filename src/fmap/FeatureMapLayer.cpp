@@ -1,4 +1,4 @@
-#include "ffnn/fmap/FeatureMapLayer.hpp"
+#include "qnets/fmap/FeatureMapLayer.hpp"
 
 #include <iostream>
 

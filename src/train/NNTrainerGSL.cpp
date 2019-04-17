@@ -1,4 +1,4 @@
-#include "ffnn/train/NNTrainerGSL.hpp"
+#include "qnets/train/NNTrainerGSL.hpp"
 
 #include <gsl/gsl_blas.h>
 

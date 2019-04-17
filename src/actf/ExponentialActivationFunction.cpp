@@ -1,4 +1,4 @@
-#include "ffnn/actf/ExponentialActivationFunction.hpp"
+#include "qnets/actf/ExponentialActivationFunction.hpp"
 
 
 // Activation Function Interface implementation

@@ -1,4 +1,4 @@
-#include "ffnn/actf/GaussianActivationFunction.hpp"
+#include "qnets/actf/GaussianActivationFunction.hpp"
 
 
 

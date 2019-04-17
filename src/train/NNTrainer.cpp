@@ -1,5 +1,5 @@
-#include "ffnn/train/NNTrainer.hpp"
-#include "ffnn/feed/SmartBetaGenerator.hpp"
+#include "qnets/train/NNTrainer.hpp"
+#include "qnets/feed/SmartBetaGenerator.hpp"
 
 #include <algorithm>
 #include <random>

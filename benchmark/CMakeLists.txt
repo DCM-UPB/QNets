@@ -1,5 +1,5 @@
 include_directories(common/)
-link_libraries(ffnn)
+link_libraries(qnets)
 
 add_executable(bench_actfs_derivs bench_actfs_derivs/main.cpp)
 add_executable(bench_actfs_ffprop bench_actfs_ffprop/main.cpp)

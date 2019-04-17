@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FeedForwardNeuralNetwork.iml" filepath="$PROJECT_DIR$/.idea/FeedForwardNeuralNetwork.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/QNets.iml" filepath="$PROJECT_DIR$/.idea/QNets.iml" />
     </modules>
   </component>
 </project>

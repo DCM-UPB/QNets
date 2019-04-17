@@ -1,4 +1,4 @@
-#include "ffnn/actf/SineActivationFunction.hpp"
+#include "qnets/actf/SineActivationFunction.hpp"
 
 // Activation Function Interface implementation
 

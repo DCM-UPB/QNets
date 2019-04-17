@@ -1,4 +1,4 @@
-#include "ffnn/actf/ActivationFunctionManager.hpp"
+#include "qnets/actf/ActivationFunctionManager.hpp"
 
 #include <cassert>
 

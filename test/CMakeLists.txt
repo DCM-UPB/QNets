@@ -1,5 +1,5 @@
 include_directories(common/)
-link_libraries(ffnn)
+link_libraries(qnets)
 
 add_executable(check main.cpp)
 add_executable(ut1.exe ut1/main.cpp)

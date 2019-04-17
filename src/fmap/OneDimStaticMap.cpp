@@ -1,4 +1,4 @@
-#include "ffnn/fmap/OneDimStaticMap.hpp"
+#include "qnets/fmap/OneDimStaticMap.hpp"
 
 // --- Constructor
 

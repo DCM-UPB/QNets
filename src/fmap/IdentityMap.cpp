@@ -1,4 +1,4 @@
-#include "ffnn/fmap/IdentityMap.hpp"
+#include "qnets/fmap/IdentityMap.hpp"
 
 // --- fill/clear sources
 

@@ -1,4 +1,4 @@
-#include "ffnn/fmap/EuclideanDistanceMap.hpp"
+#include "qnets/fmap/EuclideanDistanceMap.hpp"
 
 #include <cmath>
 

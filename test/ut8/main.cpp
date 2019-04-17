@@ -1,5 +1,5 @@
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
-#include "ffnn/train/NNTrainerGSL.hpp"
+#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/train/NNTrainerGSL.hpp"
 
 #include <gsl/gsl_blas.h>
 

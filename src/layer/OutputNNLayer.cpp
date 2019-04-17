@@ -1,4 +1,4 @@
-#include "ffnn/layer/OutputNNLayer.hpp"
+#include "qnets/layer/OutputNNLayer.hpp"
 
 
 // --- Register Unit

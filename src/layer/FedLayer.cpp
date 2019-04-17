@@ -1,4 +1,4 @@
-#include "ffnn/layer/FedLayer.hpp"
+#include "qnets/layer/FedLayer.hpp"
 
 
 // --- Register Unit

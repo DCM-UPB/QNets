@@ -1,4 +1,4 @@
-#include "ffnn/unit/FedUnit.hpp"
+#include "qnets/unit/FedUnit.hpp"
 
 // --- Computation
 

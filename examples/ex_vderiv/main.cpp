@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "ffnn/io/PrintUtilities.hpp"
+#include "qnets/io/PrintUtilities.hpp"
 
 
 int main()

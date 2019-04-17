@@ -1,4 +1,4 @@
-#include "ffnn/fmap/PairDifferenceMap.hpp"
+#include "qnets/fmap/PairDifferenceMap.hpp"
 
 #include <cmath>
 

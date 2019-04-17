@@ -1,4 +1,4 @@
-#include "ffnn/feed/WeightedFeeder.hpp"
+#include "qnets/feed/WeightedFeeder.hpp"
 
 // --- clear method
 

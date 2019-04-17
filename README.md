@@ -4,9 +4,9 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/dcm-upb/feedforwardneuralnetwork/badge)](https://www.codefactor.io/repository/github/dcm-upb/feedforwardneuralnetwork)
 
 
-# FeedForwardNeuralNetwork
+# QNets
 
-C++ Library for building and using Feed Forward Neural Networks.
+C++ Library to easily build and use (Feed Forward) Neural Networks.
 It includes first and second derivatives with respect to the input values, first derivatives with respect to the variational parameters
 and mixed derivatives with respect to both input and variational parameters.
 

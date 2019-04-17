@@ -1,4 +1,4 @@
-#include "ffnn/actf/TanSigmoidActivationFunction.hpp"
+#include "qnets/actf/TanSigmoidActivationFunction.hpp"
 
 // Activation Function Interface implementation
 

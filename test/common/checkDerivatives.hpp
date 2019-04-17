@@ -2,7 +2,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/net/FeedForwardNeuralNetwork.hpp"
 
 inline void checkDerivatives(FeedForwardNeuralNetwork * const ffnn, const double &TINY)
 {

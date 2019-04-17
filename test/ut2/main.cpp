@@ -1,4 +1,4 @@
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/net/FeedForwardNeuralNetwork.hpp"
 
 #include "../common/checkStoreOnFile.hpp"
 

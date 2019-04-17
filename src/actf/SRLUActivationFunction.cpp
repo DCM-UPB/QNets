@@ -1,4 +1,4 @@
-#include "ffnn/actf/SRLUActivationFunction.hpp"
+#include "qnets/actf/SRLUActivationFunction.hpp"
 
 
 // Activation Function Interface implementation

@@ -1,4 +1,4 @@
-#include "ffnn/feed/NNRay.hpp"
+#include "qnets/feed/NNRay.hpp"
 
 #include <cmath>
 #include <random>

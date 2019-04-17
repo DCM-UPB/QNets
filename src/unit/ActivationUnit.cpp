@@ -1,4 +1,4 @@
-#include "ffnn/unit/ActivationUnit.hpp"
+#include "qnets/unit/ActivationUnit.hpp"
 
 // --- String Code
 

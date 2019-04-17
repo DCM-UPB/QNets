@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "ffnn/io/PrintUtilities.hpp"
+#include "qnets/io/PrintUtilities.hpp"
 
 #include "FFNNBenchmarks.hpp"
 

@@ -1,4 +1,4 @@
-#include "ffnn/fmap/PairSumMap.hpp"
+#include "qnets/fmap/PairSumMap.hpp"
 
 #include <cmath>
 

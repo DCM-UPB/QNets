@@ -1,4 +1,4 @@
-#include "ffnn/unit/NetworkUnit.hpp"
+#include "qnets/unit/NetworkUnit.hpp"
 
 // --- Computation
 

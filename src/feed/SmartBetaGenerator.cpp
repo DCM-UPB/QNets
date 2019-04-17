@@ -1,4 +1,4 @@
-#include "ffnn/feed/SmartBetaGenerator.hpp"
+#include "qnets/feed/SmartBetaGenerator.hpp"
 
 #include <numeric>
 #include <random>

@@ -1,4 +1,4 @@
-link_libraries(ffnn)
+link_libraries(qnets)
 
 add_executable(ex_basic.exe ex_basic/main.cpp)
 add_executable(ex_beta.exe ex_beta/main.cpp)

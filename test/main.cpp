@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "ffnn/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/net/FeedForwardNeuralNetwork.hpp"
 
 
 void printNNStructure(FeedForwardNeuralNetwork &nn)
