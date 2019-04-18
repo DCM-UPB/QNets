@@ -1,7 +1,7 @@
 #ifndef FFNN_TRAIN_NNTRAININGCONFIG_HPP
 #define FFNN_TRAIN_NNTRAININGCONFIG_HPP
 
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 
 // holds the required configuration parameters for the trainer
 struct NNTrainingConfig

@@ -2,7 +2,7 @@
 #define FFNN_IO_PRINTUTILITIES_HPP
 
 
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 
 
 #include <string>

@@ -1,7 +1,7 @@
 #ifndef FFNN_TRAIN_NNTRAINERGSL_HPP
 #define FFNN_TRAIN_NNTRAINERGSL_HPP
 
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 #include "qnets/train/NNTrainer.hpp"
 #include "qnets/train/NNTrainingConfig.hpp"
 #include "qnets/train/NNTrainingData.hpp"

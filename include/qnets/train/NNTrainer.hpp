@@ -2,7 +2,7 @@
 #define FFNN_TRAIN_NNTRAINER_HPP
 
 #include "qnets/io/PrintUtilities.hpp"
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 #include "qnets/train/NNTrainingConfig.hpp"
 #include "qnets/train/NNTrainingData.hpp"
 #include <cstddef> // NULL

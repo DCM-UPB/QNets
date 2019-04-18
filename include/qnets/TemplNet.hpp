@@ -1,9 +1,15 @@
 #ifndef FFNN_NET_TEMPLNET_HPP
 #define FFNN_NET_TEMPLNET_HPP
 
+#include "qnets/tool/PackHelpers.hpp"
+
 #include <array>
 #include <vector>
+#include <algorithm>
+#include <numeric>
 
+namespace templ
+{
 
 template <class IteratorT = double *>
 class LogACTF // Test Array ACTF
@@ -12,75 +18,133 @@ public:
 
     static void f(IteratorT cur, IteratorT end, IteratorT out)
     {
-        for (; cur<end; ++cur, ++out) {
+        for (; cur < end; ++cur, ++out) {
             *out = 1./(1. + exp(-(*cur)));
         }
     }
 
     static void fd1(IteratorT cur, IteratorT end, IteratorT out)
     {
-        for (; cur<end; ++cur, ++out) {
+        for (; cur < end; ++cur, ++out) {
             *out = 1./(1. + exp(-(*cur))); // f
-            *out = *out * (1. - *out); // fd1
+            *out = *out*(1. - *out); // fd1
         }
     }
 
     static void fd2(IteratorT cur, IteratorT end, IteratorT out)
     {
-        for (; cur<end; ++cur, ++out) {
+        for (; cur < end; ++cur, ++out) {
             *out = 1./(1. + exp(-(*cur))); // f
-            *out = *out * (1. - *out) * (1. - 2.*(*out)); // fd2
+            *out = *out*(1. - *out)*(1. - 2.*(*out)); // fd2
         }
     }
 
     static void fad(IteratorT cur, IteratorT end, IteratorT outf, IteratorT outfd1, IteratorT outfd2)
     {
-        for (; cur<end; ++cur, ++outf, ++outfd1, ++outfd2) {
+        for (; cur < end; ++cur, ++outf, ++outfd1, ++outfd2) {
             *outf = 1./(1. + exp(-(*cur))); // f
-            *outfd1 = *outf * (1. - *outf); // fd1
-            *outfd2 = *outfd1 * (1. - 2.*(*outf)); // fd2
+            *outfd1 = *outf*(1. - *outf); // fd1
+            *outfd2 = *outfd1*(1. - 2.*(*outf)); // fd2
         }
     }
 };
 
+// --- Configuration "structs" (for user)
 
-template<typename T, T ... ts>
-constexpr T const_sum() {
-    T result = 0;
-    for(auto &t : { ts... }) result += t;
-    return result;
+// To configure "allocation" of derivative-related std::arrays
+// You may still opt OUT of the derivative COMPUTATION dynamically
+// at run time, but the pre-reserved memory will always be kept.
+template <bool RESERVE_D1 = false, bool RESERVE_D2 = false, bool RESERVE_VD1 = false>
+struct DerivSetup
+{
+    static constexpr bool d1 = RESERVE_D1;
+    static constexpr bool d2 = RESERVE_D2;
+    static constexpr bool vd1 = RESERVE_VD1;
+};
+
+// to pass non-input layers as variadic parameter pack
+template <typename SizeT, SizeT NU, class ACTF>
+struct Layer
+{
+    static constexpr SizeT size = NU;
+    using actf = ACTF;
+};
+
+
+// --- Helpers
+
+// count total number of units across Layer pack (recursive)
+template <typename SizeT>
+constexpr SizeT countUnits() { return 0; } // terminate recursion
+template <typename SizeT, class Layer, class ... LAYERS>
+constexpr SizeT countUnits()
+{
+    return Layer::size + countUnits<SizeT, LAYERS...>(); // recurse until all layer's units counted
 }
 
-
-template<typename T, T ... ts>
-constexpr T const_prod() {
-    T result = 1;
-    for(auto &t : { ts... }) result *= t;
-    return result;
+// count total number of weights across Layer pack (recursive)
+template <typename SizeT>
+constexpr SizeT countNVP(SizeT/*prev_nunits*/) { return 0; } // terminate recursion
+template <typename SizeT, class Layer, class ... LAYERS>
+constexpr SizeT countNVP(SizeT prev_nunits)
+{
+    return Layer::size*(prev_nunits + 1/*offset*/) + countNVP<SizeT, LAYERS...>(Layer::size); // recurse
 }
 
-/*template <class SizeT = size_t, SizeT N_IN, SizeT N_OUT, std::initializer_list<SizeT> N_HID>
-constexpr calcNVP*/
+// check for empty layers across pack (use it "passing" first argument as true)
+template <bool ret> constexpr bool hasNoEmptyLayer() { return ret; } // terminate recursion
+template <bool ret, class Layer, class ... LAYERS>
+constexpr bool hasNoEmptyLayer()
+{
+    return hasNoEmptyLayer<(ret && Layer::size > 0), LAYERS...>();
+}
 
-template <typename SizeT, typename ValueT,
-          class HiddenACTF, class OutputACTF,
-                  SizeT NU_IN, SizeT NU_OUT, SizeT NL_HID, SizeT ... NUs_HID>
+// make array of nunits
+template<typename SizeT, class ... LAYERS>
+constexpr auto makeNUnitsArray(SizeT input_nunits)
+{
+    return std::array<SizeT, 1 + pack::count<SizeT, LAYERS...>()> { input_nunits, LAYERS::size... };
+}
+
+// --- The fully templated TemplNet FFNN
+
+template <typename SizeT, typename ValueT, class DERIV_SETUP, SizeT NU_IN, class ... LAYERS>
 class TemplNet
 {
-private:
-    bool _flag_d1{}, _flag_d2{}, _flag_vd1{};  // flags that indicate if the substrates for the derivatives have been activated or not
+public:
+    // constexpr sizes
+    static constexpr SizeT nlayer = 1 /*IN*/ + pack::count<SizeT, LAYERS...>();
 
-    static constexpr SizeT _nvp = 0;  // global number of variational parameters
+    // check for mistakes (statically)
+    static_assert(nlayer > 2, "[TemplNet] nlayer <= 2");
+    static_assert(hasNoEmptyLayer<(NU_IN > 0), LAYERS...>(), "[TemplNet] Layer pack contains empty Layer.");
+
+    static constexpr SizeT nunit_tot = NU_IN + countUnits<SizeT, LAYERS...>();
+    static constexpr SizeT nvp_tot = countNVP<SizeT, LAYERS...>(NU_IN);
+    static constexpr SizeT nlink_tot = nvp_tot - nunit_tot + NU_IN; // substract offsets
+
+    // nunit array
+    static constexpr std::array<SizeT, nlayer> nunits = makeNUnitsArray<SizeT, LAYERS...>(NU_IN);
+
+    // input array
+    std::array<ValueT, NU_IN> input{};
+
+    // output array (const ref)
+    const std::array<ValueT, nunits.back()> &output;
+
+private:
+    std::array<ValueT, nunits.back()> _output{};
+
+    bool _flag_d1{}, _flag_d2{}, _flag_vd1{};  // flags that indicate if derivatives should currently be calculated or not
 
 public:
-    static constexpr SizeT NLAYERS = 2 + sizeof...(NUs_HID);
-    static constexpr SizeT NUNITS = NU_IN + const_sum<SizeT, NUs_HID...>() + NU_OUT;
-
-
-    constexpr TemplNet() = default;
-    constexpr TemplNet(bool flag_d1, bool flag_d2, bool flag_vd1):
-    _flag_d1(flag_d1), _flag_d2(flag_d2), _flag_vd1(flag_vd1) {}
-
+    constexpr TemplNet(): output(_output), _flag_d1(DERIV_SETUP::d1), _flag_d2(DERIV_SETUP::d2), _flag_vd1(DERIV_SETUP::vd1) {}
+    constexpr TemplNet(bool flag_d1, bool flag_d2, bool flag_vd1): TemplNet()
+    {
+        _flag_d1 = flag_d1;
+        _flag_d2 = flag_d2;
+        _flag_vd1 = flag_vd1;
+    }
 
     // --- Get information about the NN structure
     /*
@@ -159,6 +223,6 @@ public:
     // --- Store FFNN on file
     //void storeOnFile(const char * filename, bool store_betas = true);
 };
-
+} // templ
 
 #endif

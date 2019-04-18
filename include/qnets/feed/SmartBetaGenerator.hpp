@@ -4,7 +4,7 @@
 #include "qnets/feed/FeederInterface.hpp"
 #include "qnets/feed/NNRay.hpp"
 #include "qnets/layer/FedLayer.hpp"
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 
 
 namespace smart_beta

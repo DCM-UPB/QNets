@@ -1,4 +1,4 @@
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 #include "qnets/train/NNTrainerGSL.hpp"
 
 #include <gsl/gsl_blas.h>

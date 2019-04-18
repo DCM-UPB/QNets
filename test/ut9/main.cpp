@@ -3,7 +3,7 @@
 #include <iostream>
 #include <random>
 
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/FeedForwardNeuralNetwork.hpp"
 #include "qnets/train/NNTrainerGSL.hpp"
 
 using namespace std;
