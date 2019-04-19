@@ -55,11 +55,11 @@ int main()
     cout << "l0 " << l0.size() << endl;
     cout << "l1: " << l1.size() << endl;
 
-    cout << "beta ";
+    /*cout << "beta ";
     for (int i = 0; i < TestNet::getNBeta(); ++i) {
         cout << "b" << i << " " << test.getBeta(i) << "  ";
     }
-    cout << endl;
+    cout << endl;*/
 
     actf::Sigmoid actf{};
     std::array<double, 2> foo{};

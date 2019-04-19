@@ -2,6 +2,7 @@
 #define QNETS_TOOL_PACKTOOLS_HPP
 
 #include <functional>
+#include <type_traits>
 
 namespace pack
 {
@@ -13,28 +14,17 @@ namespace pack
 template <typename ...>
 struct list {};
 
-
 // count pack and return count as desired integer type
 template <typename SizeT, class ... Pack>
-constexpr SizeT count() { return static_cast<SizeT>(sizeof...(Pack)); }
-
+constexpr SizeT count(Pack ... p) { return static_cast<SizeT>(sizeof...(Pack)); }
 
 // --- Pack Sum
 
-// sum of pack values
-template <typename T, T ... ts>
-constexpr T sum()
-{
-    T result = 0;
-    for (auto &t : {ts...}) { result += t; }
-    return result;
-}
-
 // sum of pack values, with start and end
 template <typename SizeT, typename T, T ... ts>
-constexpr T sum(SizeT begin_index/*count from*/, SizeT end_index/*to before this*/)
+constexpr T sum(SizeT begin_index = 0/*count from*/, SizeT end_index = count<SizeT>(ts...)/*to before this*/)
 {
-    static_assert(end_index <= count<SizeT, ts...>(), "[pack::sum] end_index > count(pack).");
+    //static_assert(end_index <= count<SizeT>(ts...), "[pack::sum] end_index > count(pack).");
     T result = 0;
     SizeT i = 0;
     for (auto &t : {ts...}) {
@@ -48,20 +38,11 @@ constexpr T sum(SizeT begin_index/*count from*/, SizeT end_index/*to before this
 
 // --- Pack Product
 
-// product of pack values
-template <typename T, T ... ts>
-constexpr T prod()
-{
-    T result = 1;
-    for (auto &t : {ts...}) { result *= t; }
-    return result;
-}
-
-// product of pack values, with start and end
+// Product of pack values, with optional start and end
 template <typename SizeT, typename T, T ... ts>
-constexpr T prod(SizeT begin_index/*count from*/, SizeT end_index/*to before this*/)
+constexpr T prod(SizeT begin_index = 0/*count from*/, SizeT end_index = count<SizeT>(ts...)/*to before this*/)
 {
-    static_assert(end_index <= count<SizeT, ts...>(), "[pack::prod] end_index > count(pack).");
+    //static_assert(end_index <= count<SizeT>(ts...), "[pack::prod] end_index > count(pack).");
     T result = 1;
     SizeT i = 0;
     for (auto &t : {ts...}) {
@@ -75,23 +56,14 @@ constexpr T prod(SizeT begin_index/*count from*/, SizeT end_index/*to before thi
 
 // --- Accumulate Function
 
-// accumulate function of pack values
-template <typename ValueT, typename T, T ... ts>
-constexpr ValueT accumulate(std::function<ValueT(const T &)> func)
+// Accumulate function of pack values, with optional start and end
+template <class FuncT, typename SizeT, typename T, T ... ts>
+constexpr auto accumulate(FuncT func, SizeT begin_index = 0/*count from*/, SizeT end_index = count<SizeT>(ts...)/*to before this*/)
 {
-    ValueT result = 0;
-    for (auto &t : {ts...}) { result += func(t); }
-    return result;
-}
-
-// accumulate function of pack values, with start and end
-template <typename SizeT, typename ValueT, typename T, T ... ts>
-constexpr ValueT accumulate(SizeT begin_index/*count from*/, SizeT end_index/*to before this*/, std::function<ValueT(const T &)> func)
-{
-    static_assert(end_index <= count<SizeT, ts...>(), "[pack::accumulate] end_index > count(pack).");
-    ValueT result = 0;
+    //static_assert(end_index <= count<SizeT>(ts...), "[pack::accumulate] end_index > count(pack).");
+    decltype(func) result = 0;
     SizeT i = 0;
-    for (auto &t : {ts...}) {
+    for (const auto &t : {ts...}) {
         if (i >= begin_index && i < end_index) {
             result += func(t);
         }

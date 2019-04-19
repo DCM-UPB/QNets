@@ -2,6 +2,7 @@
 #define FFNN_NET_TEMPLNET_HPP
 
 #include "qnets/tool/PackTools.hpp"
+#include "qnets/tool/TupleTools.hpp"
 #include "qnets/templ/Layer.hpp"
 #include "qnets/templ/LayerPackTools.hpp"
 
@@ -21,19 +22,28 @@ class TemplNet
 private:
     // --- Static Setup
 
-    // Layer tuple
+    // Layer tuples
+
+    using LayerConfTuple = std::tuple<LayerConfs...>; // this one we can make static
+    static constexpr LayerConfTuple _layerConfs{};
+
     using LayerTuple = std::tuple<Layer<ValueT, LayerConfs, DerivConf>...>;
     LayerTuple _layers;
 
     // store some basics
-    static constexpr SizeT _nlayer = pack::count<SizeT, LayerConfs...>();
+    static constexpr SizeT _nlayer = tupl::count<SizeT, LayerTuple>();
     static constexpr SizeT _ninput = std::tuple_element<0, LayerTuple>::type::ninput;
     static constexpr SizeT _noutput = std::tuple_element<_nlayer - 1, LayerTuple>::type::noutput;
 
-    // Some homogenous arrays to make access easier
+    // Some static arrays to make access easier (needs to be defined again below the class, until C++17)
+    // Therefore we keep the sizeof...() as size instead of using nlayer static variable
     static constexpr std::array<SizeT, sizeof...(LayerConfs)> _nunit_shape{LayerConfs::size()...};
     static constexpr std::array<SizeT, sizeof...(LayerConfs)> _nbeta_shape{LayerConfs::nbeta...};
-    //const std::array<ValueT *, sizeof...(LayerConfs)> _beta_begins;
+    //static constexpr std::array<SizeT, sizeof...(LayerConfs)> _nbeta_offsets{tupl::make_fcont<std::array<SizeT, _nlayer>>(_layerConfs, [](const auto &layer) mutable { return layer.size();})};
+
+    // arrays of array.begin() pointers, for run-time public indexing
+    const std::array<ValueT *, _nlayer> _out_begins;
+    const std::array<ValueT *, _nlayer> _beta_begins;
 
     // Basic assertions
     static_assert(_nlayer > 1, "[TemplNet] nlayer <= 1");
@@ -50,7 +60,10 @@ public:
 
 public:
     constexpr TemplNet():
-            _layers({Layer<ValueT, LayerConfs, DerivConf>()...}), input{}, output(std::get<_nlayer - 1>(_layers).out),
+            _layers{Layer<ValueT, LayerConfs, DerivConf>()...},
+            _out_begins{tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return layer.out.begin(); })},
+            _beta_begins{tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return layer.beta.begin(); })},
+            input{}, output(std::get<_nlayer - 1>(_layers).out),
             flag_d1(DerivConf::d1), flag_d2(DerivConf::d2), flag_vd1(DerivConf::vd1) {}
 
 
@@ -90,17 +103,14 @@ public:
     static constexpr SizeT getNLink() { return getNBeta() - getNUnit(); } // substract offsets
     static constexpr SizeT getNLink(SizeT i) { return _nbeta_shape[i] - _nunit_shape[i]; }
 
-    constexpr ValueT getBeta(SizeT i) const
+    /*constexpr ValueT getBeta(SizeT i) const
     {
-        SizeT offset = 0;
         SizeT idx = 0;
-        while (i < offset + getNUnit(idx)) {
-            offset += getNUnit(idx);
+        while (i < _nbeta_offsets[idx]) {
             ++idx;
         }
-        return 0;
-        //return *(_beta_begins[idx] + (i - offset));
-    }
+        return *(_beta_begins[idx] + (i - _nbeta_offsets[idx]));
+    }*/
     /*ValueT getBeta(const SizeT &ib);
     void getBeta(ValueT * beta);
     void setBeta(const SizeT &ib, const ValueT &beta);
