@@ -7,10 +7,10 @@ namespace pack
 {
 // Collection of helpers for dealing with variadic template parameter packs
 // Everything in here is meant for usage at compile-time!
+// With fold-expressions from C++17 some functions will become obsolete.
 
-// Template Parameter List (to allow multiple parameter packs per template)
-template <typename ...>
-struct list {};
+// Template Parameter List (to help with multiple parameter packs per template)
+template <typename ...> struct list {};
 
 
 // count pack and return count as desired integer type

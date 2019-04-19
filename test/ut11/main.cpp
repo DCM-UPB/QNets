@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <cassert>
 
 #include "qnets/TemplNet.hpp"
 
@@ -8,43 +9,62 @@ int main()
     using namespace std;
     using namespace templ;
 
-    const double TINY = 0.0001;
+    //const double TINY = 0.0001;
 
     constexpr int NU_IN = 2;
-    using layer1 = Layer<int, 4, LogACTF<>>;
-    using layer2 = Layer<int, 2, LogACTF<>>;
-    using derivs = DerivSetup<false, false, false>;
-    using TestNet = TemplNet<int, double, derivs, NU_IN, layer1, layer2>;
+    using layer1 = LayerConfig<int, NU_IN, 4, LogACTF>;
+    using layer2 = LayerConfig<int, layer1::size(), 2, LogACTF>;
+    using derivs = DerivConfig<true, true, true>; // we are going to check them all
+    using TestNet = TemplNet<int, double, derivs, layer1, layer2>;
 
-    // compile time unit test (with possible run-time print)
-    cout << "nlayer " << TestNet::nlayer << endl;
-    static_assert(TestNet::nlayer == 3, "nlayer != 3");
-    cout << "nunits " << TestNet::nunit_tot << endl;
-    static_assert(TestNet::nunit_tot == 8, "nunit_tot != 8");
-    cout << "nvp " << TestNet::nvp_tot << endl;
-    static_assert(TestNet::nvp_tot == 22, "nvp_tot != 22");
-    cout << "nlinks " << TestNet::nlink_tot << endl;
-    static_assert(TestNet::nlink_tot == 16, "nlink_tot != 16");
+    // static type-based tests
+    static_assert(TestNet::getNLayer() == 2, "nlayer != 2");
+    static_assert(TestNet::getNUnit() == 6, "nunit != 6");
+    static_assert(TestNet::getNInput() == 2, "ninput != 2");
+    static_assert(TestNet::getNUnit(0) == 4, "nunit[0] != 4");
+    static_assert(TestNet::getNOutput() == 2, "noutput != 2");
+
+    static_assert(TestNet::getNBeta() == 22, "nbeta != 22");
+    static_assert(TestNet::getNBeta(0) == 12, "nbeta[0] != 12");
+    static_assert(TestNet::getNBeta(1) == 10, "nbeta[1] != 10");
+    static_assert(TestNet::getNLink() == 16, "nlink != 16");
+    static_assert(TestNet::getNLink(0) == 8, "nlink[0] != 8");
+    static_assert(TestNet::getNLink(1) == 8, "nlink[1] != 8");
+
+    static_assert(TestNet::allowsFirstDerivative(), "allow_d1 = false");
+    static_assert(TestNet::allowsSecondDerivative(), "allow_d2 = false");
+    static_assert(TestNet::allowsVariationalFirstDerivative(), "allow_vd1 = false");
 
 
-    TestNet test;
+    TestNet test; // create an instance
 
-    cout << "nu ";
-    for (auto nu : test.nunits) {
-        //cout << nu << " ";
+    constexpr std::array<int, 2> expected_shape{4, 2};
+    constexpr std::array<int, 2> expected_betashape{12, 10};
+
+    assert(TestNet::getShape() == expected_shape);
+    assert(TestNet::getBetaShape() == expected_betashape);
+
+    assert(test.input.size() == TestNet::getNInput());
+    assert(test.output.size() == TestNet::getNOutput());
+    assert(test.output.size() == test.getOutput().size());
+
+    cout << "layers ";
+    auto l0 = test.getLayer<0>();
+    auto l1 = test.getLayer<1>();
+    cout << "l0 " << l0.size() << endl;
+    cout << "l1: " << l1.size() << endl;
+
+    cout << "beta ";
+    for (int i = 0; i < TestNet::getNBeta(); ++i) {
+        cout << "b" << i << " " << test.getBeta(i) << "  ";
     }
     cout << endl;
 
-    cout << "in ";
-    for (auto in : test.input) {
-        cout << in << " ";
-    }
-    cout << endl;
-
-    cout << "out ";
-    for (auto out : test.output) {
-        cout << out << " ";
-    }
+    LogACTF actf{};
+    std::array<double, 2> foo{};
+    actf.f(test.getOutput().begin(), test.output.end(), foo.begin());
+    cout << "actf ";
+    for (double out : foo) { cout << out << " "; }
     cout << endl;
 
 /*
