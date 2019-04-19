@@ -1,128 +1,17 @@
 #ifndef FFNN_NET_TEMPLNET_HPP
 #define FFNN_NET_TEMPLNET_HPP
 
-#include "qnets/tool/PackHelpers.hpp"
+#include "qnets/tool/PackTools.hpp"
+#include "qnets/templ/Layer.hpp"
+#include "qnets/templ/LayerPackTools.hpp"
 
 #include <array>
-#include <vector>
 #include <tuple>
 #include <algorithm>
 #include <numeric>
 
 namespace templ
 {
-
-enum class ArrayACTF { Log };
-
-class LogACTF // Test Array ACTF
-{
-public:
-
-    template <class InputIt, class OutputIt>
-    constexpr void f(InputIt cur, InputIt end, OutputIt out)
-    {
-        for (; cur < end; ++cur, ++out) {
-            *out = 1./(1. + exp(-(*cur)));
-        }
-    }
-
-    template <class InputIt, class OutputIt>
-    constexpr void fd1(InputIt cur, InputIt end, OutputIt out)
-    {
-        for (; cur < end; ++cur, ++out) {
-            *out = 1./(1. + exp(-(*cur))); // f
-            *out = *out*(1. - *out); // fd1
-        }
-    }
-
-    template <class InputIt, class OutputIt>
-    constexpr void fd2(InputIt cur, InputIt end, OutputIt out)
-    {
-        for (; cur < end; ++cur, ++out) {
-            *out = 1./(1. + exp(-(*cur))); // f
-            *out = *out*(1. - *out)*(1. - 2.*(*out)); // fd2
-        }
-    }
-
-    template <class InputIt, class OutputIt>
-    constexpr void fad(InputIt cur, InputIt end, OutputIt outf, OutputIt outfd1, OutputIt outfd2)
-    {
-        for (; cur < end; ++cur, ++outf, ++outfd1, ++outfd2) {
-            *outf = 1./(1. + exp(-(*cur))); // f
-            *outfd1 = *outf*(1. - *outf); // fd1
-            *outfd2 = *outfd1*(1. - 2.*(*outf)); // fd2
-        }
-    }
-};
-
-
-// --- Configuration structs
-
-// To configure "allocation" of derivative-related std::arrays
-// You may still opt OUT of the derivative COMPUTATION dynamically
-// at run time, but the pre-reserved memory will always be kept.
-template <bool RESERVE_D1 = false, bool RESERVE_D2 = false, bool RESERVE_VD1 = false>
-struct DerivConfig
-{
-    static constexpr bool d1 = RESERVE_D1;
-    static constexpr bool d2 = RESERVE_D2;
-    static constexpr bool vd1 = RESERVE_VD1;
-};
-
-// to pass non-input layers as variadic parameter pack
-template <typename SizeT, SizeT N_IN, SizeT N_OUT, class ACTF>
-struct LayerConfig
-{
-    static constexpr SizeT ninput = N_IN;
-    static constexpr SizeT noutput = N_OUT;
-    static constexpr SizeT nbeta = (N_IN + 1)*N_OUT;
-    static constexpr SizeT nlink = N_IN*N_OUT;
-    using ACTF_Type = ACTF;
-
-    static constexpr SizeT size() { return noutput; }
-};
-
-template <class ValueT, class LayerConf, class DerivConf>
-struct Layer: LayerConf
-{
-    static constexpr typename LayerConf::ACTF_Type actf{};
-    std::array<ValueT, LayerConf::noutput> out;
-    std::array<ValueT, LayerConf::nlink> d1;
-    std::array<ValueT, LayerConf::nlink> d2;
-    //std::array<ValueT, LayerConf::nvp> vd1;
-    std::array<ValueT, LayerConf::nbeta> beta;
-};
-
-
-// --- Layer pack helpers (will be mostly obsolete with C++17)
-
-// count total number of units across Layer pack (recursive)
-template <typename SizeT>
-constexpr SizeT countUnits() { return 0; } // terminate recursion
-template <typename SizeT, class Layer, class ... LAYERS>
-constexpr SizeT countUnits()
-{
-    return Layer::size() + countUnits<SizeT, LAYERS...>(); // recurse until all layer's units counted
-}
-
-// count total number of weights across Layer pack (recursive)
-template <typename SizeT>
-constexpr SizeT countBetas(SizeT/*prev_nunits*/) { return 0; } // terminate recursion
-template <typename SizeT, class Layer, class ... LAYERS>
-constexpr SizeT countBetas(SizeT prev_nunits)
-{
-    return Layer::size()*(prev_nunits + 1/*offset*/) + countBetas<SizeT, LAYERS...>(Layer::size()); // recurse
-}
-
-// check for empty layers across pack (use it "passing" first argument with initial boolean (usually true)
-template <bool ret>
-constexpr bool hasNoEmptyLayer() { return ret; } // terminate recursion
-template <bool ret, class Layer, class ... LAYERS>
-constexpr bool hasNoEmptyLayer()
-{
-    return hasNoEmptyLayer<(ret && Layer::size() > 0), LAYERS...>();
-}
-
 
 // --- The fully templated TemplNet FFNN
 
@@ -148,7 +37,7 @@ private:
 
     // Basic assertions
     static_assert(_nlayer > 1, "[TemplNet] nlayer <= 1");
-    static_assert(hasNoEmptyLayer<(_ninput > 0), LayerConfs...>(), "[TemplNet] Layer pack contains empty Layer.");
+    static_assert(lpack::hasNoEmptyLayer<(_ninput > 0), LayerConfs...>(), "[TemplNet] Layer pack contains empty Layer.");
 
 public:
     // input array
@@ -169,7 +58,7 @@ public:
     static constexpr SizeT getNLayer() { return _nlayer; }
     static constexpr SizeT getNInput() { return _ninput; }
     static constexpr SizeT getNOutput() { return _noutput; }
-    static constexpr SizeT getNUnit() { return countUnits<SizeT, LayerConfs...>(); }
+    static constexpr SizeT getNUnit() { return lpack::countUnits<SizeT, LayerConfs...>(); }
     static constexpr SizeT getNUnit(SizeT i) { return _nunit_shape[i]; }
     static constexpr const auto &getShape() { return _nunit_shape; }
 
@@ -195,7 +84,7 @@ public:
     constexpr bool hasVariationalFirstDerivative() const { return flag_vd1; }
 
     // --- Access Network Weights (Betas)
-    static constexpr SizeT getNBeta() { return countBetas<SizeT, LayerConfs...>(getNInput()); }
+    static constexpr SizeT getNBeta() { return lpack::countBetas<SizeT, LayerConfs...>(getNInput()); }
     static constexpr SizeT getNBeta(SizeT i) { return _nbeta_shape[i]; }
     static constexpr const auto &getBetaShape() { return _nbeta_shape; }
     static constexpr SizeT getNLink() { return getNBeta() - getNUnit(); } // substract offsets

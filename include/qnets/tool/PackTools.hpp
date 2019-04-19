@@ -10,7 +10,8 @@ namespace pack
 // With fold-expressions from C++17 some functions will become obsolete.
 
 // Template Parameter List (to help with multiple parameter packs per template)
-template <typename ...> struct list {};
+template <typename ...>
+struct list {};
 
 
 // count pack and return count as desired integer type
@@ -76,7 +77,7 @@ constexpr T prod(SizeT begin_index/*count from*/, SizeT end_index/*to before thi
 
 // accumulate function of pack values
 template <typename ValueT, typename T, T ... ts>
-constexpr ValueT accumulate(std::function<ValueT(const T&)> func)
+constexpr ValueT accumulate(std::function<ValueT(const T &)> func)
 {
     ValueT result = 0;
     for (auto &t : {ts...}) { result += func(t); }
@@ -85,7 +86,7 @@ constexpr ValueT accumulate(std::function<ValueT(const T&)> func)
 
 // accumulate function of pack values, with start and end
 template <typename SizeT, typename ValueT, typename T, T ... ts>
-constexpr ValueT accumulate(SizeT begin_index/*count from*/, SizeT end_index/*to before this*/, std::function<ValueT(const T&)> func)
+constexpr ValueT accumulate(SizeT begin_index/*count from*/, SizeT end_index/*to before this*/, std::function<ValueT(const T &)> func)
 {
     static_assert(end_index <= count<SizeT, ts...>(), "[pack::accumulate] end_index > count(pack).");
     ValueT result = 0;
@@ -98,7 +99,6 @@ constexpr ValueT accumulate(SizeT begin_index/*count from*/, SizeT end_index/*to
     }
     return result;
 }
-
 } // pack
 
 #endif

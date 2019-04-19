@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "qnets/templ/TemplNet.hpp"
+#include "qnets/actf/Sigmoid.hpp"
 
 int main()
 {
@@ -12,8 +13,8 @@ int main()
     //const double TINY = 0.0001;
 
     constexpr int NU_IN = 2;
-    using layer1 = LayerConfig<int, NU_IN, 4, LogACTF>;
-    using layer2 = LayerConfig<int, layer1::size(), 2, LogACTF>;
+    using layer1 = LayerConfig<int, NU_IN, 4, actf::Sigmoid>;
+    using layer2 = LayerConfig<int, layer1::size(), 2, actf::Sigmoid>;
     using derivs = DerivConfig<true, true, true>; // we are going to check them all
     using TestNet = TemplNet<int, double, derivs, layer1, layer2>;
 
@@ -60,7 +61,7 @@ int main()
     }
     cout << endl;
 
-    LogACTF actf{};
+    actf::Sigmoid actf{};
     std::array<double, 2> foo{};
     actf.f(test.getOutput().begin(), test.output.end(), foo.begin());
     cout << "actf ";
