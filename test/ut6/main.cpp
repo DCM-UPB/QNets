@@ -1,4 +1,4 @@
-#include "qnets/serial/StringCodeUtilities.hpp"
+#include "qnets/poly/serial/StringCodeUtilities.hpp"
 
 #include <cassert>
 

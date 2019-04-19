@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "qnets/train/NNTrainerGSL.hpp"
+#include "qnets/poly/train/NNTrainerGSL.hpp"
 
 
 /*

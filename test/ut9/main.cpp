@@ -3,8 +3,8 @@
 #include <iostream>
 #include <random>
 
-#include "qnets/FeedForwardNeuralNetwork.hpp"
-#include "qnets/train/NNTrainerGSL.hpp"
+#include "qnets/poly/FeedForwardNeuralNetwork.hpp"
+#include "qnets/poly/train/NNTrainerGSL.hpp"
 
 using namespace std;
 using namespace nn_trainer_gsl_details; // to access hidden NNTrainerGSL methods

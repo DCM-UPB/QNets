@@ -1,7 +1,7 @@
 #include <iostream>
 #include <random>
 
-#include "qnets/FeedForwardNeuralNetwork.hpp"
+#include "qnets/poly/FeedForwardNeuralNetwork.hpp"
 
 #include "../common/checkDerivatives.hpp"
 

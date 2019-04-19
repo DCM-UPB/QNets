@@ -2,8 +2,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "qnets/actf/ActivationFunctionManager.hpp"
-#include "qnets/io/PrintUtilities.hpp"
+#include "qnets/poly/actf/ActivationFunctionManager.hpp"
+#include "qnets/poly/io/PrintUtilities.hpp"
 
 
 int main()

@@ -2,7 +2,7 @@
 #include <random>
 #include <cassert>
 
-#include "qnets/TemplNet.hpp"
+#include "qnets/templ/TemplNet.hpp"
 
 int main()
 {

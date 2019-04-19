@@ -3,7 +3,7 @@
 #include <tuple>
 
 #include "Timer.hpp"
-#include "qnets/FeedForwardNeuralNetwork.hpp"
+#include "qnets/poly/FeedForwardNeuralNetwork.hpp"
 
 inline double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval)
 {
