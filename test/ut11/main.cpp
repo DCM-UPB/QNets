@@ -12,11 +12,11 @@ int main()
 
     //const double TINY = 0.0001;
 
-    constexpr int NU_IN = 2;
+    const int NU_IN = 2;
     using layer1 = LayerConfig<int, NU_IN, 4, actf::Sigmoid>;
     using layer2 = LayerConfig<int, layer1::size(), 2, actf::Sigmoid>;
-    using derivs = DerivConfig<true, true, true>; // we are going to check them all
-    using TestNet = TemplNet<int, double, derivs, layer1, layer2>;
+    const auto dconf = DerivConfig::D12_VD1; // we are going to check them all
+    using TestNet = TemplNet<int, double, dconf, layer1, layer2>;
 
     // static type-based tests
     static_assert(TestNet::getNLayer() == 2, "nlayer != 2");
@@ -55,17 +55,31 @@ int main()
     cout << "l0 " << l0.size() << endl;
     cout << "l1: " << l1.size() << endl;
 
-    /*cout << "beta ";
+    cout << "beta (init) ";
     for (int i = 0; i < TestNet::getNBeta(); ++i) {
         cout << "b" << i << " " << test.getBeta(i) << "  ";
     }
-    cout << endl;*/
+    cout << endl;
+    cout << "beta (rand) ";
+    for (int i = 0; i < TestNet::getNBeta(); ++i) {
+        test.setBeta(i, rand()*(1./RAND_MAX));
+        cout << "b" << i << " " << test.getBeta(i) << "  ";
+    }
+    cout << endl;
 
     actf::Sigmoid actf{};
-    std::array<double, 2> foo{};
-    actf.f(test.getOutput().begin(), test.output.end(), foo.begin());
+    std::array<double, 2> foo{-0.5, 0.5};
+    std::array<double, 2> bar{};
+    actf.f(foo.begin(), foo.end(), bar.begin());
     cout << "actf ";
-    for (double out : foo) { cout << out << " "; }
+    for (double out : bar) { cout << out << " "; }
+    cout << endl;
+
+    l0.PropagateInput(foo, DynamicDFlags(DerivConfig::D12_VD1));
+    l1.PropagateInput(l0.out, DynamicDFlags(DerivConfig::D12_VD1));
+
+    cout << "layer output ";
+    for (double out : l1.out) { cout << out << " "; }
     cout << endl;
 
 /*
