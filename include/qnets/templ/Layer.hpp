@@ -46,24 +46,31 @@ private: // arrays
 
 public: // public member variables
     ACTFType actf{}; // the activation function
-    std::array<ValueT, (N_IN + 1)*N_OUT> beta; // the weights
+    std::array<ValueT, Layer::nbeta> beta{}; // the weights
 
-    // public output read references
-    const decltype(_out) &out = _out;
-    const decltype(_d1) &d1 = _d1;
-    const decltype(_d2) &d2 = _d2;
+    // public const output references
+    decltype((_out)) out = _out;
+    decltype((_d1)) d1 = _d1;
+    decltype((_d2)) d2 = _d2;
     //std::array<ValueT, LayerConf::nvp> vd1;
 
 private: // private methods
     constexpr void _computeFeed(const std::array<ValueT, N_IN> &input)
     {
+        std::cout << "feed input: ";
+        for (auto in : input) { std::cout << in << " ";}
+        std::cout << std::endl;
         for (SizeT i = 0; i < N_OUT; ++i) {
             const SizeT offset = 1 + i*(N_IN + 1);
+            std::cout << "offset idx " << offset - 1 << " beta " << beta[offset - 1] << std::endl;
             _out[i] = beta[offset - 1]; // bias weight
             for (SizeT j = 0; j < N_IN; ++j) {
                 _out[i] += beta[offset + j]*input[j];
             }
         }
+        std::cout << "feed output: ";
+        for (auto f : out) { std::cout << f << " ";}
+        std::cout << std::endl;
     }
 
     constexpr void _computeActivation(bool flag_ad1, bool flag_ad2 /*is overriding*/)
@@ -115,6 +122,12 @@ private: // private methods
 public: // public methods
     constexpr void PropagateInput(const std::array<ValueT, N_IN> &input, DynamicDFlags dflags) // propagation of input data (not layer)
     {
+        std::cout << "input: ";
+        for (auto in : input) { std::cout << in << " ";}
+        std::cout << std::endl;
+        std::cout << "beta: ";
+        for (auto b : beta) { std::cout << b << " "; }
+        std::cout << std::endl;
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
 
@@ -129,10 +142,19 @@ public: // public methods
                 _d2[i] = _ad2[i]*beta[i]*beta[i];
             }
         }
+        std::cout << "output: ";
+        for (auto f : out) { std::cout << f << " ";}
+        std::cout << std::endl;
     }
 
     constexpr void PropagateLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2, DynamicDFlags dflags)
     {
+        std::cout << "input: ";
+        for (auto in : input) { std::cout << in << " ";}
+        std::cout << std::endl;
+        std::cout << "beta: ";
+        for (auto b : beta) { std::cout << b << " "; }
+        std::cout << std::endl;
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
 
@@ -150,6 +172,9 @@ public: // public methods
             }
         }
         */
+        std::cout << "output: ";
+        for (auto f : out) { std::cout << f << " ";}
+        std::cout << std::endl;
     }
 };
 } // templ

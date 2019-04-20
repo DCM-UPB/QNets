@@ -74,8 +74,8 @@ public:
 public:
     constexpr TemplNet():
             _layers{Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>{}...},
-            _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return layer.out.cbegin(); })),
-            _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return layer.beta.begin(); })),
+            _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out.front(); })),
+            _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
             output(std::get<_nlayer - 1>(_layers).out), out_d1{std::get<_nlayer - 1>(_layers).d1}, out_d2{std::get<_nlayer - 1>(_layers).d2} {}
 
 
@@ -87,8 +87,7 @@ public:
     static constexpr SizeT getNUnit(SizeT i) { return _nunit_shape[i]; }
     static constexpr const auto &getShape() { return _nunit_shape; }
 
-    // const access to LayerTuple
-    // allows to read information on per-layer basis
+    // Read access to LayerTuple / individual layers
     constexpr const LayerTuple &getLayers() const { return _layers; }
     template <SizeT I>
     constexpr const auto &getLayer() const { return std::get<I>(_layers); }
@@ -96,8 +95,8 @@ public:
     // --- const get Value Arrays
     constexpr const auto &getInput() const { return input; } // alternative const read of public input array
     constexpr const auto &getOutput() const { return std::get<_nlayer - 1>(_layers).out; } // get values of output layer
-    //constexpr const auto &getFirstDerivative() const { return out_d1; } // get derivative of output with respect to input
-    //constexpr const auto &getSecondDerivative() const { return out_d2; }
+    constexpr const auto &getFirstDerivative() const { return out_d1; } // get derivative of output with respect to input
+    constexpr const auto &getSecondDerivative() const { return out_d2; }
 
     // --- check derivative setup
     static constexpr bool allowsFirstDerivative() { return dconf.d1; }
@@ -126,12 +125,13 @@ public:
     }
 
     template <class IterT>
-    constexpr void getBetas(IterT begin, IterT end) const
+    constexpr void getBetas(IterT begin, const IterT end) const
     {
         SizeT idx = 0;
         while (begin < end) {
-            std::copy(_beta_begins[idx], _beta_begins[idx] + _nbeta_shape[idx], begin);
-            begin += _nbeta_shape[idx];
+            const auto blocksize = (end - begin > _nbeta_shape[idx]) ? _nbeta_shape[idx] : end - begin;
+            std::copy(_beta_begins[idx], _beta_begins[idx] + blocksize, begin);
+            begin += blocksize;
             ++idx;
         }
     }
@@ -140,16 +140,21 @@ public:
 
     void setBeta(SizeT i, ValueT beta)
     {
+        std:: cout << "i_orig " << i;
         SizeT idx = 0;
         while (i >= _nbeta_shape[idx]) {
             i -= _nbeta_shape[idx];
             ++idx;
         }
+        std::cout << " i_now " << i << " idx " << idx << " beta " << beta << std::endl;
         *(_beta_begins[idx] + i) = beta;
+        std::cout << " i_now " << i << " idx " << idx << " beta_should " << beta << " beta_actual " << *(_beta_begins[idx] + i) << std::endl;
+        for (auto b : getLayer<0>().beta) { std::cout << b << " "; }
+        for (auto b : getLayer<1>().beta) { std::cout << b << " "; }
     }
 
     template <class IterT>
-    constexpr void setBeta(IterT begin, IterT end)
+    void setBetas(IterT begin, const IterT end)
     {
         SizeT idx = 0;
         while (begin < end) {
@@ -158,6 +163,8 @@ public:
             ++idx;
         }
     }
+    template <class IterT>
+    void setBetas(IterT begin) { return setBetas(begin, begin + getNBeta()); }
     /*
     ValueT getBeta(const SizeT &ib);
     void getBeta(ValueT * beta);
