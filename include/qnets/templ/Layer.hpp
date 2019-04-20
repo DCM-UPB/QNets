@@ -49,14 +49,19 @@ public: // public member variables
     std::array<ValueT, Layer::nbeta> beta{}; // the weights
 
     // public const output references
-    decltype((_out)) out = _out;
-    decltype((_d1)) d1 = _d1;
-    decltype((_d2)) d2 = _d2;
+    const std::array<ValueT, N_OUT> &out = _out;
+    const std::array<ValueT, nd1> &d1 = _d1;
+    const std::array<ValueT, nd2> &d2 = _d2;
     //std::array<ValueT, LayerConf::nvp> vd1;
+
+    explicit Layer() {}
 
 private: // private methods
     constexpr void _computeFeed(const std::array<ValueT, N_IN> &input)
     {
+        std::cout << "feed input: ";
+        for (auto in : input) { std::cout << in << " "; }
+        std::cout << std::endl;
         for (SizeT i = 0; i < N_OUT; ++i) {
             const SizeT offset = 1 + i*(N_IN + 1);
             _out[i] = beta[offset - 1]; // bias weight
@@ -66,6 +71,9 @@ private: // private methods
         }
         std::cout << "feed output: ";
         for (auto f : out) { std::cout << f << " "; }
+        std::cout << std::endl;
+        std::cout << "feed output: ";
+        for (auto f : _out) { std::cout << f << " "; }
         std::cout << std::endl;
     }
 
@@ -173,6 +181,31 @@ public: // public methods
         std::cout << std::endl;
     }
 };
+
+// --- Helper function to propagate through a tuple of layers
+
+namespace detail
+{ // Recursive FFProp over tuple
+template <class TupleT>
+constexpr void ffprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+
+template <class TupleT, size_t I, size_t ... Is>
+constexpr void ffprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+{
+    auto &prev_layer = std::get<I>(layers);
+    std::get<I + 1>(layers).PropagateLayer(prev_layer.out, prev_layer.d1, prev_layer.d2, dflags);
+    ffprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
+}
+} // detail
+
+// The public function
+template <class ArrayT, class TupleT>
+constexpr void propagateLayers(const ArrayT &input, TupleT &layers, DynamicDFlags dflags)
+{
+    std::get<0>(layers).PropagateInput(input, dflags);
+    detail::ffprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<std::tuple_size<TupleT>::value - 1>{});
+}
+
 } // templ
 
 #endif

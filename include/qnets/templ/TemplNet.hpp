@@ -10,7 +10,8 @@
 #include <array>
 #include <tuple>
 #include <algorithm>
-#include <numeric>
+#include <utility>
+#include <type_traits>
 
 namespace templ
 {
@@ -73,10 +74,10 @@ public:
 
 public:
     explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
-            _layers{Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>{}...},
+            _layers(Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>{}...),
             _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out.front(); })),
             _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
-            dflags{init_dflags}, output{std::get<_nlayer - 1>(_layers).out}, out_d1{std::get<_nlayer - 1>(_layers).d1}, out_d2{std::get<_nlayer - 1>(_layers).d2} {}
+            dflags(init_dflags), output(std::get<_nlayer - 1>(_layers).out), out_d1(std::get<_nlayer - 1>(_layers).d1), out_d2(std::get<_nlayer - 1>(_layers).d2) {}
 
     // --- Get information about the NN structure
 
@@ -138,7 +139,7 @@ public:
     // get betas into array
     constexpr void getBetas(std::array<ValueT, _nbeta> &b_arr) const { return getBetas(b_arr.begin(), b_arr.end()); }
 
-    void setBeta(SizeT i, ValueT beta)
+    constexpr void setBeta(SizeT i, ValueT beta)
     {
         SizeT idx = 0;
         while (i >= _nbeta_shape[idx]) {
@@ -149,7 +150,7 @@ public:
     }
 
     template <class IterT>
-    void setBetas(IterT begin, const IterT end)
+    constexpr void setBetas(IterT begin, const IterT end)
     {
         SizeT idx = 0;
         while (begin < end) {
@@ -160,7 +161,7 @@ public:
         }
     }
     // set betas from array
-    void setBetas(const std::array<ValueT, _nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
+    constexpr void setBetas(const std::array<ValueT, _nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
     /*
     ValueT getBeta(const SizeT &ib);
     void getBeta(ValueT * beta);
@@ -182,12 +183,19 @@ public:
 
 
     // Set initial parameters
-    void setInput(SizeT i, ValueT val) { input[i] = val; }
+    constexpr void setInput(SizeT i, ValueT val) { input[i] = val; }
     template <class IterT>
-    void setInput(IterT begin) { std::copy(begin, begin + _ninput, input.begin()); }
+    constexpr void setInput(IterT begin, const IterT end) { std::copy(begin, end, input.begin()); }
+    constexpr void setInput(const std::array<ValueT, _ninput> &in_arr) { input = in_arr; }
 
-    // --- Computation
-    //void FFPropagate();
+
+    // --- Propagation
+
+    constexpr void FFPropagate()
+    {
+        propagateLayers(input, _layers, dflags);
+    }
+
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
     // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.

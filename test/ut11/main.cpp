@@ -44,9 +44,9 @@ int main()
 
     // -- Create a TemplNet instance
 
-    auto test_ptr = make_unique<TestNet>(dflags);
-    auto &test = *test_ptr;
-    //TestNet test(dflags);
+    //auto test_ptr = make_unique<TestNet>(dflags);
+    //auto &test = *test_ptr;
+    TestNet test(dflags);
 
     // Some basic checks
 
@@ -131,6 +131,13 @@ int main()
         assert(test.getBeta(i) == rand_beta[i]);
     }
     cout << endl << endl;
+
+    test.setInput({-0.5, 0.3});
+    for (int i=0; i<5; ++i) {
+        test.FFPropagate();
+        test.setInput(test.output);
+    }
+
 
     test.setBetas(zeros); // set back to 0 (full array set)
     cout << "curb:" << endl;
