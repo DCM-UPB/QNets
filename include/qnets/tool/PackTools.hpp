@@ -24,7 +24,6 @@ constexpr SizeT count(Pack ... p) { return static_cast<SizeT>(sizeof...(Pack)); 
 template <typename SizeT, typename T, T ... ts>
 constexpr T sum(SizeT begin_index = 0/*count from*/, SizeT end_index = count<SizeT>(ts...)/*to before this*/)
 {
-    //static_assert(end_index <= count<SizeT>(ts...), "[pack::sum] end_index > count(pack).");
     T result = 0;
     SizeT i = 0;
     for (auto &t : {ts...}) {
@@ -42,7 +41,6 @@ constexpr T sum(SizeT begin_index = 0/*count from*/, SizeT end_index = count<Siz
 template <typename SizeT, typename T, T ... ts>
 constexpr T prod(SizeT begin_index = 0/*count from*/, SizeT end_index = count<SizeT>(ts...)/*to before this*/)
 {
-    //static_assert(end_index <= count<SizeT>(ts...), "[pack::prod] end_index > count(pack).");
     T result = 1;
     SizeT i = 0;
     for (auto &t : {ts...}) {
@@ -60,8 +58,7 @@ constexpr T prod(SizeT begin_index = 0/*count from*/, SizeT end_index = count<Si
 template <class FuncT, typename SizeT, typename T, T ... ts>
 constexpr auto accumulate(FuncT func, SizeT begin_index = 0/*count from*/, SizeT end_index = count<SizeT>(ts...)/*to before this*/)
 {
-    //static_assert(end_index <= count<SizeT>(ts...), "[pack::accumulate] end_index > count(pack).");
-    decltype(func) result = 0;
+    typename std::result_of<FuncT(T)>::type result = 0;
     SizeT i = 0;
     for (const auto &t : {ts...}) {
         if (i >= begin_index && i < end_index) {

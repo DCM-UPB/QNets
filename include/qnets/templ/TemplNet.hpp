@@ -61,7 +61,7 @@ private:
 public:
     // static/dynamic derivative config
     static constexpr StaticDFlags<DCONF> dconf{}; // static derivative config
-    DynamicDFlags dflags{DCONF}; // dynamic (opt-out) derivative config
+    DynamicDFlags dflags{DCONF}; // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
 
     // input array
     std::array<ValueT, _ninput> input{};
@@ -72,14 +72,14 @@ public:
     const std::array<ValueT, _nd2_out> &out_d2;
 
 public:
-    constexpr TemplNet():
+    explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
             _layers{Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>{}...},
             _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out.front(); })),
             _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
-            output(std::get<_nlayer - 1>(_layers).out), out_d1{std::get<_nlayer - 1>(_layers).d1}, out_d2{std::get<_nlayer - 1>(_layers).d2} {}
-
+            dflags{init_dflags}, output{std::get<_nlayer - 1>(_layers).out}, out_d1{std::get<_nlayer - 1>(_layers).d1}, out_d2{std::get<_nlayer - 1>(_layers).d2} {}
 
     // --- Get information about the NN structure
+
     static constexpr SizeT getNLayer() { return _nlayer; }
     static constexpr SizeT getNInput() { return _ninput; }
     static constexpr SizeT getNOutput() { return _noutput; }
@@ -114,7 +114,7 @@ public:
     static constexpr SizeT getNLink() { return _nbeta - _nunit; } // substract offsets
     static constexpr SizeT getNLink(SizeT i) { return _nbeta_shape[i] - _nunit_shape[i]; }
 
-    constexpr ValueT getBeta(SizeT i) const
+    constexpr ValueT getBeta(SizeT i) const // get beta by index
     {
         SizeT idx = 0;
         while (i >= _nbeta_shape[idx]) {
@@ -125,7 +125,7 @@ public:
     }
 
     template <class IterT>
-    constexpr void getBetas(IterT begin, const IterT end) const
+    constexpr void getBetas(IterT begin, const IterT end) const // get betas into range
     {
         SizeT idx = 0;
         while (begin < end) {
@@ -135,22 +135,17 @@ public:
             ++idx;
         }
     }
-    template <class IterT>
-    constexpr void getBetas(IterT begin) const { return getBetas(begin, begin + getNBeta()); }
+    // get betas into array
+    constexpr void getBetas(std::array<ValueT, _nbeta> &b_arr) const { return getBetas(b_arr.begin(), b_arr.end()); }
 
     void setBeta(SizeT i, ValueT beta)
     {
-        std:: cout << "i_orig " << i;
         SizeT idx = 0;
         while (i >= _nbeta_shape[idx]) {
             i -= _nbeta_shape[idx];
             ++idx;
         }
-        std::cout << " i_now " << i << " idx " << idx << " beta " << beta << std::endl;
         *(_beta_begins[idx] + i) = beta;
-        std::cout << " i_now " << i << " idx " << idx << " beta_should " << beta << " beta_actual " << *(_beta_begins[idx] + i) << std::endl;
-        for (auto b : getLayer<0>().beta) { std::cout << b << " "; }
-        for (auto b : getLayer<1>().beta) { std::cout << b << " "; }
     }
 
     template <class IterT>
@@ -158,13 +153,14 @@ public:
     {
         SizeT idx = 0;
         while (begin < end) {
-            std::copy(begin, begin + _nbeta_shape[idx], _beta_begins[idx]);
-            begin += _nbeta_shape[idx];
+            const auto blocksize = (end - begin > _nbeta_shape[idx]) ? _nbeta_shape[idx] : end - begin;
+            std::copy(begin, begin + blocksize, _beta_begins[idx]);
+            begin += blocksize;
             ++idx;
         }
     }
-    template <class IterT>
-    void setBetas(IterT begin) { return setBetas(begin, begin + getNBeta()); }
+    // set betas from array
+    void setBetas(const std::array<ValueT, _nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
     /*
     ValueT getBeta(const SizeT &ib);
     void getBeta(ValueT * beta);
@@ -188,7 +184,7 @@ public:
     // Set initial parameters
     void setInput(SizeT i, ValueT val) { input[i] = val; }
     template <class IterT>
-    void setInput(IterT begin) { std::copy(begin, begin+_ninput, input.begin()); }
+    void setInput(IterT begin) { std::copy(begin, begin + _ninput, input.begin()); }
 
     // --- Computation
     //void FFPropagate();

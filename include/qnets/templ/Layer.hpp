@@ -57,19 +57,15 @@ public: // public member variables
 private: // private methods
     constexpr void _computeFeed(const std::array<ValueT, N_IN> &input)
     {
-        std::cout << "feed input: ";
-        for (auto in : input) { std::cout << in << " ";}
-        std::cout << std::endl;
         for (SizeT i = 0; i < N_OUT; ++i) {
             const SizeT offset = 1 + i*(N_IN + 1);
-            std::cout << "offset idx " << offset - 1 << " beta " << beta[offset - 1] << std::endl;
             _out[i] = beta[offset - 1]; // bias weight
             for (SizeT j = 0; j < N_IN; ++j) {
                 _out[i] += beta[offset + j]*input[j];
             }
         }
         std::cout << "feed output: ";
-        for (auto f : out) { std::cout << f << " ";}
+        for (auto f : out) { std::cout << f << " "; }
         std::cout << std::endl;
     }
 
@@ -123,7 +119,7 @@ public: // public methods
     constexpr void PropagateInput(const std::array<ValueT, N_IN> &input, DynamicDFlags dflags) // propagation of input data (not layer)
     {
         std::cout << "input: ";
-        for (auto in : input) { std::cout << in << " ";}
+        for (auto in : input) { std::cout << in << " "; }
         std::cout << std::endl;
         std::cout << "beta: ";
         for (auto b : beta) { std::cout << b << " "; }
@@ -143,14 +139,14 @@ public: // public methods
             }
         }
         std::cout << "output: ";
-        for (auto f : out) { std::cout << f << " ";}
+        for (auto f : out) { std::cout << f << " "; }
         std::cout << std::endl;
     }
 
     constexpr void PropagateLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2, DynamicDFlags dflags)
     {
         std::cout << "input: ";
-        for (auto in : input) { std::cout << in << " ";}
+        for (auto in : input) { std::cout << in << " "; }
         std::cout << std::endl;
         std::cout << "beta: ";
         for (auto b : beta) { std::cout << b << " "; }
@@ -173,7 +169,7 @@ public: // public methods
         }
         */
         std::cout << "output: ";
-        for (auto f : out) { std::cout << f << " ";}
+        for (auto f : out) { std::cout << f << " "; }
         std::cout << std::endl;
     }
 };

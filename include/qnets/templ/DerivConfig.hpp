@@ -59,7 +59,7 @@ private:
     bool _vd1{};
 
     constexpr DynamicDFlags(bool flag_d1, bool flag_d2, bool flag_vd1):
-    _d1(flag_d1), _d2(flag_d2), _vd1(flag_vd1) {}
+            _d1(flag_d1), _d2(flag_d2), _vd1(flag_vd1) {}
 
 public:
     constexpr DynamicDFlags() = default;
