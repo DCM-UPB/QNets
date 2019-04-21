@@ -49,19 +49,17 @@ public: // public member variables
     std::array<ValueT, Layer::nbeta> beta{}; // the weights
 
     // public const output references
-    const std::array<ValueT, N_OUT> &out = _out;
-    const std::array<ValueT, nd1> &d1 = _d1;
-    const std::array<ValueT, nd2> &d2 = _d2;
+    constexpr const std::array<ValueT, N_OUT> &out() const { return _out; }
+    constexpr const std::array<ValueT, nd1> &d1() const { return _d1; }
+    constexpr const std::array<ValueT, nd2> &d2() const { return _d2; }
     //std::array<ValueT, LayerConf::nvp> vd1;
-
-    explicit Layer() {}
 
 private: // private methods
     constexpr void _computeFeed(const std::array<ValueT, N_IN> &input)
     {
-        std::cout << "feed input: ";
-        for (auto in : input) { std::cout << in << " "; }
-        std::cout << std::endl;
+        //std::cout << "feed input: ";
+        //for (auto in : input) { std::cout << in << " "; }
+        //std::cout << std::endl;
         for (SizeT i = 0; i < N_OUT; ++i) {
             const SizeT offset = 1 + i*(N_IN + 1);
             _out[i] = beta[offset - 1]; // bias weight
@@ -69,12 +67,9 @@ private: // private methods
                 _out[i] += beta[offset + j]*input[j];
             }
         }
-        std::cout << "feed output: ";
-        for (auto f : out) { std::cout << f << " "; }
-        std::cout << std::endl;
-        std::cout << "feed output: ";
-        for (auto f : _out) { std::cout << f << " "; }
-        std::cout << std::endl;
+        //std::cout << "feed output: ";
+        //for (auto f : out()) { std::cout << f << " "; }
+        //std::cout << std::endl;
     }
 
     constexpr void _computeActivation(bool flag_ad1, bool flag_ad2 /*is overriding*/)
@@ -126,12 +121,12 @@ private: // private methods
 public: // public methods
     constexpr void PropagateInput(const std::array<ValueT, N_IN> &input, DynamicDFlags dflags) // propagation of input data (not layer)
     {
-        std::cout << "input: ";
-        for (auto in : input) { std::cout << in << " "; }
-        std::cout << std::endl;
-        std::cout << "beta: ";
-        for (auto b : beta) { std::cout << b << " "; }
-        std::cout << std::endl;
+        //std::cout << "input: ";
+        //for (auto in : input) { std::cout << in << " "; }
+        //std::cout << std::endl;
+        //std::cout << "beta: ";
+        //for (auto b : beta) { std::cout << b << " "; }
+        //std::cout << std::endl;
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
 
@@ -146,39 +141,30 @@ public: // public methods
                 _d2[i] = _ad2[i]*beta[i]*beta[i];
             }
         }
-        std::cout << "output: ";
-        for (auto f : out) { std::cout << f << " "; }
-        std::cout << std::endl;
+        //std::cout << "output: ";
+        //for (auto f : out()) { std::cout << f << " "; }
+        //std::cout << std::endl;
     }
 
     constexpr void PropagateLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2, DynamicDFlags dflags)
     {
-        std::cout << "input: ";
-        for (auto in : input) { std::cout << in << " "; }
-        std::cout << std::endl;
-        std::cout << "beta: ";
-        for (auto b : beta) { std::cout << b << " "; }
-        std::cout << std::endl;
+        //std::cout << "input: ";
+        //for (auto in : input) { std::cout << in << " "; }
+        //std::cout << std::endl;
+        //std::cout << "beta: ";
+        //for (auto b : beta) { std::cout << b << " "; }
+        //std::cout << std::endl;
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
-
-        /*
-        // first derivative
-        if (_v1d != nullptr) {
-            for (int i = 0; i < _nx0; ++i) {
-                _v1d[i] = _a1d*_first_der[i];
-            }
+        if (dflags.d2()) {
+            this->_computeD12(in_d1, in_d2);
         }
-        // second derivative
-        if (_v2d != nullptr) {
-            for (int i = 0; i < _nx0; ++i) {
-                _v2d[i] = _a1d*_second_der[i] + _a2d*_first_der[i]*_first_der[i];
-            }
+        else {
+            this->_computeD1(in_d1);
         }
-        */
-        std::cout << "output: ";
-        for (auto f : out) { std::cout << f << " "; }
-        std::cout << std::endl;
+        //std::cout << "output: ";
+        //for (auto f : out()) { std::cout << f << " "; }
+        //std::cout << std::endl;
     }
 };
 
@@ -193,7 +179,7 @@ template <class TupleT, size_t I, size_t ... Is>
 constexpr void ffprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
 {
     auto &prev_layer = std::get<I>(layers);
-    std::get<I + 1>(layers).PropagateLayer(prev_layer.out, prev_layer.d1, prev_layer.d2, dflags);
+    std::get<I + 1>(layers).PropagateLayer(prev_layer.out(), prev_layer.d1(), prev_layer.d2(), dflags);
     ffprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
 }
 } // detail

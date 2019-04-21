@@ -62,8 +62,7 @@ int main()
     assert(TestNet::getBetaShape() == expected_betashape);
 
     assert(test.input.size() == TestNet::getNInput());
-    assert(test.output.size() == TestNet::getNOutput());
-    assert(test.output.size() == test.getOutput().size());
+    assert(test.getOutput().size() == TestNet::getNOutput());
 
 
     // -- Check the layers directly
@@ -76,18 +75,18 @@ int main()
     assert(l0.nbeta == 12);
     assert(l0.nd1 == 8);
     assert(l0.nd2 == 0);
-    assert(l0.out.size() == 4);
-    assert(l0.d1.size() == 8);
-    assert(l0.d2.empty());
+    assert(l0.out().size() == 4);
+    assert(l0.d1().size() == 8);
+    assert(l0.d2().empty());
     assert(l1.size() == 2);
     assert(l1.ninput == 4);
     assert(l1.nlink == 8);
     assert(l1.nbeta == 10);
     assert(l1.nd1 == 4);
     assert(l1.nd2 == 0);
-    assert(l1.out.size() == 2);
-    assert(l1.d1.size() == 4);
-    assert(l1.d2.empty());
+    assert(l1.out().size() == 2);
+    assert(l1.d1().size() == 4);
+    assert(l1.d2().empty());
 
 
     // -- Betas
@@ -132,10 +131,14 @@ int main()
     }
     cout << endl << endl;
 
+    for (int i = 15; i < 22; ++i) {
+        test.setBeta(i, rand()*(1./RAND_MAX));
+    }
     test.setInput({-0.5, 0.3});
-    for (int i=0; i<5; ++i) {
+    //for (int i=0; i<100000000; ++i) {
+    for (int i=0; i<2; ++i) {
         test.FFPropagate();
-        test.setInput(test.output);
+        test.setInput(test.getOutput());
     }
 
 
@@ -177,10 +180,10 @@ int main()
 
     array<double, 2> foo{-0.5, 0.3};
     myl0.PropagateInput(foo, dflags2);
-    myl1.PropagateLayer(myl0.out, myl0.d1, myl0.d2, dflags2);
+    myl1.PropagateLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
 
     cout << "layer output ";
-    for (double out : l1.out) { cout << out << " "; }
+    for (double out : myl1.out()) { cout << out << " "; }
     cout << endl;
 
 /*

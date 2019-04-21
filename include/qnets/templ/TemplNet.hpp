@@ -67,17 +67,17 @@ public:
     // input array
     std::array<ValueT, _ninput> input{};
 
-    // convenient public const-references to output arrays
+    /*// convenient public const-references to output arrays
     const std::array<ValueT, _noutput> &output;
     const std::array<ValueT, _nd1_out> &out_d1;
-    const std::array<ValueT, _nd2_out> &out_d2;
+    const std::array<ValueT, _nd2_out> &out_d2;*/
 
 public:
     explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
             _layers(Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>{}...),
-            _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out.front(); })),
+            _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out().front(); })),
             _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
-            dflags(init_dflags), output(std::get<_nlayer - 1>(_layers).out), out_d1(std::get<_nlayer - 1>(_layers).d1), out_d2(std::get<_nlayer - 1>(_layers).d2) {}
+            dflags(init_dflags) {}//, output(std::get<_nlayer - 1>(_layers).out()), out_d1(std::get<_nlayer - 1>(_layers).d1()), out_d2(std::get<_nlayer - 1>(_layers).d2()) {}
 
     // --- Get information about the NN structure
 
@@ -95,9 +95,9 @@ public:
 
     // --- const get Value Arrays
     constexpr const auto &getInput() const { return input; } // alternative const read of public input array
-    constexpr const auto &getOutput() const { return std::get<_nlayer - 1>(_layers).out; } // get values of output layer
-    constexpr const auto &getFirstDerivative() const { return out_d1; } // get derivative of output with respect to input
-    constexpr const auto &getSecondDerivative() const { return out_d2; }
+    constexpr const auto &getOutput() const { return std::get<_nlayer - 1>(_layers).out(); } // get values of output layer
+    constexpr const auto &getFirstDerivative() const { return std::get<_nlayer - 1>(_layers).d1(); } // get derivative of output with respect to input
+    constexpr const auto &getSecondDerivative() const { return std::get<_nlayer - 1>(_layers).d2(); }
 
     // --- check derivative setup
     static constexpr bool allowsFirstDerivative() { return dconf.d1; }
