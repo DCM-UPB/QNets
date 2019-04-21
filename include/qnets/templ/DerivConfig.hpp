@@ -81,7 +81,7 @@ public:
         return DynamicDFlags{_d1 && other.d1, _d2 && other.d2, _vd1 && other.vd1};
     }
 
-    constexpr DynamicDFlags AND(const DynamicDFlags other)
+    constexpr DynamicDFlags AND(DynamicDFlags other)
     {   // Logical AND for DynamicDFlags other
         return DynamicDFlags{_d1 && other.d1(), _d2 && other.d2(), _vd1 && other.vd1()};
     }

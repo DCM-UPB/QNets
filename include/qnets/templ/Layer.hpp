@@ -61,10 +61,10 @@ private: // private methods
         //for (auto in : input) { std::cout << in << " "; }
         //std::cout << std::endl;
         for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT offset = 1 + i*(N_IN + 1);
-            _out[i] = beta[offset - 1]; // bias weight
+            const SizeT beta_i0 = 1 + i*(N_IN + 1); // increments through the indices of the first non-offset beta per unit
+            _out[i] = beta[beta_i0 - 1]; // bias weight
             for (SizeT j = 0; j < N_IN; ++j) {
-                _out[i] += beta[offset + j]*input[j];
+                _out[i] += beta[beta_i0 + j]*input[j];
             }
         }
         //std::cout << "feed output: ";
@@ -93,28 +93,38 @@ private: // private methods
 
     constexpr void _computeD1(const std::array<ValueT, nd1_feed> &in_d1)
     {
+        std::fill(_d1.begin(), _d1.end(), 0.);
         for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT offset = 1 + i*(N_IN + 1);
-            _d1[i] = 0.;
+            const SizeT beta_i0 = 1 + i*(N_IN + 1);
+            const SizeT d_i0 = i*NET_NINPUT;
             for (SizeT j = 0; j < N_IN; ++j) {
-                _d1[i] += beta[offset + j]*in_d1[j];
+                for (SizeT k = 0; k < NET_NINPUT; ++k) {
+                    _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
+                }
             }
-            _d1[i] *= _ad1[i];
+            for (SizeT l = d_i0; l < d_i0+NET_NINPUT; ++l) {
+                _d1[l] *= _ad1[i];
+            }
         }
     }
 
     constexpr void _computeD12(const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2)
     {
+        std::fill(_d1.begin(), _d1.end(), 0.);
+        std::fill(_d2.begin(), _d2.end(), 0.);
         for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT offset = 1 + i*(N_IN + 1);
-            _d1[i] = 0.;
-            _d2[i] = 0.;
+            const SizeT beta_i0 = 1 + i*(N_IN + 1);
+            const SizeT d_i0 = i*NET_NINPUT;
             for (SizeT j = 0; j < N_IN; ++j) {
-                _d1[i] += beta[offset + j]*in_d1[j];
-                _d2[i] += beta[offset + j]*in_d2[j];
+                for (SizeT k = 0; k < NET_NINPUT; ++k) {
+                    _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
+                    _d2[d_i0 + k] += beta[beta_i0 + j]*in_d2[j*NET_NINPUT + k];
+                }
             }
-            _d2[i] = _ad1[i]*_d2[i] + _ad2[i]*_d1[i]*_d1[i];
-            _d1[i] *= _ad1[i];
+            for (SizeT l = d_i0; l < d_i0+NET_NINPUT; ++l) {
+                _d2[l] = _ad1[i]*_d2[l] + _ad2[i]*_d1[l]*_d1[l];
+                _d1[l] *= _ad1[i];
+            }
         }
     }
 
@@ -159,7 +169,7 @@ public: // public methods
         if (dflags.d2()) {
             this->_computeD12(in_d1, in_d2);
         }
-        else {
+        else if (dflags.d1()) {
             this->_computeD1(in_d1);
         }
         //std::cout << "output: ";
@@ -178,7 +188,7 @@ constexpr void ffprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, 
 template <class TupleT, size_t I, size_t ... Is>
 constexpr void ffprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
 {
-    auto &prev_layer = std::get<I>(layers);
+    const auto &prev_layer = std::get<I>(layers);
     std::get<I + 1>(layers).PropagateLayer(prev_layer.out(), prev_layer.d1(), prev_layer.d2(), dflags);
     ffprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
 }

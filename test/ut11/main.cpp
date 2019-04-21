@@ -135,8 +135,7 @@ int main()
         test.setBeta(i, rand()*(1./RAND_MAX));
     }
     test.setInput({-0.5, 0.3});
-    //for (int i=0; i<100000000; ++i) {
-    for (int i=0; i<2; ++i) {
+    for (int i=0; i<3; ++i) {
         test.FFPropagate();
         test.setInput(test.getOutput());
     }
