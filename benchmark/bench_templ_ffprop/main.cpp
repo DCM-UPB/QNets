@@ -59,32 +59,31 @@ int main()
 
     constexpr auto dconf = DerivConfig::D12_VD1; // "allocate" for all derivatives
 
-    using IntT = int;
     using RealT = double;
 
     // Small Net
-    using L1Type_s = LayerConfig<IntT, xndim[0], nhu1[0], actf::Sigmoid>;
-    using L2Type_s = LayerConfig<IntT, L1Type_s::size(), nhu2[0], actf::Sigmoid>;
-    using L3Type_s = LayerConfig<IntT, L2Type_s::size(), yndim, actf::Sigmoid>;
-    using NetType_s = TemplNet<IntT, RealT, dconf, L1Type_s, L2Type_s, L3Type_s>;
-    //auto tnet_s = std::make_unique<NetType_s>();
-    NetType_s tnet_s{};
+    using L1Type_s = LayerConfig<nhu1[0], actf::Sigmoid>;
+    using L2Type_s = LayerConfig<nhu2[0], actf::Sigmoid>;
+    using L3Type_s = LayerConfig<yndim, actf::Sigmoid>;
+    using NetType_s = TemplNet<RealT, dconf, xndim[0], L1Type_s, L2Type_s, L3Type_s>;
+    auto tnet_s_ptr = std::make_unique<NetType_s>();
+    auto &tnet_s = *tnet_s_ptr;
 
     // Medium Net
-    using L1Type_m = LayerConfig<IntT, xndim[1], nhu1[1], actf::Sigmoid>;
-    using L2Type_m = LayerConfig<IntT, L1Type_m::size(), nhu2[1], actf::Sigmoid>;
-    using L3Type_m = LayerConfig<IntT, L2Type_m::size(), yndim, actf::Sigmoid>;
-    using NetType_m = TemplNet<IntT, RealT, dconf, L1Type_m, L2Type_m, L3Type_m>;
-    //auto tnet_m = std::make_unique<NetType_m>();
-    NetType_m tnet_m{};
+    using L1Type_m = LayerConfig<nhu1[1], actf::Sigmoid>;
+    using L2Type_m = LayerConfig<nhu2[1], actf::Sigmoid>;
+    using L3Type_m = LayerConfig<yndim, actf::Sigmoid>;
+    using NetType_m = TemplNet<RealT, dconf, xndim[1], L1Type_m, L2Type_m, L3Type_m>;
+    auto tnet_m_ptr = std::make_unique<NetType_m>();
+    auto &tnet_m = *tnet_m_ptr;
 
     // Large Net
-    using L1Type_l = LayerConfig<IntT, xndim[2], nhu1[2], actf::Sigmoid>;
-    using L2Type_l = LayerConfig<IntT, L1Type_l::size(), nhu2[2], actf::Sigmoid>;
-    using L3Type_l = LayerConfig<IntT, L2Type_l::size(), yndim, actf::Sigmoid>;
-    using NetType_l = TemplNet<IntT, RealT, dconf, L1Type_l, L2Type_l, L3Type_l>;
-    //auto tnet_l = std::make_unique<NetType_l>();
-    NetType_l tnet_l{};
+    using L1Type_l = LayerConfig<nhu1[2], actf::Sigmoid>;
+    using L2Type_l = LayerConfig<nhu2[2], actf::Sigmoid>;
+    using L3Type_l = LayerConfig<yndim, actf::Sigmoid>;
+    using NetType_l = TemplNet<RealT, dconf, xndim[2], L1Type_l, L2Type_l, L3Type_l>;
+    auto tnet_l_ptr = std::make_unique<NetType_l>();
+    auto &tnet_l = *tnet_l_ptr;
 
     // Data
     int ndata[3], ndata_full = 0;
@@ -116,8 +115,7 @@ int main()
     }
 
     // FFPropagate benchmark
-    int xoffset = 0; // used to shift current xdata pointer
-    run_benchmark_netpack<0>(xdata, ndata, xoffset, neval, nruns, tnet_s, tnet_m, tnet_l);
+    run_benchmark_netpack<0>(xdata, ndata, 0, neval, nruns, tnet_s, tnet_m, tnet_l);
 
     delete[] xdata;
     return 0;

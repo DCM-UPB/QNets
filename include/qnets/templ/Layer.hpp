@@ -12,30 +12,33 @@ namespace templ
 // Layer Config
 //
 // To pass non-input layer configurations as variadic parameter pack
-template <typename SizeT, SizeT N_IN, SizeT N_OUT, class ACTFType>
+template <int N_OUT, class ACTFType>
 struct LayerConfig
 {
-    static constexpr SizeT ninput = N_IN;
-    static constexpr SizeT noutput = N_OUT;
-    static constexpr SizeT nbeta = (N_IN + 1)*N_OUT;
-    static constexpr SizeT nlink = N_IN*N_OUT;
+    static constexpr int noutput = N_OUT;
     using ACTF_Type = ACTFType;
 
-    static constexpr SizeT size() { return noutput; }
+    static constexpr int size() { return noutput; }
 };
 
 
 // The actual Layer class
 //
-template <typename SizeT, typename ValueT, SizeT NET_NINPUT, SizeT N_IN, SizeT N_OUT, class ACTFType, DerivConfig DCONF>
-class Layer: public LayerConfig<SizeT, N_IN, N_OUT, ACTFType>
+template <typename ValueT, int NET_NINPUT, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
+class Layer: public LayerConfig<N_OUT, ACTFType>
 {
-public: // sizes
+public:
+    // N_IN dependent sizes
+    static constexpr int ninput = N_IN;
+    static constexpr int nbeta = (N_IN + 1)*N_OUT;
+    static constexpr int nlink = N_IN*N_OUT;
+
+    // Sizes which also depend on DCONF
     static constexpr StaticDFlags<DCONF> dconf{};
-    static constexpr SizeT nd1 = dconf.d1 ? NET_NINPUT*N_OUT : 0; // number of input derivative values
-    static constexpr SizeT nd1_feed = dconf.d1 ? NET_NINPUT*N_IN : 0; // number of deriv values from previous layer
-    static constexpr SizeT nd2 = dconf.d2 ? nd1 : 0;
-    static constexpr SizeT nd2_feed = dconf.d2 ? nd1_feed : 0;
+    static constexpr int nd1 = dconf.d1 ? NET_NINPUT*N_OUT : 0; // number of input derivative values
+    static constexpr int nd1_feed = dconf.d1 ? NET_NINPUT*N_IN : 0; // number of deriv values from previous layer
+    static constexpr int nd2 = dconf.d2 ? nd1 : 0;
+    static constexpr int nd2_feed = dconf.d2 ? nd1_feed : 0;
 
 private: // arrays
     std::array<ValueT, N_OUT> _out;
@@ -57,9 +60,12 @@ public: // public member variables
 private: // private methods
     constexpr void _computeFeed(const std::array<ValueT, N_IN> &input)
     {
-        for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT beta_i0 = 1 + i*(N_IN + 1); // increments through the indices of the first non-offset beta per unit
+        for (int i = 0; i < N_OUT; ++i) {
+            const int beta_i0 = 1 + i*(N_IN + 1); // increments through the indices of the first non-offset beta per unit
             _out[i] = beta[beta_i0 - 1]; // bias weight
+            //for (int j = 0; j < N_IN; ++j) {
+            //    _out[i] += beta[beta_i0 + j] * input[j];
+           // }
             _out[i] += std::inner_product(input.begin(), input.end(), beta.begin()+beta_i0, 0.);
         }
     }
@@ -86,15 +92,15 @@ private: // private methods
     constexpr void _computeD1_Layer(const std::array<ValueT, nd1_feed> &in_d1)
     {
         std::fill(_d1.begin(), _d1.end(), 0.);
-        for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT beta_i0 = 1 + i*(N_IN + 1);
-            const SizeT d_i0 = i*NET_NINPUT;
-            for (SizeT j = 0; j < N_IN; ++j) {
-                for (SizeT k = 0; k < NET_NINPUT; ++k) {
+        for (int i = 0; i < N_OUT; ++i) {
+            const int beta_i0 = 1 + i*(N_IN + 1);
+            const int d_i0 = i*NET_NINPUT;
+            for (int j = 0; j < N_IN; ++j) {
+                for (int k = 0; k < NET_NINPUT; ++k) {
                     _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
                 }
             }
-            for (SizeT l = d_i0; l < d_i0+NET_NINPUT; ++l) {
+            for (int l = d_i0; l < d_i0+NET_NINPUT; ++l) {
                 _d1[l] *= _ad1[i];
             }
         }
@@ -103,9 +109,9 @@ private: // private methods
     constexpr void _computeD1_Input() // i.e. in_d1[i][i] = 1., else 0
     {
         std::fill(_d1.begin(), _d1.end(), 0.);
-        for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT beta_i0 = 1 + i*(N_IN + 1);
-            for (SizeT j = 0; j < N_IN; ++j) {
+        for (int i = 0; i < N_OUT; ++i) {
+            const int beta_i0 = 1 + i*(NET_NINPUT + 1);
+            for (int j = 0; j < NET_NINPUT; ++j) {
                 _d1[i*NET_NINPUT + j] = _ad1[i] * beta[beta_i0 + j];
             }
         }
@@ -115,16 +121,16 @@ private: // private methods
     {
         std::fill(_d1.begin(), _d1.end(), 0.);
         std::fill(_d2.begin(), _d2.end(), 0.);
-        for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT beta_i0 = 1 + i*(N_IN + 1);
-            const SizeT d_i0 = i*NET_NINPUT;
-            for (SizeT j = 0; j < N_IN; ++j) {
-                for (SizeT k = 0; k < NET_NINPUT; ++k) {
+        for (int i = 0; i < N_OUT; ++i) {
+            const int beta_i0 = 1 + i*(N_IN + 1);
+            const int d_i0 = i*NET_NINPUT;
+            for (int j = 0; j < N_IN; ++j) {
+                for (int k = 0; k < NET_NINPUT; ++k) {
                     _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
                     _d2[d_i0 + k] += beta[beta_i0 + j]*in_d2[j*NET_NINPUT + k];
                 }
             }
-            for (SizeT l = d_i0; l < d_i0+NET_NINPUT; ++l) {
+            for (int l = d_i0; l < d_i0+NET_NINPUT; ++l) {
                 _d2[l] = _ad1[i]*_d2[l] + _ad2[i]*_d1[l]*_d1[l];
                 _d1[l] *= _ad1[i];
             }
@@ -135,9 +141,9 @@ private: // private methods
     {
         std::fill(_d1.begin(), _d1.end(), 0.);
         std::fill(_d2.begin(), _d2.end(), 0.);
-        for (SizeT i = 0; i < N_OUT; ++i) {
-            const SizeT beta_i0 = 1 + i*(N_IN + 1);
-            for (SizeT j = 0; j < N_IN; ++j) {
+        for (int i = 0; i < N_OUT; ++i) {
+            const int beta_i0 = 1 + i*(NET_NINPUT + 1);
+            for (int j = 0; j < NET_NINPUT; ++j) {
                 _d1[i*NET_NINPUT + j] = _ad1[i] * beta[beta_i0 + j];
                 _d2[i*NET_NINPUT + j] = _ad2[i] * beta[beta_i0 + j] * beta[beta_i0 + j];
             }
@@ -145,8 +151,9 @@ private: // private methods
     }
 
 public: // public methods
-    constexpr void PropagateInput(const std::array<ValueT, N_IN> &input, DynamicDFlags dflags) // propagation of input data (not layer)
+    constexpr void PropagateInput(const std::array<ValueT, NET_NINPUT> &input, DynamicDFlags dflags) // propagation of input data (not layer)
     {
+        static_assert(N_IN == NET_NINPUT, "[Layer::PropagateInput] N_IN != NET_NINPUT");
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
 

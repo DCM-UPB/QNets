@@ -14,10 +14,10 @@ int main()
     //const double TINY = 0.0001;
 
     const int NU_IN = 2;
-    using layer1 = LayerConfig<int, NU_IN, 4, actf::Sigmoid>;
-    using layer2 = LayerConfig<int, layer1::size(), 2, actf::Sigmoid>;
+    using layer1 = LayerConfig<4, actf::Sigmoid>;
+    using layer2 = LayerConfig<2, actf::Sigmoid>;
     const auto dopt = DerivConfig::D1_VD1; // we want to check that D2 arrays are size 0 in that case
-    using TestNet = TemplNet<int, double, dopt, layer1, layer2>;
+    using TestNet = TemplNet<double, dopt, NU_IN, layer1, layer2>;
     const StaticDFlags<dopt> dconf{}; // static flag set according to dopt
     constexpr DynamicDFlags dflags(DerivConfig::D1); // dynamic flag set (to configure deriv calculation at runtime)
 
@@ -169,8 +169,8 @@ int main()
 
     // create some new test layers
     const auto dopt2 = DerivConfig::D12_VD1; // now we enable all
-    Layer<int, double, 2, 2, 4, actf::Sigmoid, dopt2> myl0{};
-    Layer<int, double, 2, 4, 2, actf::Sigmoid, dopt2> myl1{};
+    Layer<double, 2, 2, 4, actf::Sigmoid, dopt2> myl0{};
+    Layer<double, 2, 4, 2, actf::Sigmoid, dopt2> myl1{};
     DynamicDFlags dflags2(dopt2);
 
     // set beta to random values

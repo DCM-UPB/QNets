@@ -16,81 +16,97 @@
 namespace templ
 {
 
+// NOTE: For technical reasons, we need to use a TemplNetShape class for static creation
+//       of arrays like nbeta_shape (which depends on Layer, not LayerConf). Might become obsolete with C++17.
+namespace detail
+{
+template <class LTuplType, class ISeq>
+struct TemplNetShape;
+
+template <class LTuplType, int ... Is>
+struct TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>
+{
+private:
+    using LayerTuple = LTuplType;
+
+public:
+    // Some static arrays to make access easier (needs to be defined again below the class, until C++17)
+    static constexpr std::array<int, sizeof...(Is)> nunits{std::tuple_element<Is, LayerTuple>::type::size()...};
+    static constexpr std::array<int, sizeof...(Is)> nbetas{std::tuple_element<Is, LayerTuple>::type::nbeta...};
+};
+template <class LTuplType, int ... Is>
+constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>::nunits;
+template <class LTuplType, int ... Is>
+constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>::nbetas;
+} // detail
+
+
 // --- The fully templated TemplNet FFNN
 
-template <typename SizeT, typename ValueT, DerivConfig DCONF, class ... LayerConfs>
+template <typename ValueT, DerivConfig DCONF, int N_IN, class ... LayerConfs>
 class TemplNet
 {
 private:
     // --- Static Setup
 
-    using LayerConfTuple = std::tuple<LayerConfs...>; // used to compute some statics
+    // LayerTuple / Shape
+    using LayerTuple = typename lpack::LayerPackTuple<ValueT, DCONF, N_IN, LayerConfs...>::type;
+    using Shape = detail::TemplNetShape<LayerTuple, std::make_integer_sequence<int, sizeof...(LayerConfs)>>;
+
+    LayerTuple _layers{};
 
     // store some basics (these stay private so they may be freely removed/replaced by constexpr method)
-    static constexpr SizeT _nlayer = tupl::count<SizeT, LayerConfTuple>();
-    static constexpr SizeT _ninput = std::tuple_element<0, LayerConfTuple>::type::ninput;
-    static constexpr SizeT _noutput = std::tuple_element<_nlayer - 1, LayerConfTuple>::type::noutput;
-    static constexpr SizeT _nbeta = lpack::countBetas<SizeT, LayerConfs...>(_ninput);
-    static constexpr SizeT _nunit = lpack::countUnits<SizeT, LayerConfs...>();
-
-    // Some static arrays to make access easier (needs to be defined again below the class, until C++17)
-    // Therefore we keep the sizeof...() as size instead of using nlayer static variable
-    static constexpr std::array<SizeT, sizeof...(LayerConfs)> _nunit_shape{LayerConfs::size()...};
-    static constexpr std::array<SizeT, sizeof...(LayerConfs)> _nbeta_shape{LayerConfs::nbeta...};
+    static constexpr int _nlayer = tupl::count<int, LayerTuple>();
+    static constexpr int _ninput = std::tuple_element<0, LayerTuple>::type::ninput;
+    static constexpr int _noutput = std::tuple_element<_nlayer - 1, LayerTuple>::type::noutput;
+    static constexpr int _nbeta = lpack::countBetas<N_IN, LayerConfs...>();
+    static constexpr int _nunit = lpack::countUnits<LayerConfs...>();
 
 
-    // --- Layer tuple
-
-    using LayerTuple = std::tuple<Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>...>;
-    LayerTuple _layers;
-
-    // Static Output Deriv Array Sizes
-    static constexpr SizeT _nd1_out = std::tuple_element<_nlayer - 1, LayerTuple>::type::nd1;
-    static constexpr SizeT _nd2_out = std::tuple_element<_nlayer - 1, LayerTuple>::type::nd2;
+    // Static Output Deriv Array Sizes (depend on DCONF)
+    static constexpr int _nd1_out = std::tuple_element<_nlayer - 1, LayerTuple>::type::nd1;
+    static constexpr int _nd2_out = std::tuple_element<_nlayer - 1, LayerTuple>::type::nd2;
 
     // Basic assertions
+    static_assert(_nlayer == static_cast<int>(sizeof...(LayerConfs)), ""); // -> BUG!
+    static_assert(_ninput == N_IN, ""); // -> BUG!
+    static_assert(_noutput == Shape::nunits[_nlayer - 1], ""); // -> BUG!
     static_assert(_nlayer > 1, "[TemplNet] nlayer <= 1");
-    static_assert(lpack::hasNoEmptyLayer<(_ninput > 0), LayerConfs...>(), "[TemplNet] Layer pack contains empty Layer.");
+    static_assert(lpack::hasNoEmptyLayer<(_ninput > 0), LayerConfs...>(), "[TemplNet] LayerConf pack contains empty Layer.");
 
 
-    // --- Non-static
+    // --- Non-statics
 
     // arrays of array.begin() pointers, for run-time public indexing
     const std::array<const ValueT *, _nlayer> _out_begins;
     const std::array<ValueT *, _nlayer> _beta_begins;
 
 public:
-    // static/dynamic derivative config
+    // static and dynamic derivative config
     static constexpr StaticDFlags<DCONF> dconf{}; // static derivative config
     DynamicDFlags dflags{DCONF}; // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
 
     // input array
     std::array<ValueT, _ninput> input{};
 
-    /*// convenient public const-references to output arrays
-    const std::array<ValueT, _noutput> &output;
-    const std::array<ValueT, _nd1_out> &out_d1;
-    const std::array<ValueT, _nd2_out> &out_d2;*/
-
 public:
     explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
-            _layers(Layer<SizeT, ValueT, _ninput, LayerConfs::ninput, LayerConfs::noutput, typename LayerConfs::ACTF_Type, DCONF>{}...),
             _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out().front(); })),
             _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
-            dflags(init_dflags) {}//, output(std::get<_nlayer - 1>(_layers).out()), out_d1(std::get<_nlayer - 1>(_layers).d1()), out_d2(std::get<_nlayer - 1>(_layers).d2()) {}
+            dflags(init_dflags) {}
 
     // --- Get information about the NN structure
 
-    static constexpr SizeT getNLayer() { return _nlayer; }
-    static constexpr SizeT getNInput() { return _ninput; }
-    static constexpr SizeT getNOutput() { return _noutput; }
-    static constexpr SizeT getNUnit() { return _nunit; }
-    static constexpr SizeT getNUnit(SizeT i) { return _nunit_shape[i]; }
-    static constexpr const auto &getShape() { return _nunit_shape; }
+    static constexpr int getNLayer() { return _nlayer; }
+    static constexpr int getNInput() { return _ninput; }
+    static constexpr int getNOutput() { return _noutput; }
+    static constexpr int getNUnit() { return _nunit; }
+    static constexpr int getNUnit(int i) { return Shape::nunits[i]; }
+    static constexpr const auto &getShape() { return Shape::nunits; }
 
     // Read access to LayerTuple / individual layers
     constexpr const LayerTuple &getLayers() const { return _layers; }
-    template <SizeT I>
+    template <int I>
     constexpr const auto &getLayer() const { return std::get<I>(_layers); }
 
     // --- const get Value Arrays
@@ -109,17 +125,17 @@ public:
     constexpr bool hasVariationalFirstDerivative() const { return dconf.vd1 && dflags.vd1(); }
 
     // --- Access Network Weights (Betas)
-    static constexpr SizeT getNBeta() { return _nbeta; }
-    static constexpr SizeT getNBeta(SizeT i) { return _nbeta_shape[i]; }
-    static constexpr const auto &getBetaShape() { return _nbeta_shape; }
-    static constexpr SizeT getNLink() { return _nbeta - _nunit; } // substract offsets
-    static constexpr SizeT getNLink(SizeT i) { return _nbeta_shape[i] - _nunit_shape[i]; }
+    static constexpr int getNBeta() { return _nbeta; }
+    static constexpr int getNBeta(int i) { return Shape::nbetas[i]; }
+    static constexpr const auto &getBetaShape() { return Shape::nbetas; }
+    static constexpr int getNLink() { return _nbeta - _nunit; } // substract offsets
+    static constexpr int getNLink(int i) { return Shape::nbetas[i] - Shape::nunits[i]; }
 
-    constexpr ValueT getBeta(SizeT i) const // get beta by index
+    constexpr ValueT getBeta(int i) const // get beta by index
     {
-        SizeT idx = 0;
-        while (i >= _nbeta_shape[idx]) {
-            i -= _nbeta_shape[idx];
+        int idx = 0;
+        while (i >= Shape::nbetas[idx]) {
+            i -= Shape::nbetas[idx];
             ++idx;
         }
         return *(_beta_begins[idx] + i);
@@ -128,9 +144,9 @@ public:
     template <class IterT>
     constexpr void getBetas(IterT begin, const IterT end) const // get betas into range
     {
-        SizeT idx = 0;
+        int idx = 0;
         while (begin < end) {
-            const auto blocksize = (end - begin > _nbeta_shape[idx]) ? _nbeta_shape[idx] : end - begin;
+            const auto blocksize = (end - begin > Shape::nbetas[idx]) ? Shape::nbetas[idx] : end - begin;
             std::copy(_beta_begins[idx], _beta_begins[idx] + blocksize, begin);
             begin += blocksize;
             ++idx;
@@ -139,11 +155,11 @@ public:
     // get betas into array
     constexpr void getBetas(std::array<ValueT, _nbeta> &b_arr) const { return getBetas(b_arr.begin(), b_arr.end()); }
 
-    constexpr void setBeta(SizeT i, ValueT beta)
+    constexpr void setBeta(int i, ValueT beta)
     {
-        SizeT idx = 0;
-        while (i >= _nbeta_shape[idx]) {
-            i -= _nbeta_shape[idx];
+        int idx = 0;
+        while (i >= Shape::nbetas[idx]) {
+            i -= Shape::nbetas[idx];
             ++idx;
         }
         *(_beta_begins[idx] + i) = beta;
@@ -152,9 +168,9 @@ public:
     template <class IterT>
     constexpr void setBetas(IterT begin, const IterT end)
     {
-        SizeT idx = 0;
+        int idx = 0;
         while (begin < end) {
-            const auto blocksize = (end - begin > _nbeta_shape[idx]) ? _nbeta_shape[idx] : end - begin;
+            const auto blocksize = (end - begin > Shape::nbetas[idx]) ? Shape::nbetas[idx] : end - begin;
             std::copy(begin, begin + blocksize, _beta_begins[idx]);
             begin += blocksize;
             ++idx;
@@ -163,18 +179,18 @@ public:
     // set betas from array
     constexpr void setBetas(const std::array<ValueT, _nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
     /*
-    ValueT getBeta(const SizeT &ib);
+    ValueT getBeta(const int &ib);
     void getBeta(ValueT * beta);
-    void setBeta(const SizeT &ib, const ValueT &beta);
+    void setBeta(const int &ib, const ValueT &beta);
     void setBeta(const ValueT * beta);
     void randomizeBetas(); // has to be changed maybe if we add beta that are not "normal" weights*/
 
     // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters),
     //     which exist only after that they are assigned to actual parameters in the network (e.g. betas)
-    //SizeT getNVariationalParameters() { return _nvp; }
-    /*ValueT getVariationalParameter(const SizeT &ivp);
+    //int getNVariationalParameters() { return _nvp; }
+    /*ValueT getVariationalParameter(const int &ivp);
     void getVariationalParameter(ValueT * vp);
-    void setVariationalParameter(const SizeT &ivp, const ValueT &vp);
+    void setVariationalParameter(const int &ivp, const ValueT &vp);
     void setVariationalParameter(const ValueT * vp);
     */
 
@@ -183,7 +199,7 @@ public:
 
 
     // Set initial parameters
-    constexpr void setInput(SizeT i, ValueT val) { input[i] = val; }
+    constexpr void setInput(int i, ValueT val) { input[i] = val; }
     template <class IterT>
     constexpr void setInput(IterT begin, const IterT end) { std::copy(begin, end, input.begin()); }
     constexpr void setInput(const std::array<ValueT, _ninput> &in_arr) { input = in_arr; }
@@ -196,38 +212,13 @@ public:
         propagateLayers(input, _layers, dflags);
     }
 
-
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
     // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
     //void evaluate(const ValueT * in, ValueT * out, ValueT * d1 = nullptr, ValueT * d2 = nullptr, ValueT * vd1 = nullptr);
 
-
-    // --- Get outputs
-    /*
-    void getOutput(ValueT * out);
-    ValueT getOutput(const SizeT &i);
-
-    void getFirstDerivative(ValueT ** d1);
-    void getFirstDerivative(const SizeT &iu, ValueT * d1);  // iu is the unit index
-    ValueT getFirstDerivative(const SizeT &iu, const SizeT &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
-
-    void getSecondDerivative(ValueT ** d2);
-    void getSecondDerivative(const SizeT &i, ValueT * d2);  // i is the output index
-    ValueT getSecondDerivative(const SizeT &i, const SizeT &i2d); // i is the index of the output element, i2d the index of the input element
-
-    void getVariationalFirstDerivative(ValueT ** vd1);
-    void getVariationalFirstDerivative(const SizeT &i, ValueT * vd1);  // i is the output index
-    ValueT getVariationalFirstDerivative(const SizeT &i, const SizeT &iv1d);  // i is the index of the output element, iv1d the index of the beta element
-    */
-
     // --- Store FFNN on file
     //void storeOnFile(const char * filename, bool store_betas = true);
 };
-
-template <typename SizeT, typename ValueT, DerivConfig DCONF, class ... LayerConfs>
-constexpr std::array<SizeT, sizeof...(LayerConfs)> TemplNet<SizeT, ValueT, DCONF, LayerConfs...>::_nunit_shape;
-template <typename SizeT, typename ValueT, DerivConfig DCONF, class ... LayerConfs>
-constexpr std::array<SizeT, sizeof...(LayerConfs)> TemplNet<SizeT, ValueT, DCONF, LayerConfs...>::_nbeta_shape;
 } // templ
 
 #endif
