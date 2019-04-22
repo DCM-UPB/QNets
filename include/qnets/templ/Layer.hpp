@@ -31,7 +31,6 @@ public:
     // N_IN dependent sizes
     static constexpr int ninput = N_IN;
     static constexpr int nbeta = (N_IN + 1)*N_OUT;
-    static constexpr int nlink = N_IN*N_OUT;
 
     // Sizes which also depend on DCONF
     static constexpr StaticDFlags<DCONF> dconf{};
@@ -65,8 +64,8 @@ private: // private methods
             _out[i] = beta[beta_i0 - 1]; // bias weight
             //for (int j = 0; j < N_IN; ++j) {
             //    _out[i] += beta[beta_i0 + j] * input[j];
-           // }
-            _out[i] += std::inner_product(input.begin(), input.end(), beta.begin()+beta_i0, 0.);
+            // }
+            _out[i] += std::inner_product(input.begin(), input.end(), beta.begin() + beta_i0, 0.);
         }
     }
 
@@ -100,7 +99,7 @@ private: // private methods
                     _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
                 }
             }
-            for (int l = d_i0; l < d_i0+NET_NINPUT; ++l) {
+            for (int l = d_i0; l < d_i0 + NET_NINPUT; ++l) {
                 _d1[l] *= _ad1[i];
             }
         }
@@ -112,7 +111,7 @@ private: // private methods
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(NET_NINPUT + 1);
             for (int j = 0; j < NET_NINPUT; ++j) {
-                _d1[i*NET_NINPUT + j] = _ad1[i] * beta[beta_i0 + j];
+                _d1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
             }
         }
     }
@@ -130,7 +129,7 @@ private: // private methods
                     _d2[d_i0 + k] += beta[beta_i0 + j]*in_d2[j*NET_NINPUT + k];
                 }
             }
-            for (int l = d_i0; l < d_i0+NET_NINPUT; ++l) {
+            for (int l = d_i0; l < d_i0 + NET_NINPUT; ++l) {
                 _d2[l] = _ad1[i]*_d2[l] + _ad2[i]*_d1[l]*_d1[l];
                 _d1[l] *= _ad1[i];
             }
@@ -144,8 +143,8 @@ private: // private methods
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(NET_NINPUT + 1);
             for (int j = 0; j < NET_NINPUT; ++j) {
-                _d1[i*NET_NINPUT + j] = _ad1[i] * beta[beta_i0 + j];
-                _d2[i*NET_NINPUT + j] = _ad2[i] * beta[beta_i0 + j] * beta[beta_i0 + j];
+                _d1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
+                _d2[i*NET_NINPUT + j] = _ad2[i]*beta[beta_i0 + j]*beta[beta_i0 + j];
             }
         }
     }
@@ -202,7 +201,6 @@ constexpr void propagateLayers(const ArrayT &input, TupleT &layers, DynamicDFlag
     std::get<0>(layers).PropagateInput(input, dflags);
     detail::ffprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<std::tuple_size<TupleT>::value - 1>{});
 }
-
 } // templ
 
 #endif

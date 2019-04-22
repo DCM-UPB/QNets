@@ -46,90 +46,95 @@ constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_s
 template <typename ValueT, DerivConfig DCONF, int N_IN, class ... LayerConfs>
 class TemplNet
 {
-private:
+public:
     // --- Static Setup
 
-    // LayerTuple / Shape
+    // LayerTuple type / Shape
     using LayerTuple = typename lpack::LayerPackTuple<ValueT, DCONF, N_IN, LayerConfs...>::type;
     using Shape = detail::TemplNetShape<LayerTuple, std::make_integer_sequence<int, sizeof...(LayerConfs)>>;
 
-    LayerTuple _layers{};
+    // some basic static sizes
+    static constexpr int nlayer = tupl::count<int, LayerTuple>();
+    static constexpr int ninput = std::tuple_element<0, LayerTuple>::type::ninput;
+    static constexpr int noutput = std::tuple_element<nlayer - 1, LayerTuple>::type::noutput;
+    static constexpr int nbeta = lpack::countBetas<N_IN, LayerConfs...>();
+    static constexpr int nunit = lpack::countUnits<LayerConfs...>();
 
-    // store some basics (these stay private so they may be freely removed/replaced by constexpr method)
-    static constexpr int _nlayer = tupl::count<int, LayerTuple>();
-    static constexpr int _ninput = std::tuple_element<0, LayerTuple>::type::ninput;
-    static constexpr int _noutput = std::tuple_element<_nlayer - 1, LayerTuple>::type::noutput;
-    static constexpr int _nbeta = lpack::countBetas<N_IN, LayerConfs...>();
-    static constexpr int _nunit = lpack::countUnits<LayerConfs...>();
-
+    // static derivative config
+    static constexpr StaticDFlags<DCONF> dconf{};
 
     // Static Output Deriv Array Sizes (depend on DCONF)
-    static constexpr int _nd1_out = std::tuple_element<_nlayer - 1, LayerTuple>::type::nd1;
-    static constexpr int _nd2_out = std::tuple_element<_nlayer - 1, LayerTuple>::type::nd2;
+    static constexpr int nd1 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd1;
+    static constexpr int nd2 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd2;
+
 
     // Basic assertions
-    static_assert(_nlayer == static_cast<int>(sizeof...(LayerConfs)), ""); // -> BUG!
-    static_assert(_ninput == N_IN, ""); // -> BUG!
-    static_assert(_noutput == Shape::nunits[_nlayer - 1], ""); // -> BUG!
-    static_assert(_nlayer > 1, "[TemplNet] nlayer <= 1");
-    static_assert(lpack::hasNoEmptyLayer<(_ninput > 0), LayerConfs...>(), "[TemplNet] LayerConf pack contains empty Layer.");
+    static_assert(nlayer == static_cast<int>(sizeof...(LayerConfs)), ""); // -> BUG!
+    static_assert(ninput == N_IN, ""); // -> BUG!
+    static_assert(noutput == Shape::nunits[nlayer - 1], ""); // -> BUG!
+    static_assert(nlayer > 1, "[TemplNet] nlayer <= 1");
+    static_assert(lpack::hasNoEmptyLayer<(ninput > 0), LayerConfs...>(), "[TemplNet] LayerConf pack contains empty Layer.");
 
 
     // --- Non-statics
 
-    // arrays of array.begin() pointers, for run-time public indexing
-    const std::array<const ValueT *, _nlayer> _out_begins;
-    const std::array<ValueT *, _nlayer> _beta_begins;
+private:
+    // The layer tuple
+    LayerTuple _layers{};
+
+    // arrays of array.begin() pointers, for run-time indexing
+    const std::array<const ValueT *, nlayer> _out_begins;
+    const std::array<ValueT *, nlayer> _beta_begins;
 
 public:
-    // static and dynamic derivative config
-    static constexpr StaticDFlags<DCONF> dconf{}; // static derivative config
-    DynamicDFlags dflags{DCONF}; // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
+    // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
+    DynamicDFlags dflags{DCONF};
 
     // input array
-    std::array<ValueT, _ninput> input{};
+    std::array<ValueT, ninput> input{};
 
 public:
     explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
-            _out_begins(tupl::make_fcont<std::array<const ValueT *, _nlayer>>(_layers, [](const auto &layer) { return &layer.out().front(); })),
-            _beta_begins(tupl::make_fcont<std::array<ValueT *, _nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
+            _out_begins(tupl::make_fcont<std::array<const ValueT *, nlayer>>(_layers, [](const auto &layer) { return &layer.out().front(); })),
+            _beta_begins(tupl::make_fcont<std::array<ValueT *, nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
             dflags(init_dflags) {}
 
     // --- Get information about the NN structure
 
-    static constexpr int getNLayer() { return _nlayer; }
-    static constexpr int getNInput() { return _ninput; }
-    static constexpr int getNOutput() { return _noutput; }
-    static constexpr int getNUnit() { return _nunit; }
+    static constexpr int getNLayer() { return nlayer; }
+    static constexpr int getNInput() { return ninput; }
+    static constexpr int getNOutput() { return noutput; }
+    static constexpr int getNUnit() { return nunit; }
     static constexpr int getNUnit(int i) { return Shape::nunits[i]; }
-    static constexpr const auto &getShape() { return Shape::nunits; }
+    static constexpr const auto &getUnitShape() { return Shape::nunits; }
 
     // Read access to LayerTuple / individual layers
     constexpr const LayerTuple &getLayers() const { return _layers; }
     template <int I>
     constexpr const auto &getLayer() const { return std::get<I>(_layers); }
 
-    // --- const get Value Arrays
+    // --- const get Value Arrays/Elements
     constexpr const auto &getInput() const { return input; } // alternative const read of public input array
-    constexpr const auto &getOutput() const { return std::get<_nlayer - 1>(_layers).out(); } // get values of output layer
-    constexpr const auto &getFirstDerivative() const { return std::get<_nlayer - 1>(_layers).d1(); } // get derivative of output with respect to input
-    constexpr const auto &getSecondDerivative() const { return std::get<_nlayer - 1>(_layers).d2(); }
+    constexpr const auto &getOutput() const { return std::get<nlayer - 1>(_layers).out(); } // get values of output layer
+    constexpr ValueT &getOutput(int i) const { return this->getOutput()[i]; }
+    constexpr const auto &getD1() const { return std::get<nlayer - 1>(_layers).d1(); } // get derivative of output with respect to input
+    constexpr ValueT &getD1(int i, int j) const { return this->getD1()[i*ninput + j]; }
+    constexpr const auto &getD2() const { return std::get<nlayer - 1>(_layers).d2(); }
+    constexpr ValueT getD2(int i, int j) const { return this->getD2()[i*ninput + j]; }
 
     // --- check derivative setup
-    static constexpr bool allowsFirstDerivative() { return dconf.d1; }
-    static constexpr bool allowsSecondDerivative() { return dconf.d2; }
-    static constexpr bool allowsVariationalFirstDerivative() { return dconf.vd1; }
+    static constexpr bool allowsD1() { return dconf.d1; }
+    static constexpr bool allowsD2() { return dconf.d2; }
+    static constexpr bool allowsVD1() { return dconf.vd1; }
 
-    constexpr bool hasFirstDerivative() const { return dconf.d1 && dflags.d1(); }
-    constexpr bool hasSecondDerivative() const { return dconf.d2 && dflags.d2(); }
-    constexpr bool hasVariationalFirstDerivative() const { return dconf.vd1 && dflags.vd1(); }
+    constexpr bool hasD1() const { return dconf.d1 && dflags.d1(); }
+    constexpr bool hasD2() const { return dconf.d2 && dflags.d2(); }
+    constexpr bool hasVD1() const { return dconf.vd1 && dflags.vd1(); }
 
     // --- Access Network Weights (Betas)
-    static constexpr int getNBeta() { return _nbeta; }
+    static constexpr int getNBeta() { return nbeta; }
     static constexpr int getNBeta(int i) { return Shape::nbetas[i]; }
     static constexpr const auto &getBetaShape() { return Shape::nbetas; }
-    static constexpr int getNLink() { return _nbeta - _nunit; } // substract offsets
-    static constexpr int getNLink(int i) { return Shape::nbetas[i] - Shape::nunits[i]; }
 
     constexpr ValueT getBeta(int i) const // get beta by index
     {
@@ -153,7 +158,7 @@ public:
         }
     }
     // get betas into array
-    constexpr void getBetas(std::array<ValueT, _nbeta> &b_arr) const { return getBetas(b_arr.begin(), b_arr.end()); }
+    constexpr void getBetas(std::array<ValueT, nbeta> &b_arr) const { return getBetas(b_arr.begin(), b_arr.end()); }
 
     constexpr void setBeta(int i, ValueT beta)
     {
@@ -177,7 +182,7 @@ public:
         }
     }
     // set betas from array
-    constexpr void setBetas(const std::array<ValueT, _nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
+    constexpr void setBetas(const std::array<ValueT, nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
     /*
     ValueT getBeta(const int &ib);
     void getBeta(ValueT * beta);
@@ -202,7 +207,7 @@ public:
     constexpr void setInput(int i, ValueT val) { input[i] = val; }
     template <class IterT>
     constexpr void setInput(IterT begin, const IterT end) { std::copy(begin, end, input.begin()); }
-    constexpr void setInput(const std::array<ValueT, _ninput> &in_arr) { input = in_arr; }
+    constexpr void setInput(const std::array<ValueT, ninput> &in_arr) { input = in_arr; }
 
 
     // --- Propagation

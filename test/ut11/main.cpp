@@ -19,7 +19,7 @@ int main()
     const auto dopt = DerivConfig::D1_VD1; // we want to check that D2 arrays are size 0 in that case
     using TestNet = TemplNet<double, dopt, NU_IN, layer1, layer2>;
     const StaticDFlags<dopt> dconf{}; // static flag set according to dopt
-    constexpr DynamicDFlags dflags(DerivConfig::D1); // dynamic flag set (to configure deriv calculation at runtime)
+    const DynamicDFlags dflags(DerivConfig::D1); // dynamic flag set (to configure deriv calculation at runtime)
 
 
     // -- Static type-based tests
@@ -33,32 +33,26 @@ int main()
     static_assert(TestNet::getNBeta() == 22, "");
     static_assert(TestNet::getNBeta(0) == 12, "");
     static_assert(TestNet::getNBeta(1) == 10, "");
-    static_assert(TestNet::getNLink() == 16, "");
-    static_assert(TestNet::getNLink(0) == 8, "");
-    static_assert(TestNet::getNLink(1) == 8, "");
 
-    static_assert(TestNet::allowsFirstDerivative() == dconf.d1, "");
-    static_assert(TestNet::allowsSecondDerivative() == dconf.d2, "");
-    static_assert(TestNet::allowsVariationalFirstDerivative() == dconf.vd1, "");
+    static_assert(TestNet::allowsD1() == dconf.d1, "");
+    static_assert(TestNet::allowsD2() == dconf.d2, "");
+    static_assert(TestNet::allowsVD1() == dconf.vd1, "");
 
 
     // -- Create a TemplNet instance
-
-    //auto test_ptr = make_unique<TestNet>(dflags);
-    //auto &test = *test_ptr;
     TestNet test(dflags);
 
-    // Some basic checks
+    // -- More basic checks
 
     // check again for the dynamic dflag setting
-    assert(test.hasFirstDerivative() == dflags.d1());
-    assert(test.hasSecondDerivative() == dflags.d2());
-    assert(test.hasVariationalFirstDerivative() == dflags.vd1());
+    assert(test.hasD1() == dflags.d1());
+    assert(test.hasD2() == dflags.d2());
+    assert(test.hasVD1() == dflags.vd1());
 
     constexpr array<int, 2> expected_shape{4, 2};
     constexpr array<int, 2> expected_betashape{12, 10};
 
-    assert(TestNet::getShape() == expected_shape);
+    assert(TestNet::getUnitShape() == expected_shape);
     assert(TestNet::getBetaShape() == expected_betashape);
 
     assert(test.input.size() == TestNet::getNInput());
@@ -71,7 +65,6 @@ int main()
     const auto &l1 = test.getLayer<1>();
     assert(l0.size() == 4);
     assert(l0.ninput == 2);
-    assert(l0.nlink == 8);
     assert(l0.nbeta == 12);
     assert(l0.nd1 == 8);
     assert(l0.nd2 == 0);
@@ -80,7 +73,6 @@ int main()
     assert(l0.d2().empty());
     assert(l1.size() == 2);
     assert(l1.ninput == 4);
-    assert(l1.nlink == 8);
     assert(l1.nbeta == 10);
     assert(l1.nd1 == 4);
     assert(l1.nd2 == 0);
@@ -103,13 +95,7 @@ int main()
     // fill in some garbage which should become 0 in the end
     iota(cur_beta.begin(), cur_beta.end(), 42.);
     copy(cur_beta.begin() + 15, cur_beta.end(), some_zeros.begin() + 15);
-    cout << "sz ";
-    for (double sz : some_zeros) { cout << sz << " "; }
-    cout << endl;
     test.getBetas(cur_beta.begin(), cur_beta.end() - 7);
-    cout << "cb ";
-    for (double cb : cur_beta) { cout << cb << " "; }
-    cout << endl;
     assert(std::equal(cur_beta.begin(), cur_beta.end(), some_zeros.begin()));
     iota(cur_beta.begin(), cur_beta.end(), 42.); // again fill some garbage
     test.getBetas(cur_beta); // get all into cur_beta (should be all 0)
@@ -123,49 +109,19 @@ int main()
     }
     // rest of comp_beta stays 0
 
-    cout << "beta (rand) ";
+
     for (int i = 0; i < 15; ++i) {
         test.setBeta(i, rand_beta[i]);
-        cout << "b" << i << " " << test.getBeta(i) << "  ";
         assert(test.getBeta(i) == rand_beta[i]);
     }
-    cout << endl << endl;
-
-    for (int i = 15; i < 22; ++i) {
-        test.setBeta(i, rand()*(1./RAND_MAX));
-    }
-    test.setInput({-0.5, 0.3});
-    for (int i=0; i<3; ++i) {
-        test.FFPropagate();
-        test.setInput(test.getOutput());
-    }
-
 
     test.setBetas(zeros); // set back to 0 (full array set)
-    cout << "curb:" << endl;
-    for (auto curb : cur_beta) { cout << curb << " "; }
-    cout << endl;
     test.setBetas(rand_beta.begin(), rand_beta.end()); // set betas again, now range-based
     test.getBetas(cur_beta);
-    cout << "curb:" << endl;
-    for (auto curb : cur_beta) { cout << curb << " "; }
-    cout << endl;
-    cout << "compb:" << endl;
-    for (auto compb : comp_beta) { cout << compb << " "; }
-    cout << endl;
     assert(std::equal(cur_beta.begin(), cur_beta.end(), comp_beta.begin()));
 
-    /*
-     actf::Sigmoid actf{};
-     array<double, 2> foo{-0.5, 0.5};
-     array<double, 2> bar{};
-     actf.f(foo.begin(), foo.end(), bar.begin());
-     cout << "actf ";
-     for (double out : bar) { cout << out << " "; }
-     cout << endl;
- */
 
-    // -- Propagation
+    // -- Propagation (properly in another test)
 
     // create some new test layers
     const auto dopt2 = DerivConfig::D12_VD1; // now we enable all
@@ -180,41 +136,6 @@ int main()
     array<double, 2> foo{-0.5, 0.3};
     myl0.PropagateInput(foo, dflags2);
     myl1.PropagateLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
-
-    cout << "layer output ";
-    for (double out : myl1.out()) { cout << out << " "; }
-    cout << endl;
-
-/*
-       FeedForwardNeuralNetwork * ffnn = new FeedForwardNeuralNetwork(3, 5, 3);
-       ffnn->pushHiddenLayer(4);
-
-       ffnn->pushFeatureMapLayer(5);
-       ffnn->getFeatureMapLayer(0)->setNMaps(0, 0, 1, 1, 2);
-
-       ffnn->pushFeatureMapLayer(4);
-       ffnn->getFeatureMapLayer(1)->setNMaps(1, 1, 0, 1, 0); // we specify only 3 units
-       ffnn->getFeatureMapLayer(1)->setSize(6); // now the other 2 should be defaulted to IDMU (generates warning)
-       ffnn->getFeatureMapLayer(1)->setNMaps(1, 1, 0, 1, 2); // to suppress further warning on copies
-
-       //printFFNNStructure(ffnn);
-
-       ffnn->connectFFNN();
-*/
-
-/*
-    // random generator with fixed seed for generating the beta, in order to eliminate randomness of results in the unittest
-    random_device rdev;
-    mt19937_64 rgen;
-    uniform_real_distribution<double> rd;
-    rgen = mt19937_64(rdev());
-    rgen.seed(18984687);
-    rd = uniform_real_distribution<double>(-2., 2.);
-    for (int i = 0; i < ffnn->getNBeta(); ++i) {
-        ffnn->setBeta(i, rd(rgen));
-    }
-*/
-    //printFFNNStructure(ffnn, false, 0);
 
     return 0;
 }
