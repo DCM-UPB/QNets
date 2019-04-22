@@ -57,19 +57,11 @@ public: // public member variables
 private: // private methods
     constexpr void _computeFeed(const std::array<ValueT, N_IN> &input)
     {
-        //std::cout << "feed input: ";
-        //for (auto in : input) { std::cout << in << " "; }
-        //std::cout << std::endl;
         for (SizeT i = 0; i < N_OUT; ++i) {
             const SizeT beta_i0 = 1 + i*(N_IN + 1); // increments through the indices of the first non-offset beta per unit
             _out[i] = beta[beta_i0 - 1]; // bias weight
-            for (SizeT j = 0; j < N_IN; ++j) {
-                _out[i] += beta[beta_i0 + j]*input[j];
-            }
+            _out[i] += std::inner_product(input.begin(), input.end(), beta.begin()+beta_i0, 0.);
         }
-        //std::cout << "feed output: ";
-        //for (auto f : out()) { std::cout << f << " "; }
-        //std::cout << std::endl;
     }
 
     constexpr void _computeActivation(bool flag_ad1, bool flag_ad2 /*is overriding*/)
@@ -91,7 +83,7 @@ private: // private methods
         this->_computeActivation(dflags.d1(), dflags.d2());
     }
 
-    constexpr void _computeD1(const std::array<ValueT, nd1_feed> &in_d1)
+    constexpr void _computeD1_Layer(const std::array<ValueT, nd1_feed> &in_d1)
     {
         std::fill(_d1.begin(), _d1.end(), 0.);
         for (SizeT i = 0; i < N_OUT; ++i) {
@@ -108,7 +100,18 @@ private: // private methods
         }
     }
 
-    constexpr void _computeD12(const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2)
+    constexpr void _computeD1_Input() // i.e. in_d1[i][i] = 1., else 0
+    {
+        std::fill(_d1.begin(), _d1.end(), 0.);
+        for (SizeT i = 0; i < N_OUT; ++i) {
+            const SizeT beta_i0 = 1 + i*(N_IN + 1);
+            for (SizeT j = 0; j < N_IN; ++j) {
+                _d1[i*NET_NINPUT + j] = _ad1[i] * beta[beta_i0 + j];
+            }
+        }
+    }
+
+    constexpr void _computeD12_Layer(const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2)
     {
         std::fill(_d1.begin(), _d1.end(), 0.);
         std::fill(_d2.begin(), _d2.end(), 0.);
@@ -128,53 +131,44 @@ private: // private methods
         }
     }
 
+    constexpr void _computeD12_Input()
+    {
+        std::fill(_d1.begin(), _d1.end(), 0.);
+        std::fill(_d2.begin(), _d2.end(), 0.);
+        for (SizeT i = 0; i < N_OUT; ++i) {
+            const SizeT beta_i0 = 1 + i*(N_IN + 1);
+            for (SizeT j = 0; j < N_IN; ++j) {
+                _d1[i*NET_NINPUT + j] = _ad1[i] * beta[beta_i0 + j];
+                _d2[i*NET_NINPUT + j] = _ad2[i] * beta[beta_i0 + j] * beta[beta_i0 + j];
+            }
+        }
+    }
+
 public: // public methods
     constexpr void PropagateInput(const std::array<ValueT, N_IN> &input, DynamicDFlags dflags) // propagation of input data (not layer)
     {
-        //std::cout << "input: ";
-        //for (auto in : input) { std::cout << in << " "; }
-        //std::cout << std::endl;
-        //std::cout << "beta: ";
-        //for (auto b : beta) { std::cout << b << " "; }
-        //std::cout << std::endl;
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
 
         // fill diagonal d1,d2
-        if (dflags.d1()) {
-            for (SizeT i = 0; i < nd1; i += NET_NINPUT + 1) {
-                _d1[i] = _ad1[i]*beta[i];
-            }
-        }
         if (dflags.d2()) {
-            for (SizeT i = 0; i < nd2; i += NET_NINPUT + 1) {
-                _d2[i] = _ad2[i]*beta[i]*beta[i];
-            }
+            this->_computeD12_Input();
         }
-        //std::cout << "output: ";
-        //for (auto f : out()) { std::cout << f << " "; }
-        //std::cout << std::endl;
+        else if (dflags.d1()) {
+            this->_computeD1_Input();
+        }
     }
 
     constexpr void PropagateLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2, DynamicDFlags dflags)
     {
-        //std::cout << "input: ";
-        //for (auto in : input) { std::cout << in << " "; }
-        //std::cout << std::endl;
-        //std::cout << "beta: ";
-        //for (auto b : beta) { std::cout << b << " "; }
-        //std::cout << std::endl;
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
         if (dflags.d2()) {
-            this->_computeD12(in_d1, in_d2);
+            this->_computeD12_Layer(in_d1, in_d2);
         }
         else if (dflags.d1()) {
-            this->_computeD1(in_d1);
+            this->_computeD1_Layer(in_d1);
         }
-        //std::cout << "output: ";
-        //for (auto f : out()) { std::cout << f << " "; }
-        //std::cout << std::endl;
     }
 };
 
