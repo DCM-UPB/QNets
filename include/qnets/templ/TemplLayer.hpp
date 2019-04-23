@@ -29,7 +29,7 @@ struct LayerConfig
 
 // The actual Layer class
 //
-template <typename ValueT, int NET_NINPUT, int IBETA_BEGIN, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
+template <typename ValueT, int IBETA_PREV_BEGIN, int IBETA_BEGIN, int NET_NINPUT, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
 class TemplLayer: public LayerConfig<N_OUT, ACTFType>
 {
 public:
@@ -38,6 +38,10 @@ public:
     static constexpr int nbeta = (N_IN + 1)*N_OUT;
     static constexpr int ibeta_begin = IBETA_BEGIN;
     static constexpr int ibeta_end = IBETA_BEGIN + nbeta;
+    static constexpr int nbeta_prev = IBETA_BEGIN - IBETA_PREV_BEGIN;
+
+    static_assert(nbeta_prev%N_IN == 0, ""); // -> BUG!
+    static constexpr int nblock_prev = nbeta_prev/N_IN;
 
     // Sizes which also depend on DCONF
     static constexpr StaticDFlags<DCONF> dconf{};
@@ -50,10 +54,9 @@ public:
 
 private: // arrays
     std::array<ValueT, N_OUT> _out{};
-    std::array<ValueT, nd1> _d1{};
-    std::array<ValueT, nd2> _d2{};
-
-    // the vderiv array can be quite large, so we need to heap allocate
+    // the deriv arrays could be quite large, so we need to heap allocate
+    const std::unique_ptr<std::array<ValueT, nd1>> _d1_ptr{std::make_unique<std::array<ValueT, nd1>>()};
+    const std::unique_ptr<std::array<ValueT, nd2>> _d2_ptr{std::make_unique<std::array<ValueT, nd2>>()};
     const std::unique_ptr<std::array<ValueT, nvd1>> _vd1_ptr{std::make_unique<std::array<ValueT, nvd1>>()};
 
     std::array<ValueT, dconf.d1 || dconf.vd1 ? N_OUT : 0> _ad1{}; // activation function d1
@@ -65,8 +68,8 @@ public: // public member variables
 
     // public const output references
     constexpr const std::array<ValueT, N_OUT> &out() const { return _out; }
-    constexpr const std::array<ValueT, nd1> &d1() const { return _d1; }
-    constexpr const std::array<ValueT, nd2> &d2() const { return _d2; }
+    constexpr const std::array<ValueT, nd1> &d1() const { return *_d1_ptr; }
+    constexpr const std::array<ValueT, nd2> &d2() const { return *_d2_ptr; }
     constexpr const std::array<ValueT, nvd1> &vd1() const { return *_vd1_ptr; }
 
 private:
@@ -74,8 +77,7 @@ private:
     {
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(N_IN + 1); // increments through the indices of the first non-offset beta per unit
-            _out[i] = beta[beta_i0 - 1]; // bias weight
-            _out[i] += std::inner_product(input, input + ninput, beta.begin() + beta_i0, 0.); // found to be much faster than loop
+            _out[i] = std::inner_product(input, input + ninput, beta.begin() + beta_i0, beta[beta_i0 - 1]/*bias weight*/); // found to be faster than loop
         }
     }
 
@@ -100,99 +102,105 @@ private:
 
     constexpr void _computeD1_Layer(const ValueT in_d1[])
     {
-        std::fill(_d1.begin(), _d1.end(), 0.);
+        auto &D1 = *_d1_ptr;
+        D1.fill(0.);
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(N_IN + 1);
             const int d_i0 = i*NET_NINPUT;
             for (int j = 0; j < N_IN; ++j) {
                 for (int k = 0; k < NET_NINPUT; ++k) {
-                    _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
+                    D1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
                 }
             }
             for (int l = d_i0; l < d_i0 + NET_NINPUT; ++l) {
-                _d1[l] *= _ad1[i];
+                D1[l] *= _ad1[i];
             }
         }
     }
 
     constexpr void _computeD1_Input() // i.e. in_d1[i][i] = 1., else 0
     {
-        std::fill(_d1.begin(), _d1.end(), 0.);
+        auto &D1 = *_d1_ptr;
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(NET_NINPUT + 1);
             for (int j = 0; j < NET_NINPUT; ++j) {
-                _d1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
+                D1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
             }
         }
     }
 
     constexpr void _computeD12_Layer(const ValueT in_d1[], const ValueT in_d2[])
     {
-        std::fill(_d1.begin(), _d1.end(), 0.);
-        std::fill(_d2.begin(), _d2.end(), 0.);
+        auto &D1 = *_d1_ptr;
+        auto &D2 = *_d2_ptr;
+        D1.fill(0.);
+        D2.fill(0.);
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(N_IN + 1);
             const int d_i0 = i*NET_NINPUT;
             for (int j = 0; j < N_IN; ++j) {
                 for (int k = 0; k < NET_NINPUT; ++k) {
-                    _d1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
-                    _d2[d_i0 + k] += beta[beta_i0 + j]*in_d2[j*NET_NINPUT + k];
+                    D1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
+                    D2[d_i0 + k] += beta[beta_i0 + j]*in_d2[j*NET_NINPUT + k];
                 }
             }
             for (int l = d_i0; l < d_i0 + NET_NINPUT; ++l) {
-                _d2[l] = _ad1[i]*_d2[l] + _ad2[i]*_d1[l]*_d1[l];
-                _d1[l] *= _ad1[i];
+                D2[l] = _ad1[i]*D2[l] + _ad2[i]*D1[l]*D1[l];
+                D1[l] *= _ad1[i];
             }
         }
     }
 
     constexpr void _computeD12_Input()
     {
-        std::fill(_d1.begin(), _d1.end(), 0.);
-        std::fill(_d2.begin(), _d2.end(), 0.);
+        auto &D1 = *_d1_ptr;
+        auto &D2 = *_d2_ptr;
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(NET_NINPUT + 1);
             for (int j = 0; j < NET_NINPUT; ++j) {
-                _d1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
-                _d2[i*NET_NINPUT + j] = _ad2[i]*beta[beta_i0 + j]*beta[beta_i0 + j];
+                D1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
+                D2[i*NET_NINPUT + j] = _ad2[i]*beta[beta_i0 + j]*beta[beta_i0 + j];
             }
         }
     }
 
     constexpr void _computeVD1_Layer(const ValueT input[], const ValueT in_vd1[])
     {
-        ValueT * const VD = (*_vd1_ptr).begin();
-        std::fill(VD, VD + nvd1, 0.);
+        auto &VD1 = *_vd1_ptr;
+        VD1.fill(0.);
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(N_IN + 1);
             const int d_i0 = i*ibeta_end;
             // add old elements
             for (int j = 0; j < N_IN; ++j) {
-                for (int k = 0; k < IBETA_BEGIN; ++k) {
-                    VD[d_i0 + k] += beta[beta_i0 + j]*in_vd1[j*IBETA_BEGIN + k];
+                for (int k = 0; k < IBETA_PREV_BEGIN; ++k) {
+                    VD1[d_i0 + k] += beta[beta_i0 + j]*in_vd1[j*IBETA_BEGIN + k];
+                }
+                for (int k = IBETA_PREV_BEGIN + j*nblock_prev; k < IBETA_PREV_BEGIN + (j + 1)*nblock_prev; ++k) {
+                    VD1[d_i0 + k] = beta[beta_i0 + j]*in_vd1[j*IBETA_BEGIN + k];
                 }
             }
             // add new elements
             const int beta_inew = IBETA_BEGIN + beta_i0; // the first new non-offset beta index
-            VD[d_i0 + beta_inew - 1] = 1.; // the bias weight derivative
-            std::copy(input, input + N_IN, VD + d_i0 + beta_inew);
+            VD1[d_i0 + beta_inew - 1] = 1.; // the bias weight derivative
+            std::copy(input, input + N_IN, VD1.begin() + d_i0 + beta_inew);
             for (int l = d_i0; l < d_i0 + ibeta_end; ++l) {
-                VD[l] *= _ad1[i];
+                VD1[l] *= _ad1[i];
             }
         }
     }
 
     constexpr void _computeVD1_Input(const ValueT input[])
     {
-        ValueT * const VD = (*_vd1_ptr).begin();
-        std::fill(VD, VD + nvd1, 0.);
+        auto &VD1 = *_vd1_ptr;
+        VD1.fill(0.);
         for (int i = 0; i < N_OUT; ++i) {
             const int beta_i0 = 1 + i*(NET_NINPUT + 1);
             const int d_i0 = i*ibeta_end;
-            VD[d_i0 + beta_i0 - 1] = 1.; // the bias weight derivative
-            std::copy(input, input + NET_NINPUT, VD + d_i0 + beta_i0);
+            VD1[d_i0 + beta_i0 - 1] = 1.; // the bias weight derivative
+            std::copy(input, input + NET_NINPUT, VD1.begin() + d_i0 + beta_i0);
             for (int l = d_i0; l < d_i0 + ibeta_end; ++l) {
-                VD[l] *= _ad1[i];
+                VD1[l] *= _ad1[i];
             }
         }
     }

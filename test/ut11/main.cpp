@@ -125,8 +125,8 @@ int main()
 
     // create some new test layers
     const auto dopt2 = DerivConfig::D12_VD1; // now we enable all
-    TemplLayer<double, 2, 0, 2, 4, actf::Sigmoid, dopt2> myl0{};
-    TemplLayer<double, 2, 0 + myl0.nbeta, 4, 2, actf::Sigmoid, dopt2> myl1{};
+    TemplLayer<double, 0, 0, 2, 2, 4, actf::Sigmoid, dopt2> myl0{};
+    TemplLayer<double, 0, 0 + myl0.nbeta, 2, 4, 2, actf::Sigmoid, dopt2> myl1{};
     DynamicDFlags dflags2(dopt2);
 
     // set beta to random values
