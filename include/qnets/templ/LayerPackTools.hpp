@@ -1,7 +1,7 @@
 #ifndef QNETS_TEMPL_LAYERPACKTOOLS_HPP
 #define QNETS_TEMPL_LAYERPACKTOOLS_HPP
 
-#include "qnets/templ/Layer.hpp"
+#include "qnets/templ/TemplLayer.hpp"
 #include "qnets/tool/PackTools.hpp"
 
 namespace templ
@@ -17,18 +17,21 @@ namespace lpack
 // recursive helpers for LayerPackTuple:
 namespace detail
 {
-template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, int N_IN, typename>
+template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, int IBETA_BEGIN, int N_IN, typename>
 struct LayerPackTuple_rec
 {
     using type = std::tuple<>;
 };
 
-template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, int N_IN, typename LConf, typename... LCONFS>
-struct LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, N_IN, std::tuple<LConf, LCONFS...>>
+template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, int IBETA_BEGIN, int N_IN, typename LConf, typename... LCONFS>
+struct LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, IBETA_BEGIN, N_IN, std::tuple<LConf, LCONFS...>>
 {
-    using rest = typename LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, LConf::noutput, std::tuple<LCONFS...>>::type;
+private:
+    using layer = TemplLayer<ValueT, NET_NINPUT, IBETA_BEGIN, N_IN, LConf::noutput, typename LConf::ACTF_Type, DCONF>;
+    using rest = typename LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, IBETA_BEGIN+layer::nbeta, layer::noutput, std::tuple<LCONFS...>>::type;
+public:
     using type = decltype(std::tuple_cat(
-            std::declval<std::tuple<Layer<ValueT, NET_NINPUT, N_IN, LConf::noutput, typename LConf::ACTF_Type, DCONF>>>(),
+            std::declval<std::tuple<layer>>(),
             std::declval<rest>()));
 };
 } // detail
@@ -37,10 +40,11 @@ template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, typename LConf, ty
 class LayerPackTuple
 {
 private:
-    using rest = typename detail::LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, LConf::noutput, std::tuple<LCONFS...>>::type;
+    using layer = TemplLayer<ValueT, NET_NINPUT, 0, NET_NINPUT, LConf::noutput, typename LConf::ACTF_Type, DCONF>;
+    using rest = typename detail::LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, layer::nbeta, layer::noutput, std::tuple<LCONFS...>>::type;
 public:
     using type = decltype(std::tuple_cat(
-            std::declval<std::tuple<Layer<ValueT, NET_NINPUT, NET_NINPUT, LConf::noutput, typename LConf::ACTF_Type, DCONF>>>(),
+            std::declval<std::tuple<layer>>(),
             std::declval<rest>()));
 };
 

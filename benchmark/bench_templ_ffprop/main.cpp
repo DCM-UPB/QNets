@@ -24,7 +24,7 @@ template <int I>
 void run_benchmark_netpack(const double xdata[], const int ndata[], const int xoffset, const int neval[], const int nruns) {}
 
 template <int I, class TNet, class ... Args>
-void run_benchmark_netpack(const double xdata[], const int ndata[], const int xoffset, const int neval[], const int nruns, TNet tnet, Args ... tnets)
+void run_benchmark_netpack(const double xdata[], const int ndata[], const int xoffset, const int neval[], const int nruns, TNet &tnet, Args& ... tnets)
 {
     using namespace templ;
     cout << "FFPropagate benchmark with " << nruns << " runs of " << neval[I] << " FF-Propagations, for a FFNN of shape " << TNet::getNInput() << "x" << TNet::getNUnit(0) << "x" << TNet::getNUnit(1) << "x" << TNet::getNOutput() << " ." << endl;
@@ -40,7 +40,8 @@ void run_benchmark_netpack(const double xdata[], const int ndata[], const int xo
     tnet.dflags.set(DerivConfig::D12);
     run_single_benchmark("f+d1+d2", tnet, xdata + xoffset, neval[I], nruns);
 
-    //run_single_benchmark("f+d1+d2+vd1", tnet, xdata + xoffset, neval[I], nruns);
+    tnet.dflags.set(DerivConfig::D12_VD1);
+    run_single_benchmark("f+d1+d2+vd1", tnet, xdata + xoffset, neval[I], nruns);
 
     cout << "=========================================================================================" << endl << endl << endl;
 
@@ -51,7 +52,7 @@ int main()
 {
     using namespace templ;
 
-    const int neval[3] = {500000, 10000, 500};
+    const int neval[3] = {200000, 2000, 20};
     const int nruns = 5;
 
     const int yndim = 1;
@@ -118,6 +119,7 @@ int main()
     run_benchmark_netpack<0>(xdata, ndata, 0, neval, nruns, tnet_s, tnet_m, tnet_l);
 
     delete[] xdata;
+
     return 0;
 }
 

@@ -125,8 +125,8 @@ int main()
 
     // create some new test layers
     const auto dopt2 = DerivConfig::D12_VD1; // now we enable all
-    Layer<double, 2, 2, 4, actf::Sigmoid, dopt2> myl0{};
-    Layer<double, 2, 4, 2, actf::Sigmoid, dopt2> myl1{};
+    TemplLayer<double, 2, 0, 2, 4, actf::Sigmoid, dopt2> myl0{};
+    TemplLayer<double, 2, 0 + myl0.nbeta, 4, 2, actf::Sigmoid, dopt2> myl1{};
     DynamicDFlags dflags2(dopt2);
 
     // set beta to random values
@@ -135,7 +135,7 @@ int main()
 
     array<double, 2> foo{-0.5, 0.3};
     myl0.PropagateInput(foo, dflags2);
-    myl1.PropagateLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
+    myl1.PropagateLayer(myl0.out(), myl0.d1(), myl0.d2(), myl0.vd1(), dflags2);
 
     return 0;
 }

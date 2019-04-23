@@ -3,7 +3,7 @@
 
 #include "qnets/tool/PackTools.hpp"
 #include "qnets/tool/TupleTools.hpp"
-#include "qnets/templ/Layer.hpp"
+#include "qnets/templ/TemplLayer.hpp"
 #include "qnets/templ/LayerPackTools.hpp"
 #include "qnets/templ/DerivConfig.hpp"
 
@@ -17,7 +17,7 @@ namespace templ
 {
 
 // NOTE: For technical reasons, we need to use a TemplNetShape class for static creation
-//       of arrays like nbeta_shape (which depends on Layer, not LayerConf). Might become obsolete with C++17.
+//       of arrays like nbeta_shape (which depends on TemplLayer, not LayerConf). Might become obsolete with C++17.
 namespace detail
 {
 template <class LTuplType, class ISeq>
@@ -66,6 +66,7 @@ public:
     // Static Output Deriv Array Sizes (depend on DCONF)
     static constexpr int nd1 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd1;
     static constexpr int nd2 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd2;
+    static constexpr int nvd1 = std::tuple_element<nlayer - 1, LayerTuple>::type::nvd1;
 
 
     // Basic assertions
@@ -116,11 +117,13 @@ public:
     // --- const get Value Arrays/Elements
     constexpr const auto &getInput() const { return input; } // alternative const read of public input array
     constexpr const auto &getOutput() const { return std::get<nlayer - 1>(_layers).out(); } // get values of output layer
-    constexpr ValueT &getOutput(int i) const { return this->getOutput()[i]; }
+    constexpr ValueT getOutput(int i) const { return this->getOutput()[i]; }
     constexpr const auto &getD1() const { return std::get<nlayer - 1>(_layers).d1(); } // get derivative of output with respect to input
-    constexpr ValueT &getD1(int i, int j) const { return this->getD1()[i*ninput + j]; }
+    constexpr ValueT getD1(int i, int j) const { return this->getD1()[i*ninput + j]; }
     constexpr const auto &getD2() const { return std::get<nlayer - 1>(_layers).d2(); }
     constexpr ValueT getD2(int i, int j) const { return this->getD2()[i*ninput + j]; }
+    constexpr const auto &getVD1() const { return std::get<nlayer - 1>(_layers).vd1(); }
+    constexpr ValueT getVD1(int i, int j) const { return this->getVD1()[i*nbeta + j]; }
 
     // --- check derivative setup
     static constexpr bool allowsD1() { return dconf.d1; }

@@ -18,7 +18,7 @@ int main()
     using layer1 = LayerConfig<4, actf::Sigmoid>;
     using layer2 = LayerConfig<3, actf::Sigmoid>;
     using layer3 = LayerConfig<2, actf::Sigmoid>;
-    const auto dopt = DerivConfig::D12; // vd1 not impl yet
+    const auto dopt = DerivConfig::D12_VD1; // test all derivs that are available for TemplNet
     using TestNet = TemplNet<double, dopt, NU_IN, layer1, layer2, layer3>;
 
     TestNet tmpl{};
@@ -56,10 +56,14 @@ int main()
     for (int i = 0; i < ffnn.getNOutput(); ++i) {
         assert(ffnn.getOutput(i) == tmpl.getOutput()[i]);
         for (int j = 0; j < ffnn.getNInput(); ++j) {
-            std::cout << "d1_" << i << "_" << j << ": poly " << ffnn.getFirstDerivative(i, j) << " tmpl " << tmpl.getD1()[i*ffnn.getNInput() + j] << std::endl;
-            std::cout << "d2_" << i << "_" << j << ": poly " << ffnn.getSecondDerivative(i, j) << " tmpl " << tmpl.getD2()[i*ffnn.getNInput() + j] << std::endl;
-            assert(fabs(ffnn.getFirstDerivative(i, j) - tmpl.getD1()[i*ffnn.getNInput() + j]) < EXTRA_TINY);
-            assert(fabs(ffnn.getSecondDerivative(i, j) - tmpl.getD2()[i*ffnn.getNInput() + j]) < EXTRA_TINY);
+            //std::cout << "d1_" << i << "_" << j << ": poly " << ffnn.getFirstDerivative(i, j) << " tmpl " << tmpl.getD1(i, j) << std::endl;
+            //std::cout << "d2_" << i << "_" << j << ": poly " << ffnn.getSecondDerivative(i, j) << " tmpl " << tmpl.getD2(i, j) << std::endl;
+            assert(fabs(ffnn.getFirstDerivative(i, j) - tmpl.getD1(i, j)) < EXTRA_TINY);
+            assert(fabs(ffnn.getSecondDerivative(i, j) - tmpl.getD2(i, j)) < EXTRA_TINY);
+        }
+        for (int j = 0; j < ffnn.getNBeta(); ++j) {
+            //std::cout << "vd1_" << i << "_" << j << ": poly " << ffnn.getVariationalFirstDerivative(i, j) << " tmpl " << tmpl.getVD1(i, j) << std::endl;
+            assert(fabs(ffnn.getVariationalFirstDerivative(i, j) - tmpl.getVD1(i, j)) < EXTRA_TINY);
         }
     }
 

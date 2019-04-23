@@ -59,7 +59,7 @@ inline double benchmark_actf_derivs(ActivationFunctionInterface * const actf, co
 }
 
 template <class BenchT, class ... Args>
-inline std::pair<double, double> sample_benchmark(BenchT bench, const int nruns, Args ... args)
+inline std::pair<double, double> sample_benchmark(BenchT bench, const int nruns, Args&& ... args)
 {
     double times[nruns];
     double mean = 0., err = 0.;
