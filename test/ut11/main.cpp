@@ -125,8 +125,8 @@ int main()
 
     // create some new test layers
     const auto dopt2 = DerivConfig::D12_VD1; // now we enable all
-    TemplLayer<double, 0, 0, 2, 2, 4, actf::Sigmoid, dopt2> myl0{};
-    TemplLayer<double, 0, 0 + myl0.nbeta, 2, 4, 2, actf::Sigmoid, dopt2> myl1{};
+    TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, (4+1)*2/*nbeta_next*/, 2/*nin*/, 4/*nout*/, actf::Sigmoid, dopt2> myl0{};
+    TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, 0/*nbeta_next*/, 4/*nin*/, 2/*nout*/, actf::Sigmoid, dopt2> myl1{};
     DynamicDFlags dflags2(dopt2);
 
     // set beta to random values
@@ -134,8 +134,27 @@ int main()
     for (auto &b : myl1.beta) { b = rand()*(1./RAND_MAX); }
 
     array<double, 2> foo{-0.5, 0.3};
-    myl0.PropagateInput(foo, dflags2);
-    myl1.PropagateLayer(myl0.out(), myl0.d1(), myl0.d2(), myl0.vd1(), dflags2);
+    myl0.ForwardInput(foo, dflags2);
+    myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
+    myl1.BackwardOutput(dflags2);
+    myl0.BackwardLayer(myl1.vd1(), myl1.beta, dflags2);
+
+    double ana_vd1_0 = foo[1]*myl0.vd1()[0];
+    double ana_vd1_1 = foo[1]*myl0.vd1()[4];
+    std::cout << "ana_vd1_0: " << ana_vd1_0 << ", ana_vd1_1: " << ana_vd1_1 << std::endl;
+    auto out_l = myl1.out();
+
+    dflags2.set(DerivConfig::OFF);
+    double dx = 0.00001;
+    myl0.beta[2] += dx;
+    myl0.ForwardInput(foo, dflags2);
+    myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
+    auto out_r = myl1.out();
+
+    std::cout << "nvd1 " << myl0.nvd1 << std::endl;
+    double num_vd1_0 = (out_r[0] - out_l[0])/dx;
+    double num_vd1_1 = (out_r[1] - out_l[1])/dx;
+    std::cout << "num_vd1_0: " << num_vd1_0 << ", num_vd1_1: " << num_vd1_1 << std::endl;
 
     return 0;
 }

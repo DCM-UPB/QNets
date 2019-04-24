@@ -29,28 +29,26 @@ struct LayerConfig
 
 // The actual Layer class
 //
-template <typename ValueT, int IBETA_PREV_BEGIN, int IBETA_BEGIN, int NET_NINPUT, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
+template <typename ValueT, int NET_NINPUT, int NET_NOUTPUT, int NBETA_NEXT, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
 class TemplLayer: public LayerConfig<N_OUT, ACTFType>
 {
 public:
-    // N_IN/IBETA dependent sizes
+    // N_IN dependent sizes
     static constexpr int ninput = N_IN;
     static constexpr int nbeta = (N_IN + 1)*N_OUT;
-    static constexpr int ibeta_begin = IBETA_BEGIN;
-    static constexpr int ibeta_end = IBETA_BEGIN + nbeta;
-    static constexpr int nbeta_prev = IBETA_BEGIN - IBETA_PREV_BEGIN;
 
-    static_assert(nbeta_prev%N_IN == 0, ""); // -> BUG!
-    static constexpr int nblock_prev = nbeta_prev/N_IN;
 
     // Sizes which also depend on DCONF
     static constexpr StaticDFlags<DCONF> dconf{};
     static constexpr int nd1 = dconf.d1 ? NET_NINPUT*N_OUT : 0; // number of input derivative values
-    static constexpr int nd1_feed = dconf.d1 ? NET_NINPUT*N_IN : 0; // number of deriv values from previous layer
+    static constexpr int nd1_prev = dconf.d1 ? NET_NINPUT*N_IN : 0; // number of deriv values from previous layer
     static constexpr int nd2 = dconf.d2 ? nd1 : 0;
-    static constexpr int nd2_feed = dconf.d2 ? nd1_feed : 0;
-    static constexpr int nvd1 = dconf.vd1 ? ibeta_end*N_OUT : 0; // number of variational derivative values
-    static constexpr int nvd1_feed = dconf.vd1 ? IBETA_BEGIN*N_IN : 0; // number of deriv values from previous layer
+    static constexpr int nd2_prev = dconf.d2 ? nd1_prev : 0;
+
+    static_assert(NBETA_NEXT % (1 + N_OUT) == 0, ""); // -> BUG!
+    static constexpr int nout_next = NBETA_NEXT/(1 + N_OUT);
+    static constexpr int nvd1 = dconf.vd1 ? NET_NOUTPUT*N_OUT : 0; // number of backprop grad values
+    static constexpr int nvd1_next = dconf.vd1 ? NET_NOUTPUT*nout_next : 0; // number of backprop grad values from previous layer
 
 private: // arrays
     std::array<ValueT, N_OUT> _out{};
@@ -164,6 +162,7 @@ private:
         }
     }
 
+    /*
     constexpr void _computeVD1_Layer(const ValueT input[], const ValueT in_vd1[])
     {
         auto &VD1 = *_vd1_ptr;
@@ -203,13 +202,12 @@ private:
                 VD1[l] *= _ad1[i];
             }
         }
-    }
+    }*/
 
-    constexpr void _propagateInput(const ValueT input[], DynamicDFlags dflags)
+    constexpr void _forwardInput(const ValueT input[], DynamicDFlags dflags)
     {
         // statically secure this call (i.e. using it on non-input layer will not compile)
-        static_assert(N_IN == NET_NINPUT, "[TemplLayer::PropagateInput] N_IN != NET_NINPUT");
-        static_assert(IBETA_BEGIN == 0, "[TemplLayer::PropagateInput] IBETA_BEGIN != 0");
+        static_assert(N_IN == NET_NINPUT, "[TemplLayer::ForwardInput] N_IN != NET_NINPUT");
 
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
@@ -221,15 +219,10 @@ private:
         else if (dflags.d1()) {
             this->_computeD1_Input();
         }
-
-        // input vderiv
-        if (dflags.vd1()) {
-            this->_computeVD1_Input(input);
-        }
     }
 
 
-    constexpr void _propagateLayer(const ValueT input[], const ValueT in_d1[], const ValueT in_d2[], const ValueT in_vd1[], DynamicDFlags dflags)
+    constexpr void _forwardLayer(const ValueT input[], const ValueT in_d1[], const ValueT in_d2[], DynamicDFlags dflags)
     {
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
@@ -241,10 +234,39 @@ private:
         else if (dflags.d1()) {
             this->_computeD1_Layer(in_d1);
         }
+    }
 
-        // vderiv
+
+    constexpr void _backwardOutput(DynamicDFlags dflags)
+    {
+        dflags = dflags.AND(dconf); // AND static and dynamic conf
+        static_assert(N_OUT == NET_NOUTPUT, "[TemplLayer::BackwardOutput] N_OUT != NET_NOUTPUT");
+        auto &VD1 = *_vd1_ptr;
+
+        VD1.fill(0.);
         if (dflags.vd1()) {
-            this->_computeVD1_Layer(input, in_vd1);
+            for (int i = 0; i < NET_NOUTPUT; ++i) {
+                VD1[i*NET_NOUTPUT + i] = _ad1[i];
+            }
+        }
+    }
+
+    constexpr void _backwardLayer(const ValueT vd1_next[], const ValueT beta_next[], DynamicDFlags dflags)
+    {
+        dflags = dflags.AND(dconf); // AND static and dynamic conf
+        auto &VD1 = *_vd1_ptr;
+        VD1.fill(0.);
+
+        for (int i = 0; i < NET_NOUTPUT; ++i) {
+            const int d_i0 = i*N_OUT;
+            for (int j = 0; j < nout_next; ++j) {
+                for (int k = 0; k < N_OUT; ++k) {
+                    VD1[d_i0 + k] += beta_next[1 + j*(N_OUT + 1) + k] * vd1_next[i*nout_next + j];
+                }
+            }
+            for (int k = 0; k < N_OUT; ++k) {
+                VD1[d_i0 + k] *= _ad1[k];
+            }
         }
     }
 
@@ -257,67 +279,112 @@ public: // public propagate methods
 
     // --- Propagation of input data (not layer)
 
-    constexpr void PropagateInput(const std::array<ValueT, NET_NINPUT> &input, DynamicDFlags dflags)
+    constexpr void ForwardInput(const std::array<ValueT, NET_NINPUT> &input, DynamicDFlags dflags)
     {
-        _propagateInput(input.begin(), dflags);
+        _forwardInput(input.begin(), dflags);
     }
 
-    constexpr void PropagateInput(const std::vector<ValueT> &input, DynamicDFlags dflags)
+    constexpr void ForwardInput(const std::vector<ValueT> &input, DynamicDFlags dflags)
     {
         assert(input.size() == N_IN);
-        _propagateInput(input.begin(), dflags);
+        _forwardInput(input.begin(), dflags);
     }
 
-    constexpr void PropagateInput(const ValueT input[], DynamicDFlags dflags)
+    constexpr void ForwardInput(const ValueT input[], DynamicDFlags dflags)
     {
-        _propagateInput(input, dflags);
+        _forwardInput(input, dflags);
     }
 
 
-    // --- Propagation of layer data
+    // --- Forward Propagation of layer data
 
-    constexpr void PropagateLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_feed> &in_d1, const std::array<ValueT, nd2_feed> &in_d2, const std::array<ValueT, nvd1_feed> &in_vd1, DynamicDFlags dflags)
+    constexpr void ForwardLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_prev> &in_d1, const std::array<ValueT, nd2_prev> &in_d2, DynamicDFlags dflags)
     {
-        _propagateLayer(input.begin(), in_d1.begin(), in_d2.begin(), in_vd1.begin(), dflags);
+        _forwardLayer(input.begin(), in_d1.begin(), in_d2.begin(), dflags);
     }
 
-    constexpr void PropagateLayer(const std::vector<ValueT> &input, const std::vector<ValueT> &in_d1, const std::vector<ValueT> &in_d2, const std::vector<ValueT> &in_vd1, DynamicDFlags dflags)
+    constexpr void ForwardLayer(const std::vector<ValueT> &input, const std::vector<ValueT> &in_d1, const std::vector<ValueT> &in_d2, DynamicDFlags dflags)
     {
         assert(input.size() == N_IN);
-        assert(in_d1.size() == nd1_feed);
-        assert(in_d2.size() == nd2_feed);
-        assert(in_vd1.size() == nvd1_feed);
-        _propagateLayer(input.begin(), in_d1.begin(), in_d2.begin(), in_vd1.begin(), dflags);
+        assert(in_d1.size() == nd1_prev);
+        assert(in_d2.size() == nd2_prev);
+        _forwardLayer(input.begin(), in_d1.begin(), in_d2.begin(), dflags);
     }
 
-    constexpr void PropagateLayer(const ValueT input[], const ValueT in_d1[], const ValueT in_d2[], const ValueT in_vd1[], DynamicDFlags dflags)
+    constexpr void ForwardLayer(const ValueT input[], const ValueT in_d1[], const ValueT in_d2[], DynamicDFlags dflags)
     {
-        _propagateLayer(input, in_d1, in_d2, in_vd1, dflags);
+        _forwardLayer(input, in_d1, in_d2, dflags);
+    }
+
+
+    // --- Backward Propagation for an output layer
+
+    constexpr void BackwardOutput(DynamicDFlags dflags)
+    {
+        _backwardOutput(dflags);
+    }
+
+
+    // --- Backward Propagation for a hidden layer
+
+    constexpr void BackwardLayer(const std::array<ValueT, nvd1_next> &vd1_next, const std::array<ValueT, NBETA_NEXT> &beta_next, DynamicDFlags dflags)
+    {
+        _backwardLayer(vd1_next.begin(), beta_next.begin(), dflags);
+    }
+
+    constexpr void BackwardLayer(const std::vector<ValueT> &vd1_next, const std::vector<ValueT> &beta_next, DynamicDFlags dflags)
+    {
+        assert(vd1_next.size() == nvd1_next);
+        assert(beta_next.size() == NBETA_NEXT);
+        _backwardLayer(vd1_next.begin(), beta_next.begin(), dflags);
+    }
+
+    constexpr void BackwardLayer(const ValueT vd1_next[], const ValueT beta_next[], DynamicDFlags dflags)
+    {
+        _backwardLayer(vd1_next, beta_next, dflags);
     }
 };
 
 // --- Helper function to propagate through a tuple of layers
 
 namespace detail
-{ // Recursive FFProp over tuple
+{
+// Recursive ForwardProp over tuple
 template <class TupleT>
-constexpr void ffprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+constexpr void fwdprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
 
 template <class TupleT, size_t I, size_t ... Is>
-constexpr void ffprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+constexpr void fwdprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
 {
     const auto &prev_layer = std::get<I>(layers);
-    std::get<I + 1>(layers).PropagateLayer(prev_layer.out(), prev_layer.d1(), prev_layer.d2(), prev_layer.vd1(), dflags);
-    ffprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
+    std::get<I + 1>(layers).ForwardLayer(prev_layer.out(), prev_layer.d1(), prev_layer.d2(), dflags);
+    fwdprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
 }
+
+template <class TupleT>
+constexpr void backprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+
+template <class TupleT, size_t I, size_t ... Is>
+constexpr void backprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+{
+    const size_t idx = sizeof...(Is);
+    const auto &next_layer = std::get<idx + 1>(layers);
+    std::get<idx>(layers).BackwardLayer(next_layer.vd1(), next_layer.beta, dflags);
+    backprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
+}
+
 } // detail
 
 // The public function
 template <class ArrayT, class TupleT>
 constexpr void propagateLayers(const ArrayT &input, TupleT &layers, DynamicDFlags dflags)
 {
-    std::get<0>(layers).PropagateInput(input, dflags);
-    detail::ffprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<std::tuple_size<TupleT>::value - 1>{});
+    using namespace detail;
+    constexpr size_t nlayer = std::tuple_size<TupleT>::value;
+    std::get<0>(layers).ForwardInput(input, dflags);
+    fwdprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
+    std::get<nlayer - 1>(layers).BackwardOutput(dflags);
+    backprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
 }
 } // templ
 

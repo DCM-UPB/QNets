@@ -17,7 +17,8 @@ namespace templ
 {
 
 // NOTE: For technical reasons, we need to use a TemplNetShape class for static creation
-//       of arrays like nbeta_shape (which depends on TemplLayer, not LayerConf). Might become obsolete with C++17.
+//       of arrays like nbeta_shape (which depends on TemplLayer, not LayerConf),
+//       making use of integer_sequence. Might become obsolete with C++17.
 namespace detail
 {
 template <class LTuplType, class ISeq>
