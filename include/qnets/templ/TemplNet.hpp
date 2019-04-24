@@ -67,7 +67,7 @@ public:
     // Static Output Deriv Array Sizes (depend on DCONF)
     static constexpr int nd1 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd1;
     static constexpr int nd2 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd2;
-    static constexpr int nvd1 = std::tuple_element<nlayer - 1, LayerTuple>::type::nvd1;
+    static constexpr int nvd1 = dconf.vd1 ? noutput*nbeta : 0;
 
 
     // Basic assertions
@@ -87,6 +87,9 @@ private:
     // arrays of array.begin() pointers, for run-time indexing
     const std::array<const ValueT *, nlayer> _out_begins;
     const std::array<ValueT *, nlayer> _beta_begins;
+
+    // vd1 array
+    std::array<ValueT, nvd1> _vd1{};
 
 public:
     // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
@@ -123,8 +126,8 @@ public:
     constexpr ValueT getD1(int i, int j) const { return this->getD1()[i*ninput + j]; }
     constexpr const auto &getD2() const { return std::get<nlayer - 1>(_layers).d2(); }
     constexpr ValueT getD2(int i, int j) const { return this->getD2()[i*ninput + j]; }
-    constexpr const auto &getVD1() const { return std::get<nlayer - 1>(_layers).vd1(); }
-    constexpr ValueT getVD1(int i, int j) const { return this->getVD1()[i*nbeta + j]; }
+    constexpr const auto &getVD1() const { return _vd1; }
+    constexpr ValueT getVD1(int i, int j) const { return _vd1[i*nbeta + j]; }
 
     // --- check derivative setup
     static constexpr bool allowsD1() { return dconf.d1; }
@@ -218,7 +221,7 @@ public:
 
     constexpr void FFPropagate()
     {
-        propagateLayers(input, _layers, dflags);
+        propagateLayers<nbeta>(_layers, input, _vd1, dflags);
     }
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
