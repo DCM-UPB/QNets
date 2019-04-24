@@ -16,11 +16,12 @@
 namespace templ
 {
 
+// detail namespace with helpers
+namespace detail
+{
 // NOTE: For technical reasons, we need to use a TemplNetShape class for static creation
 //       of arrays like nbeta_shape (which depends on TemplLayer, not LayerConf),
 //       making use of integer_sequence. Might become obsolete with C++17.
-namespace detail
-{
 template <class LTuplType, class ISeq>
 struct TemplNetShape;
 
@@ -39,7 +40,98 @@ template <class LTuplType, int ... Is>
 constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>::nunits;
 template <class LTuplType, int ... Is>
 constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>::nbetas;
+
+
+// --- subroutines to propagate (i.e. fwd+back) input through a tuple of layers
+
+// Recursive ForwardProp over tuple
+template <class TupleT>
+constexpr void fwdprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+
+template <class TupleT, size_t I, size_t ... Is>
+constexpr void fwdprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+{
+    const auto &prev_layer = std::get<I>(layers);
+    std::get<I + 1>(layers).ForwardLayer(prev_layer.out(), prev_layer.d1(), prev_layer.d2(), dflags);
+    fwdprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
+}
+
+// Recursive BackProp over tuple
+template <class TupleT>
+constexpr void backprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+
+template <class TupleT, size_t I, size_t ... Is>
+constexpr void backprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+{
+    constexpr size_t idx = sizeof...(Is);
+    const auto &next_layer = std::get<idx + 1>(layers);
+    std::get<idx>(layers).BackwardLayer(next_layer.vd1(), next_layer.beta, dflags);
+    backprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
+}
+
+// calculate final weight gradients of a backpropped layer
+template <int ibeta_begin, int nbeta_net, class LayerT, class ArrayT1, class ArrayT2>
+constexpr void calc_grad_layer(const LayerT &layer, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags)
+{
+    if (!dflags.vd1()) {
+        std::fill(vd1.begin(), vd1.end(), 0.);
+        return;
+    }
+    const auto &LVD1 = layer.vd1();
+    for (int i = 0; i < layer.net_nout; ++i) {
+        const int lvd1_i0 = i*layer.noutput;
+        for (int j = 0; j < layer.noutput; ++j) {
+            const int gvd1_i0 = i*nbeta_net + ibeta_begin + j*(1 + layer.ninput) + 1; // global vd1 index of first non-offset weight
+            vd1[gvd1_i0 - 1] = LVD1[lvd1_i0 + j]; // bias weight gradient
+            for (int k = 0; k < layer.ninput; ++k) {
+                vd1[gvd1_i0 + k] = input[k] * LVD1[lvd1_i0 + j];
+            }
+        }
+    }
+}
+
+// accumulate network gradients into vd1
+template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2>
+constexpr void grad_layers_impl(const TupleT &/*layers*/, const ArrayT1 &/*input*/, ArrayT2 &/*vd1*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+
+template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2, size_t I, size_t ... Is>
+constexpr void grad_layers_impl(const TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+{
+    using layerT = std::tuple_element_t<I, TupleT>;
+    const auto &this_layer = std::get<I>(layers);
+
+    calc_grad_layer<ibeta_begin, nbeta_net, decltype(this_layer)/*clang fix*/>(this_layer, input, vd1, dflags);
+    grad_layers_impl<ibeta_begin + layerT::nbeta, nbeta_net, TupleT>(layers, this_layer.out(), vd1, dflags, std::index_sequence<Is...>{});
+}
+
+template <class ... LAYERS>
+constexpr int nbeta_sum(const std::tuple<LAYERS...> &/*tupl*/) { return pack::sum<int, int, LAYERS::nbeta...>(); }
 } // detail
+
+
+// The public function propagateLayers helper function
+// ArrayT1/2 can be any random-access std container
+// vd1 should consist of net_noutput blocks of size nbeta (if vd1 statically enabled, else size 0)
+template <class TupleT, class ArrayT1, class ArrayT2>
+constexpr void propagateLayers(TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags)
+{
+    using namespace detail;
+    constexpr int nlayer = static_cast<int>(std::tuple_size<TupleT>::value);
+    constexpr int nbeta_net = nbeta_sum(layers);
+
+    // fdwprop
+    std::get<0>(layers).ForwardInput(input, dflags);
+    fwdprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
+
+    // backprop
+    std::get<nlayer - 1>(layers).BackwardOutput(dflags);
+    backprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
+
+    // store backprop grads into vd1
+    grad_layers_impl<0, nbeta_net, TupleT>(layers, input, vd1, dflags, std::make_index_sequence<nlayer>{});
+}
+
+
 
 
 // --- The fully templated TemplNet FFNN
@@ -191,10 +283,6 @@ public:
     // set betas from array
     constexpr void setBetas(const std::array<ValueT, nbeta> &b_arr) { setBetas(b_arr.begin(), b_arr.end()); }
     /*
-    ValueT getBeta(const int &ib);
-    void getBeta(ValueT * beta);
-    void setBeta(const int &ib, const ValueT &beta);
-    void setBeta(const ValueT * beta);
     void randomizeBetas(); // has to be changed maybe if we add beta that are not "normal" weights*/
 
     // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters),
@@ -221,7 +309,18 @@ public:
 
     constexpr void FFPropagate()
     {
-        propagateLayers<nbeta>(_layers, input, _vd1, dflags);
+        using namespace detail;
+
+        // fdwprop
+        std::get<0>(_layers).ForwardInput(input, dflags);
+        fwdprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
+
+        // backprop
+        std::get<nlayer - 1>(_layers).BackwardOutput(dflags);
+        backprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
+
+        // store backprop grads into vd1
+        grad_layers_impl<0, nbeta>(_layers, input, _vd1, dflags, std::make_index_sequence<nlayer>{});
     }
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.

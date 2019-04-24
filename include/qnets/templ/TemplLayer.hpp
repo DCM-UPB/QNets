@@ -163,47 +163,6 @@ private:
         }
     }
 
-    /*
-    constexpr void _computeVD1_Layer(const ValueT input[], const ValueT in_vd1[])
-    {
-        auto &VD1 = *_vd1_ptr;
-        VD1.fill(0.);
-        for (int i = 0; i < N_OUT; ++i) {
-            const int beta_i0 = 1 + i*(N_IN + 1);
-            const int d_i0 = i*ibeta_end;
-            // add old elements
-            for (int j = 0; j < N_IN; ++j) {
-                for (int k = 0; k < IBETA_PREV_BEGIN; ++k) {
-                    VD1[d_i0 + k] += beta[beta_i0 + j]*in_vd1[j*IBETA_BEGIN + k];
-                }
-                for (int k = IBETA_PREV_BEGIN + j*nblock_prev; k < IBETA_PREV_BEGIN + (j + 1)*nblock_prev; ++k) {
-                    VD1[d_i0 + k] = beta[beta_i0 + j]*in_vd1[j*IBETA_BEGIN + k];
-                }
-            }
-            // add new elements
-            const int beta_inew = IBETA_BEGIN + beta_i0; // the first new non-offset beta index
-            VD1[d_i0 + beta_inew - 1] = 1.; // the bias weight derivative
-            std::copy(input, input + N_IN, VD1.begin() + d_i0 + beta_inew);
-            for (int l = d_i0; l < d_i0 + ibeta_end; ++l) {
-                VD1[l] *= _ad1[i];
-            }
-        }
-    }
-
-    constexpr void _computeVD1_Input(const ValueT input[])
-    {
-        auto &VD1 = *_vd1_ptr;
-        VD1.fill(0.);
-        for (int i = 0; i < N_OUT; ++i) {
-            const int beta_i0 = 1 + i*(NET_NINPUT + 1);
-            const int d_i0 = i*ibeta_end;
-            VD1[d_i0 + beta_i0 - 1] = 1.; // the bias weight derivative
-            std::copy(input, input + NET_NINPUT, VD1.begin() + d_i0 + beta_i0);
-            for (int l = d_i0; l < d_i0 + ibeta_end; ++l) {
-                VD1[l] *= _ad1[i];
-            }
-        }
-    }*/
 
     constexpr void _forwardInput(const ValueT input[], DynamicDFlags dflags)
     {
@@ -345,89 +304,6 @@ public: // public propagate methods
         _backwardLayer(vd1_next, beta_next, dflags);
     }
 };
-
-// --- propagateLayers helper to propagate input through a tuple of layers
-//     The function uses the recursive subroutines below to iterate through the tuple.
-
-namespace detail
-{
-// Recursive ForwardProp over tuple
-template <class TupleT>
-constexpr void fwdprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
-
-template <class TupleT, size_t I, size_t ... Is>
-constexpr void fwdprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
-{
-    const auto &prev_layer = std::get<I>(layers);
-    std::get<I + 1>(layers).ForwardLayer(prev_layer.out(), prev_layer.d1(), prev_layer.d2(), dflags);
-    fwdprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
-}
-
-template <class TupleT>
-constexpr void backprop_layers_impl(TupleT &/*layers*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
-
-template <class TupleT, size_t I, size_t ... Is>
-constexpr void backprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::index_sequence<I, Is...>)
-{
-    constexpr size_t idx = sizeof...(Is);
-    const auto &next_layer = std::get<idx + 1>(layers);
-    std::get<idx>(layers).BackwardLayer(next_layer.vd1(), next_layer.beta, dflags);
-    backprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
-}
-
-template <int ibeta_begin, int nbeta_net, class LayerT, class ArrayT1, class ArrayT2>
-constexpr void calc_grad_layer(LayerT &layer, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags)
-{
-    if (!dflags.vd1()) {
-        std::fill(vd1.begin(), vd1.end(), 0.);
-        return;
-    }
-    const auto &LVD1 = layer.vd1();
-    for (int i = 0; i < layer.net_nout; ++i) {
-        const int lvd1_i0 = i*layer.noutput;
-        for (int j = 0; j < layer.noutput; ++j) {
-            const int gvd1_i0 = i*nbeta_net + ibeta_begin + j*(1 + layer.ninput) + 1; // global vd1 index of first non-offset weight
-            vd1[gvd1_i0 - 1] = LVD1[lvd1_i0 + j]; // bias weight gradient
-            for (int k = 0; k < layer.ninput; ++k) {
-                vd1[gvd1_i0 + k] = input[k] * LVD1[lvd1_i0 + j];
-            }
-        }
-    }
-}
-
-template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2>
-constexpr void grad_layers_impl(TupleT &/*layers*/, const ArrayT1 &/*input*/, ArrayT2 &/*vd1*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
-
-template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2, size_t I, size_t ... Is>
-constexpr void grad_layers_impl(TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags, std::index_sequence<I, Is...>)
-{
-    const auto &this_layer = std::get<I>(layers);
-
-    calc_grad_layer<ibeta_begin, nbeta_net>(this_layer, input, vd1, dflags);
-    grad_layers_impl<ibeta_begin + this_layer.nbeta, nbeta_net, TupleT>(layers, this_layer.out(), vd1, dflags, std::index_sequence<Is...>{});
-}
-} // detail
-
-// The public function
-// ArrayT1/2 can be any random-access std container
-// vd1 should consist of net_noutput blocks of size nbeta_net
-template <int nbeta, class TupleT, class ArrayT1, class ArrayT2>
-constexpr void propagateLayers(TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags)
-{
-    using namespace detail;
-    constexpr int nlayer = static_cast<int>(std::tuple_size<TupleT>::value);
-
-    // fdwprop
-    std::get<0>(layers).ForwardInput(input, dflags);
-    fwdprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
-
-    // backprop
-    std::get<nlayer - 1>(layers).BackwardOutput(dflags);
-    backprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
-
-    // store backprop grads into vd1
-    grad_layers_impl<0, nbeta, TupleT>(layers, input, vd1, dflags, std::make_index_sequence<nlayer>{});
-}
 } // templ
 
 #endif

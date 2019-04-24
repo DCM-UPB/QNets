@@ -45,6 +45,7 @@ public:
 } // detail
 
 // -- LayerPackTuple
+//
 // Helps to determine the full layer tuple type according to LayerConfig pack
 //
 template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, class LConf, class ... LCONFS>
