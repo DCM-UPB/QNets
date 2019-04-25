@@ -77,16 +77,8 @@ constexpr void calc_grad_layer(const LayerT &layer, const ArrayT1 &input, ArrayT
         std::fill(vd1.begin(), vd1.end(), 0.);
         return;
     }
-    const auto &LVD1 = layer.vd1();
     for (int i = 0; i < layer.net_nout; ++i) {
-        const int lvd1_i0 = i*layer.noutput;
-        for (int j = 0; j < layer.noutput; ++j) {
-            const int gvd1_i0 = i*nbeta_net + ibeta_begin + j*(1 + layer.ninput) + 1; // global vd1 index of first non-offset weight
-            vd1[gvd1_i0 - 1] = LVD1[lvd1_i0 + j]; // bias weight gradient
-            for (int k = 0; k < layer.ninput; ++k) {
-                vd1[gvd1_i0 + k] = input[k] * LVD1[lvd1_i0 + j];
-            }
-        }
+        layer.storeLayerGradients(input.begin(), vd1.begin() + i*nbeta_net + ibeta_begin, i, dflags);
     }
 }
 
@@ -103,34 +95,7 @@ constexpr void grad_layers_impl(const TupleT &layers, const ArrayT1 &input, Arra
     calc_grad_layer<ibeta_begin, nbeta_net, decltype(this_layer)/*clang fix*/>(this_layer, input, vd1, dflags);
     grad_layers_impl<ibeta_begin + layerT::nbeta, nbeta_net, TupleT>(layers, this_layer.out(), vd1, dflags, std::index_sequence<Is...>{});
 }
-
-template <class ... LAYERS>
-constexpr int nbeta_sum(const std::tuple<LAYERS...> &/*tupl*/) { return pack::sum<int, int, LAYERS::nbeta...>(); }
 } // detail
-
-
-// The public function propagateLayers helper function
-// ArrayT1/2 can be any random-access std container
-// vd1 should consist of net_noutput blocks of size nbeta (if vd1 statically enabled, else size 0)
-template <class TupleT, class ArrayT1, class ArrayT2>
-constexpr void propagateLayers(TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags)
-{
-    using namespace detail;
-    constexpr int nlayer = static_cast<int>(std::tuple_size<TupleT>::value);
-    constexpr int nbeta_net = nbeta_sum(layers);
-
-    // fdwprop
-    std::get<0>(layers).ForwardInput(input, dflags);
-    fwdprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
-
-    // backprop
-    std::get<nlayer - 1>(layers).BackwardOutput(dflags);
-    backprop_layers_impl<TupleT>(layers, dflags, std::make_index_sequence<nlayer - 1>{});
-
-    // store backprop grads into vd1
-    grad_layers_impl<0, nbeta_net, TupleT>(layers, input, vd1, dflags, std::make_index_sequence<nlayer>{});
-}
-
 
 
 

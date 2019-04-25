@@ -7,7 +7,6 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
-#include <cassert>
 #include <type_traits>
 
 namespace templ
@@ -46,10 +45,12 @@ public:
     static constexpr int nd2 = dconf.d2 ? nd1 : 0;
     static constexpr int nd2_prev = dconf.d2 ? nd1_prev : 0;
 
-    static_assert(NBETA_NEXT % (1 + N_OUT) == 0, ""); // -> BUG!
+    static_assert(NBETA_NEXT%(1 + N_OUT) == 0, ""); // -> BUG!
     static constexpr int nout_next = NBETA_NEXT/(1 + N_OUT);
     static constexpr int nvd1 = dconf.vd1 ? NET_NOUTPUT*N_OUT : 0; // number of backprop grad values
-    static constexpr int nvd1_next = dconf.vd1 ? NET_NOUTPUT*nout_next : 0; // number of backprop grad values from previous layer
+    static constexpr int nvd1_next = dconf.vd1
+                                     ? NET_NOUTPUT*nout_next
+                                     : 0; // number of backprop grad values from previous layer
 
 private: // arrays
     std::array<ValueT, N_OUT> _out{};
@@ -74,8 +75,8 @@ public: // public member variables
 private:
     constexpr void _computeFeed(const ValueT input[])
     {
-        for (int i = 0; i < N_OUT; ++i) {
-            const int beta_i0 = 1 + i*(N_IN + 1); // increments through the indices of the first non-offset beta per unit
+        int beta_i0 = 1; // increments through the indices of the first non-offset beta per unit
+        for (int i = 0; i < N_OUT; ++i, beta_i0 += N_IN + 1) {
             _out[i] = std::inner_product(input, input + ninput, beta.begin() + beta_i0, beta[beta_i0 - 1]/*bias weight*/); // found to be faster than loop
         }
     }
@@ -96,7 +97,7 @@ private:
     constexpr void _computeOutput(const ValueT input[], DynamicDFlags dflags)
     {
         this->_computeFeed(input);
-        this->_computeActivation(dflags.d1(), dflags.d2());
+        this->_computeActivation(dflags.d1() || dflags.vd1(), dflags.d2());
     }
 
     constexpr void _computeD1_Layer(const ValueT in_d1[])
@@ -205,9 +206,9 @@ private:
 
         VD1.fill(0.);
         if (!dflags.vd1()) { return; }
-            for (int i = 0; i < NET_NOUTPUT; ++i) {
-                VD1[i*NET_NOUTPUT + i] = _ad1[i];
-            }
+        for (int i = 0; i < NET_NOUTPUT; ++i) {
+            VD1[i*NET_NOUTPUT + i] = _ad1[i];
+        }
     }
 
     constexpr void _backwardLayer(const ValueT vd1_next[], const ValueT beta_next[], DynamicDFlags dflags)
@@ -221,7 +222,7 @@ private:
             const int d_i0 = i*N_OUT;
             for (int j = 0; j < nout_next; ++j) {
                 for (int k = 0; k < N_OUT; ++k) {
-                    VD1[d_i0 + k] += beta_next[1 + j*(N_OUT + 1) + k] * vd1_next[i*nout_next + j];
+                    VD1[d_i0 + k] += beta_next[1 + j*(N_OUT + 1) + k]*vd1_next[i*nout_next + j];
                 }
             }
             for (int k = 0; k < N_OUT; ++k) {
@@ -230,23 +231,46 @@ private:
         }
     }
 
+    constexpr void _layerGrad(const ValueT input[], ValueT vd1_block[], const int iout, DynamicDFlags dflags) const
+    {
+        dflags = dflags.AND(dconf); // AND static and dynamic conf
+        if (!dflags.vd1()) { return; }
+        const auto VD1_iout = (*_vd1_ptr).begin() + iout*N_OUT;
+
+        for (int j = 0; j < N_OUT; ++j) {
+            *vd1_block++ = VD1_iout[j]; // bias weight gradient
+            for (int k = 0; k < N_IN; ++k, ++vd1_block) {
+                *vd1_block = input[k]*VD1_iout[j];
+            }
+        }
+    }
+
+    constexpr void _inputGrad(ValueT d1_out[], DynamicDFlags dflags) const
+    {
+        dflags = dflags.AND(dconf); // AND static and dynamic conf
+        if (!dflags.vd1()) { return; }
+        auto &VD1 = *_vd1_ptr;
+
+        for (int i = 0; i < NET_NOUTPUT; ++i) {
+            const int d_i0 = i*N_IN;
+            for (int j = 0; j < N_OUT; ++j) {
+                for (int k = 0; k < N_IN; ++k) {
+                    d1_out[d_i0 + k] += beta[1 + j*(N_IN + 1) + k]*VD1[i*N_OUT + j];
+                }
+            }
+        }
+    }
+
 public: // public propagate methods
-    // We support 3 different ways to provide arrays for propagate calls:
+    // We support 2 different ways to provide arrays for propagate calls:
     // Array: Bounds statically checked due to type system
-    // Vector: Runtime bounds checking (once per call)
-    // C-Style (Pointer): No bounds checking
+    // Pointer: No bounds checking
 
 
     // --- Propagation of input data (not layer)
 
     constexpr void ForwardInput(const std::array<ValueT, NET_NINPUT> &input, DynamicDFlags dflags)
     {
-        _forwardInput(input.begin(), dflags);
-    }
-
-    constexpr void ForwardInput(const std::vector<ValueT> &input, DynamicDFlags dflags)
-    {
-        assert(input.size() == N_IN);
         _forwardInput(input.begin(), dflags);
     }
 
@@ -260,14 +284,6 @@ public: // public propagate methods
 
     constexpr void ForwardLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd1_prev> &in_d1, const std::array<ValueT, nd2_prev> &in_d2, DynamicDFlags dflags)
     {
-        _forwardLayer(input.begin(), in_d1.begin(), in_d2.begin(), dflags);
-    }
-
-    constexpr void ForwardLayer(const std::vector<ValueT> &input, const std::vector<ValueT> &in_d1, const std::vector<ValueT> &in_d2, DynamicDFlags dflags)
-    {
-        assert(input.size() == N_IN);
-        assert(in_d1.size() == nd1_prev);
-        assert(in_d2.size() == nd2_prev);
         _forwardLayer(input.begin(), in_d1.begin(), in_d2.begin(), dflags);
     }
 
@@ -292,16 +308,34 @@ public: // public propagate methods
         _backwardLayer(vd1_next.begin(), beta_next.begin(), dflags);
     }
 
-    constexpr void BackwardLayer(const std::vector<ValueT> &vd1_next, const std::vector<ValueT> &beta_next, DynamicDFlags dflags)
-    {
-        assert(vd1_next.size() == nvd1_next);
-        assert(beta_next.size() == NBETA_NEXT);
-        _backwardLayer(vd1_next.begin(), beta_next.begin(), dflags);
-    }
-
     constexpr void BackwardLayer(const ValueT vd1_next[], const ValueT beta_next[], DynamicDFlags dflags)
     {
         _backwardLayer(vd1_next, beta_next, dflags);
+    }
+
+
+    // --- Calculate weight gradient block of output unit iout with respect to this layers' weights
+
+    constexpr void storeLayerGradients(const std::array<ValueT, N_IN> &input, std::array<ValueT, nbeta> &vd1_block, const int iout, DynamicDFlags dflags) const
+    {
+        _layerGrad(input.begin(), vd1_block.begin(), iout, dflags);
+    }
+
+    constexpr void storeLayerGradients(const ValueT input[], ValueT vd1_block[], const int iout, DynamicDFlags dflags) const
+    {
+        _layerGrad(input, vd1_block, iout, dflags);
+    }
+
+    // --- Calculate input gradient block of output unit iout with respect to this layers inputs
+
+    constexpr void storeInputGradients(std::array<ValueT, NET_NOUTPUT*N_IN> &d1_out, DynamicDFlags dflags) const
+    {
+        _inputGrad(d1_out.begin(), dflags);
+    }
+
+    constexpr void storeInputGradients(ValueT d1_out[], DynamicDFlags dflags) const
+    {
+        _inputGrad(d1_out, dflags);
     }
 };
 } // templ

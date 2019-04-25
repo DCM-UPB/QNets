@@ -66,7 +66,7 @@ public:
 template <class ... LAYERS>
 constexpr int countUnits()
 {
-    return pack::sum<int, int, LAYERS::size()...>();
+    return pack::sum<int, LAYERS::size()...>();
 }
 
 // count total number of weights across Layer pack (recursive)
