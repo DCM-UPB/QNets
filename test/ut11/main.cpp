@@ -133,33 +133,108 @@ int main()
     for (auto &b : myl0.beta) { b = rand()*(1./RAND_MAX); }
     for (auto &b : myl1.beta) { b = rand()*(1./RAND_MAX); }
 
-    array<double, 2> foo{-0.5, 0.3};
+    const array<double, 2> foo{-0.5, 0.3};
     myl0.ForwardInput(foo, dflags2);
     myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
     myl1.BackwardOutput(dflags2);
-    myl0.BackwardLayer(myl1.vd1(), myl1.beta, dflags2);
+    myl0.BackwardLayer(myl1.vd1(), myl1.vd2(), myl1.ad1(), myl1.ad2(), myl1.beta, dflags2);
 
     std::array<double, 4> ana_d1{};
-    myl0.storeInputGradients(ana_d1, dflags2);
+    std::array<double, 4> ana_d2{};
+    std::array<std::array<double, 12>, 2> ana_vd1{};
+    std::array<std::array<double, 12>, 2> ana_vd2{};
+    myl0.storeInputGradients(ana_d1, ana_d2, dflags2);
+    myl0.storeLayerGradients(foo, ana_vd1[0], ana_vd2[0], 0, dflags2);
+    myl0.storeLayerGradients(foo, ana_vd1[1], ana_vd2[1], 1, dflags2);
+    cout << endl << "all newVD1: ";
+    for (double vd1 : ana_vd1[0]) { cout << vd1 << " "; }
+    for (double vd1 : ana_vd1[1]) { cout << vd1 << " "; }
+    cout << endl << "all newVD2: ";
+    for (double vd2 : ana_vd2[0]) { cout << vd2 << " "; }
+    for (double vd2 : ana_vd2[1]) { cout << vd2 << " "; }
+    cout << endl;
+
     cout << "myl1.d1 " << myl1.d1()[0] << endl;
+    cout << "myl1.d2 " << myl1.d2()[0] << endl;
     cout << "myl0.calcD1 " << ana_d1[0] << endl;
+    cout << "myl0.calcD2 " << ana_d2[0] << endl;
+
+    //cout << endl << "l0 beta: ";
+    //for (double b : myl0.beta) { cout << b << " "; }
+    //cout << endl << "l1 beta: ";
+    //for (double b: myl1.beta) { cout << b << " "; }
+    cout << endl << "all oldD1: ";
+    for (double d1 : myl1.d1()) { cout << d1 << " "; }
+    cout << endl << "all newD1: ";
+    for (double d1 : ana_d1) { cout << d1 << " "; }
+    cout << endl << "all oldD2: ";
+    for (double d2 : myl1.d2()) { cout << d2 << " "; }
+    cout << endl << "all newD2: ";
+    for (double d2 : ana_d2) { cout << d2 << " "; }
+    cout << endl << "diff D2: ";
+    for (int i = 0; i < 4; ++i) { cout << myl1.d2()[i] - ana_d2[i] << " "; }
+    //cout << endl << "l0 vd1: ";
+    //for (double vd : myl0.vd1()) { cout << vd << " "; }
+    //cout << endl << "l0 vd2: ";
+    //for (double vd : myl0.vd2()) { cout << vd << " "; }
+    //cout << endl;
 
     double ana_vd1_0 = foo[1]*myl0.vd1()[0];
     double ana_vd1_1 = foo[1]*myl0.vd1()[4];
+    double ana_vd2_0 = foo[1]*foo[1]*myl0.vd2()[0];
+    double ana_vd2_1 = foo[1]*foo[1]*myl0.vd2()[4];
+    cout << endl;
     cout << "ana_vd1_0: " << ana_vd1_0 << ", ana_vd1_1: " << ana_vd1_1 << endl;
+    cout << "ana_vd2_0: " << ana_vd2_0 << ", ana_vd2_1: " << ana_vd2_1 << endl;
     auto out_l = myl1.out();
 
-    dflags2.set(DerivConfig::OFF);
-    double dx = 0.00001;
-    myl0.beta[2] += dx;
+
+    // check input derivs
+
+    double dx = 0.000001;
+    auto foo2 = foo;
+    foo2[0] += dx;
+    myl0.ForwardInput(foo2, dflags2);
+    myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
+    myl1.BackwardOutput(dflags2);
+    myl0.BackwardLayer(myl1.vd1(), myl1.vd2(), myl1.ad1(), myl1.ad2(), myl1.beta, dflags2);
+    auto out_r_x = myl1.out();
+
+    std::array<double, 4> ana_d1_r{};
+    std::array<double, 4> ana_d2_r{};
+    myl0.storeInputGradients(ana_d1_r, ana_d2_r, dflags2);
+
+    double num_d1_0 = (out_r_x[0] - out_l[0])/dx;
+    double num_d1_1 = (out_r_x[1] - out_l[1])/dx;
+    double num_d2_0 = (ana_d1_r[0] - ana_d1[0])/dx;
+    double num_d2_1 = (ana_d1_r[2] - ana_d1[2])/dx;
+    cout << "num_d1_0: " << num_d1_0 << ", num_d1_1: " << num_d1_1 << endl;
+    cout << "num_d2_0: " << num_d2_0 << ", num_d2_1: " << num_d2_1 << endl;
+
+
+    // check beta derivs
+
+    double db = 0.000001;
+    myl0.beta[2] += db;
     myl0.ForwardInput(foo, dflags2);
     myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
-    auto out_r = myl1.out();
+    myl1.BackwardOutput(dflags2);
+    myl0.BackwardLayer(myl1.vd1(), myl1.vd2(), myl1.ad1(), myl1.ad2(), myl1.beta, dflags2);
+    auto out_r_b = myl1.out();
+
+    auto ana_vd1_r_0 = foo[1]*myl0.vd1()[0];
+    auto ana_vd1_r_1 = foo[1]*myl0.vd1()[4];
+    cout << "ana_vd1_r_0: " << ana_vd1_r_0 << ", ana_vd1_r_1: " << ana_vd1_r_1 << endl;
 
     cout << "nvd1 " << myl0.nvd1 << endl;
-    double num_vd1_0 = (out_r[0] - out_l[0])/dx;
-    double num_vd1_1 = (out_r[1] - out_l[1])/dx;
+    double num_vd1_0 = (out_r_b[0] - out_l[0])/db;
+    double num_vd1_1 = (out_r_b[1] - out_l[1])/db;
+    double num_vd2_0 = (ana_vd1_r_0 - ana_vd1_0)/db;
+    double num_vd2_1 = (ana_vd1_r_1 - ana_vd1_1)/db;
     cout << "num_vd1_0: " << num_vd1_0 << ", num_vd1_1: " << num_vd1_1 << endl;
+    cout << "num_vd2_0: " << num_vd2_0 << ", num_vd2_1: " << num_vd2_1 << endl;
+
+
 
     return 0;
 }
