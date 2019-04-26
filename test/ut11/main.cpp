@@ -137,15 +137,19 @@ int main()
     myl0.ForwardInput(foo, dflags2);
     myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
     myl1.BackwardOutput(dflags2);
-    myl0.BackwardLayer(myl1.vd1(), myl1.vd2(), myl1.ad1(), myl1.ad2(), myl1.beta, dflags2);
+    myl0.BackwardLayer(myl1.bd1(), myl1.bd2(), myl1.beta, dflags2);
 
     std::array<double, 4> ana_d1{};
     std::array<double, 4> ana_d2{};
     std::array<std::array<double, 12>, 2> ana_vd1{};
     std::array<std::array<double, 12>, 2> ana_vd2{};
-    myl0.storeInputGradients(ana_d1, ana_d2, dflags2);
-    myl0.storeLayerGradients(foo, ana_vd1[0], ana_vd2[0], 0, dflags2);
-    myl0.storeLayerGradients(foo, ana_vd1[1], ana_vd2[1], 1, dflags2);
+    myl0.storeInputD1(ana_d1, dflags2);
+    ana_d2 = myl1.d2();
+    myl0.storeLayerVD1(foo, ana_vd1[0], 0, dflags2);
+    myl0.storeLayerVD2(foo, ana_vd2[0], 0, dflags2);
+    myl0.storeLayerVD1(foo, ana_vd1[1], 1, dflags2);
+    myl0.storeLayerVD2(foo, ana_vd2[1], 1, dflags2);
+
     cout << endl << "all newVD1: ";
     for (double vd1 : ana_vd1[0]) { cout << vd1 << " "; }
     for (double vd1 : ana_vd1[1]) { cout << vd1 << " "; }
@@ -173,16 +177,16 @@ int main()
     for (double d2 : ana_d2) { cout << d2 << " "; }
     cout << endl << "diff D2: ";
     for (int i = 0; i < 4; ++i) { cout << myl1.d2()[i] - ana_d2[i] << " "; }
-    //cout << endl << "l0 vd1: ";
-    //for (double vd : myl0.vd1()) { cout << vd << " "; }
-    //cout << endl << "l0 vd2: ";
-    //for (double vd : myl0.vd2()) { cout << vd << " "; }
+    //cout << endl << "l0 bd1: ";
+    //for (double vd : myl0.bd1()) { cout << vd << " "; }
+    //cout << endl << "l0 bd2: ";
+    //for (double vd : myl0.bd2()) { cout << vd << " "; }
     //cout << endl;
 
-    double ana_vd1_0 = foo[1]*myl0.vd1()[0];
-    double ana_vd1_1 = foo[1]*myl0.vd1()[4];
-    double ana_vd2_0 = foo[1]*foo[1]*myl0.vd2()[0];
-    double ana_vd2_1 = foo[1]*foo[1]*myl0.vd2()[4];
+    double ana_vd1_0 = foo[1]*myl0.bd1()[0];
+    double ana_vd1_1 = foo[1]*myl0.bd1()[4];
+    double ana_vd2_0 = foo[1]*foo[1]*myl0.bd2()[0];
+    double ana_vd2_1 = foo[1]*foo[1]*myl0.bd2()[4];
     cout << endl;
     cout << "ana_vd1_0: " << ana_vd1_0 << ", ana_vd1_1: " << ana_vd1_1 << endl;
     cout << "ana_vd2_0: " << ana_vd2_0 << ", ana_vd2_1: " << ana_vd2_1 << endl;
@@ -197,12 +201,13 @@ int main()
     myl0.ForwardInput(foo2, dflags2);
     myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
     myl1.BackwardOutput(dflags2);
-    myl0.BackwardLayer(myl1.vd1(), myl1.vd2(), myl1.ad1(), myl1.ad2(), myl1.beta, dflags2);
+    myl0.BackwardLayer(myl1.bd1(), myl1.bd2(), myl1.beta, dflags2);
     auto out_r_x = myl1.out();
 
     std::array<double, 4> ana_d1_r{};
     std::array<double, 4> ana_d2_r{};
-    myl0.storeInputGradients(ana_d1_r, ana_d2_r, dflags2);
+    myl0.storeInputD1(ana_d1_r, dflags2);
+    ana_d2_r = myl1.d2();
 
     double num_d1_0 = (out_r_x[0] - out_l[0])/dx;
     double num_d1_1 = (out_r_x[1] - out_l[1])/dx;
@@ -219,14 +224,14 @@ int main()
     myl0.ForwardInput(foo, dflags2);
     myl1.ForwardLayer(myl0.out(), myl0.d1(), myl0.d2(), dflags2);
     myl1.BackwardOutput(dflags2);
-    myl0.BackwardLayer(myl1.vd1(), myl1.vd2(), myl1.ad1(), myl1.ad2(), myl1.beta, dflags2);
+    myl0.BackwardLayer(myl1.bd1(), myl1.bd2(), myl1.beta, dflags2);
     auto out_r_b = myl1.out();
 
-    auto ana_vd1_r_0 = foo[1]*myl0.vd1()[0];
-    auto ana_vd1_r_1 = foo[1]*myl0.vd1()[4];
+    auto ana_vd1_r_0 = foo[1]*myl0.bd1()[0];
+    auto ana_vd1_r_1 = foo[1]*myl0.bd1()[4];
     cout << "ana_vd1_r_0: " << ana_vd1_r_0 << ", ana_vd1_r_1: " << ana_vd1_r_1 << endl;
 
-    cout << "nvd1 " << myl0.nvd1 << endl;
+    cout << "nbd1 " << myl0.nbd1 << endl;
     double num_vd1_0 = (out_r_b[0] - out_l[0])/db;
     double num_vd1_1 = (out_r_b[1] - out_l[1])/db;
     double num_vd2_0 = (ana_vd1_r_0 - ana_vd1_0)/db;

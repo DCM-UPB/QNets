@@ -43,57 +43,40 @@ public:
     static constexpr int nd1 = dconf.d1 ? NET_NINPUT*N_OUT : 0; // number of input derivative values
     static constexpr int nd1_prev = dconf.d1 ? NET_NINPUT*N_IN : 0; // number of deriv values from previous layer
 
-    static constexpr int nd2 = dconf.d2 ? nd1 : 0;
-    static constexpr int nd2_prev = dconf.d2 ? nd1_prev : 0;
+    static constexpr int nd2 = dconf.d2 ? NET_NINPUT*N_OUT : 0; // number of forward-accumulated first/second order input derivative values
+    static constexpr int nd2_prev = dconf.d2 ? NET_NINPUT*N_IN : 0; // the same number of previous layer
 
     static_assert(NBETA_NEXT%(1 + N_OUT) == 0, ""); // -> BUG!
     static constexpr int nout_next = NBETA_NEXT/(1 + N_OUT);
     static constexpr int nad1 = dconf.d1 || dconf.vd1 ? N_OUT : 0;
-    static constexpr int nad1_next = dconf.d1 || dconf.vd1 ? nout_next : 0;
     static constexpr int nad2 = dconf.d2 ? N_OUT : 0;
-    static constexpr int nad2_next = dconf.d2 ? nout_next : 0;
 
-    static constexpr int nvd1 = (dconf.d1 || dconf.vd1) ? NET_NOUTPUT*N_OUT : 0; // number of backprop grad values
-    static constexpr int nvd1_next = (dconf.d1 || dconf.vd1)
-                                     ? NET_NOUTPUT*nout_next
-                                     : 0; // number of backprop grad values from previous layer
+    static constexpr int nbd1 = (dconf.d1 || dconf.vd1) ? NET_NOUTPUT*N_OUT : 0; // number of stored backprop values
+    static constexpr int nbd1_next = (dconf.d1 || dconf.vd1) ? NET_NOUTPUT*nout_next : 0; // number from previous layer
 
-    static constexpr int nvd2 = dconf.d2
-                                ? NET_NOUTPUT*N_OUT
-                                : 0; // number of approximate diagonal second order backprop grad values
-    static constexpr int nvd2_next = dconf.d2
-                                     ? NET_NOUTPUT*nout_next
-                                     : 0;
-
-    static constexpr int nbd2 = dconf.d2 ? NET_NOUTPUT*N_OUT*N_OUT : 0; // number of second order backprop grad values
-    static constexpr int nbd2_next = dconf.d2
-                                     ? NET_NOUTPUT*nout_next*nout_next
-                                     : 0;
+    static constexpr int nbd2 = dconf.d2 ? NET_NOUTPUT*N_OUT : 0; // number of diagonal second order backprop values
+    static constexpr int nbd2_next = dconf.d2 ? NET_NOUTPUT*nout_next : 0;
 
 private: // arrays
     std::array<ValueT, N_OUT> _out{};
-    // the deriv arrays could be quite large, so we need to heap allocate
+    // the deriv arrays could be quite large, so we heap allocate them
     const std::unique_ptr<std::array<ValueT, nd1>> _d1_ptr{std::make_unique<std::array<ValueT, nd1>>()};
     const std::unique_ptr<std::array<ValueT, nd2>> _d2_ptr{std::make_unique<std::array<ValueT, nd2>>()};
-    const std::unique_ptr<std::array<ValueT, nvd1>> _vd1_ptr{std::make_unique<std::array<ValueT, nvd1>>()};
-    const std::unique_ptr<std::array<ValueT, nvd2>> _vd2_ptr{std::make_unique<std::array<ValueT, nvd2>>()};
-    const std::unique_ptr<std::array<ValueT, nbd2>> _bd2_ptr{std::make_unique<std::array<ValueT, nbd2>>()};
-
+    const std::unique_ptr<std::array<ValueT, nbd1>> _bd1_ptr{std::make_unique<std::array<ValueT, nbd1>>()}; // intermediate values for vd1, but NOT stored as dnet/du
+    const std::unique_ptr<std::array<ValueT, nbd2>> _bd2_ptr{std::make_unique<std::array<ValueT, nbd2>>()}; // intermediate values for diag-vd2, but NOT stored as dnet^2/du^2
     std::array<ValueT, nad1> _ad1{}; // activation function d1
     std::array<ValueT, nad2> _ad2{}; // activation function d2
 
 public: // public member variables
     ACTFType actf{}; // the activation function
-    std::array<ValueT, nbeta> beta{}; // the weights
+    std::array<ValueT, nbeta> beta{}; // the weights (NOTE: If the network should contain millions of weights, stacksize must be increased)
 
     // public const output references
     constexpr const std::array<ValueT, N_OUT> &out() const { return _out; }
     constexpr const std::array<ValueT, nd1> &d1() const { return *_d1_ptr; }
     constexpr const std::array<ValueT, nd2> &d2() const { return *_d2_ptr; }
-    constexpr const std::array<ValueT, nvd1> &vd1() const { return *_vd1_ptr; }
-    constexpr const std::array<ValueT, nvd2> &vd2() const { return *_vd2_ptr; }
+    constexpr const std::array<ValueT, nbd1> &bd1() const { return *_bd1_ptr; }
     constexpr const std::array<ValueT, nbd2> &bd2() const { return *_bd2_ptr; }
-
     constexpr const std::array<ValueT, nad1> &ad1() const { return _ad1; }
     constexpr const std::array<ValueT, nad2> &ad2() const { return _ad2; };
 
@@ -143,30 +126,32 @@ private:
         }
     }
 
-    constexpr void _computeD1_Input() // i.e. in_d1[i][i] = 1., else 0
+    constexpr void _computeD1_Input(const ValueT scale = 1.) // i.e. in_d1[i][i] = 1., else 0
     {
+        static_assert(N_IN == NET_NINPUT,"");
         auto &D1 = *_d1_ptr;
         for (int i = 0; i < N_OUT; ++i) {
-            const int beta_i0 = 1 + i*(NET_NINPUT + 1);
-            for (int j = 0; j < NET_NINPUT; ++j) {
-                D1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
+            const int beta_i0 = 1 + i*(N_IN + 1);
+            for (int j = 0; j < N_IN; ++j) {
+                D1[i*N_IN + j] = _ad1[i]*scale*beta[beta_i0 + j];
             }
         }
     }
 
-    constexpr void _computeD12_Layer(const ValueT in_d1[], const ValueT in_d2[])
+    // forward-accumulate second order input derivatives from a layer
+    constexpr void _computeD2_Layer(const ValueT * in_d1, const ValueT * in_d2)
     {
         auto &D1 = *_d1_ptr;
         auto &D2 = *_d2_ptr;
         D1.fill(0.);
         D2.fill(0.);
         for (int i = 0; i < N_OUT; ++i) {
-            const int beta_i0 = 1 + i*(N_IN + 1);
             const int d_i0 = i*NET_NINPUT;
             for (int j = 0; j < N_IN; ++j) {
+                const ValueT bij = beta[1 + i*(N_IN + 1) + j];
                 for (int k = 0; k < NET_NINPUT; ++k) {
-                    D1[d_i0 + k] += beta[beta_i0 + j]*in_d1[j*NET_NINPUT + k];
-                    D2[d_i0 + k] += beta[beta_i0 + j]*in_d2[j*NET_NINPUT + k];
+                    D1[d_i0 + k] += bij*in_d1[j*NET_NINPUT + k];
+                    D2[d_i0 + k] += bij*in_d2[j*NET_NINPUT + k];
                 }
             }
             for (int l = d_i0; l < d_i0 + NET_NINPUT; ++l) {
@@ -176,20 +161,22 @@ private:
         }
     }
 
-    constexpr void _computeD12_Input()
+    // forward-accumulate second order deriv when the inputs correspond (besides shift/scale) to the true network inputs
+    constexpr void _computeD2_Input()
     {
+        static_assert(N_IN == NET_NINPUT,"");
         auto &D1 = *_d1_ptr;
         auto &D2 = *_d2_ptr;
         for (int i = 0; i < N_OUT; ++i) {
-            const int beta_i0 = 1 + i*(NET_NINPUT + 1);
-            for (int j = 0; j < NET_NINPUT; ++j) {
-                D1[i*NET_NINPUT + j] = _ad1[i]*beta[beta_i0 + j];
-                D2[i*NET_NINPUT + j] = _ad2[i]*beta[beta_i0 + j]*beta[beta_i0 + j];
+            for (int j = 0; j < N_IN; ++j) {
+                const ValueT bij = beta[1 + i*(N_IN + 1) + j];
+                D1[i*N_IN + j] = _ad1[i]*bij;
+                D2[i*N_IN + j] = _ad2[i]*bij*bij;
             }
         }
     }
 
-
+    // start forward pass from true network inputs
     constexpr void _forwardInput(const ValueT input[], DynamicDFlags dflags)
     {
         // statically secure this call (i.e. using it on non-input layer will not compile)
@@ -200,14 +187,14 @@ private:
 
         // fill diagonal d1,d2
         if (dflags.d2()) {
-            this->_computeD12_Input();
+            this->_computeD2_Input();
         }
         else if (dflags.d1()) {
             this->_computeD1_Input();
         }
     }
 
-
+    // continue forward pass from previous layer
     constexpr void _forwardLayer(const ValueT input[], const ValueT in_d1[], const ValueT in_d2[], DynamicDFlags dflags)
     {
         dflags = dflags.AND(dconf); // AND static and dynamic conf
@@ -215,170 +202,134 @@ private:
 
         // input derivs
         if (dflags.d2()) {
-            this->_computeD12_Layer(in_d1, in_d2);
+            this->_computeD2_Layer(in_d1, in_d2);
         }
         else if (dflags.d1()) {
             this->_computeD1_Layer(in_d1);
         }
     }
 
-
+    // initialize backprop on output layer
     constexpr void _backwardOutput(DynamicDFlags dflags)
     {
         dflags = dflags.AND(dconf); // AND static and dynamic conf
-        static_assert(N_OUT == NET_NOUTPUT, "[TemplLayer::BackwardOutput] nout_next != NET_NOUTPUT");
-        auto &VD1 = *_vd1_ptr;
-        auto &VD2 = *_vd2_ptr;
-        //auto &BD2 = *_bd2_ptr;
+        static_assert(N_OUT == NET_NOUTPUT, "[TemplLayer::setOutputVD] N_OUT != NET_NOUTPUT");
+        auto &BD1 = *_bd1_ptr;
+        auto &BD2 = *_bd2_ptr;
+        BD1.fill(0.);
+        BD2.fill(0.);
 
-        VD1.fill(0.);
-        VD2.fill(0.);
-        //BD2.fill(0.);
+        // set the diagonal elements
         if (!dflags.d1() && !dflags.vd1()) { return; }
         for (int i = 0; i < NET_NOUTPUT; ++i) {
-            VD1[i*NET_NOUTPUT + i] = 1.;//_ad1[i];
+            BD1[i*NET_NOUTPUT + i] = _ad1[i];
         }
-
         if (!dflags.d2()) { return; }
         for (int i = 0; i < NET_NOUTPUT; ++i) {
-            VD2[i*NET_NOUTPUT + i] = 1.;//_ad2[i];
-        }
-        /*for (int i = 0; i < NET_NOUTPUT; ++i) {
-            BD2[i*NET_NOUTPUT*NET_NOUTPUT + i*NET_NOUTPUT + i] = _ad2[i];
-        }*/
-    }
-
-    constexpr void _backwardLayerD1(const ValueT vd1_next[], const ValueT ad1_next[], const ValueT beta_next[], DynamicDFlags dflags)
-    {
-        dflags = dflags.AND(dconf); // AND static and dynamic conf
-        auto &VD1 = *_vd1_ptr;
-        VD1.fill(0.);
-        if (!dflags.d1() && !dflags.vd1()) { return; }
-
-        for (int i = 0; i < NET_NOUTPUT; ++i) {
-            for (int j = 0; j < nout_next; ++j) {
-                const ValueT jfac = ad1_next[j]*vd1_next[i*nout_next + j];
-                const int beta_i0 = 1 + j*(N_OUT + 1);
-                for (int k = 0; k < N_OUT; ++k) {
-                    VD1[i*N_OUT + k] += beta_next[beta_i0 + k]*jfac;
-                }
-            }
+            BD2[i*NET_NOUTPUT + i] = _ad2[i];
         }
     }
 
-    constexpr void _backwardLayerD2(const ValueT vd1_next[], const ValueT vd2_next[]/*, const ValueT bd2_next[],*/, const ValueT ad1_next[], const ValueT ad2_next[], const ValueT beta_next[], DynamicDFlags dflags)
+    // continue backprop coming from a layer (first order version)
+    constexpr void _backwardLayerBD1(const ValueT bd1_next[], const ValueT beta_next[], DynamicDFlags dflags)
     {
-        dflags = dflags.AND(dconf); // AND static and dynamic conf
-        auto &VD1 = *_vd1_ptr;
-        auto &VD2 = *_vd2_ptr;
-        //auto &BD2 = *_bd2_ptr;
-        VD1.fill(0.);
-        VD2.fill(0.);
-        //BD2.fill(0.);
-        if (!dflags.d1() && !dflags.vd1()) { return; }
+        auto &BD1 = *_bd1_ptr;
 
         for (int i = 0; i < NET_NOUTPUT; ++i) {
+            const int d_i0 = i*N_OUT;
             for (int j = 0; j < nout_next; ++j) {
-                const ValueT jfac1 = ad1_next[j]*vd1_next[i*nout_next + j];
-                const ValueT jfac2 = dflags.d2() ? ad1_next[j]*ad1_next[j]*vd2_next[i*nout_next + j] + ad2_next[j]*vd1_next[i*nout_next + j] : 0;
                 const int beta_i0 = 1 + j*(N_OUT + 1);
                 for (int k = 0; k < N_OUT; ++k) {
-                    const ValueT bjk = beta_next[beta_i0 + k];
-                    VD1[i*N_OUT + k] += bjk*jfac1;
-                    if (dflags.d2()) {
-                        VD2[i*N_OUT + k] += bjk*bjk*jfac2;
-                    }
-                }
-            }
-            /*if (dflags.d2()) {
-                const int bd_i0 = i*N_OUT*N_OUT;
-                for (int j = 0; j < nout_next; ++j) {
-                    for (int k = 0; k < N_OUT; ++k) {
-                        const int bd_i0_k = bd_i0 + k*N_OUT;
-                        const ValueT bjk = beta_next[1 + j*(N_OUT + 1) + k];
-                        for (int l = 0; l < N_OUT; ++l) {
-                            BD2[bd_i0_k + l] += bjk*bjk*vd2_next[i*nout_next + j];
-
-                        }
-                    }
-            }*/
-            /*
-            if (dflags.d2()) {
-                for (int k = 0; k < N_OUT; ++k) {
-                    VD2[d_i0 + k] = _ad1[k]*_ad1[k]*VD2[d_i0 + k] + _ad2[k]*VD1[d_i0 + k];
+                    BD1[d_i0 + k] += beta_next[beta_i0 + k]*bd1_next[i*nout_next + j];
                 }
             }
             for (int k = 0; k < N_OUT; ++k) {
-                VD1[d_i0 + k] *= _ad1[k];
-            }*/
+                BD1[d_i0 + k] *= _ad1[k];
+            }
         }
+    }
+
+    // continue backprop coming from a layer (first + second order version)
+    constexpr void _backwardLayerBD12(const ValueT bd1_next[], const ValueT bd2_next[], const ValueT beta_next[], DynamicDFlags dflags)
+    {
+        auto &BD1 = *_bd1_ptr;
+        auto &BD2 = *_bd2_ptr;
+
+        for (int i = 0; i < NET_NOUTPUT; ++i) {
+            const int d_i0 = i*N_OUT;
+            for (int j = 0; j < nout_next; ++j) {
+                for (int k = 0; k < N_OUT; ++k) {
+                    const ValueT bjk = beta_next[1 + j*(N_OUT + 1) + k];
+                    BD1[d_i0 + k] += bjk*bd1_next[i*nout_next + j];
+                    BD2[d_i0 + k] += bjk*bjk*bd2_next[i*nout_next + j];
+                }
+            }
+            for (int k = 0; k < N_OUT; ++k) {
+                BD2[d_i0 + k] = _ad1[k]*_ad1[k]*BD2[d_i0 + k] + _ad2[k]*BD1[d_i0 + k];
+                BD1[d_i0 + k] *= _ad1[k];
+            }
+        }
+    }
+
+    // continue backprop coming from a layer
+    constexpr void _backwardLayer(const ValueT bd1_next[], const ValueT bd2_next[], const ValueT beta_next[], DynamicDFlags dflags)
+    {
+        dflags = dflags.AND(dconf); // AND static and dynamic conf
+        (*_bd1_ptr).fill(0.);
+        (*_bd2_ptr).fill(0.);
+        if (!dflags.d1() && !dflags.vd1()) { return; }
+        if (dflags.d2()) {
+            _backwardLayerBD12(bd1_next, bd2_next, beta_next, dflags);
+        }
+        else {
+            _backwardLayerBD1(bd1_next, beta_next, dflags);
+        }
+
     }
 
     constexpr void _layerGrad(const ValueT input[], ValueT vd1_block[], const int iout, DynamicDFlags dflags) const
     {
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         if (!dflags.vd1()) { return; }
-        const auto VD1_iout = (*_vd1_ptr).begin() + iout*N_OUT;
+        const auto BD1_iout = (*_bd1_ptr).begin() + iout*N_OUT;
 
         for (int j = 0; j < N_OUT; ++j) {
-            const ValueT jfac = _ad1[j]*VD1_iout[j];
-            *vd1_block++ = jfac; // bias weight gradient
+            *vd1_block++ = BD1_iout[j]; // bias weight gradient
             for (int k = 0; k < N_IN; ++k, ++vd1_block) {
-                *vd1_block = input[k]*jfac;
+                *vd1_block = input[k]*BD1_iout[j];
             }
         }
     }
 
     constexpr void _layerGrad2(const ValueT input[], ValueT vd2_block[], const int iout, DynamicDFlags dflags) const
     {
-        const auto VD1_iout = (*_vd1_ptr).begin() + iout*N_OUT;
-        const auto VD2_iout = (*_vd2_ptr).begin() + iout*N_OUT;
+        dflags = dflags.AND(dconf); // AND static and dynamic conf
+        if (!dflags.d2()) { return; }
+        const auto BD2_iout = (*_bd2_ptr).begin() + iout*N_OUT;
 
         for (int j = 0; j < N_OUT; ++j) {
-            const ValueT jfac = _ad1[j]*_ad1[j]*VD2_iout[j] + _ad2[j]*VD1_iout[j];
-            *vd2_block++ = jfac; // bias weight gradient
+            *vd2_block++ = BD2_iout[j]; // bias weight gradient
             for (int k = 0; k < N_IN; ++k, ++vd2_block) {
-                *vd2_block = input[k]*input[k]*jfac;
+                *vd2_block = input[k]*input[k]*BD2_iout[j];
             }
         }
     }
 
-    constexpr void _inputGrad(ValueT d1_out[], ValueT d2_out[], DynamicDFlags dflags) const
+    constexpr void _inputGrad(ValueT d1_out[], DynamicDFlags dflags) const
     {
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         if (!dflags.d1()) { return; }
         std::fill(d1_out, d1_out + NET_NOUTPUT*N_IN, 0.);
-        if (dflags.d2()) {
-            std::fill(d2_out, d2_out + NET_NOUTPUT*N_IN, 0.);
-        }
-        const auto &VD1 = *_vd1_ptr;
-        const auto &VD2 = *_vd2_ptr;
+        const auto &BD1 = *_bd1_ptr;
 
         for (int i = 0; i < NET_NOUTPUT; ++i) {
             for (int j = 0; j < N_OUT; ++j) {
-                const ValueT jfac1 = _ad1[j]*VD1[i*N_OUT + j];
-                const ValueT jfac2 = dflags.d2() ? _ad1[j]*_ad1[j]*VD2[i*N_OUT + j] + _ad2[j]*VD1[i*N_OUT + j] : 0;
+                const ValueT bdj = BD1[i*N_OUT + j];
                 for (int k = 0; k < N_IN; ++k) {
                     const ValueT bjk = beta[1 + j*(N_IN + 1) + k];
-                    d1_out[i*N_IN + k] += bjk*jfac1;
-                    if (dflags.d2()) {
-                        d2_out[i*N_IN + k] += bjk*bjk*jfac2;
-                    }
+                    d1_out[i*N_IN + k] += bjk*bdj;
                 }
             }
-            /*if (dflags.d2()) {
-                for (int j = 0; j < N_OUT; ++j) {
-                    for (int k = 0; k < N_IN; ++k) {
-                        const ValueT bjk = beta[1 + j*(N_IN + 1) + k];
-                        //d2_out[i*N_IN + k] += bjk*bjk*(VD2[i*N_OUT + j] - VD1[i*N_OUT + j] / _ad1[j] * _ad2[j])/_ad1[j];
-                        const ValueT vd1_recon = VD1[i*N_OUT + j]/_ad1[j];
-                        const ValueT vd2_recon = (VD2[i*N_OUT + j] - VD1[i*N_OUT + j]/_ad1[j]*_ad2[j])/_ad1[j]/_ad1[j];
-                        //d2_out[i*N_IN + k] += bjk * _ad1[j] * vd2_recon + vd1_sum * bjk * bjk * _ad2[j];
-                        //d2_out[i*N_IN + k] += bjk * VD2[i*N_OUT + j] + VD1[i*N_OUT + j] * bjk * bjk;
-                        d2_out[i*N_IN + k] += vd2_recon*bjk*bjk*_ad1[j]*_ad1[j] + vd1_recon*_ad2[j]*bjk*bjk;
-                    }
-                }
-            }*/
         }
     }
 
@@ -424,50 +375,50 @@ public: // public propagate methods
 
     // --- Backward Propagation for a hidden layer
 
-    constexpr void BackwardLayer(const std::array<ValueT, nvd1_next> &vd1_next, const std::array<ValueT, nvd2_next> &vd2_next,
-            const std::array<ValueT, nad1_next> &ad1_next, const std::array<ValueT, nad2_next> &ad2_next, const std::array<ValueT, NBETA_NEXT> &beta_next, DynamicDFlags dflags)
+    constexpr void BackwardLayer(const std::array<ValueT, nbd1_next> &bd1_next, const std::array<ValueT, nbd2_next> &bd2_next, const std::array<ValueT, NBETA_NEXT> &beta_next, DynamicDFlags dflags)
     {
-        _backwardLayerD2(vd1_next.begin(), vd2_next.begin(), ad1_next.begin(), ad2_next.begin(), beta_next.begin(), dflags);
+        _backwardLayer(bd1_next.begin(), bd2_next.begin(), beta_next.begin(), dflags);
     }
 
-    /*constexpr void BackwardLayerD2(const ValueT vd1_next[], const ValueT vd2_next[], const ValueT beta_next[], DynamicDFlags dflags)
+    constexpr void BackwardLayer(const ValueT bd1_next[], const ValueT bd2_next[], const ValueT beta_next[], DynamicDFlags dflags)
     {
-        _backwardLayer(vd1_next, vd2_next, beta_next, dflags);
-    }*/
+        _backwardLayer(bd1_next, bd2_next, beta_next, dflags);
+    }
 
 
     // --- Calculate weight gradient block of output unit iout with respect to this layers' weights
 
-    constexpr void storeLayerGradients1(const std::array<ValueT, N_IN> &input, std::array<ValueT, nbeta> &vd1_block, const int iout, DynamicDFlags dflags) const
+    constexpr void storeLayerVD1(const std::array<ValueT, N_IN> &input, std::array<ValueT, nbeta> &vd1_block, int iout, DynamicDFlags dflags) const
     {
         _layerGrad(input.begin(), vd1_block.begin(), iout, dflags);
     }
 
-    constexpr void storeLayerGradients2(const std::array<ValueT, N_IN> &input, std::array<ValueT, nbeta> &vd2_block, const int iout, DynamicDFlags dflags) const
+    constexpr void storeLayerVD2(const std::array<ValueT, N_IN> &input, std::array<ValueT, nbeta> &vd2_block, int iout, DynamicDFlags dflags) const
     {
         _layerGrad2(input.begin(), vd2_block.begin(), iout, dflags);
     }
-    constexpr void storeLayerGradients(const std::array<ValueT, N_IN> &input, std::array<ValueT, nbeta> &vd1_block, std::array<ValueT, nbeta> &vd2_block, const int iout, DynamicDFlags dflags) const
-    {
-        storeLayerGradients1(input, vd1_block, iout, dflags);
-        storeLayerGradients2(input, vd2_block, iout, dflags);
-    }
 
-    constexpr void storeLayerGradients(const ValueT input[], ValueT vd1_block[], const int iout, DynamicDFlags dflags) const
+    constexpr void storeLayerVD1(const ValueT input[], ValueT vd1_block[], int iout, DynamicDFlags dflags) const
     {
         _layerGrad(input, vd1_block, iout, dflags);
     }
 
-    // --- Calculate input gradient block of output unit iout with respect to this layers inputs
-
-    constexpr void storeInputGradients(std::array<ValueT, NET_NOUTPUT*N_IN> &d1_out, std::array<ValueT, NET_NOUTPUT*N_IN> &d2_out, DynamicDFlags dflags) const
+    constexpr void storeLayerVD2(const ValueT input[], ValueT vd2_block[], int iout, DynamicDFlags dflags) const
     {
-        _inputGrad(d1_out.begin(), d2_out.begin(), dflags);
+        _layerGrad2(input, vd2_block, iout, dflags);
     }
 
-    constexpr void storeInputGradients(ValueT d1_out[], ValueT d2_out[], DynamicDFlags dflags) const
+
+    // --- Calculate input gradient block of output units with respect to this layers inputs
+
+    constexpr void storeInputD1(std::array<ValueT, NET_NOUTPUT*N_IN> &d1_out, DynamicDFlags dflags) const
     {
-        _inputGrad(d1_out, d2_out, dflags);
+        _inputGrad(d1_out.begin(), dflags);
+    }
+
+    constexpr void storeInputGradients(ValueT d1_out[], DynamicDFlags dflags) const
+    {
+        _inputGrad(d1_out, dflags);
     }
 };
 } // templ

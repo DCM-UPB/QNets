@@ -65,7 +65,7 @@ constexpr void backprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::i
 {
     constexpr size_t idx = sizeof...(Is);
     const auto &next_layer = std::get<idx + 1>(layers);
-    std::get<idx>(layers).BackwardLayer(next_layer.vd1(), next_layer.vd2(), next_layer.ad1(), next_layer.ad2(), next_layer.beta, dflags);
+    std::get<idx>(layers).BackwardLayer(next_layer.bd1(), next_layer.bd2(), next_layer.beta, dflags);
     backprop_layers_impl<TupleT>(layers, dflags, std::index_sequence<Is...>{});
 }
 
@@ -78,7 +78,7 @@ constexpr void calc_grad_layer(const LayerT &layer, const ArrayT1 &input, ArrayT
         return;
     }
     for (int i = 0; i < layer.net_nout; ++i) {
-        layer.storeLayerGradients(input.begin(), vd1.begin() + i*nbeta_net + ibeta_begin, i, dflags);
+        layer.storeLayerVD1(input.begin(), vd1.begin() + i*nbeta_net + ibeta_begin, i, dflags);
     }
 }
 
