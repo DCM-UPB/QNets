@@ -16,7 +16,7 @@ int main()
     const int NU_IN = 2;
     using layer1 = LayerConfig<4, actf::Sigmoid>;
     using layer2 = LayerConfig<2, actf::Sigmoid>;
-    const auto dopt = DerivConfig::D1_VD1; // we want to check that D2 arrays are size 0 in that case
+    const auto dopt = DerivConfig::D12_VD1; // we want to check that VD2 arrays are size 0 in that case
     using TestNet = TemplNet<double, dopt, NU_IN, layer1, layer2>;
     const StaticDFlags<dopt> dconf{}; // static flag set according to dopt
     const DynamicDFlags dflags(DerivConfig::D1); // dynamic flag set (to configure deriv calculation at runtime)
@@ -37,6 +37,7 @@ int main()
     static_assert(TestNet::allowsD1() == dconf.d1, "");
     static_assert(TestNet::allowsD2() == dconf.d2, "");
     static_assert(TestNet::allowsVD1() == dconf.vd1, "");
+    static_assert(TestNet::allowsVD2() == dconf.vd2, "");
 
 
     // -- Create a TemplNet instance
@@ -48,6 +49,7 @@ int main()
     assert(test.hasD1() == dflags.d1());
     assert(test.hasD2() == dflags.d2());
     assert(test.hasVD1() == dflags.vd1());
+    assert(test.hasVD2() == dflags.vd2());
 
     constexpr array<int, 2> expected_shape{4, 2};
     constexpr array<int, 2> expected_betashape{12, 10};
@@ -66,19 +68,25 @@ int main()
     assert(l0.size() == 4);
     assert(l0.ninput == 2);
     assert(l0.nbeta == 12);
-    assert(l0.nd1 == 8);
-    assert(l0.nd2 == 0);
+    assert(l0.nd2 == 8);
+    assert(l0.nbd1 == 8);
+    assert(l0.nbd2 == 0);
     assert(l0.out().size() == 4);
     assert(l0.d1().size() == 8);
-    assert(l0.d2().empty());
+    assert(l0.d2().size() == 8);
+    assert(l0.bd1().size() == 8);
+    assert(l0.bd2().size() == 0);
     assert(l1.size() == 2);
     assert(l1.ninput == 4);
     assert(l1.nbeta == 10);
-    assert(l1.nd1 == 4);
-    assert(l1.nd2 == 0);
+    assert(l1.nd2 == 4);
+    assert(l1.nbd1 == 4);
+    assert(l1.nbd2 == 0);
     assert(l1.out().size() == 2);
     assert(l1.d1().size() == 4);
-    assert(l1.d2().empty());
+    assert(l1.d2().size() == 4);
+    assert(l1.bd1().size() == 4);
+    assert(l1.bd2().size() == 0);
 
 
     // -- Betas
@@ -124,7 +132,7 @@ int main()
     // -- Propagation (properly in another test)
 
     // create some new test layers
-    const auto dopt2 = DerivConfig::D12_VD1; // now we enable all
+    const auto dopt2 = DerivConfig::D12_VD12; // now we enable all
     TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, (4+1)*2/*nbeta_next*/, 2/*nin*/, 4/*nout*/, actf::Sigmoid, dopt2> myl0{};
     TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, 0/*nbeta_next*/, 4/*nin*/, 2/*nout*/, actf::Sigmoid, dopt2> myl1{};
     DynamicDFlags dflags2(dopt2);
@@ -150,38 +158,18 @@ int main()
     myl0.storeLayerVD1(foo, ana_vd1[1], 1, dflags2);
     myl0.storeLayerVD2(foo, ana_vd2[1], 1, dflags2);
 
-    cout << endl << "all newVD1: ";
+    cout << endl << "all D1: ";
+    for (double d1 : ana_d1) { cout << d1 << " "; }
+    cout << endl << "all D2: ";
+    for (double d2 : ana_d2) { cout << d2 << " "; }
+    cout << endl << "all VD1: ";
     for (double vd1 : ana_vd1[0]) { cout << vd1 << " "; }
     for (double vd1 : ana_vd1[1]) { cout << vd1 << " "; }
-    cout << endl << "all newVD2: ";
+    cout << endl << "all D2: ";
     for (double vd2 : ana_vd2[0]) { cout << vd2 << " "; }
     for (double vd2 : ana_vd2[1]) { cout << vd2 << " "; }
     cout << endl;
 
-    cout << "myl1.d1 " << myl1.d1()[0] << endl;
-    cout << "myl1.d2 " << myl1.d2()[0] << endl;
-    cout << "myl0.calcD1 " << ana_d1[0] << endl;
-    cout << "myl0.calcD2 " << ana_d2[0] << endl;
-
-    //cout << endl << "l0 beta: ";
-    //for (double b : myl0.beta) { cout << b << " "; }
-    //cout << endl << "l1 beta: ";
-    //for (double b: myl1.beta) { cout << b << " "; }
-    cout << endl << "all oldD1: ";
-    for (double d1 : myl1.d1()) { cout << d1 << " "; }
-    cout << endl << "all newD1: ";
-    for (double d1 : ana_d1) { cout << d1 << " "; }
-    cout << endl << "all oldD2: ";
-    for (double d2 : myl1.d2()) { cout << d2 << " "; }
-    cout << endl << "all newD2: ";
-    for (double d2 : ana_d2) { cout << d2 << " "; }
-    cout << endl << "diff D2: ";
-    for (int i = 0; i < 4; ++i) { cout << myl1.d2()[i] - ana_d2[i] << " "; }
-    //cout << endl << "l0 bd1: ";
-    //for (double vd : myl0.bd1()) { cout << vd << " "; }
-    //cout << endl << "l0 bd2: ";
-    //for (double vd : myl0.bd2()) { cout << vd << " "; }
-    //cout << endl;
 
     double ana_vd1_0 = foo[1]*myl0.bd1()[0];
     double ana_vd1_1 = foo[1]*myl0.bd1()[4];
@@ -231,7 +219,6 @@ int main()
     auto ana_vd1_r_1 = foo[1]*myl0.bd1()[4];
     cout << "ana_vd1_r_0: " << ana_vd1_r_0 << ", ana_vd1_r_1: " << ana_vd1_r_1 << endl;
 
-    cout << "nbd1 " << myl0.nbd1 << endl;
     double num_vd1_0 = (out_r_b[0] - out_l[0])/db;
     double num_vd1_1 = (out_r_b[1] - out_l[1])/db;
     double num_vd2_0 = (ana_vd1_r_0 - ana_vd1_0)/db;

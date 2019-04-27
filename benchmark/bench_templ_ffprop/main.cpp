@@ -37,6 +37,12 @@ void run_benchmark_netpack(const double xdata[], const int ndata[], const int xo
     tnet.dflags.set(DerivConfig::D1);
     run_single_benchmark("f+d1", tnet, xdata + xoffset, neval[I], nruns);
 
+    tnet.dflags.set(DerivConfig::VD1);
+    run_single_benchmark("f+vd1", tnet, xdata + xoffset, neval[I], nruns);
+
+    tnet.dflags.set(DerivConfig::D1_VD1);
+    run_single_benchmark("f+d1+vd1", tnet, xdata + xoffset, neval[I], nruns);
+
     tnet.dflags.set(DerivConfig::D12);
     run_single_benchmark("f+d1+d2", tnet, xdata + xoffset, neval[I], nruns);
 

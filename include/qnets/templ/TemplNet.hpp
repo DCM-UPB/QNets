@@ -70,30 +70,27 @@ constexpr void backprop_layers_impl(TupleT &layers, DynamicDFlags dflags, std::i
 }
 
 // calculate final weight gradients of a backpropped layer
-template <int ibeta_begin, int nbeta_net, class LayerT, class ArrayT1, class ArrayT2>
-constexpr void calc_grad_layer(const LayerT &layer, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags)
+template <int ibeta_begin, int nbeta_net, class LayerT, class ArrayT1, class ArrayT2, class ArrayT3>
+constexpr void calc_grad_layer(const LayerT &layer, const ArrayT1 &input, ArrayT2 &vd1, ArrayT3 &vd2, DynamicDFlags dflags)
 {
-    if (!dflags.vd1()) {
-        std::fill(vd1.begin(), vd1.end(), 0.);
-        return;
-    }
     for (int i = 0; i < layer.net_nout; ++i) {
         layer.storeLayerVD1(input.begin(), vd1.begin() + i*nbeta_net + ibeta_begin, i, dflags);
+        layer.storeLayerVD2(input.begin(), vd2.begin() + i*nbeta_net + ibeta_begin, i, dflags);
     }
 }
 
 // accumulate network gradients into vd1
-template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2>
-constexpr void grad_layers_impl(const TupleT &/*layers*/, const ArrayT1 &/*input*/, ArrayT2 &/*vd1*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
+template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2, class ArrayT3>
+constexpr void grad_layers_impl(const TupleT &/*layers*/, const ArrayT1 &/*input*/, ArrayT2 &/*vd1*/, ArrayT3 &/*vd2*/, DynamicDFlags /*dflags*/, std::index_sequence<>) {}
 
-template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2, size_t I, size_t ... Is>
-constexpr void grad_layers_impl(const TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, DynamicDFlags dflags, std::index_sequence<I, Is...>)
+template <int ibeta_begin, int nbeta_net, class TupleT, class ArrayT1, class ArrayT2, class ArrayT3, size_t I, size_t ... Is>
+constexpr void grad_layers_impl(const TupleT &layers, const ArrayT1 &input, ArrayT2 &vd1, ArrayT3 &vd2, DynamicDFlags dflags, std::index_sequence<I, Is...>)
 {
     using layerT = std::tuple_element_t<I, TupleT>;
     const auto &this_layer = std::get<I>(layers);
 
-    calc_grad_layer<ibeta_begin, nbeta_net, decltype(this_layer)/*clang fix*/>(this_layer, input, vd1, dflags);
-    grad_layers_impl<ibeta_begin + layerT::nbeta, nbeta_net, TupleT>(layers, this_layer.out(), vd1, dflags, std::index_sequence<Is...>{});
+    calc_grad_layer<ibeta_begin, nbeta_net, decltype(this_layer)/*clang fix*/>(this_layer, input, vd1, vd2, dflags);
+    grad_layers_impl<ibeta_begin + layerT::nbeta, nbeta_net, TupleT>(layers, this_layer.out(), vd1, vd2, dflags, std::index_sequence<Is...>{});
 }
 } // detail
 
@@ -122,9 +119,10 @@ public:
     static constexpr StaticDFlags<DCONF> dconf{};
 
     // Static Output Deriv Array Sizes (depend on DCONF)
-    static constexpr int nd1 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd1;
-    static constexpr int nd2 = std::tuple_element<nlayer - 1, LayerTuple>::type::nd2;
+    static constexpr int nd1 = dconf.d1 ? noutput*ninput : 0;
+    static constexpr int nd2 = dconf.d2 ? noutput*ninput : 0;
     static constexpr int nvd1 = dconf.vd1 ? noutput*nbeta : 0;
+    static constexpr int nvd2 = dconf.vd2 ? noutput*nbeta : 0;
 
 
     // Basic assertions
@@ -145,8 +143,11 @@ private:
     const std::array<const ValueT *, nlayer> _out_begins;
     const std::array<ValueT *, nlayer> _beta_begins;
 
-    // vd1 array
+    // deriv arrays
+    std::array<ValueT, nd1> _d1{};
+    std::array<ValueT, nd2> _d2{};
     std::array<ValueT, nvd1> _vd1{};
+    std::array<ValueT, nvd2> _vd2{};
 
 public:
     // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
@@ -179,21 +180,25 @@ public:
     constexpr const auto &getInput() const { return input; } // alternative const read of public input array
     constexpr const auto &getOutput() const { return std::get<nlayer - 1>(_layers).out(); } // get values of output layer
     constexpr ValueT getOutput(int i) const { return this->getOutput()[i]; }
-    constexpr const auto &getD1() const { return std::get<nlayer - 1>(_layers).d1(); } // get derivative of output with respect to input
-    constexpr ValueT getD1(int i, int j) const { return this->getD1()[i*ninput + j]; }
-    constexpr const auto &getD2() const { return std::get<nlayer - 1>(_layers).d2(); }
-    constexpr ValueT getD2(int i, int j) const { return this->getD2()[i*ninput + j]; }
+    constexpr const auto &getD1() const { return _d1; } // get derivative of output with respect to input
+    constexpr ValueT getD1(int i, int j) const { return _d1[i*ninput + j]; }
+    constexpr const auto &getD2() const { return _d2; }
+    constexpr ValueT getD2(int i, int j) const { return _d2[i*ninput + j]; }
     constexpr const auto &getVD1() const { return _vd1; }
     constexpr ValueT getVD1(int i, int j) const { return _vd1[i*nbeta + j]; }
+    constexpr const auto &getVD2() const { return _vd2; }
+    constexpr ValueT getVD2(int i, int j) const { return _vd2[i*nbeta + j]; }
 
     // --- check derivative setup
     static constexpr bool allowsD1() { return dconf.d1; }
     static constexpr bool allowsD2() { return dconf.d2; }
     static constexpr bool allowsVD1() { return dconf.vd1; }
+    static constexpr bool allowsVD2() { return dconf.vd2; }
 
     constexpr bool hasD1() const { return dconf.d1 && dflags.d1(); }
     constexpr bool hasD2() const { return dconf.d2 && dflags.d2(); }
     constexpr bool hasVD1() const { return dconf.vd1 && dflags.vd1(); }
+    constexpr bool hasVD2() const { return dconf.vd2 && dflags.vd2(); }
 
     // --- Access Network Weights (Betas)
     static constexpr int getNBeta() { return nbeta; }
@@ -284,8 +289,12 @@ public:
         std::get<nlayer - 1>(_layers).BackwardOutput(dflags);
         backprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
 
-        // store backprop grads into vd1
-        grad_layers_impl<0, nbeta>(_layers, input, _vd1, dflags, std::make_index_sequence<nlayer>{});
+        // store backprop grads into vd1/vd2
+        grad_layers_impl<0, nbeta>(_layers, input, _vd1, _vd2, dflags, std::make_index_sequence<nlayer>{});
+
+        // store input grads into d1/d2
+        std::get<0>(_layers).storeInputD1(_d1, dflags);
+        _d2 = std::get<nlayer - 1>(_layers).d2();
     }
 
     // Shortcut for computation: set input and get all values and derivatives with one calculations.
