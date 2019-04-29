@@ -93,14 +93,14 @@ private:
 
     constexpr void _computeActivation(bool flag_ad1, bool flag_ad2 /*is overriding*/)
     {
-        if (flag_ad2) {
-            actf.fd12(_out.begin(), _out.end(), _out.begin(), _ad1.begin(), _ad2.begin());
+        if (flag_ad2 && /*static*/(nad1 > 0 && nad2 > 0)) {
+            actf.fd12(_out.begin(), _out.end(), _ad1.begin(), _ad2.begin());
         }
-        else if (flag_ad1) {
-            actf.fd1(_out.begin(), _out.end(), _out.begin(), _ad1.begin());
+        else if (flag_ad1 && nad1 > 0) {
+            actf.fd1(_out.begin(), _out.end(), _ad1.begin());
         }
         else {
-            actf.f(_out.begin(), _out.end(), _out.begin());
+            actf.f(_out.begin(), _out.end());
         }
     }
 

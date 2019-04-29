@@ -25,8 +25,8 @@ namespace detail
 template <class LTuplType, class ISeq>
 struct TemplNetShape;
 
-template <class LTuplType, int ... Is>
-struct TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>
+template <class LTuplType, size_t ... Is>
+struct TemplNetShape<LTuplType, std::index_sequence<Is...>>
 {
 private:
     using LayerTuple = LTuplType;
@@ -36,10 +36,10 @@ public:
     static constexpr std::array<int, sizeof...(Is)> nunits{std::tuple_element<Is, LayerTuple>::type::size()...};
     static constexpr std::array<int, sizeof...(Is)> nbetas{std::tuple_element<Is, LayerTuple>::type::nbeta...};
 };
-template <class LTuplType, int ... Is>
-constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>::nunits;
-template <class LTuplType, int ... Is>
-constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::integer_sequence<int, Is...>>::nbetas;
+template <class LTuplType, size_t ... Is>
+constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::index_sequence<Is...>>::nunits;
+template <class LTuplType, size_t ... Is>
+constexpr std::array<int, sizeof...(Is)> TemplNetShape<LTuplType, std::index_sequence<Is...>>::nbetas;
 
 
 // --- subroutines to propagate (i.e. fwd+back) input through a tuple of layers
@@ -106,7 +106,7 @@ public:
 
     // LayerTuple type / Shape
     using LayerTuple = typename lpack::LayerPackTuple<ValueT, DCONF, N_IN, LayerConfs...>::type;
-    using Shape = detail::TemplNetShape<LayerTuple, std::make_integer_sequence<int, sizeof...(LayerConfs)>>;
+    using Shape = detail::TemplNetShape<LayerTuple, std::make_index_sequence<sizeof...(LayerConfs)>>;
 
     // some basic static sizes
     static constexpr int nlayer = tupl::count<int, LayerTuple>();
