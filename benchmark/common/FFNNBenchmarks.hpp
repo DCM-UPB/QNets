@@ -25,14 +25,11 @@ inline double benchmark_TemplProp(TemplNet &tnet, const double xdata[], const in
     Timer timer(1.);
     const int ninput = tnet.getNInput();
 
-    double test = 0;
     timer.reset();
     for (int i = 0; i < neval; ++i) {
         tnet.setInput(xdata + i*ninput, xdata + (i+1)*ninput);
         tnet.FFPropagate();
-        test += tnet.getVD1(0,i%tnet.nvd1);
     }
-    std::cout << test << std::endl;
 
     return timer.elapsed();
 }

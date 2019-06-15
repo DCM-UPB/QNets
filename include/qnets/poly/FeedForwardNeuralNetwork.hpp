@@ -43,15 +43,15 @@ public:
 
 
     // --- Get information about the NN structure
-    int getNLayers() { return _L.size(); }
-    int getNFedLayers() { return _L_fed.size(); }
-    int getNNeuralLayers() { return _L_nn.size(); }
-    int getNFeatureMapLayers() { return _L_fm.size(); }
-    int getNHiddenLayers() { return _L_nn.size() - 1; }
+    int getNLayers() const { return _L.size(); }
+    int getNFedLayers() const { return _L_fed.size(); }
+    int getNNeuralLayers() const { return _L_nn.size(); }
+    int getNFeatureMapLayers() const { return _L_fm.size(); }
+    int getNHiddenLayers() const { return _L_nn.size() - 1; }
 
-    int getNInput() { return _L_in->getNInputUnits(); }
-    int getNOutput() { return _L_out->getNOutputNNUnits(); }
-    int getLayerSize(const int &li) { return _L[li]->getNUnits(); }
+    int getNInput() const { return _L_in->getNInputUnits(); }
+    int getNOutput() const { return _L_out->getNOutputNNUnits(); }
+    int getLayerSize(const int &li) const { return _L[li]->getNUnits(); }
 
     NetworkLayer * getLayer(const int &li) { return _L[li]; }
     FedLayer * getFedLayer(const int &li) { return _L_fed[li]; }
@@ -60,12 +60,12 @@ public:
     InputLayer * getInputLayer() { return _L_in; }
     OutputNNLayer * getOutputLayer() { return _L_out; }
 
-    bool isConnected() { return _flag_connected; }
-    bool hasFirstDerivativeSubstrate() { return _flag_1d; }
-    bool hasSecondDerivativeSubstrate() { return _flag_2d; }
-    bool hasVariationalFirstDerivativeSubstrate() { return _flag_v1d; }
-    bool hasCrossFirstDerivativeSubstrate() { return _flag_c1d; }
-    bool hasCrossSecondDerivativeSubstrate() { return _flag_c2d; }
+    bool isConnected() const { return _flag_connected; }
+    bool hasFirstDerivativeSubstrate() const { return _flag_1d; }
+    bool hasSecondDerivativeSubstrate() const { return _flag_2d; }
+    bool hasVariationalFirstDerivativeSubstrate() const { return _flag_v1d; }
+    bool hasCrossFirstDerivativeSubstrate() const { return _flag_c1d; }
+    bool hasCrossSecondDerivativeSubstrate() const { return _flag_c2d; }
 
 
     // --- Modify NN structure
@@ -81,9 +81,9 @@ public:
 
 
     // --- Manage the betas, which exist only after that the FFNN has been connected
-    int getNBeta();
-    double getBeta(const int &ib);
-    void getBeta(double * beta);
+    int getNBeta() const;
+    double getBeta(const int &ib) const;
+    void getBeta(double * beta) const;
     void setBeta(const int &ib, const double &beta);
     void setBeta(const double * beta);
     void randomizeBetas(); // has to be changed maybe if we add beta that are not "normal" weights
@@ -91,9 +91,9 @@ public:
     // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters),
     //     which exist only after that they are assigned to actual parameters in the network (e.g. betas)
     void assignVariationalParameters(const int &starting_layer_index = 0); // make betas variational parameters, starting from starting_layer
-    int getNVariationalParameters() { return _nvp; }
-    double getVariationalParameter(const int &ivp);
-    void getVariationalParameter(double * vp);
+    int getNVariationalParameters() const { return _nvp; }
+    double getVariationalParameter(const int &ivp) const;
+    void getVariationalParameter(double * vp) const;
     void setVariationalParameter(const int &ivp, const double &vp);
     void setVariationalParameter(const double * vp);
 
@@ -127,32 +127,34 @@ public:
 
 
     // --- Get outputs
-    void getOutput(double * out);
-    double getOutput(const int &i);
+    void getOutput(double * out) const;
+    double getOutput(const int &i) const;
 
-    void getFirstDerivative(double ** d1);
-    void getFirstDerivative(const int &iu, double * d1);  // iu is the unit index
-    double getFirstDerivative(const int &iu, const int &i1d); // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
+    void getFirstDerivative(double ** d1) const;
+    void getFirstDerivative(const int &iu, double * d1) const;  // iu is the unit index
+    double getFirstDerivative(const int &iu, const int &i1d) const; // i is the index of the output elemnet (i.e. unit=1, offset unit is meaningless), i1d the index of the input element
 
-    void getSecondDerivative(double ** d2);
-    void getSecondDerivative(const int &i, double * d2);  // i is the output index
-    double getSecondDerivative(const int &i, const int &i2d); // i is the index of the output element, i2d the index of the input element
+    void getSecondDerivative(double ** d2) const;
+    void getSecondDerivative(const int &i, double * d2) const;  // i is the output index
+    double getSecondDerivative(const int &i, const int &i2d) const; // i is the index of the output element, i2d the index of the input element
 
-    void getVariationalFirstDerivative(double ** vd1);
-    void getVariationalFirstDerivative(const int &i, double * vd1);  // i is the output index
-    double getVariationalFirstDerivative(const int &i, const int &iv1d);  // i is the index of the output element, iv1d the index of the beta element
+    void getVariationalFirstDerivative(double ** vd1) const;
+    void getVariationalFirstDerivative(const int &i, double * vd1) const;  // i is the output index
+    double getVariationalFirstDerivative(const int &i, const int &iv1d) const;  // i is the index of the output element, iv1d the index of the beta element
 
-    void getCrossFirstDerivative(double *** d1vd1);
-    void getCrossFirstDerivative(const int &i, double ** d1vd1);  // i is the output index
-    double getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d);  // i is the index of the output element, i1d, of the input element, iv1d the index of the beta element
+    void getCrossFirstDerivative(double *** d1vd1) const;
+    void getCrossFirstDerivative(const int &i, double ** d1vd1) const;  // i is the output index
+    void getCrossFirstDerivative(const int &i, const int &i1d, double * d1vd1) const;  // i is the output index, i1d the input index
+    double getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d) const;  // i is the index of the output element, i1d, of the input element, iv1d the index of the beta element
 
-    void getCrossSecondDerivative(double *** d1vd1);
-    void getCrossSecondDerivative(const int &i, double ** d1vd1);  // i is the output index
-    double getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d);  // i is the index of the output element, i2d, of the input element, iv1d the index of the beta element
+    void getCrossSecondDerivative(double *** d2vd1) const;
+    void getCrossSecondDerivative(const int &i, double ** d2vd1) const;  // i is the output index
+    void getCrossSecondDerivative(const int &i, const int &i2d, double * d2vd1) const;  // i is the output index, i2d the input index
+    double getCrossSecondDerivative(const int &i, const int &i2d, const int &iv1d) const;  // i is the index of the output element, i2d, of the input element, iv1d the index of the beta element
 
 
     // --- Store FFNN on file
-    void storeOnFile(const char * filename, bool store_betas = true);
+    void storeOnFile(const char * filename, bool store_betas = true) const;
 };
 
 

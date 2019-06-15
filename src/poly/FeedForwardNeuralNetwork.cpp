@@ -8,7 +8,7 @@
 
 // --- Beta
 
-int FeedForwardNeuralNetwork::getNBeta()
+int FeedForwardNeuralNetwork::getNBeta() const
 {
     using namespace std;
     int nbeta = 0;
@@ -23,7 +23,7 @@ int FeedForwardNeuralNetwork::getNBeta()
 }
 
 
-double FeedForwardNeuralNetwork::getBeta(const int &ib)
+double FeedForwardNeuralNetwork::getBeta(const int &ib) const
 {
     using namespace std;
     if (ib < 0 || ib >= getNBeta()) {
@@ -50,7 +50,7 @@ double FeedForwardNeuralNetwork::getBeta(const int &ib)
 }
 
 
-void FeedForwardNeuralNetwork::getBeta(double * beta)
+void FeedForwardNeuralNetwork::getBeta(double * beta) const
 {
     using namespace std;
     int idx = 0;
@@ -162,7 +162,7 @@ void FeedForwardNeuralNetwork::assignVariationalParameters(const int &starting_l
 }
 
 
-double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp)
+double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp) const
 {
     using namespace std;
 
@@ -187,7 +187,7 @@ double FeedForwardNeuralNetwork::getVariationalParameter(const int &ivp)
 }
 
 
-void FeedForwardNeuralNetwork::getVariationalParameter(double * vp)
+void FeedForwardNeuralNetwork::getVariationalParameter(double * vp) const
 {
     using namespace std;
 
@@ -245,37 +245,45 @@ void FeedForwardNeuralNetwork::setVariationalParameter(const double * vp)
 // --- Computation
 
 
-double FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d)
+double FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, const int &i1d, const int &iv1d) const
 {
     return _L_out->getUnit(i + 1)->getCrossSecondDerivativeValue(i1d, iv1d);
 }
 
 
-void FeedForwardNeuralNetwork::getCrossSecondDerivative(double *** d1vd1)
+void FeedForwardNeuralNetwork::getCrossSecondDerivative(double *** d2vd1) const
 {
     for (int i = 0; i < getNOutput(); ++i) {
-        getCrossSecondDerivative(i, d1vd1[i]);
+        getCrossSecondDerivative(i, d2vd1[i]);
     }
 }
 
 
-void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, double ** d1vd1)
+void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, double ** d2vd1) const
 {
-    for (int i1d = 0; i1d < getNInput(); ++i1d) {
+    for (int i2d = 0; i2d < getNInput(); ++i2d) {
         for (int iv1d = 0; iv1d < getNVariationalParameters(); ++iv1d) {
-            d1vd1[i1d][iv1d] = getCrossSecondDerivative(i, i1d, iv1d);
+            d2vd1[i2d][iv1d] = getCrossSecondDerivative(i, i2d, iv1d);
         }
     }
 }
 
 
-double FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d)
+void FeedForwardNeuralNetwork::getCrossSecondDerivative(const int &i, const int &i2d, double * d2vd1) const
+{
+    for (int iv1d = 0; iv1d < getNVariationalParameters(); ++iv1d) {
+        d2vd1[iv1d] = getCrossSecondDerivative(i, i2d, iv1d);
+    }
+}
+
+
+double FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, const int &iv1d) const
 {
     return _L_out->getUnit(i + 1)->getCrossFirstDerivativeValue(i1d, iv1d);
 }
 
 
-void FeedForwardNeuralNetwork::getCrossFirstDerivative(double *** d1vd1)
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(double *** d1vd1) const
 {
     for (int i = 0; i < getNOutput(); ++i) {
         getCrossFirstDerivative(i, d1vd1[i]);
@@ -283,7 +291,7 @@ void FeedForwardNeuralNetwork::getCrossFirstDerivative(double *** d1vd1)
 }
 
 
-void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d1vd1)
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d1vd1) const
 {
     for (int i1d = 0; i1d < getNInput(); ++i1d) {
         for (int iv1d = 0; iv1d < getNBeta(); ++iv1d) {
@@ -293,13 +301,21 @@ void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, double ** d
 }
 
 
-double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, const int &iv1d)
+void FeedForwardNeuralNetwork::getCrossFirstDerivative(const int &i, const int &i1d, double * d1vd1) const
+{
+    for (int iv1d = 0; iv1d < getNVariationalParameters(); ++iv1d) {
+        d1vd1[iv1d] = getCrossFirstDerivative(i, i1d, iv1d);
+    }
+}
+
+
+double FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, const int &iv1d) const
 {
     return _L_out->getUnit(i + 1)->getVariationalFirstDerivativeValue(iv1d);
 }
 
 
-void FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, double * vd1)
+void FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, double * vd1) const
 {
     for (int iv1d = 0; iv1d < getNInput(); ++iv1d) {
         vd1[iv1d] = getVariationalFirstDerivative(i, iv1d);
@@ -307,7 +323,7 @@ void FeedForwardNeuralNetwork::getVariationalFirstDerivative(const int &i, doubl
 }
 
 
-void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
+void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1) const
 {
     for (int i = 0; i < getNOutput(); ++i) {
         for (int iv1d = 0; iv1d < getNBeta(); ++iv1d) {
@@ -317,13 +333,13 @@ void FeedForwardNeuralNetwork::getVariationalFirstDerivative(double ** vd1)
 }
 
 
-double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2d)
+double FeedForwardNeuralNetwork::getSecondDerivative(const int &i, const int &i2d) const
 {
     return (_L_out->getUnit(i + 1)->getSecondDerivativeValue(i2d));
 }
 
 
-void FeedForwardNeuralNetwork::getSecondDerivative(const int &i, double * d2)
+void FeedForwardNeuralNetwork::getSecondDerivative(const int &i, double * d2) const
 {
     for (int i2d = 0; i2d < getNInput(); ++i2d) {
         d2[i2d] = getSecondDerivative(i, i2d);
@@ -331,7 +347,7 @@ void FeedForwardNeuralNetwork::getSecondDerivative(const int &i, double * d2)
 }
 
 
-void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
+void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2) const
 {
     for (int i = 0; i < getNOutput(); ++i) {
         for (int i2d = 0; i2d < getNInput(); ++i2d) {
@@ -341,13 +357,13 @@ void FeedForwardNeuralNetwork::getSecondDerivative(double ** d2)
 }
 
 
-double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d)
+double FeedForwardNeuralNetwork::getFirstDerivative(const int &i, const int &i1d) const
 {
     return (_L_out->getUnit(i + 1)->getFirstDerivativeValue(i1d));
 }
 
 
-void FeedForwardNeuralNetwork::getFirstDerivative(const int &i, double * d1)
+void FeedForwardNeuralNetwork::getFirstDerivative(const int &i, double * d1) const
 {
     for (int i1d = 0; i1d < getNInput(); ++i1d) {
         d1[i1d] = getFirstDerivative(i, i1d);
@@ -355,7 +371,7 @@ void FeedForwardNeuralNetwork::getFirstDerivative(const int &i, double * d1)
 }
 
 
-void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1)
+void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1) const
 {
     for (int i = 0; i < getNOutput(); ++i) {
         for (int i1d = 0; i1d < getNInput(); ++i1d) {
@@ -365,13 +381,13 @@ void FeedForwardNeuralNetwork::getFirstDerivative(double ** d1)
 }
 
 
-double FeedForwardNeuralNetwork::getOutput(const int &i)
+double FeedForwardNeuralNetwork::getOutput(const int &i) const
 {
     return _L_out->getUnit(i + 1)->getValue();
 }
 
 
-void FeedForwardNeuralNetwork::getOutput(double * out)
+void FeedForwardNeuralNetwork::getOutput(double * out) const
 {
     for (int i = 1; i < _L_out->getNUnits(); ++i) {
         out[i - 1] = _L_out->getUnit(i)->getValue();
@@ -697,7 +713,7 @@ void FeedForwardNeuralNetwork::pushFeatureMapLayer(const int &size, const std::s
 
 // --- Store FFNN on a file
 
-void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool store_betas)
+void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool store_betas) const
 {
     using namespace std;
 
@@ -708,7 +724,7 @@ void FeedForwardNeuralNetwork::storeOnFile(const char * filename, const bool sto
     file << getNLayers() << endl;
     // store the tree code of each layer
     for (int i = 0; i < getNLayers(); ++i) {
-        string word, treeCode = getLayer(i)->getTreeCode();
+        string word, treeCode = _L[i]->getTreeCode();
 
         if (!store_betas) { // cut out betas
             bool skip = false;
@@ -789,7 +805,7 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char * filename)
     _updateNVP();
 
     // read and set the substrates
-    bool flag_1d = 0, flag_2d = 0, flag_v1d = 0, flag_c1d = 0, flag_c2d = 0;
+    bool flag_1d = false, flag_2d = false, flag_v1d = false, flag_c1d = false, flag_c2d = false;
     file >> flag_1d;
     if (flag_1d) {
         addFirstDerivativeSubstrate();

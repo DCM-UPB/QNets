@@ -49,6 +49,9 @@ void run_benchmark_netpack(const double xdata[], const int ndata[], const int xo
     tnet.dflags.set(DerivConfig::D12_VD1);
     run_single_benchmark("f+d1+d2+vd1", tnet, xdata + xoffset, neval[I], nruns);
 
+    tnet.dflags.set(DerivConfig::D12_VD12);
+    run_single_benchmark("f+d1+d2+vd1+vd2", tnet, xdata + xoffset, neval[I], nruns);
+
     cout << "=========================================================================================" << endl << endl << endl;
 
     run_benchmark_netpack<I + 1, Args...>(xdata, ndata, xoffset + ndata[I], neval, nruns, tnets...);
@@ -58,13 +61,13 @@ int main()
 {
     using namespace templ;
 
-    const int neval[3] = {200000, 2000, 20};
+    const int neval[3] = {200000, 20000, 1000};
     const int nruns = 5;
 
     const int yndim = 1;
     constexpr int xndim[3] = {6, 24, 96}, nhu1[3] = {12, 48, 192}, nhu2[3] = {6, 24, 96};
 
-    constexpr auto dconf = DerivConfig::D12_VD1; // "allocate" for all derivatives
+    constexpr auto dconf = DerivConfig::D12_VD12; // "allocate" for all derivatives
 
     using RealT = double;
 
