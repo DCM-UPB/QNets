@@ -831,37 +831,39 @@ FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const char * filename)
 }
 
 
-FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(FeedForwardNeuralNetwork * ffnn)
+FeedForwardNeuralNetwork::FeedForwardNeuralNetwork(const FeedForwardNeuralNetwork &ffnn)
 {
+    auto &other = const_cast<FeedForwardNeuralNetwork &>(ffnn); // lazy hack for const signature
+
     // copy layer structure
-    for (int i = 0; i < ffnn->getNLayers(); ++i) {
-        _addNewLayer(ffnn->getLayer(i)->getIdCode(), ffnn->getLayer(i)->getParams());
+    for (int i = 0; i < other.getNLayers(); ++i) {
+        _addNewLayer(other.getLayer(i)->getIdCode(), other.getLayer(i)->getParams());
     }
 
     // read and set the substrates
-    if (ffnn->isConnected()) {
+    if (other.isConnected()) {
         connectFFNN();
     }
 
     // now copy the parameter tree (incl. betas) for all layers
-    for (int i = 0; i < ffnn->getNLayers(); ++i) {
-        _L[i]->setMemberParams(ffnn->getLayer(i)->getMemberTreeCode());
+    for (int i = 0; i < other.getNLayers(); ++i) {
+        _L[i]->setMemberParams(other.getLayer(i)->getMemberTreeCode());
     }
     _updateNVP();
 
-    if (ffnn->hasFirstDerivativeSubstrate()) {
+    if (other.hasFirstDerivativeSubstrate()) {
         addFirstDerivativeSubstrate();
     }
-    if (ffnn->hasSecondDerivativeSubstrate()) {
+    if (other.hasSecondDerivativeSubstrate()) {
         addSecondDerivativeSubstrate();
     }
-    if (ffnn->hasVariationalFirstDerivativeSubstrate()) {
+    if (other.hasVariationalFirstDerivativeSubstrate()) {
         addVariationalFirstDerivativeSubstrate();
     }
-    if (ffnn->hasCrossFirstDerivativeSubstrate()) {
+    if (other.hasCrossFirstDerivativeSubstrate()) {
         addCrossFirstDerivativeSubstrate();
     }
-    if (ffnn->hasCrossSecondDerivativeSubstrate()) {
+    if (other.hasCrossSecondDerivativeSubstrate()) {
         addCrossSecondDerivativeSubstrate();
     }
 }
