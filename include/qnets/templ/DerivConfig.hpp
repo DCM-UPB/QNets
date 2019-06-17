@@ -51,6 +51,7 @@ struct StaticDFlags
     static constexpr bool vd1 = isVD1Enabled(DCONF);
     static constexpr bool vd2 = isVD2Enabled(DCONF);
 
+    static constexpr DerivConfig dconf() { return DCONF; }
     static constexpr bool needsAny() { return (d1 || d2 || vd1 || vd2); }
     static constexpr bool needsNone() { return !needsAny(); }
     // check for backprop needs

@@ -162,6 +162,12 @@ public:
             _beta_begins(tupl::make_fcont<std::array<ValueT *, nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
             dflags(init_dflags) {}
 
+    // hacky copy constructor that works for the moment
+    TemplNet(const TemplNet &other): TemplNet(other.dflags)
+    {
+        for (int i = 0; i < other.getNBeta(); ++i) { this->setBeta(i, other.getBeta(i)); }
+    }
+
     // --- Get information about the NN structure
 
     static constexpr int getNLayer() { return nlayer; }
