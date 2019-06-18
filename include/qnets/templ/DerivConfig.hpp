@@ -99,6 +99,17 @@ public:
         return DynamicDFlags{_d1 && other.d1(), _d2 && other.d2(), _vd1 && other.vd1(), _vd2 && other.vd2()};
     }
 
+    template <class DFlags>
+    constexpr DynamicDFlags OR(DFlags other)
+    {   // Logical OR template, meant for StaticDFlags other
+        return DynamicDFlags{_d1 || other.d1, _d2 || other.d2, _vd1 || other.vd1, _vd2 || other.vd2};
+    }
+
+    constexpr DynamicDFlags OR(DynamicDFlags other)
+    {   // Logical OR for DynamicDFlags other
+        return DynamicDFlags{_d1 || other.d1(), _d2 || other.d2(), _vd1 || other.vd1(), _vd2 || other.vd2()};
+    }
+
     constexpr bool d1() const { return _d1; }
     constexpr bool d2() const { return _d2; }
     constexpr bool vd1() const { return _vd1; }
