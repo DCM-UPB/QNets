@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <random>
+#include <ctime>
 
 // --- Constructor
 
@@ -58,14 +59,15 @@ void NNRay::randomizeBeta()
     // random number generator, used to initialize the intensities
     std::random_device rdev;
     std::mt19937_64 rgen;
-    std::uniform_real_distribution<double> rd;
 
+    // old:
     // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
     // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
-    const double bah = 4*pow(_sourcePool.size(), -0.5); // (b-a)/2
+    // const double bah = 4*pow(_sourcePool.size(), -0.5); // (b-a)/2
 
     rgen = std::mt19937_64(rdev());
-    rd = std::uniform_real_distribution<double>(-bah, bah);
+    const double init_sigma = 0.01; // currently we use hard-coded sigma for initial betas
+    std::normal_distribution<double> rd(init_sigma); // initialize betas to small values
 
     for (double &b : _beta) {
         b = rd(rgen);

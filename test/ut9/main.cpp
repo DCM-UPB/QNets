@@ -32,6 +32,7 @@ void validate_beta(FeedForwardNeuralNetwork * const ffnn, const double * const b
     const bool case2 = abs(ffnn->getVariationalParameter(0) + beta[0]) < TINY && abs(ffnn->getVariationalParameter(1) + beta[1]) < TINY && abs(ffnn->getVariationalParameter(2) + beta[2]) < TINY;
     assert(case1 || case2); // symmetric gaussian allows both combinations
     for (int i = 3; i < ffnn->getNVariationalParameters(); ++i) {
+        // std::cout << "abs(vp[i]-beta[i]) " << abs(ffnn->getVariationalParameter(i) - beta[i]) << std::endl;
         assert(abs(ffnn->getVariationalParameter(i) - beta[i]) < TINY);
     }
 }
@@ -44,6 +45,7 @@ void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardN
     }
     trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
     double resi = trainer->computeResidual(ffnn, false, flag_d);
+    std::cout << "resi " << resi << std::endl;
     assert(resi <= TINY);
     delete trainer;
 }
@@ -51,7 +53,7 @@ void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardN
 int main()
 {
     const int verbose = 0;
-    const double TINY = 0.000001;
+    const double TINY = 0.00001;
 
     const int ndim = 2;
     const int xndim = ndim;

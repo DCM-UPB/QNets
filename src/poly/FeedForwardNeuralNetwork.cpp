@@ -112,27 +112,11 @@ void FeedForwardNeuralNetwork::setBeta(const double * beta)
 
 void FeedForwardNeuralNetwork::randomizeBetas()
 {
-    using namespace std;
-
-    random_device rdev;
-    mt19937_64 rgen = std::mt19937_64(rdev());
-    uniform_real_distribution<double> rd;
-
-    int nsource;
-    double bah;
-
     for (auto &i : _L_fed) {
         for (int j = 0; j < i->getNFedUnits(); ++j) {
-            if (i->getFedUnit(j)->getFeeder() != nullptr) {
-                nsource = i->getFedUnit(j)->getFeeder()->getNBeta();
-                // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
-                // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * n^(1/2) , where n is nsource
-                bah = 4*pow(nsource, -0.5); // (b-a)/2
-                rd = uniform_real_distribution<double>(-bah, bah);
-
-                for (int k = 0; k < nsource; ++k) {
-                    i->getFedUnit(j)->getFeeder()->setBeta(k, rd(rgen));
-                }
+            FeederInterface * feeder = i->getFedUnit(j)->getFeeder();
+            if (feeder != nullptr) {
+                feeder->randomizeBeta();
             }
         }
     }
