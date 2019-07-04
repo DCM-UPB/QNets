@@ -60,18 +60,12 @@ void NNRay::randomizeBeta()
     std::random_device rdev;
     std::mt19937_64 rgen;
 
-    // old:
-    // target sigma to keep sum of weighted inputs in range [-4,4], assuming uniform distribution
-    // sigma = 8/sqrt(12) = (b-a)/sqrt(12) * m^(1/2)
-    // const double bah = 4*pow(_sourcePool.size(), -0.5); // (b-a)/2
-
     rgen = std::mt19937_64(rdev());
-    const double init_sigma = 0.01; // currently we use hard-coded sigma for initial betas
-    std::normal_distribution<double> rd(init_sigma); // initialize betas to small values
+    const double init_sigma = sqrt(1./_sources.size()); // beta initialization width guess
+    std::normal_distribution<double> rd(0., init_sigma);
 
-    for (double &b : _beta) {
-        b = rd(rgen);
-    }
+    _beta[0] = 0.; // init offset weight to 0
+    for (size_t i = 1; i<_sources.size(); ++i) { _beta[i] = rd(rgen); }
 }
 
 
