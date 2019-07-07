@@ -26,7 +26,7 @@ with valgrind or use `make test` inside the build directory, to run unit tests w
 
 ## Unit Test 5
 
-`ut5/`: check that the activation functions derivatives are correct
+`ut5/`: check that the PolyNet activation functions derivatives are correct
 
 
 ## Unit Test 6
@@ -56,9 +56,14 @@ with valgrind or use `make test` inside the build directory, to run unit tests w
 
 ## Unit Test 11
 
-`ut11/`: check the results of basic TemplNet methods
+`ut11/`: check that the TemplNet activation functions derivatives are correct
 
 
 ## Unit Test 12
 
-`ut12/`: check TemplNet propagation by comparing against the already checked PolyNet
+`ut12/`: check the results of basic TemplNet methods
+
+
+## Unit Test 13
+
+`ut13/`: check TemplNet propagation by comparing against the already checked PolyNet

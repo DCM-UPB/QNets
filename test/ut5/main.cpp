@@ -30,7 +30,7 @@ int main()
 
             // cout << "        f1d     = " << f1d << endl;
             // cout << "        num_f1d = " << num_f1d << endl;
-            assert(abs(num_f1d - f1d) < TINY);
+            assert(fabs(num_f1d - f1d) < TINY);
 
 
             // --- second derivative
@@ -42,7 +42,7 @@ int main()
 
             // cout << "        f2d     = " << f2d << endl;
             // cout << "        num_f2d = " << num_f2d << endl;
-            assert(abs(num_f2d - f2d) < TINY);
+            assert(fabs(num_f2d - f2d) < TINY);
 
 
             // --- third derivative
@@ -53,16 +53,16 @@ int main()
 
             // cout << "        f3d     = " << f3d << endl;
             // cout << "        num_f3d = " << num_f3d << endl;
-            assert(abs(num_f3d - f3d) < TINY*20);
+            assert(fabs(num_f3d - f3d) < TINY*20);
 
 
             // -- check the fad function
             double fad_f, fad_f1d, fad_f2d, fad_f3d;
             actf->fad(x, fad_f, fad_f1d, fad_f2d, fad_f3d, true, true, true);
-            assert(abs(fad_f - f) < TINY);
-            assert(abs(fad_f1d - f1d) < TINY);
-            assert(abs(fad_f2d - f2d) < TINY);
-            assert(abs(fad_f3d - f3d) < TINY);
+            assert(fabs(fad_f - f) < TINY);
+            assert(fabs(fad_f1d - f1d) < TINY);
+            assert(fabs(fad_f2d - f2d) < TINY);
+            assert(fabs(fad_f3d - f3d) < TINY);
         }
 
         // cout << endl;

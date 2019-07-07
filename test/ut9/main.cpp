@@ -45,7 +45,7 @@ void validate_fit(NNTrainingData &tdata, NNTrainingConfig &tconfig, FeedForwardN
     }
     trainer->bestFit(ffnn, maxn_fits, TINY, verbose); // fit until residual<TINY or maxn_fits reached
     double resi = trainer->computeResidual(ffnn, false, flag_d);
-    std::cout << "resi " << resi << std::endl;
+    //std::cout << "resi " << resi << std::endl;
     assert(resi <= TINY);
     delete trainer;
 }
