@@ -105,11 +105,11 @@ for benchmark_file in sys.argv[1:]:
     except(OSError):
         print("Warning: Couldn't load benchmark file " + benchmark_file + "!")
 
-if len(benchmark_list)<1:
+if not benchmark_list:
     print("Error: Not even one benchmark loaded!")
 else:
     fig1 = plot_compare_nets(benchmark_list, fmt='o--')
-    if len(benchmark_list)>1:
+    if benchmark_list:
         fig2 = plot_compare_runs(benchmark_list, ['6x12x6x1', '24x48x24x1', '96x192x96x1'])
 
 show()
