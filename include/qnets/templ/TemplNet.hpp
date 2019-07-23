@@ -12,6 +12,10 @@
 #include <algorithm>
 #include <utility>
 #include <type_traits>
+#include <fstream>
+#include <string>
+#include <iomanip>
+#include <exception>
 
 namespace templ
 {
@@ -303,12 +307,48 @@ public:
         _d2 = std::get<nlayer - 1>(_layers).d2();
     }
 
-    // Shortcut for computation: set input and get all values and derivatives with one calculations.
-    // If some derivatives are not supported (substrate missing) the values will be leaved unchanged.
-    //void evaluate(const ValueT * in, ValueT * out, ValueT * d1 = nullptr, ValueT * d2 = nullptr, ValueT * vd1 = nullptr);
 
-    // --- Store FFNN on file
-    //void storeOnFile(const char * filename, bool store_betas = true);
+    // --- Store FFNN weights to stream/file
+    // NOTE: Dynamic dflags are not stored!
+    void storeToStream(std::ofstream &ostream)
+    {
+        ostream << typeid(*this).name() << "\n";
+        ostream << std::setprecision(18); // to achieve maximal accuracy of doubles
+        for (int i = 0; i < nbeta - 1; ++i) { ostream << this->getBeta(i) << " "; }
+        ostream << this->getBeta(nbeta - 1) << std::endl;
+    }
+
+    void storeToFile(const std::string &filename)
+    {
+        std::ofstream file;
+        file.open(filename);
+        this->storeToStream(file);
+        file.close();
+    }
+
+    // --- Load FFNN weights from stream/file
+    // NOTE: Dynamic dflags are left untouched!
+    void loadFromStream(std::ifstream &istream)
+    {
+        std::string typestr;
+        std::getline(istream, typestr);
+        if (typestr != typeid(*this).name()) {
+            throw std::invalid_argument("[TemplNet::loadFromStream] The stored typeid is not identical to the typeid of this FFNN.");
+        }
+        for (int i = 0; i < nbeta; ++i) {
+            double beta;
+            istream >> beta;
+            this->setBeta(i, beta);
+        }
+    }
+
+    void loadFromFile(const std::string &filename)
+    {
+        std::ifstream file;
+        file.open(filename);
+        this->loadFromStream(file);
+        file.close();
+    }
 };
 } // templ
 

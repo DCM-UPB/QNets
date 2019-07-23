@@ -131,15 +131,26 @@ int main()
     assert(std::equal(cur_beta.begin(), cur_beta.end(), comp_beta.begin()));
 
 
-    // -- Propagation (properly in another test)
+    // check file load / store
+    test.storeToFile("templtest.txt");
+    TestNet test2;
+    test2.loadFromFile("templtest.txt");
+    array<double, 22> cur2_beta{};
+    test2.getBetas(cur2_beta);
+    assert(std::equal(cur_beta.begin(), cur_beta.end(), cur2_beta.begin()));
+
+
+
+    // -- Propagation / Derivatives (properly in another test)
 
     // create some new test layers
-    const auto dopt2 = DerivConfig::D12_VD12; // now we enable all
-    TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, (4+1)*4/*nbeta_next*/, 2/*nin*/, 4/*nout*/, actf::Sigmoid, dopt2> myl0{};
-    TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, (4+1)*2/*nbeta_next*/, 4/*nin*/, 4/*nout*/, actf::Sigmoid, dopt2> myl1{};
-    TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, 0/*nbeta_next*/, 4/*nin*/, 2/*nout*/, actf::Sigmoid, dopt2> myl2{};
-    DynamicDFlags dflags2(dopt2);
+    // const auto dopt2 = DerivConfig::D12_VD12; // now we enable all
+    // TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, (4+1)*4/*nbeta_next*/, 2/*nin*/, 4/*nout*/, actf::Sigmoid, dopt2> myl0{};
+    // TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, (4+1)*2/*nbeta_next*/, 4/*nin*/, 4/*nout*/, actf::Sigmoid, dopt2> myl1{};
+    // TemplLayer<double, 2/*net_nin*/, 2/*net_nout*/, 0/*nbeta_next*/, 4/*nin*/, 2/*nout*/, actf::Sigmoid, dopt2> myl2{};
+    // DynamicDFlags dflags2(dopt2);
 
+    /*
     // set beta to random values
     for (auto &b : myl0.beta) { b = rand()*(1./RAND_MAX); }
     for (auto &b : myl1.beta) { b = rand()*(1./RAND_MAX); }
@@ -252,7 +263,7 @@ int main()
     const double num_vd2_1 = (ana_vd1_r_1 - ana_vd1_1)/db;
     cout << "num_vd1_0: " << num_vd1_0 << ", num_vd1_1: " << num_vd1_1 << endl;
     cout << "num_vd2_0: " << num_vd2_0 << ", num_vd2_1: " << num_vd2_1 << endl;
-
+*/
 
 
     return 0;
