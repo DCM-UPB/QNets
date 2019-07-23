@@ -1,8 +1,10 @@
 #include "qnets/actf/NoOp.hpp"
 #include "qnets/actf/ReLU.hpp"
+#include "qnets/actf/SRLU.hpp"
 #include "qnets/actf/Sigmoid.hpp"
 #include "qnets/actf/TanSig.hpp"
 #include "qnets/actf/Exp.hpp"
+#include "qnets/actf/Sine.hpp"
 
 #include <vector>
 #include <cassert>
@@ -70,15 +72,17 @@ int main()
     using namespace std;
 
     const double TINY_DEFAULT = 0.0001;
-    const double dx = 0.0001;
+    const double dx = 0.00001;
     vector<double> x_to_test = {-3., -2.5, -2., -1.5, -1.0, -0.5, -0.25, -0.001, 0.001, 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
 
     using namespace actf;
     checkACTFDerivatives<NoOp>(x_to_test, dx, TINY_DEFAULT);
     checkACTFDerivatives<ReLU>(x_to_test, dx, TINY_DEFAULT);
+    checkACTFDerivatives<SRLU>(x_to_test, dx, TINY_DEFAULT);
     checkACTFDerivatives<Sigmoid>(x_to_test, dx, TINY_DEFAULT);
     checkACTFDerivatives<TanSig>(x_to_test, dx, TINY_DEFAULT);
-    checkACTFDerivatives<Exp>(x_to_test, dx, 0.002);
+    checkACTFDerivatives<Exp>(x_to_test, dx, 0.001); // hard to get better accuracy on exp
+    checkACTFDerivatives<Sine>(x_to_test, dx, TINY_DEFAULT);
 
     return 0;
 }
