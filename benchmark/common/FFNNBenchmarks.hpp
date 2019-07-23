@@ -3,7 +3,7 @@
 #include <tuple>
 
 #include "Timer.hpp"
-#include "qnets/net/FeedForwardNeuralNetwork.hpp"
+#include "qnets/poly/FeedForwardNeuralNetwork.hpp"
 
 inline double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval)
 {
@@ -19,25 +19,21 @@ inline double benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const
     return timer.elapsed();
 }
 
-inline std::pair<double, double> sample_benchmark_FFPropagate(FeedForwardNeuralNetwork * const ffnn, const double * const xdata, const int neval, const int nruns)
+template <class TemplNet>
+inline double benchmark_TemplProp(TemplNet &tnet, const double xdata[], const int neval)
 {
-    double times[nruns];
-    double mean = 0., err = 0.;
+    Timer timer(1.);
+    const int ninput = tnet.getNInput();
 
-    for (int i = 0; i < nruns; ++i) {
-        times[i] = benchmark_FFPropagate(ffnn, xdata, neval);
-        mean += times[i];
+    timer.reset();
+    for (int i = 0; i < neval; ++i) {
+        tnet.setInput(xdata + i*ninput, xdata + (i+1)*ninput);
+        tnet.FFPropagate();
     }
-    mean /= nruns;
-    for (int i = 0; i < nruns; ++i) {
-        err += pow(times[i] - mean, 2);
-    }
-    err /= (nruns - 1)*nruns; // variance of the mean
-    err = sqrt(err); // standard error of the mean
 
-    const std::pair<double, double> result(mean, err);
-    return result;
+    return timer.elapsed();
 }
+
 
 inline double benchmark_actf_derivs(ActivationFunctionInterface * const actf, const double * const xdata, const int neval, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true)
 {
@@ -62,13 +58,14 @@ inline double benchmark_actf_derivs(ActivationFunctionInterface * const actf, co
     return timer.elapsed();
 }
 
-inline std::pair<double, double> sample_benchmark_actf_derivs(ActivationFunctionInterface * const actf, const double * const xdata, const int neval, const int nruns, const bool flag_d1 = true, const bool flag_d2 = true, const bool flag_d3 = true, const bool flag_fad = true)
+template <class BenchT, class ... Args>
+inline std::pair<double, double> sample_benchmark(BenchT bench, const int nruns, Args&& ... args)
 {
     double times[nruns];
     double mean = 0., err = 0.;
 
     for (int i = 0; i < nruns; ++i) {
-        times[i] = benchmark_actf_derivs(actf, xdata, neval, flag_d1, flag_d2, flag_d3, flag_fad);
+        times[i] = bench(args...);
         mean += times[i];
     }
     mean /= nruns;

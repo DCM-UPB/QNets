@@ -24,7 +24,7 @@ matrix:
     - USE_OPENMP="TRUE"
 
   - os: osx
-    osx_image: xcode10.1
+    osx_image: xcode11
     env:
     - MYCXX="g++"
     - USE_DOCKER="FALSE"
@@ -32,7 +32,7 @@ matrix:
     - USE_OPENMP="FALSE"
 
   - os: osx
-    osx_image: xcode10.1
+    osx_image: xcode11
     env:
     - MYCXX="clang++"
     - USE_DOCKER="FALSE"

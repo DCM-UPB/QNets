@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "qnets/actf/ActivationFunctionManager.hpp"
+#include "qnets/poly/actf/ActivationFunctionManager.hpp"
 
 #include "FFNNBenchmarks.hpp"
 
@@ -13,7 +13,7 @@ void run_single_benchmark(const string &label, const string &actf_id, const doub
     pair<double, double> result;
     const double time_scale = 1000000000.; //nanoseconds
 
-    result = sample_benchmark_actf_derivs(std_actf::provideActivationFunction(actf_id), xdata, neval, nruns, flag_d1, flag_d2, flag_d3, flag_fad);
+    result = sample_benchmark(benchmark_actf_derivs, nruns, std_actf::provideActivationFunction(actf_id), xdata, neval, flag_d1, flag_d2, flag_d3, flag_fad);
     cout << label << ":" << setw(max(1, 11 - static_cast<int>(label.length()))) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " nanoseconds" << endl;
 }
 

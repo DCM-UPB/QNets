@@ -5,9 +5,9 @@
 #include <numeric>
 #include <vector>
 
-#include "qnets/actf/ActivationFunctionManager.hpp"
-#include "qnets/feed/FeederInterface.hpp"
-#include "qnets/feed/SmartBetaGenerator.hpp"
+#include "qnets/poly/actf/ActivationFunctionManager.hpp"
+#include "qnets/poly/feed/FeederInterface.hpp"
+#include "qnets/poly/feed/SmartBetaGenerator.hpp"
 
 
 int main()

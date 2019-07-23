@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "qnets/io/PrintUtilities.hpp"
+#include "qnets/poly/io/PrintUtilities.hpp"
 
 #include "FFNNBenchmarks.hpp"
 
@@ -13,7 +13,7 @@ void run_single_benchmark(const string &label, FeedForwardNeuralNetwork * const 
     pair<double, double> result;
     const double time_scale = 1000000.; //microseconds
 
-    result = sample_benchmark_FFPropagate(ffnn, xdata, neval, nruns);
+    result = sample_benchmark(benchmark_FFPropagate, nruns, ffnn, xdata, neval);
     cout << label << ":" << setw(max(1, 20 - static_cast<int>(label.length()))) << setfill(' ') << " " << result.first/neval*time_scale << " +- " << result.second/neval*time_scale << " microseconds" << endl;
 }
 

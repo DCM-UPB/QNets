@@ -1,4 +1,4 @@
-file(GLOB SOURCES "*/*.cpp")
+file(GLOB_RECURSE SOURCES "*.cpp")
 add_library(qnets SHARED ${SOURCES})
 target_link_libraries(qnets "${GSL_LIBRARIES}" "${OpenMP_CXX_LIBRARIES}") # shared libs
 add_library(qnets_static STATIC ${SOURCES})
