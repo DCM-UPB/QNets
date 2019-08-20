@@ -328,11 +328,11 @@ public:
 
     // --- Load FFNN weights from stream/file
     // NOTE: Dynamic dflags are left untouched!
-    void loadFromStream(std::ifstream &istream)
+    void loadFromStream(std::ifstream &istream, bool checkTypeID = true)
     {
         std::string typestr;
         std::getline(istream, typestr);
-        if (typestr != typeid(*this).name()) {
+        if (checkTypeID && typestr != typeid(*this).name()) {
             throw std::invalid_argument("[TemplNet::loadFromStream] The stored typeid is not identical to the typeid of this FFNN.");
         }
         for (int i = 0; i < nbeta; ++i) {
@@ -342,11 +342,11 @@ public:
         }
     }
 
-    void loadFromFile(const std::string &filename)
+    void loadFromFile(const std::string &filename, bool checkTypeID = true)
     {
         std::ifstream file;
         file.open(filename);
-        this->loadFromStream(file);
+        this->loadFromStream(file, checkTypeID);
         file.close();
     }
 };
