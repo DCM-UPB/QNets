@@ -25,18 +25,18 @@ constexpr int nbeta_next() { return 0; }
 template <class LConf1, class LConf2, class ... Rest> // LConf2 is "next"
 constexpr int nbeta_next() { return (1 + LConf1::noutput)*LConf2::noutput; }
 
-template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, int NET_NOUTPUT, int N_IN, class>
+template <typename ValueT, DerivConfig DCONF, int ORIG_NINPUT, int NET_NINPUT, int NET_NOUTPUT, int N_IN, class>
 struct LayerPackTuple_rec
 {
     using type = std::tuple<>;
 };
 
-template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, int NET_NOUTPUT, int N_IN, class LConf, class ... LCONFS>
-struct LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, NET_NOUTPUT, N_IN, std::tuple<LConf, LCONFS...>>
+template <typename ValueT, DerivConfig DCONF, int ORIG_NINPUT, int NET_NINPUT, int NET_NOUTPUT, int N_IN, class LConf, class ... LCONFS>
+struct LayerPackTuple_rec<ValueT, DCONF, ORIG_NINPUT, NET_NINPUT, NET_NOUTPUT, N_IN, std::tuple<LConf, LCONFS...>>
 {
 private:
-    using layer = TemplLayer<ValueT, NET_NINPUT, NET_NOUTPUT, nbeta_next<LConf, LCONFS...>(), N_IN, LConf::noutput, typename LConf::ACTF_Type, DCONF>;
-    using rest = typename LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, NET_NOUTPUT, layer::noutput, std::tuple<LCONFS...>>::type;
+    using layer = TemplLayer<ValueT, ORIG_NINPUT, NET_NINPUT, NET_NOUTPUT, nbeta_next<LConf, LCONFS...>(), N_IN, LConf::noutput, typename LConf::ACTF_Type, DCONF>;
+    using rest = typename LayerPackTuple_rec<ValueT, DCONF, ORIG_NINPUT, NET_NINPUT, NET_NOUTPUT, layer::noutput, std::tuple<LCONFS...>>::type;
 public:
     using type = decltype(std::tuple_cat(
             std::declval<std::tuple<layer>>(),
@@ -48,13 +48,13 @@ public:
 //
 // Helps to determine the full layer tuple type according to LayerConfig pack
 //
-template <typename ValueT, DerivConfig DCONF, int NET_NINPUT, class LConf, class ... LCONFS>
+template <typename ValueT, DerivConfig DCONF, int ORIG_NINPUT, int NET_NINPUT, class LConf, class ... LCONFS>
 struct LayerPackTuple
 {
 private:
     static constexpr int net_noutput = detail::net_nout<LConf, LCONFS...>();
-    using layer = TemplLayer<ValueT, NET_NINPUT, net_noutput, detail::nbeta_next<LConf, LCONFS...>(), NET_NINPUT, LConf::noutput, typename LConf::ACTF_Type, DCONF>;
-    using rest = typename detail::LayerPackTuple_rec<ValueT, DCONF, NET_NINPUT, net_noutput, layer::noutput, std::tuple<LCONFS...>>::type;
+    using layer = TemplLayer<ValueT, ORIG_NINPUT, NET_NINPUT, net_noutput, detail::nbeta_next<LConf, LCONFS...>(), NET_NINPUT, LConf::noutput, typename LConf::ACTF_Type, DCONF>;
+    using rest = typename detail::LayerPackTuple_rec<ValueT, DCONF, ORIG_NINPUT, NET_NINPUT, net_noutput, layer::noutput, std::tuple<LCONFS...>>::type;
 public:
     using type = decltype(std::tuple_cat(
             std::declval<std::tuple<layer>>(),

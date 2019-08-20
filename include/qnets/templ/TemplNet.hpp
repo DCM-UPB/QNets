@@ -102,36 +102,38 @@ constexpr void grad_layers_impl(const TupleT &layers, const ArrayT1 &input, Arra
 
 // --- The fully templated TemplNet FFNN
 
-template <typename ValueT, DerivConfig DCONF, int N_IN, class ... LayerConfs>
+template <typename ValueT, DerivConfig DCONF, int ORIG_N_IN, int NET_N_IN, class ... LayerConfs>
 class TemplNet
 {
 public:
     // --- Static Setup
 
     // LayerTuple type / Shape
-    using LayerTuple = typename lpack::LayerPackTuple<ValueT, DCONF, N_IN, LayerConfs...>::type;
+    using LayerTuple = typename lpack::LayerPackTuple<ValueT, DCONF, ORIG_N_IN, NET_N_IN, LayerConfs...>::type;
     using Shape = detail::TemplNetShape<LayerTuple, std::make_index_sequence<sizeof...(LayerConfs)>>;
 
     // some basic static sizes
     static constexpr int nlayer = tupl::count<int, LayerTuple>();
-    static constexpr int ninput = std::tuple_element<0, LayerTuple>::type::ninput;
+    static constexpr int orig_ninput = ORIG_N_IN; // if network inputs are a function of orig_ninput original inputs
+    static constexpr int ninput = std::tuple_element<0, LayerTuple>::type::ninput; // the number of direct network inputs
     static constexpr int noutput = std::tuple_element<nlayer - 1, LayerTuple>::type::noutput;
-    static constexpr int nbeta = lpack::countBetas<N_IN, LayerConfs...>();
+    static constexpr int nbeta = lpack::countBetas<NET_N_IN, LayerConfs...>();
     static constexpr int nunit = lpack::countUnits<LayerConfs...>();
 
     // static derivative config
     static constexpr StaticDFlags<DCONF> dconf{};
 
     // Static Output Deriv Array Sizes (depend on DCONF)
-    static constexpr int nd1 = dconf.d1 ? noutput*ninput : 0;
-    static constexpr int nd2 = dconf.d2 ? noutput*ninput : 0;
+    static constexpr int nd1_net = noutput*ninput; // helper array to calc d1 from backprop
+    static constexpr int nd1 = dconf.d1 ? noutput*orig_ninput : 0;
+    static constexpr int nd2 = dconf.d2 ? noutput*orig_ninput : 0;
     static constexpr int nvd1 = dconf.vd1 ? noutput*nbeta : 0;
     static constexpr int nvd2 = dconf.vd2 ? noutput*nbeta : 0;
 
 
     // Basic assertions
     static_assert(nlayer == static_cast<int>(sizeof...(LayerConfs)), ""); // -> BUG!
-    static_assert(ninput == N_IN, ""); // -> BUG!
+    static_assert(ninput == NET_N_IN, ""); // -> BUG!
     static_assert(noutput == Shape::nunits[nlayer - 1], ""); // -> BUG!
     static_assert(nlayer > 1, "[TemplNet] nlayer <= 1");
     static_assert(lpack::hasNoEmptyLayer<(ninput > 0), LayerConfs...>(), "[TemplNet] LayerConf pack contains empty Layer.");
@@ -147,7 +149,11 @@ private:
     const std::array<const ValueT *, nlayer> _out_begins;
     const std::array<ValueT *, nlayer> _beta_begins;
 
+    // input array
+    std::array<ValueT, ninput> _input{};
+
     // deriv arrays
+    std::array<ValueT, nd1_net> _d1_net{};
     std::array<ValueT, nd1> _d1{};
     std::array<ValueT, nd2> _d2{};
     std::array<ValueT, nvd1> _vd1{};
@@ -157,10 +163,88 @@ public:
     // dynamic (opt-out) derivative config (default to DCONF or explicit set in ctor)
     DynamicDFlags dflags{DCONF};
 
-    // input array
-    std::array<ValueT, ninput> input{};
+private:
+    // some helper methods
+
+    void _propagateLayers() // continue the initialized fwd prop
+    {
+        using namespace detail;
+
+        // continue fwd prop
+        fwdprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
+
+        // backprop
+        std::get<nlayer - 1>(_layers).BackwardOutput(dflags);
+        backprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
+
+        // store backprop grads into vd1/vd2
+        grad_layers_impl<0, nbeta>(_layers, _input, _vd1, _vd2, dflags, std::make_index_sequence<nlayer>{});
+    }
+
+    template <int ONIN = ORIG_N_IN>
+    typename std::enable_if<ONIN == NET_N_IN, void>::type _computeInputGradients() // use only if network input is the original input
+    {
+        // store input grads into d1/d2
+        if (dflags.d2()) { // we used forward accumulation
+            _d1 = std::get<nlayer - 1>(_layers).d1();
+            _d2 = std::get<nlayer - 1>(_layers).d2();
+        }
+        else { // compute original input derivative from backprop derivatives
+            std::get<0>(_layers).storeInputD1(_d1, dflags);
+        }
+    }
+
+    template <int ONIN = ORIG_N_IN>
+    typename std::enable_if<ONIN != NET_N_IN, void>::type _computeInputGradients()
+    {
+        throw std::runtime_error("[TemplNet::_processOrigInput] Original input derivatives require provided input-to-orig derivatives.");
+    }
+
+    void _computeInputGradients(const ValueT orig_d1[]) // used if network input is not the original input
+    {
+        // store input grads into d1/d2
+        if (dflags.d2()) { // we used forward accumulation
+            _d1 = std::get<nlayer - 1>(_layers).d1();
+            _d2 = std::get<nlayer - 1>(_layers).d2();
+        }
+        else { // compute original input derivative from backprop derivatives
+            _d1.fill(0.);
+            std::get<0>(_layers).storeInputD1(_d1_net, dflags);
+            for (int i = 0; i < noutput; ++i) {
+                for (int j = 0; j < ninput; ++j) {
+                    for (int k = 0; k < orig_ninput; ++k) {
+                        _d1[i*orig_ninput + k] += _d1_net[i*ninput + j]*orig_d1[j*orig_ninput + k];
+                    }
+                }
+            }
+        }
+    }
+
+    template <int ONIN = ORIG_N_IN>
+    typename std::enable_if<ONIN == NET_N_IN, void>::type _processOrigInput()
+    {
+        // feed original input
+        std::get<0>(_layers).ForwardInput(_input, dflags);
+        this->_propagateLayers();
+        if (dflags.d1()) { this->_computeInputGradients(); }
+    }
+
+    template <int ONIN = ORIG_N_IN>
+    typename std::enable_if<ONIN != NET_N_IN, void>::type _processOrigInput()
+    {
+        throw std::runtime_error("[TemplNet::_processOrigInput] Original input can't be fed directly, because it differs in size from network input.");
+    }
+
+    void _processDerivInput(const ValueT orig_d1[], const ValueT orig_d2[])
+    {
+        // feed derived network input
+        std::get<0>(_layers).ForwardLayer(_input.data(), orig_d1, orig_d2, dflags);
+        this->_propagateLayers();
+        if (dflags.d1()) { this->_computeInputGradients(orig_d1); }
+    }
 
 public:
+
     explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
             _out_begins(tupl::make_fcont<std::array<const ValueT *, nlayer>>(_layers, [](const auto &layer) { return &layer.out().front(); })),
             _beta_begins(tupl::make_fcont<std::array<ValueT *, nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
@@ -187,7 +271,6 @@ public:
     constexpr const auto &getLayer() const { return std::get<I>(_layers); }
 
     // --- const get Value Arrays/Elements
-    constexpr const auto &getInput() const { return input; } // alternative const read of public input array
     constexpr const auto &getOutput() const { return std::get<nlayer - 1>(_layers).out(); } // get values of output layer
     constexpr ValueT getOutput(int i) const { return this->getOutput()[i]; }
     constexpr const auto &getD1() const { return _d1; } // get derivative of output with respect to input
@@ -265,46 +348,31 @@ public:
     /*
     void randomizeBetas(); // has to be changed maybe if we add beta that are not "normal" weights*/
 
-    // --- Manage the variational parameters (which may contain a subset of beta and/or non-beta parameters),
-    //     which exist only after that they are assigned to actual parameters in the network (e.g. betas)
-    //int getNVariationalParameters() { return _nvp; }
-    /*ValueT getVariationalParameter(const int &ivp);
-    void getVariationalParameter(ValueT * vp);
-    void setVariationalParameter(const int &ivp, const ValueT &vp);
-    void setVariationalParameter(const ValueT * vp);
-    */
-
-    // shortcut for (connecting and) adding substrates
-    //void enableDerivatives(bool flag_d1, bool flag_d2, bool flag_vd1);
-
-
-    // Set initial parameters
-    constexpr void setInput(int i, ValueT val) { input[i] = val; }
-    template <class IterT>
-    constexpr void setInput(IterT begin, const IterT end) { std::copy(begin, end, input.begin()); }
-    constexpr void setInput(const std::array<ValueT, ninput> &in_arr) { input = in_arr; }
-
 
     // --- Propagation
 
-    constexpr void FFPropagate()
+    constexpr void Propagate(const ValueT input[])
     {
-        using namespace detail;
+        std::copy(input, input + ninput, _input.begin());
+        this->_processOrigInput();
+    }
 
-        // fdwprop
-        std::get<0>(_layers).ForwardInput(input, dflags);
-        fwdprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
+    constexpr void Propagate(const std::array<ValueT, ninput> &in_arr)
+    {
+        _input = in_arr;
+        this->_processOrigInput();
+    }
 
-        // backprop
-        std::get<nlayer - 1>(_layers).BackwardOutput(dflags);
-        backprop_layers_impl(_layers, dflags, std::make_index_sequence<nlayer - 1>{});
+    constexpr void PropagateDerived(const ValueT input[], const ValueT orig_d1[], const ValueT orig_d2[])
+    {
+        std::copy(input, input + ninput, _input.begin());
+        this->_processDerivInput(orig_d1, orig_d2);
+    }
 
-        // store backprop grads into vd1/vd2
-        grad_layers_impl<0, nbeta>(_layers, input, _vd1, _vd2, dflags, std::make_index_sequence<nlayer>{});
-
-        // store input grads into d1/d2
-        std::get<0>(_layers).storeInputD1(_d1, dflags);
-        _d2 = std::get<nlayer - 1>(_layers).d2();
+    constexpr void PropagateDerived(const std::array<ValueT, ninput> &in_arr, const std::array<ValueT, ninput*orig_ninput> &orig_d1, const std::array<ValueT, ninput*orig_ninput> &orig_d2)
+    {
+        _input = in_arr;
+        this->_processDerivInput(orig_d1.data(), orig_d2.data());
     }
 
 

@@ -27,8 +27,7 @@ inline double benchmark_TemplProp(TemplNet &tnet, const double xdata[], const in
 
     timer.reset();
     for (int i = 0; i < neval; ++i) {
-        tnet.setInput(xdata + i*ninput, xdata + (i+1)*ninput);
-        tnet.FFPropagate();
+        tnet.Propagate(xdata + i*ninput);
     }
 
     return timer.elapsed();
