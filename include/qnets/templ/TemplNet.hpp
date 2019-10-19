@@ -182,10 +182,10 @@ private:
     }
 
     template <int ONIN = ORIG_N_IN>
-    typename std::enable_if<ONIN == NET_N_IN, void>::type _computeInputGradients() // use only if network input is the original input
+    typename std::enable_if<ONIN == NET_N_IN && nd2 != 0, void>::type _computeInputGradients() // use only if network input is the original input and D2 derivs allocated
     {
         // store input grads into d1/d2
-        if (dflags.d2()) { // we used forward accumulation
+        if (this->hasD2()) { // we used forward accumulation
             _d1 = std::get<nlayer - 1>(_layers).d1();
             _d2 = std::get<nlayer - 1>(_layers).d2();
         }
@@ -195,15 +195,24 @@ private:
     }
 
     template <int ONIN = ORIG_N_IN>
+    typename std::enable_if<ONIN == NET_N_IN && nd2 == 0, void>::type _computeInputGradients() // use only if network input is the original input and D2 derivs not allocated
+    {
+        // compute original input derivative from backprop derivatives
+        std::get<0>(_layers).storeInputD1(_d1, dflags);
+    }
+
+
+    template <int ONIN = ORIG_N_IN>
     typename std::enable_if<ONIN != NET_N_IN, void>::type _computeInputGradients()
     {
         throw std::runtime_error("[TemplNet::_processOrigInput] Original input derivatives require provided input-to-orig derivatives.");
     }
 
-    void _computeInputGradients(const ValueT orig_d1[]) // used if network input is not the original input
+    template <int N_D2 = nd2>
+    typename std::enable_if<N_D2 != 0, void>::type _computeInputGradients(const ValueT orig_d1[]) // used if network input is not the original input and D2 derivs allocated
     {
         // store input grads into d1/d2
-        if (dflags.d2()) { // we used forward accumulation
+        if (this->hasD2()) { // we used forward accumulation
             _d1 = std::get<nlayer - 1>(_layers).d1();
             _d2 = std::get<nlayer - 1>(_layers).d2();
         }
@@ -220,13 +229,28 @@ private:
         }
     }
 
+    template <int N_D2 = nd2>
+    typename std::enable_if<N_D2 == 0, void>::type _computeInputGradients(const ValueT orig_d1[]) // used if network input is not the original input and D2 derivs not allocated
+    {
+        // compute original input derivative from backprop derivatives
+        _d1.fill(0.);
+        std::get<0>(_layers).storeInputD1(_d1_net, dflags);
+        for (int i = 0; i < noutput; ++i) {
+            for (int j = 0; j < ninput; ++j) {
+                for (int k = 0; k < orig_ninput; ++k) {
+                    _d1[i*orig_ninput + k] += _d1_net[i*ninput + j]*orig_d1[j*orig_ninput + k];
+                }
+            }
+        }
+    }
+
     template <int ONIN = ORIG_N_IN>
     typename std::enable_if<ONIN == NET_N_IN, void>::type _processOrigInput()
     {
         // feed original input
         std::get<0>(_layers).ForwardInput(_input, dflags);
         this->_propagateLayers();
-        if (dflags.d1()) { this->_computeInputGradients(); }
+        if (this->hasD1()) { this->_computeInputGradients(); }
     }
 
     template <int ONIN = ORIG_N_IN>
@@ -240,7 +264,7 @@ private:
         // feed derived network input
         std::get<0>(_layers).ForwardLayer(_input.data(), orig_d1, orig_d2, dflags);
         this->_propagateLayers();
-        if (dflags.d1()) { this->_computeInputGradients(orig_d1); }
+        if (this->hasD1()) { this->_computeInputGradients(orig_d1); }
     }
 
 public:
