@@ -19,7 +19,7 @@ int main()
     using layer1 = LayerConfig<4, actf::Sigmoid>;
     using layer2 = LayerConfig<2, actf::Sigmoid>;
     const auto dopt = DerivConfig::D12_VD1; // we want to check that VD2 arrays are size 0 in that case
-    using TestNet = TemplNet<double, dopt, NU_IN, layer1, layer2>;
+    using TestNet = TemplNet<double, dopt, NU_IN, NU_IN, layer1, layer2>;
     const StaticDFlags<dopt> dconf{}; // static flag set according to dopt
     const DynamicDFlags dflags(DerivConfig::D1); // dynamic flag set (to configure deriv calculation at runtime)
 
@@ -59,7 +59,6 @@ int main()
     assert(TestNet::getUnitShape() == expected_shape);
     assert(TestNet::getBetaShape() == expected_betashape);
 
-    assert(test.input.size() == TestNet::getNInput());
     assert(test.getOutput().size() == TestNet::getNOutput());
 
 

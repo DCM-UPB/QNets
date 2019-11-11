@@ -29,13 +29,14 @@ struct LayerConfig
 
 // The actual Layer class
 //
-template <typename ValueT, int NET_NINPUT, int NET_NOUTPUT, int NBETA_NEXT, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
+template <typename ValueT, int ORIG_NINPUT,int NET_NINPUT, int NET_NOUTPUT, int NBETA_NEXT, int N_IN, int N_OUT, class ACTFType, DerivConfig DCONF>
 class TemplLayer: public LayerConfig<N_OUT, ACTFType>
 {
 public:
     // N_IN dependent sizes
     static constexpr int ninput = N_IN;
     static constexpr int nbeta = (N_IN + 1)*N_OUT;
+    static constexpr int orig_nin = ORIG_NINPUT;
     static constexpr int net_nin = NET_NINPUT;
     static constexpr int net_nout = NET_NOUTPUT;
 
@@ -43,9 +44,9 @@ public:
     static constexpr StaticDFlags<DCONF> dconf{};
 
     static constexpr int nd2 = dconf.d2
-                               ? NET_NINPUT*N_OUT
+                               ? ORIG_NINPUT*N_OUT
                                : 0; // number of forward-accumulated first/second order input derivative values
-    static constexpr int nd2_prev = dconf.d2 ? NET_NINPUT*N_IN : 0; // the same number of previous layer
+    static constexpr int nd2_prev = dconf.d2 ? ORIG_NINPUT*N_IN : 0; // the same number of previous layer
 
     static_assert(NBETA_NEXT%(1 + N_OUT) == 0, ""); // -> BUG!
     static constexpr int nout_next = NBETA_NEXT/(1 + N_OUT);
@@ -121,12 +122,12 @@ private:
         for (int i = 0; i < N_OUT; ++i) {
             for (int j = 0; j < N_IN; ++j) {
                 const ValueT bij = beta[1 + i*(N_IN + 1) + j];
-                for (int k = 0; k < NET_NINPUT; ++k) {
-                    D1[i*NET_NINPUT + k] += bij*in_d1[j*NET_NINPUT + k];
-                    D2[i*NET_NINPUT + k] += bij*in_d2[j*NET_NINPUT + k];
+                for (int k = 0; k < ORIG_NINPUT; ++k) {
+                    D1[i*ORIG_NINPUT + k] += bij*in_d1[j*ORIG_NINPUT + k];
+                    D2[i*ORIG_NINPUT + k] += bij*in_d2[j*ORIG_NINPUT + k];
                 }
             }
-            for (int l = i*NET_NINPUT; l < (i + 1)*NET_NINPUT; ++l) {
+            for (int l = i*ORIG_NINPUT; l < (i + 1)*ORIG_NINPUT; ++l) {
                 D2[l] = _ad1[i]*D2[l] + _ad2[i]*D1[l]*D1[l];
                 D1[l] *= _ad1[i];
             }
@@ -136,7 +137,6 @@ private:
     // forward-accumulate second order deriv when the inputs correspond (besides shift/scale) to the true network inputs
     constexpr void _computeD2_Input()
     {
-        static_assert(N_IN == NET_NINPUT, "");
         auto &D1 = *_d1_ptr;
         auto &D2 = *_d2_ptr;
         for (int i = 0; i < N_OUT; ++i) {
@@ -153,6 +153,7 @@ private:
     {
         // statically secure this call (i.e. using it on non-input layer will not compile)
         static_assert(N_IN == NET_NINPUT, "[TemplLayer::ForwardInput] N_IN != NET_NINPUT");
+        static_assert(N_IN == ORIG_NINPUT, "[TemplLayer::ForwardInput] N_IN != ORIG_NINPUT");
 
         dflags = dflags.AND(dconf); // AND static and dynamic conf
         this->_computeOutput(input, dflags);
@@ -163,7 +164,7 @@ private:
         }
     }
 
-    // continue forward pass from previous layer
+    // continue/start forward pass from previous layer / external source
     constexpr void _forwardLayer(const ValueT input[], const ValueT in_d1[], const ValueT in_d2[], DynamicDFlags dflags)
     {
         dflags = dflags.AND(dconf); // AND static and dynamic conf
@@ -303,9 +304,9 @@ public: // public propagate methods
     // Pointer: No bounds checking
 
 
-    // --- Propagation of input data (not layer)
+    // --- Propagation of original input data (not layer)
 
-    constexpr void ForwardInput(const std::array<ValueT, NET_NINPUT> &input, DynamicDFlags dflags)
+    constexpr void ForwardInput(const std::array<ValueT, ORIG_NINPUT> &input, DynamicDFlags dflags)
     {
         _forwardInput(input.begin(), dflags);
     }
@@ -316,7 +317,7 @@ public: // public propagate methods
     }
 
 
-    // --- Forward Propagation of layer data
+    // --- Forward Propagation of layer data or external source
 
     constexpr void ForwardLayer(const std::array<ValueT, N_IN> &input, const std::array<ValueT, nd2_prev> &in_d1, const std::array<ValueT, nd2_prev> &in_d2, DynamicDFlags dflags)
     {
