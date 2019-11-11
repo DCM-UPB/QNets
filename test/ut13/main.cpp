@@ -13,16 +13,16 @@ template <class TNet>
 void checkIdentity(const FeedForwardNeuralNetwork &ffnn, const TNet &tmpl, double TINY)
 {
     for (int i = 0; i < ffnn.getNOutput(); ++i) {
-        std::cout << "f_" << i << ": poly " << ffnn.getOutput(i) << " tmpl " << tmpl.getOutput(i) << std::endl;
+        //std::cout << "f_" << i << ": poly " << ffnn.getOutput(i) << " tmpl " << tmpl.getOutput(i) << std::endl;
         assert(ffnn.getOutput(i) == tmpl.getOutput(i));
         for (int j = 0; j < ffnn.getNInput(); ++j) {
-            std::cout << "d1_" << i << "_" << j << ": poly " << ffnn.getFirstDerivative(i, j) << " tmpl " << tmpl.getD1(i, j) << std::endl;
-            std::cout << "d2_" << i << "_" << j << ": poly " << ffnn.getSecondDerivative(i, j) << " tmpl " << tmpl.getD2(i, j) << std::endl;
+            //std::cout << "d1_" << i << "_" << j << ": poly " << ffnn.getFirstDerivative(i, j) << " tmpl " << tmpl.getD1(i, j) << std::endl;
+            //std::cout << "d2_" << i << "_" << j << ": poly " << ffnn.getSecondDerivative(i, j) << " tmpl " << tmpl.getD2(i, j) << std::endl;
             assert(fabs(ffnn.getFirstDerivative(i, j) - tmpl.getD1(i, j)) < TINY);
             assert(fabs(ffnn.getSecondDerivative(i, j) - tmpl.getD2(i, j)) < TINY);
         }
         for (int j = 0; j < ffnn.getNBeta(); ++j) {
-            std::cout << "vd1_" << i << "_" << j << ": poly " << ffnn.getVariationalFirstDerivative(i, j) << " tmpl " << tmpl.getVD1(i, j) << std::endl;
+            //std::cout << "vd1_" << i << "_" << j << ": poly " << ffnn.getVariationalFirstDerivative(i, j) << " tmpl " << tmpl.getVD1(i, j) << std::endl;
             assert(fabs(ffnn.getVariationalFirstDerivative(i, j) - tmpl.getVD1(i, j)) < TINY);
         }
     }

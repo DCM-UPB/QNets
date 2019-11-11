@@ -268,7 +268,6 @@ private:
     }
 
 public:
-
     explicit constexpr TemplNet(DynamicDFlags init_dflags = DynamicDFlags{DCONF}):
             _out_begins(tupl::make_fcont<std::array<const ValueT *, nlayer>>(_layers, [](const auto &layer) { return &layer.out().front(); })),
             _beta_begins(tupl::make_fcont<std::array<ValueT *, nlayer>>(_layers, [](auto &layer) { return &layer.beta.front(); })),
