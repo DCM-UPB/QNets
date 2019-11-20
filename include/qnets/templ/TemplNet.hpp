@@ -203,7 +203,7 @@ private:
 
 
     template <int ONIN = ORIG_N_IN>
-    typename std::enable_if<ONIN != NET_N_IN, void>::type _computeInputGradients()
+    typename std::enable_if<ONIN != NET_N_IN && (nd1 != 0 || nd2 != 0), void>::type _computeInputGradients()
     {
         throw std::runtime_error("[TemplNet::_processOrigInput] Original input derivatives require provided input-to-orig derivatives.");
     }
@@ -245,7 +245,7 @@ private:
     }
 
     template <int ONIN = ORIG_N_IN>
-    typename std::enable_if<ONIN == NET_N_IN, void>::type _processOrigInput()
+    typename std::enable_if<ONIN == NET_N_IN && nd1 != 0, void>::type _processOrigInput()
     {
         // feed original input
         std::get<0>(_layers).ForwardInput(_input, dflags);
@@ -254,17 +254,34 @@ private:
     }
 
     template <int ONIN = ORIG_N_IN>
+    typename std::enable_if<ONIN == NET_N_IN && nd1 == 0, void>::type _processOrigInput()
+    {
+        // feed original input
+        std::get<0>(_layers).ForwardInput(_input, dflags);
+        this->_propagateLayers();
+    }
+
+    template <int ONIN = ORIG_N_IN>
     typename std::enable_if<ONIN != NET_N_IN, void>::type _processOrigInput()
     {
         throw std::runtime_error("[TemplNet::_processOrigInput] Original input can't be fed directly, because it differs in size from network input.");
     }
 
-    void _processDerivInput(const ValueT orig_d1[], const ValueT orig_d2[])
+    template <int N_D1 = nd1>
+    typename std::enable_if<N_D1 != 0, void>::type _processDerivInput(const ValueT orig_d1[], const ValueT orig_d2[])
     {
         // feed derived network input
         std::get<0>(_layers).ForwardLayer(_input.data(), orig_d1, orig_d2, dflags);
         this->_propagateLayers();
         if (this->hasD1()) { this->_computeInputGradients(orig_d1); }
+    }
+
+    template <int N_D1 = nd1>
+    typename std::enable_if<N_D1 == 0, void>::type _processDerivInput(const ValueT orig_d1[], const ValueT orig_d2[])
+    {
+        // feed derived network input
+        std::get<0>(_layers).ForwardLayer(_input.data(), orig_d1, orig_d2, dflags);
+        this->_propagateLayers();
     }
 
 public:
